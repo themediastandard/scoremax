@@ -117,46 +117,102 @@ export default function Home() {
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
                 {/* Top Left - Study Session */}
-                <div className="bg-blue-100 rounded-3xl p-8 h-64 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full"></div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                      📚
+                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                  <Image
+                    src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Student studying with books and notes"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-blue-600/30 group-hover:bg-blue-600/40 transition-colors duration-300"></div>
+                  <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full shadow-lg"></div>
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 5v10l7-5z"/>
+                      </svg>
+                      <span className="text-sm font-semibold">Watch</span>
                     </div>
-                    <div className="font-semibold text-gray-800">Study Session</div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
+                    Study Session
                   </div>
                 </div>
                 
                 {/* Top Right - Success */}
-                <div className="bg-green-100 rounded-3xl p-8 h-64 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute bottom-4 left-4 w-6 h-6 bg-purple-400 rounded-full"></div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                      🎉
+                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                  <Image
+                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Happy student celebrating test score success"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-green-600/30 group-hover:bg-green-600/40 transition-colors duration-300"></div>
+                  <div className="absolute bottom-4 left-4 w-6 h-6 bg-purple-400 rounded-full shadow-lg"></div>
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 5v10l7-5z"/>
+                      </svg>
+                      <span className="text-sm font-semibold">Watch</span>
                     </div>
-                    <div className="font-semibold text-gray-800">Success!</div>
+                  </div>
+                  <div className="absolute bottom-4 right-4 text-white font-bold text-lg drop-shadow-lg">
+                    Success!
                   </div>
                 </div>
                 
                 {/* Bottom Left - Online Learning */}
-                <div className="bg-purple-100 rounded-3xl p-8 h-64 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute top-4 left-4 w-4 h-4 bg-teal-400 rounded-full"></div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                      💻
+                <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                  <Image
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Students collaborating with laptops for online learning"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-purple-600/30 group-hover:bg-purple-600/40 transition-colors duration-300"></div>
+                  <div className="absolute top-4 left-4 w-4 h-4 bg-teal-400 rounded-full shadow-lg"></div>
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 5v10l7-5z"/>
+                      </svg>
+                      <span className="text-sm font-semibold">Watch</span>
                     </div>
-                    <div className="font-semibold text-gray-800">Online Learning</div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
+                    Online Learning
                   </div>
                 </div>
                 
                 {/* Bottom Right - Achievement */}
-                <div className="bg-orange-100 rounded-3xl p-8 h-64 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-400 rounded-full"></div>
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                      🏆
+                <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                  <Image
+                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+                    alt="Students celebrating graduation and academic achievement"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-orange-600/30 group-hover:bg-orange-600/40 transition-colors duration-300"></div>
+                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-400 rounded-full shadow-lg"></div>
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 5v10l7-5z"/>
+                      </svg>
+                      <span className="text-sm font-semibold">Watch</span>
                     </div>
-                    <div className="font-semibold text-gray-800">Achievement</div>
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
+                    Achievement
                   </div>
                 </div>
               </div>
