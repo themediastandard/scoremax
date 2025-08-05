@@ -84,10 +84,10 @@ export default function Home() {
                 </div>
               </div>
               
-              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight">
+              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading">
                 Unlock Your
                 <br />
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Test Score</span> 
+                <span className="text-blue-600">Test Score</span> 
                 <br />
                 Potential
               </h1>
@@ -297,7 +297,7 @@ export default function Home() {
             <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
               Getting Started is as
               <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Easy as 1-2-3</span>
+              <span className="text-blue-600">Easy as 1-2-3</span>
             </h2>
             <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Join thousands of successful students in just three simple steps
@@ -379,7 +379,7 @@ export default function Home() {
             <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
               Learn from the
               <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Best in the Field</span>
+              <span className="text-blue-600">Best in the Field</span>
             </h2>
             <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Our certified tutors are passionate educators with proven track records of helping students achieve their academic goals
@@ -601,7 +601,7 @@ export default function Home() {
             <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
               Real Results from
               <br />
-              <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Real Students</span>
+              <span className="text-green-600">Real Students</span>
             </h2>
             <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Join thousands of students who have achieved their academic goals with ScoreMax Tutoring
