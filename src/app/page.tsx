@@ -45,8 +45,8 @@ export default function Home() {
             
             {/* CTA Button */}
             <Link href="/contact" 
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-full font-semibold text-sm tracking-wide uppercase shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 border border-blue-500/20">
-              Get In Touch
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 border border-blue-500/20">
+              Book Free Consultation
             </Link>
 
             {/* Mobile menu button */}
@@ -100,7 +100,7 @@ export default function Home() {
               <div className="flex flex-col lg:flex-row gap-6 pt-4">
                 <Link href="/contact"
                   className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-6 py-3 rounded-full font-semibold text-base hover:from-yellow-500 hover:to-orange-500 transition shadow-lg hover:shadow-xl transform hover:scale-105 duration-200 whitespace-nowrap inline-flex items-center justify-center">
-                  Get Free Consultation
+                  Book Free Consultation
                 </Link>
                 <button className="flex items-center space-x-4 bg-white/90 backdrop-blur-md px-6 py-4 rounded-full border border-white/60 shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 group whitespace-nowrap">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transform group-hover:scale-110 transition-all duration-300 ring-2 ring-white/30">
@@ -752,7 +752,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="/contact" 
               className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
-              Get Free Consultation
+              Book Free Consultation
             </Link>
             <Link href="/pricing" 
               className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition">
