@@ -392,11 +392,21 @@ export default function Home() {
           {/* Success Stories Grid */}
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 mb-24">
             {/* Story 1 */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 group border border-gray-100">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 w-20 h-20 rounded-2xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl">🎯</span>
+            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-blue-100">
+                <Image
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                  alt="Sarah M. - SAT Success Student"
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
               </div>
               <div className="text-center">
+                <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                  +280 SAT Points
+                </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">SAT Score Boost</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                   "Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference."
@@ -406,11 +416,21 @@ export default function Home() {
             </div>
 
             {/* Story 2 */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 group border border-gray-100">
-              <div className="bg-gradient-to-br from-green-100 to-green-200 w-20 h-20 rounded-2xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl">📈</span>
+            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-green-100">
+                <Image
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                  alt="Marcus T. - GPA Improvement Student"
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
               </div>
               <div className="text-center">
+                <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                  2.8 → 3.7 GPA
+                </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">GPA Improvement</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                   "Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I'd struggled with for months."
@@ -420,11 +440,21 @@ export default function Home() {
             </div>
 
             {/* Story 3 */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 group border border-gray-100">
-              <div className="bg-gradient-to-br from-purple-100 to-purple-200 w-20 h-20 rounded-2xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl">🏆</span>
+            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-purple-100">
+                <Image
+                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                  alt="Emma L. - College Acceptance Student"
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
               </div>
               <div className="text-center">
+                <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                  Dream School Accepted ✓
+                </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">College Acceptance</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                   "Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed."
@@ -434,11 +464,21 @@ export default function Home() {
             </div>
 
             {/* Story 4 */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 group border border-gray-100">
-              <div className="bg-gradient-to-br from-orange-100 to-orange-200 w-20 h-20 rounded-2xl flex items-center justify-center mb-8 mx-auto group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl">💡</span>
+            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-orange-100">
+                <Image
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                  alt="David K. - Chemistry Confidence Student"
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
               </div>
               <div className="text-center">
+                <div className="bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                  Chemistry Mastered 🧪
+                </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">Confidence Boost</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                   "Finally understand chemistry! My tutor is amazing and made complex topics feel simple."
@@ -450,22 +490,22 @@ export default function Home() {
 
           {/* Statistics */}
           <div className="grid md:grid-cols-3 gap-12 lg:gap-16">
-            <div className="text-center group">
-              <div className="bg-white p-8 rounded-3xl shadow-lg group-hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div className="text-center">
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-blue-600 mb-4">95%</div>
-                <div className="text-gray-700 text-xl font-semibold">Students see score improvement</div>
+                <div className="text-gray-700 text-xl font-semibold leading-tight">Students see score improvement</div>
               </div>
             </div>
-            <div className="text-center group">
-              <div className="bg-white p-8 rounded-3xl shadow-lg group-hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div className="text-center">
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-green-600 mb-4">250+</div>
-                <div className="text-gray-700 text-xl font-semibold">Average SAT point increase</div>
+                <div className="text-gray-700 text-xl font-semibold leading-tight">Average SAT point increase</div>
               </div>
             </div>
-            <div className="text-center group">
-              <div className="bg-white p-8 rounded-3xl shadow-lg group-hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div className="text-center">
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-purple-600 mb-4">1000+</div>
-                <div className="text-gray-700 text-xl font-semibold">Successful students</div>
+                <div className="text-gray-700 text-xl font-semibold leading-tight">Successful students</div>
               </div>
             </div>
           </div>
