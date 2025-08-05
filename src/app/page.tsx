@@ -21,24 +21,24 @@ export default function Home() {
             
             {/* Navigation Links */}
             <div className="hidden lg:flex items-center space-x-10">
-              <Link href="/" className="text-gray-900 font-semibold text-sm tracking-wider uppercase hover:text-blue-600 transition-colors duration-300 relative group">
+              <Link href="/" className="text-gray-900 font-semibold text-sm tracking-wider hover:text-blue-600 transition-colors duration-300 relative group">
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider uppercase transition-colors duration-300 relative group">
-                About
+              <Link href="/about" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
+                About Us
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="/services" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider uppercase transition-colors duration-300 relative group">
-                Services
+              <Link href="/test-prep" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
+                Test Prep
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="/pricing" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider uppercase transition-colors duration-300 relative group">
-                Pricing
+              <Link href="/college-high-school" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
+                College & High School
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="/contact" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider uppercase transition-colors duration-300 relative group">
-                Contact
+              <Link href="/step-up-for-students" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
+                Step Up For Students
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
@@ -46,7 +46,7 @@ export default function Home() {
             {/* CTA Button */}
             <Link href="/contact" 
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-full font-semibold text-sm tracking-wide uppercase shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 border border-blue-500/20">
-              Get Started
+              Get In Touch
             </Link>
 
             {/* Mobile menu button */}
