@@ -92,10 +92,10 @@ export default function Home() {
                 Potential
               </h1>
               
-              <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
-                Expert 1-on-1 tutoring for <span className="text-blue-600 font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
-                Join <span className="text-purple-600 font-semibold">thousands of students</span> who've boosted their scores with personalized learning.
-              </p>
+                              <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
+                  Expert 1-on-1 tutoring for <span className="text-blue-600 font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
+                  Join <span className="text-purple-600 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
+                </p>
               
               <div className="flex flex-col lg:flex-row gap-6 pt-4">
                 <Link href="/contact"
@@ -316,7 +316,7 @@ export default function Home() {
               </div>
               <h3 className="text-3xl font-bold mb-6 text-gray-900">Schedule Free Consultation</h3>
               <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
-                Tell us about your goals and learning needs. We'll assess your current level and create a personalized plan.
+                Tell us about your goals and learning needs. We&apos;ll assess your current level and create a personalized plan.
               </p>
             </div>
 
@@ -331,7 +331,7 @@ export default function Home() {
               </div>
               <h3 className="text-3xl font-bold mb-6 text-gray-900">Get Matched with Expert Tutor</h3>
               <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
-                We'll pair you with a certified tutor who specializes in your subject and understands your learning style.
+                We&apos;ll pair you with a certified tutor who specializes in your subject and understands your learning style.
               </p>
             </div>
 
@@ -408,7 +408,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Sarah Chen</h3>
                 <div className="text-blue-600 font-semibold mb-4 h-6">SAT/ACT Math Specialist</div>
                 <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
-                  Master's in Mathematics from MIT. Helped 200+ students improve their SAT math scores by an average of 150 points. 
+                  Master&apos;s in Mathematics from MIT. Helped 200+ students improve their SAT math scores by an average of 150 points. 
                   Specializes in breaking down complex concepts into simple, understandable steps.
                 </p>
                 <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
@@ -507,7 +507,7 @@ export default function Home() {
               Choose Your Path to <span className="text-blue-600">Success</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Whether you're preparing for standardized tests or need help with academic subjects, 
+              Whether you&apos;re preparing for standardized tests or need help with academic subjects, 
               we have expert tutors ready to help you succeed.
             </p>
           </div>
@@ -652,7 +652,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">GPA Improvement</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                  "Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I'd struggled with for months."
+                  &quot;Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I&apos;d struggled with for months.&quot;
                 </p>
                 <div className="text-green-600 font-bold text-lg">- Marcus T.</div>
               </div>
@@ -676,7 +676,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">College Acceptance</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                  "Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed."
+                  &quot;Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed.&quot;
                 </p>
                 <div className="text-purple-600 font-bold text-lg">- Emma L.</div>
               </div>
@@ -700,7 +700,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">Confidence Boost</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                  "Finally understand chemistry! My tutor is amazing and made complex topics feel simple."
+                  &quot;Finally understand chemistry! My tutor is amazing and made complex topics feel simple.&quot;
                 </p>
                 <div className="text-orange-600 font-bold text-lg">- David K.</div>
               </div>
