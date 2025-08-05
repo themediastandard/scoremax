@@ -511,92 +511,115 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section className="py-32 bg-white relative">
-        {/* Background shapes */}
+      <section className="py-40 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+        {/* Enhanced Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-40 right-10 w-40 h-40 bg-purple-300 rounded-full opacity-15"></div>
-          <div className="absolute bottom-10 left-20 w-28 h-28 bg-yellow-300 rounded-full opacity-20"></div>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-200 to-purple-200 rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-br from-green-200 to-teal-200 rounded-full opacity-25 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full opacity-30 blur-2xl"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <div className="text-sm font-semibold text-gray-600 tracking-wide uppercase mb-4">
-              WHY CHOOSE US
+          <div className="text-center mb-20">
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 px-6 py-3 rounded-full mb-8">
+              <div className="text-sm font-bold text-blue-800 tracking-wider uppercase">
+                WHY CHOOSE US
+              </div>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Choose Your Path to <span className="text-blue-600">Success</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Whether you&apos;re preparing for standardized tests or need help with academic subjects, 
               we have expert tutors ready to help you succeed.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
             {/* Test Prep Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute top-4 right-4 w-16 h-16 bg-blue-200 rounded-full opacity-50"></div>
-              <div className="absolute bottom-4 left-4 w-8 h-8 bg-purple-300 rounded-full opacity-60"></div>
+            <div className="bg-white p-10 rounded-3xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-60 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full opacity-40 blur-xl"></div>
               
-              <div className="text-5xl mb-6">📚</div>
-              <h3 className="text-3xl font-bold mb-4 text-black">Test Prep</h3>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Prepare for SAT, ACT, GMAT, or GRE with proven strategies and personalized study plans 
-                designed to maximize your score improvement.
-              </p>
-              
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Personalized study plans</span>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="text-3xl">📚</div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Practice tests and materials</span>
+                <h3 className="text-4xl font-black mb-6 text-black">Test Prep</h3>
+                <p className="text-gray-600 text-xl mb-8 leading-relaxed">
+                  Prepare for SAT, ACT, GMAT, or GRE with proven strategies and personalized study plans 
+                  designed to maximize your score improvement.
+                </p>
+                
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Personalized study plans</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Practice tests and materials</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Test-taking strategies</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Test-taking strategies</span>
-                </div>
+                
+                <Link href="/services" 
+                  className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  Learn More
+                </Link>
               </div>
-              
-              <Link href="/services" 
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition group-hover:scale-105">
-                Learn More
-              </Link>
             </div>
 
             {/* Academic Help Card */}
-            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute top-4 right-4 w-12 h-12 bg-green-200 rounded-full opacity-50"></div>
-              <div className="absolute bottom-4 left-4 w-20 h-20 bg-teal-300 rounded-full opacity-40"></div>
+            <div className="bg-white p-10 rounded-3xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-100 to-teal-100 rounded-full opacity-60 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-100 to-blue-100 rounded-full opacity-40 blur-xl"></div>
               
-              <div className="text-5xl mb-6">🎓</div>
-              <h3 className="text-3xl font-bold mb-4 text-black">Academic Help</h3>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Get expert help with AP classes, Calculus, Physics, Chemistry, Algebra, Geometry, 
-                and Statistics from certified tutors.
-              </p>
-              
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Subject matter experts</span>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="text-3xl">🎓</div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Homework assistance</span>
+                <h3 className="text-4xl font-black mb-6 text-black">Academic Help</h3>
+                <p className="text-gray-600 text-xl mb-8 leading-relaxed">
+                  Get expert help with AP classes, Calculus, Physics, Chemistry, Algebra, Geometry, 
+                  and Statistics from certified tutors.
+                </p>
+                
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Subject matter experts</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Homework assistance</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-gray-700 text-lg font-medium">Concept reinforcement</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-green-500 text-xl mr-3">✓</span>
-                  <span className="text-gray-700">Concept reinforcement</span>
-                </div>
+                
+                <Link href="/services" 
+                  className="inline-block bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-green-700 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  Learn More
+                </Link>
               </div>
-              
-              <Link href="/services" 
-                className="inline-block bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition group-hover:scale-105">
-                Learn More
-              </Link>
             </div>
           </div>
         </div>
