@@ -84,7 +84,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading">
+              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
                 Unlock Your
                 <br />
                 <span className="text-blue-600">Test Score</span> 
@@ -294,7 +294,7 @@ export default function Home() {
                 How It Works
               </div>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
+            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Getting Started is as
               <br />
               <span className="text-blue-600">Easy as 1-2-3</span>
@@ -376,7 +376,7 @@ export default function Home() {
                 Meet Our Expert Tutors
               </div>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
+            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Learn from the
               <br />
               <span className="text-blue-600">Best in the Field</span>
@@ -598,7 +598,7 @@ export default function Home() {
                 Experience the Magic of Learning
               </div>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
+            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Real Results from
               <br />
               <span className="text-green-600">Real Students</span>
