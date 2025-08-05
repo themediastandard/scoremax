@@ -327,6 +327,136 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Meet Our Expert Tutors */}
+      <section className="py-32 bg-gradient-to-b from-white to-gray-50 relative">
+        {/* Background shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200 rounded-full opacity-10"></div>
+          <div className="absolute bottom-20 right-20 w-24 h-24 bg-purple-200 rounded-full opacity-15"></div>
+          <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-green-200 rounded-full opacity-12"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-20">
+            <div className="inline-block bg-gradient-to-r from-blue-100 to-purple-100 px-6 py-3 rounded-full mb-8">
+              <div className="text-sm font-bold text-blue-800 tracking-wider uppercase">
+                Meet Our Expert Tutors
+              </div>
+            </div>
+            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-8 leading-tight">
+              Learn from the
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Best in the Field</span>
+            </h2>
+            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Our certified tutors are passionate educators with proven track records of helping students achieve their academic goals
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-12 lg:gap-16">
+            {/* Tutor 1 - Sarah Chen */}
+            <div className="text-center group">
+              <div className="relative mb-8">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                    alt="Sarah Chen - SAT/ACT Math Specialist"
+                    width={160}
+                    height={160}
+                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Sarah Chen</h3>
+                <div className="text-blue-600 font-semibold mb-4 h-6">SAT/ACT Math Specialist</div>
+                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+                  Master's in Mathematics from MIT. Helped 200+ students improve their SAT math scores by an average of 150 points. 
+                  Specializes in breaking down complex concepts into simple, understandable steps.
+                </p>
+                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
+                  <span className="bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">8+ Years Experience</span>
+                  <span className="bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">200+ Students</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tutor 2 - Marcus Johnson */}
+            <div className="text-center group">
+              <div className="relative mb-8">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-green-100 group-hover:ring-green-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                    alt="Marcus Johnson - English & Writing Expert"
+                    width={160}
+                    height={160}
+                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Marcus Johnson</h3>
+                <div className="text-green-600 font-semibold mb-4 h-6">English & Writing Expert</div>
+                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+                  PhD in English Literature from Harvard. Former college admissions counselor with expertise in essay writing and reading comprehension. 
+                  Known for his engaging teaching style and ability to boost student confidence.
+                </p>
+                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
+                  <span className="bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">12+ Years Experience</span>
+                  <span className="bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">Harvard PhD</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tutor 3 - Dr. Emily Rodriguez */}
+            <div className="text-center group">
+              <div className="relative mb-8">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+                    alt="Dr. Emily Rodriguez - Science & STEM Specialist"
+                    width={160}
+                    height={160}
+                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+              </div>
+              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Dr. Emily Rodriguez</h3>
+                <div className="text-purple-600 font-semibold mb-4 h-6">Science & STEM Specialist</div>
+                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+                  PhD in Chemistry from Stanford. Specializes in AP Chemistry, Physics, and Biology. 
+                  Her students consistently achieve 4s and 5s on AP exams. Passionate about making science accessible and fun.
+                </p>
+                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
+                  <span className="bg-purple-50 px-3 py-1 rounded-full whitespace-nowrap">10+ Years Experience</span>
+                  <span className="bg-orange-50 px-3 py-1 rounded-full whitespace-nowrap">AP Expert</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-16">
+            <Link href="/tutors"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-full font-bold text-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
+              Meet All Our Tutors
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="py-32 bg-white relative">
         {/* Background shapes */}
