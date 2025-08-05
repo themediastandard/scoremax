@@ -222,7 +222,7 @@ export default function Home() {
       </section>
 
       {/* Trust Signals */}
-      <section className="py-8 bg-white">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm font-medium text-gray-600">
             <div className="flex items-center space-x-2">
@@ -246,7 +246,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-32 bg-gradient-to-b from-gray-50 to-white relative">
+      <section className="py-40 bg-gradient-to-b from-gray-50 to-white relative">
         {/* Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-20 w-40 h-40 bg-blue-200 rounded-full opacity-10"></div>
@@ -328,7 +328,7 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 bg-white relative">
+      <section className="py-32 bg-white relative">
         {/* Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-40 right-10 w-40 h-40 bg-purple-300 rounded-full opacity-15"></div>
@@ -420,7 +420,7 @@ export default function Home() {
       </section>
 
       {/* Student Success Section */}
-      <section className="py-32 bg-gradient-to-b from-white to-gray-50 relative">
+      <section className="py-40 bg-gradient-to-b from-white to-gray-50 relative">
         {/* Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-32 left-20 w-32 h-32 bg-orange-200 rounded-full opacity-10"></div>
@@ -569,7 +569,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-700 text-white relative overflow-hidden">
+      <section className="py-32 bg-gradient-to-r from-blue-600 to-purple-700 text-white relative overflow-hidden">
         {/* Background shapes */}
         <div className="absolute inset-0">
           <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full opacity-10"></div>
