@@ -128,16 +128,21 @@ export default function Home() {
                   <div className="absolute inset-0 bg-blue-600/30 group-hover:bg-blue-600/40 transition-colors duration-300"></div>
                   <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
-                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-4 left-4">
+                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
-                      <span className="text-sm font-semibold">Watch</span>
+                      <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
-                    Study Session
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                      Study Session
+                    </div>
+                    <div className="text-white/80 text-sm font-medium mt-1">
+                      Personalized Learning
+                    </div>
                   </div>
                 </div>
                 
@@ -153,16 +158,21 @@ export default function Home() {
                   <div className="absolute inset-0 bg-green-600/30 group-hover:bg-green-600/40 transition-colors duration-300"></div>
                   <div className="absolute bottom-4 left-4 w-6 h-6 bg-purple-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
-                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-4 left-4">
+                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
-                      <span className="text-sm font-semibold">Watch</span>
+                      <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 right-4 text-white font-bold text-lg drop-shadow-lg">
-                    Success!
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                      Success!
+                    </div>
+                    <div className="text-white/80 text-sm font-medium mt-1">
+                      Score Improvement
+                    </div>
                   </div>
                 </div>
                 
@@ -178,16 +188,21 @@ export default function Home() {
                   <div className="absolute inset-0 bg-purple-600/30 group-hover:bg-purple-600/40 transition-colors duration-300"></div>
                   <div className="absolute top-4 left-4 w-4 h-4 bg-teal-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
-                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-4 left-4">
+                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
-                      <span className="text-sm font-semibold">Watch</span>
+                      <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
-                    Online Learning
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                      Online Learning
+                    </div>
+                    <div className="text-white/80 text-sm font-medium mt-1">
+                      Virtual Sessions
+                    </div>
                   </div>
                 </div>
                 
@@ -203,16 +218,21 @@ export default function Home() {
                   <div className="absolute inset-0 bg-orange-600/30 group-hover:bg-orange-600/40 transition-colors duration-300"></div>
                   <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="border-2 border-white/80 text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-2">
-                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-4 left-4">
+                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
-                      <span className="text-sm font-semibold">Watch</span>
+                      <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white font-bold text-lg drop-shadow-lg">
-                    Achievement
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                      Achievement
+                    </div>
+                    <div className="text-white/80 text-sm font-medium mt-1">
+                      Academic Excellence
+                    </div>
                   </div>
                 </div>
               </div>
