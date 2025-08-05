@@ -519,7 +519,7 @@ export default function Home() {
               <div className="absolute bottom-4 left-4 w-8 h-8 bg-purple-300 rounded-full opacity-60"></div>
               
               <div className="text-5xl mb-6">📚</div>
-              <h3 className="text-3xl font-bold mb-4">Test Prep</h3>
+              <h3 className="text-3xl font-bold mb-4 text-black">Test Prep</h3>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 Prepare for SAT, ACT, GMAT, or GRE with proven strategies and personalized study plans 
                 designed to maximize your score improvement.
@@ -552,7 +552,7 @@ export default function Home() {
               <div className="absolute bottom-4 left-4 w-20 h-20 bg-teal-300 rounded-full opacity-40"></div>
               
               <div className="text-5xl mb-6">🎓</div>
-              <h3 className="text-3xl font-bold mb-4">Academic Help</h3>
+              <h3 className="text-3xl font-bold mb-4 text-black">Academic Help</h3>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 Get expert help with AP classes, Calculus, Physics, Chemistry, Algebra, Geometry, 
                 and Statistics from certified tutors.
