@@ -628,7 +628,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-2xl mb-4 text-gray-900">SAT Score Boost</h4>
                 <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                  "Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference."
+                  &quot;Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference.&quot;
                 </p>
                 <div className="text-blue-600 font-bold text-lg">- Sarah M.</div>
               </div>
