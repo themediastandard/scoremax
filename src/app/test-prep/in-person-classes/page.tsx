@@ -100,21 +100,21 @@ export default function InPersonClassesPage() {
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 w-40 h-40 bg-yellow-200 rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 right-20 w-32 h-32 bg-blue-200 rounded-full opacity-15"></div>
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-green-200 rounded-full opacity-20"></div>
+          <div className="absolute top-20 left-20 w-40 h-40 bg-gray-200 rounded-full opacity-10"></div>
+          <div className="absolute bottom-20 right-20 w-32 h-32 bg-gray-300 rounded-full opacity-15"></div>
+          <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-gray-200 rounded-full opacity-20"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-block bg-gradient-to-r from-yellow-100 to-orange-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-yellow-800 tracking-wider uppercase">
+            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
+              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
                 Why Choose In-Person Classes
               </div>
             </div>
             <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
-              Your Path to <span className="text-yellow-600">Test Success</span>
+              Your Path to <span className="text-[#517cad]">Test Success</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Experience the benefits of face-to-face learning with expert instructors and structured classroom environment
@@ -124,8 +124,8 @@ export default function InPersonClassesPage() {
           {/* Benefits Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {/* Benefit 1 - Expert Instruction */}
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-yellow-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">👨‍🏫</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Expert Instruction</h3>
@@ -135,8 +135,8 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Benefit 2 - Structured Learning */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-blue-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">📚</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Structured Learning</h3>
@@ -146,8 +146,8 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Benefit 3 - Hands-on Practice */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-green-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">✍️</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Hands-on Practice</h3>
@@ -157,8 +157,8 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Benefit 4 - Peer Learning */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-purple-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">👥</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Peer Learning</h3>
@@ -168,8 +168,8 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Benefit 5 - Immediate Feedback */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-red-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">💬</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Immediate Feedback</h3>
@@ -179,8 +179,8 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Benefit 6 - Proven Results */}
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-indigo-200">
-              <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-white p-8 rounded-3xl hover:shadow-md transition-all duration-300 group border border-gray-200">
+              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🏆</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Proven Results</h3>
@@ -191,7 +191,7 @@ export default function InPersonClassesPage() {
           </div>
 
           {/* Stats Section */}
-          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-3xl p-12 text-white text-center">
+          <div className="bg-gray-800 rounded-3xl p-12 text-white text-center">
             <h3 className="text-3xl font-bold mb-8">Proven Results</h3>
             <div className="grid md:grid-cols-3 gap-8">
               <div>
@@ -216,7 +216,7 @@ export default function InPersonClassesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
-              Course <span className="text-yellow-600">Schedule & Details</span>
+              Course <span className="text-[#517cad]">Schedule & Details</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Our structured in-person program is designed to maximize your learning and test performance
@@ -228,9 +228,9 @@ export default function InPersonClassesPage() {
             <div className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
               <h3 className="text-3xl font-bold text-gray-900 mb-8">Course Schedule</h3>
               
-              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-200 mb-8">
+              <div className="bg-white p-8 rounded-2xl border border-gray-200 mb-8">
                 <div className="text-center">
-                  <div className="text-4xl font-black text-yellow-600 mb-4">Duration</div>
+                  <div className="text-4xl font-black text-[#517cad] mb-4">Duration</div>
                   <div className="text-2xl text-gray-800 font-semibold mb-2">2-Days a week</div>
                   <div className="text-2xl text-gray-800 font-semibold mb-2">5 Weeks Total</div>
                   <div className="text-2xl text-gray-800 font-semibold">2-Hour Sessions</div>
@@ -274,7 +274,7 @@ export default function InPersonClassesPage() {
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-white text-sm font-bold">1</span>
                   </div>
                   <div>
@@ -284,7 +284,7 @@ export default function InPersonClassesPage() {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-white text-sm font-bold">2</span>
                   </div>
                   <div>
@@ -294,7 +294,7 @@ export default function InPersonClassesPage() {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-white text-sm font-bold">3</span>
                   </div>
                   <div>
@@ -304,7 +304,7 @@ export default function InPersonClassesPage() {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-white text-sm font-bold">4</span>
                   </div>
                   <div>
@@ -314,7 +314,7 @@ export default function InPersonClassesPage() {
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-white text-sm font-bold">5</span>
                   </div>
                   <div>
@@ -329,12 +329,12 @@ export default function InPersonClassesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-yellow-600 to-orange-600 text-white relative overflow-hidden">
+      <section className="py-20 bg-gray-800 text-white relative overflow-hidden">
         {/* Background shapes */}
         <div className="absolute inset-0">
           <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 left-20 w-24 h-24 bg-yellow-400 rounded-full opacity-20"></div>
-          <div className="absolute top-40 left-40 w-16 h-16 bg-pink-400 rounded-full opacity-15"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 bg-gray-600 rounded-full opacity-20"></div>
+          <div className="absolute top-40 left-40 w-16 h-16 bg-gray-600 rounded-full opacity-15"></div>
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -348,11 +348,11 @@ export default function InPersonClassesPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="/contact" 
-              className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
+              className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
               Enroll Now
             </Link>
             <Link href="/pricing" 
-              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-yellow-600 transition">
+              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-800 transition">
               View Pricing
             </Link>
           </div>
@@ -385,7 +385,7 @@ export default function InPersonClassesPage() {
             {/* Logo */}
             <div className="mb-8">
               <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mr-3">
+                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center mr-3">
                   <span className="text-2xl">🎓</span>
                 </div>
                 <span className="text-3xl font-black">SCOREMAX</span>
@@ -401,17 +401,17 @@ export default function InPersonClassesPage() {
             
             {/* Social Media */}
             <div className="flex justify-center space-x-6 mb-8">
-              <a href="#" className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
               </a>
-              <a href="#" className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
-              <a href="#" className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
