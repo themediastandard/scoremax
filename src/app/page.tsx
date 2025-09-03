@@ -65,7 +65,7 @@ export default function Home() {
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">
                 {/* Top Left - Study Session */}
-                <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Student studying with books and notes"
@@ -95,7 +95,7 @@ export default function Home() {
                 </div>
                 
                 {/* Top Right - Success */}
-                <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Happy student celebrating test score success"
@@ -125,7 +125,7 @@ export default function Home() {
                 </div>
                 
                 {/* Bottom Left - Online Learning */}
-                <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Students collaborating with laptops for online learning"
@@ -155,7 +155,7 @@ export default function Home() {
                 </div>
                 
                 {/* Bottom Right - Achievement */}
-                <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Students celebrating graduation and academic achievement"
@@ -279,8 +279,8 @@ export default function Home() {
                 <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">1</span>
                 </div>
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-gradient-to-r from-pink-400 to-red-400 rounded-full"></div>
+                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-gray-500 rounded-full"></div>
               </div>
               <h3 className="text-3xl font-bold mb-6 text-gray-900">Schedule Free Consultation</h3>
               <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
@@ -294,8 +294,8 @@ export default function Home() {
                 <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">2</span>
                 </div>
-                <div className="absolute -top-3 -left-3 w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -right-3 w-5 h-5 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full"></div>
+                <div className="absolute -top-3 -left-3 w-10 h-10 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-3 -right-3 w-5 h-5 bg-gray-500 rounded-full"></div>
               </div>
               <h3 className="text-3xl font-bold mb-6 text-gray-900">Get Matched with Expert Tutor</h3>
               <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
@@ -309,8 +309,8 @@ export default function Home() {
                 <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">3</span>
                 </div>
-                <div className="absolute -top-3 -right-3 w-7 h-7 bg-gradient-to-r from-orange-400 to-red-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -left-3 w-9 h-9 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full shadow-lg"></div>
+                <div className="absolute -top-3 -right-3 w-7 h-7 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-3 -left-3 w-9 h-9 bg-gray-500 rounded-full shadow-lg"></div>
               </div>
               <h3 className="text-3xl font-bold mb-6 text-gray-900">Start Improving</h3>
               <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
@@ -451,7 +451,7 @@ export default function Home() {
 
           <div className="text-center mt-16">
             <Link href="/tutors"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-full font-bold text-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
+              className="bg-[#517cad] text-white px-10 py-4 rounded-full font-bold text-xl hover:bg-[#4568a3] transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
               Meet All Our Tutors
             </Link>
           </div>
@@ -501,19 +501,19 @@ export default function Home() {
                 
                 <div className="space-y-4 mb-10">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Personalized study plans</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Practice tests and materials</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Test-taking strategies</span>
@@ -521,7 +521,7 @@ export default function Home() {
                 </div>
                 
                 <Link href="/services" 
-                  className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  className="inline-block bg-[#517cad] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
                   Learn More
                 </Link>
               </div>
@@ -544,19 +544,19 @@ export default function Home() {
                 
                 <div className="space-y-4 mb-10">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Subject matter experts</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Homework assistance</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-sm font-bold">✓</span>
                     </div>
                     <span className="text-gray-700 text-lg font-medium">Concept reinforcement</span>
@@ -564,7 +564,7 @@ export default function Home() {
                 </div>
                 
                 <Link href="/services" 
-                  className="inline-block bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:from-green-700 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  className="inline-block bg-[#517cad] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
                   Learn More
                 </Link>
               </div>
@@ -723,12 +723,12 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-32 bg-gradient-to-r from-blue-600 to-purple-700 text-white relative overflow-hidden">
+      <section className="py-32 bg-gray-800 text-white relative overflow-hidden">
         {/* Background shapes */}
         <div className="absolute inset-0">
           <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 left-20 w-24 h-24 bg-yellow-400 rounded-full opacity-20"></div>
-          <div className="absolute top-40 left-40 w-16 h-16 bg-pink-400 rounded-full opacity-15"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 bg-gray-600 rounded-full opacity-20"></div>
+          <div className="absolute top-40 left-40 w-16 h-16 bg-gray-500 rounded-full opacity-15"></div>
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -742,11 +742,11 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="/contact" 
-              className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
+              className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
               Book Free Consultation
             </Link>
             <Link href="/pricing" 
-              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-800 transition">
               View Pricing
             </Link>
           </div>

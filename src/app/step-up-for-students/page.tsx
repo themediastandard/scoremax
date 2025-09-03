@@ -226,7 +226,7 @@ export default function StepUpForStudentsPage() {
                       type="text"
                       id="firstName"
                       name="firstName"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-gray-200 focus:outline-none transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
                       placeholder="Enter your first name"
                     />
                   </div>
@@ -236,7 +236,7 @@ export default function StepUpForStudentsPage() {
                       type="text"
                       id="lastName"
                       name="lastName"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-gray-200 focus:outline-none transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
                       placeholder="Enter your last name"
                     />
                   </div>
@@ -249,7 +249,7 @@ export default function StepUpForStudentsPage() {
                     id="email"
                     name="email"
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-gray-200 focus:outline-none transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
                     placeholder="Enter your email address"
                   />
                 </div>
@@ -260,7 +260,7 @@ export default function StepUpForStudentsPage() {
                     type="tel"
                     id="phone"
                     name="phone"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-gray-200 focus:outline-none transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
                     placeholder="Enter your phone number"
                   />
                 </div>
@@ -298,7 +298,7 @@ export default function StepUpForStudentsPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="#steps" 
-              className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
+              className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
               Get Started Now
             </Link>
             <Link href="/contact" 

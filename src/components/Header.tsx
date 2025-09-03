@@ -70,7 +70,7 @@ export default function Header() {
 
           {/* CTA Button - Far Right */}
           <div className="flex-shrink-0">
-            <Link href="/contact" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 border border-blue-500/20">
+            <Link href="/contact" className="bg-[#517cad] text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:bg-[#4568a3] transform hover:scale-105 transition-all duration-300 border border-[#517cad]/20">
               Book Free Consultation
             </Link>
           </div>
