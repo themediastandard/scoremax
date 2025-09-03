@@ -200,8 +200,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {/* A+ BBB Rating */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+                              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
@@ -211,8 +211,8 @@ export default function Home() {
             </div>
 
             {/* Step Up For Students */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
@@ -222,8 +222,8 @@ export default function Home() {
             </div>
 
             {/* 100% Satisfaction Guarantee */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                 </svg>
@@ -233,8 +233,8 @@ export default function Home() {
             </div>
 
             {/* Certified Expert Tutors */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
                 </svg>
@@ -276,7 +276,7 @@ export default function Home() {
             {/* Step 1 */}
             <div className="text-center group relative">
               <div className="relative mb-12">
-                <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl shadow-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-blue-100">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-blue-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">1</span>
                 </div>
                 <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-lg"></div>
@@ -291,7 +291,7 @@ export default function Home() {
             {/* Step 2 */}
             <div className="text-center group relative">
               <div className="relative mb-12">
-                <div className="w-28 h-28 bg-gradient-to-br from-purple-500 to-purple-700 rounded-3xl shadow-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-purple-100">
+                <div className="w-28 h-28 bg-gradient-to-br from-purple-500 to-purple-700 rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-purple-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">2</span>
                 </div>
                 <div className="absolute -top-3 -left-3 w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-lg"></div>
@@ -306,7 +306,7 @@ export default function Home() {
             {/* Step 3 */}
             <div className="text-center group relative">
               <div className="relative mb-12">
-                <div className="w-28 h-28 bg-gradient-to-br from-green-500 to-emerald-700 rounded-3xl shadow-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-green-100">
+                <div className="w-28 h-28 bg-gradient-to-br from-green-500 to-emerald-700 rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-green-100">
                   <span className="text-4xl font-black text-white drop-shadow-lg">3</span>
                 </div>
                 <div className="absolute -top-3 -right-3 w-7 h-7 bg-gradient-to-r from-orange-400 to-red-400 rounded-full shadow-lg"></div>
@@ -358,7 +358,7 @@ export default function Home() {
             {/* Tutor 1 - Sarah Chen */}
             <div className="text-center group">
               <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
                   <Image
                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Sarah Chen - SAT/ACT Math Specialist"
@@ -372,7 +372,7 @@ export default function Home() {
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Sarah Chen</h3>
                 <div className="text-blue-600 font-semibold mb-4 h-6">SAT/ACT Math Specialist</div>
                 <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
@@ -389,7 +389,7 @@ export default function Home() {
             {/* Tutor 2 - Marcus Johnson */}
             <div className="text-center group">
               <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-green-100 group-hover:ring-green-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-green-100 group-hover:ring-green-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
                   <Image
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Marcus Johnson - English & Writing Expert"
@@ -403,7 +403,7 @@ export default function Home() {
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Marcus Johnson</h3>
                 <div className="text-green-600 font-semibold mb-4 h-6">English & Writing Expert</div>
                 <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
@@ -420,7 +420,7 @@ export default function Home() {
             {/* Tutor 3 - Dr. Emily Rodriguez */}
             <div className="text-center group">
               <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300 shadow-xl group-hover:shadow-2xl">
+                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-purple-100 group-hover:ring-purple-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
                   <Image
                     src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Dr. Emily Rodriguez - Science & STEM Specialist"
@@ -434,7 +434,7 @@ export default function Home() {
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Dr. Emily Rodriguez</h3>
                 <div className="text-purple-600 font-semibold mb-4 h-6">Science & STEM Specialist</div>
                 <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
@@ -485,12 +485,12 @@ export default function Home() {
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
             {/* Test Prep Card */}
-            <div className="bg-white p-10 rounded-3xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-lg">
+            <div className="bg-white p-10 rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-60 blur-2xl"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full opacity-40 blur-xl"></div>
               
               <div className="relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   <div className="text-3xl">📚</div>
                 </div>
                 <h3 className="text-4xl font-black mb-6 text-black">Test Prep</h3>
@@ -528,12 +528,12 @@ export default function Home() {
             </div>
 
             {/* Academic Help Card */}
-            <div className="bg-white p-10 rounded-3xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-lg">
+            <div className="bg-white p-10 rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-100 to-teal-100 rounded-full opacity-60 blur-2xl"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-teal-100 to-blue-100 rounded-full opacity-40 blur-xl"></div>
               
               <div className="relative z-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   <div className="text-3xl">🎓</div>
                 </div>
                 <h3 className="text-4xl font-black mb-6 text-black">Academic Help</h3>
@@ -602,7 +602,7 @@ export default function Home() {
           {/* Success Stories Grid */}
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 mb-24">
             {/* Story 1 */}
-            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
               <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-blue-100">
                 <Image
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -626,7 +626,7 @@ export default function Home() {
             </div>
 
             {/* Story 2 */}
-            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
               <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-green-100">
                 <Image
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -650,7 +650,7 @@ export default function Home() {
             </div>
 
             {/* Story 3 */}
-            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
               <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-purple-100">
                 <Image
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -674,7 +674,7 @@ export default function Home() {
             </div>
 
             {/* Story 4 */}
-            <div className="bg-white p-10 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
               <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-orange-100">
                 <Image
                   src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -701,19 +701,19 @@ export default function Home() {
           {/* Statistics */}
           <div className="grid md:grid-cols-3 gap-12 lg:gap-16">
             <div className="text-center">
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-blue-600 mb-4">95%</div>
                 <div className="text-gray-700 text-xl font-semibold leading-tight">Students see score improvement</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-green-600 mb-4">250+</div>
                 <div className="text-gray-700 text-xl font-semibold leading-tight">Average SAT point increase</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
+              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 h-48 flex flex-col justify-center">
                 <div className="text-6xl font-black text-purple-600 mb-4">1000+</div>
                 <div className="text-gray-700 text-xl font-semibold leading-tight">Successful students</div>
               </div>
