@@ -225,7 +225,7 @@ export default function InPersonClassesPage() {
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Course Schedule */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
               <h3 className="text-3xl font-bold text-gray-900 mb-8">Course Schedule</h3>
               
               <div className="bg-white p-8 rounded-2xl border border-gray-200 mb-8">
@@ -269,7 +269,7 @@ export default function InPersonClassesPage() {
             </div>
 
             {/* Curriculum Details */}
-            <div className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
               <h3 className="text-3xl font-bold text-gray-900 mb-8">Comprehensive Curriculum</h3>
               
               <div className="space-y-6">
