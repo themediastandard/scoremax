@@ -1,0 +1,374 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import Header from '../../components/Header';
+
+export default function StepUpForStudentsPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 overflow-hidden">
+      <Header />
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 bg-gradient-to-b from-white to-gray-50">
+        {/* Background Geometric Shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 right-20 w-64 h-64 bg-red-200 rounded-full opacity-20"></div>
+          <div className="absolute top-40 right-80 w-32 h-32 bg-blue-200 rounded-full opacity-30"></div>
+          <div className="absolute bottom-40 right-60 w-20 h-20 bg-green-200 rounded-full opacity-40"></div>
+          <div className="absolute bottom-80 left-40 w-40 h-40 bg-purple-200 rounded-full opacity-25"></div>
+          <div className="absolute top-60 left-20 w-24 h-24 bg-orange-200 rounded-full opacity-35"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center">
+            <div className="mb-8">
+              <img 
+                src="/step-up.avif" 
+                alt="Step Up For Students Logo" 
+                className="h-32 mx-auto"
+              />
+            </div>
+            
+            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black mt-2 mb-6">
+              Step Up For
+              <br />
+              <span className="text-red-600">Students</span>
+              <br />
+              <span className="text-4xl lg:text-5xl xl:text-6xl">Scholarship Program</span>
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-black leading-relaxed max-w-4xl mx-auto font-medium mb-10">
+              Step Up For Students supports students and families in building a stronger future through an education that fits their needs. 
+              Their scholarships open doors with 
+              <span className="text-red-600 font-semibold"> tuition, transportation</span>, and 
+              <span className="text-blue-600 font-semibold"> educational resources</span>.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="#steps"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-3 rounded-full font-semibold text-sm hover:from-red-600 hover:to-red-700 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                Get Started
+              </Link>
+              <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-600 via-red-700 to-blue-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                  <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 5v10l7-5z"/>
+                  </svg>
+                </div>
+                <span className="text-base font-semibold text-gray-800">Learn More</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Partnership Section */}
+      <section className="py-20 bg-white relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-red-100 to-blue-100 px-6 py-3 rounded-full mb-8">
+              <div className="text-sm font-bold text-red-800 tracking-wider uppercase">
+                Partnership Announcement
+              </div>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
+              Two Organizations, <span className="text-red-600">One Mission</span>
+            </h2>
+            <p className="text-xl text-black max-w-4xl mx-auto leading-relaxed">
+              ScoreMax Tutoring and Step Up For Students are now working together to provide 
+              expert tutoring services at no cost to scholarship recipients.
+            </p>
+          </div>
+
+          {/* Partnership Visual */}
+          <div className="max-w-4xl mx-auto">
+            {/* Top Row - Both Logos */}
+            <div className="flex justify-center items-center gap-16 mb-12">
+              <div className="text-center">
+                <img 
+                  src="/logo.avif" 
+                  alt="ScoreMax Tutoring Logo" 
+                  className="h-20 mx-auto mb-4"
+                />
+                <h3 className="text-xl font-bold text-black">ScoreMax</h3>
+              </div>
+              
+              {/* Partnership Arrow */}
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <img 
+                  src="/step-up.avif" 
+                  alt="Step Up For Students Logo" 
+                  className="h-20 mx-auto mb-4"
+                />
+                <h3 className="text-xl font-bold text-black">Step Up</h3>
+              </div>
+            </div>
+
+            {/* Bottom Row - Partnership Result */}
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-red-50 to-blue-50 p-8 rounded-3xl border border-red-100">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-black">Partnership Success</h3>
+                </div>
+                <p className="text-lg text-black leading-relaxed">
+                  <span className="font-semibold text-red-600">Free expert tutoring</span> for Step Up scholarship recipients
+                </p>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+
+      {/* Steps Section */}
+      <section id="steps" className="py-20 bg-gray-50 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
+              How to Get Started with <span className="text-red-600">Step Up</span>
+            </h2>
+            <p className="text-xl text-black max-w-3xl mx-auto">
+              Follow these simple steps to use your Step Up scholarship with ScoreMax Tutoring
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Step 1 */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">1</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-black mb-4">Get Started!</h3>
+                  <p className="text-black mb-4">
+                    Log in or apply for your student's scholarship here.
+                  </p>
+                  <Link href="https://www.stepupforstudents.org" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition-colors">
+                    Visit Step Up For Students
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">2</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-black mb-4">Find us on the Education Market Assistant</h3>
+                  <p className="text-black mb-4">
+                    Search for ScoreMax Tutoring using these details:
+                  </p>
+                  <div className="bg-gray-50 p-4 rounded-xl">
+                    <div className="space-y-2 text-sm">
+                      <div><span className="font-semibold text-black">Provider Name:</span> <span className="text-black">Avi Spiller</span></div>
+                      <div><span className="font-semibold text-black">Location Name:</span> <span className="text-black">Scoremax Tutoring</span></div>
+                      <div><span className="font-semibold text-black">Catalog Item #:</span> <span className="text-black">20019985</span></div>
+                      <div><span className="font-semibold text-black">Service Category:</span> <span className="text-black">Part Time Tutoring Services K-12</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">3</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-black mb-4">Choose ScoreMax as your provider</h3>
+                  <p className="text-black">
+                    Once you've chosen ScoreMax Tutoring as your provider, let us know by filling out the form below to schedule your sessions at no cost!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4 - Contact Form */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100">
+              <div className="flex items-start space-x-4 mb-8">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">4</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-black mb-2">Complete Your Registration</h3>
+                  <p className="text-gray-600">Fill out the form below to get started with your Step Up scholarship tutoring sessions.</p>
+                </div>
+              </div>
+              
+              <form className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-3">First Name</label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                      placeholder="Enter your first name"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-3">Last Name</label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                      placeholder="Enter your last name"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-3">Email Address <span className="text-red-500">*</span></label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-3">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder-gray-400"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Start Your Tutoring Journey
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-red-600 to-blue-600 text-white relative overflow-hidden">
+        {/* Background shapes */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full opacity-10"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 bg-yellow-400 rounded-full opacity-20"></div>
+          <div className="absolute top-40 left-40 w-16 h-16 bg-pink-400 rounded-full opacity-15"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+            Ready to Start Your Journey?
+          </h2>
+          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Join thousands of students who have achieved their academic goals with ScoreMax Tutoring through the Step Up For Students program.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Link href="#steps" 
+              className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
+              Get Started Now
+            </Link>
+            <Link href="/contact" 
+              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-red-600 transition">
+              Contact Us
+            </Link>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm opacity-80">
+            <div className="flex items-center space-x-2">
+              <span>✓</span>
+              <span>No cost to you</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span>✓</span>
+              <span>Expert tutors</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span>✓</span>
+              <span>Step Up approved</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span>✓</span>
+              <span>Proven results</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            {/* Logo */}
+            <div className="mb-8">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-2xl">🎓</span>
+                </div>
+                <span className="text-3xl font-black">SCOREMAX</span>
+              </div>
+            </div>
+            
+            {/* Contact Info */}
+            <div className="mb-8">
+              <div className="text-lg text-gray-300 mb-2">
+                (954) 214-8880 | (954) 224-1511
+              </div>
+            </div>
+            
+            {/* Social Media */}
+            <div className="flex justify-center space-x-6 mb-8">
+              <a href="#" className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                <span className="text-white">📷</span>
+              </a>
+              <a href="#" className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                <span className="text-white font-bold">f</span>
+              </a>
+              <a href="#" className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                <span className="text-white">▶</span>
+              </a>
+            </div>
+            
+            {/* Copyright */}
+            <div className="text-gray-400 text-sm">
+              © 2023 Created by Designs By Clementine
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
