@@ -1,6 +1,45 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Step Up For Students Partnership | ScoreMax Tutoring',
+  description: 'ScoreMax partners with Step Up For Students to provide quality tutoring services. Learn about our partnership and how we support student success through educational scholarships.',
+  keywords: 'Step Up For Students, educational scholarships, tutoring partnership, student success, educational funding, tutoring scholarships',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/step-up-for-students',
+    siteName: 'ScoreMax',
+    title: 'Step Up For Students Partnership | ScoreMax Tutoring',
+    description: 'ScoreMax partners with Step Up For Students to provide quality tutoring services and support student success.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'Step Up For Students Partnership - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Step Up For Students Partnership',
+    description: 'ScoreMax partners with Step Up For Students to support student success.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/step-up-for-students',
+  },
+};
 
 export default function StepUpForStudentsPage() {
   return (

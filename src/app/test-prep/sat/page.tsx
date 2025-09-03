@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -108,6 +109,10 @@ export default function SATPage() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <Breadcrumbs items={[
+            { label: 'Test Prep', href: '/test-prep' },
+            { label: 'SAT Tutoring' }
+          ]} />
           {/* Header */}
           <div className="text-center mb-16">
 

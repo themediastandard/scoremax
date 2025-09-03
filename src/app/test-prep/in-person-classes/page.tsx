@@ -1,5 +1,44 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'In-Person SAT & ACT Classes | ScoreMax Test Prep',
+  description: 'Join our in-person SAT and ACT test prep classes. Small group sessions with expert instructors, comprehensive study materials, and proven strategies for test success.',
+  keywords: 'in-person SAT classes, in-person ACT classes, test prep classes, SAT group tutoring, ACT group tutoring, classroom test prep',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/test-prep/in-person-classes',
+    siteName: 'ScoreMax',
+    title: 'In-Person SAT & ACT Classes | ScoreMax Test Prep',
+    description: 'Join our in-person SAT and ACT test prep classes. Small group sessions with expert instructors and proven strategies.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'In-Person Test Prep Classes - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'In-Person SAT & ACT Classes',
+    description: 'Join our in-person SAT and ACT test prep classes with expert instructors.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/test-prep/in-person-classes',
+  },
+};
 
 export default function InPersonClassesPage() {
   return (

@@ -74,11 +74,54 @@ export default function Home() {
     "areaServed": "United States"
   };
 
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much can I improve my SAT score with ScoreMax tutoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Students typically improve their SAT scores by 280+ points with our expert tutoring services. Our personalized approach and proven strategies help students achieve significant score improvements."
+        }
+      },
+      {
+        "@type": "Question", 
+        "name": "What subjects does ScoreMax offer tutoring for?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ScoreMax offers comprehensive tutoring services including SAT preparation, ACT preparation, mathematics, science, and academic subject tutoring for both high school and college students."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you offer in-person and online tutoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, ScoreMax offers both in-person tutoring sessions and online tutoring options to accommodate different learning preferences and schedules."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I get started with ScoreMax tutoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Getting started is easy! Simply contact us to book your free consultation. We&apos;ll assess your needs, create a personalized learning plan, and match you with the perfect tutor."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
       />
       <Header />
 

@@ -1,5 +1,44 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'High School Tutoring Services | Math, Science & Test Prep | ScoreMax',
+  description: 'Expert high school tutoring services in mathematics, science, and test preparation. Personalized learning plans, flexible scheduling, and proven academic success.',
+  keywords: 'high school tutoring, math tutoring, science tutoring, high school math, high school science, academic tutoring, grade improvement',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/college-high-school/high-school-tutoring',
+    siteName: 'ScoreMax',
+    title: 'High School Tutoring Services | Math, Science & Test Prep',
+    description: 'Expert high school tutoring services in mathematics, science, and test preparation. Personalized learning plans and proven academic success.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'High School Tutoring Services - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'High School Tutoring Services',
+    description: 'Expert high school tutoring in math, science, and test preparation.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/college-high-school/high-school-tutoring',
+  },
+};
 
 export default function HighSchoolTutoringPage() {
   return (

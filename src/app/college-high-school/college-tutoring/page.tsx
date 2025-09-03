@@ -1,5 +1,44 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'College Tutoring Services | Advanced Math & Science | ScoreMax',
+  description: 'Expert college tutoring services for advanced mathematics, science, and academic subjects. Personalized learning plans for college students with flexible scheduling.',
+  keywords: 'college tutoring, college math tutoring, college science tutoring, advanced math, calculus tutoring, college academic support, university tutoring',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/college-high-school/college-tutoring',
+    siteName: 'ScoreMax',
+    title: 'College Tutoring Services | Advanced Math & Science',
+    description: 'Expert college tutoring services for advanced mathematics, science, and academic subjects. Personalized learning plans for college students.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'College Tutoring Services - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'College Tutoring Services',
+    description: 'Expert college tutoring for advanced math, science, and academic subjects.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/college-high-school/college-tutoring',
+  },
+};
 
 export default function CollegeTutoringPage() {
   return (
