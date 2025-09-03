@@ -64,10 +64,7 @@ export default function Header() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
 
-            <Link href="/payment-portal" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
-              Payment Portal
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
+
 
           </div>
 
@@ -111,7 +108,7 @@ export default function Header() {
             </div>
             <Link href="/step-up-for-students" className="block py-2 text-gray-800 font-medium">Step Up For Students</Link>
             <Link href="/contact" className="block py-2 text-gray-800 font-medium">Get In Touch</Link>
-            <Link href="/payment-portal" className="block py-2 text-gray-800 font-medium">Payment Portal</Link>
+
             <Link href="/contact" className="inline-flex items-center justify-center w-full bg-blue-600 text-white py-3 rounded-lg font-semibold mt-2">Book Free Consultation</Link>
           </div>
         </div>

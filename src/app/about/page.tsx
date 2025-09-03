@@ -20,7 +20,7 @@ export default function AboutPage() {
               <div className="inline-block bg-gray-100 px-4 py-2 rounded-full">
                 <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">About ScoreMax</div>
               </div>
-              <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their Full Potential</h1>
+              <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#517cad]">Full Potential</span></h1>
               <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
             </div>
             <div className="relative">
