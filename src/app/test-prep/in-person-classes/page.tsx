@@ -238,7 +238,7 @@ export default function InPersonClassesPage() {
               </div>
               
               <div className="space-y-4">
-                <h4 className="text-xl font-bold text-gray-900 mb-4">What You'll Get:</h4>
+                <h4 className="text-xl font-bold text-gray-900 mb-4">What You&apos;ll Get:</h4>
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-4">

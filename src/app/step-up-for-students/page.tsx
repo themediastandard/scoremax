@@ -21,9 +21,11 @@ export default function StepUpForStudentsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <div className="mb-8">
-              <img 
+              <Image 
                 src="/step-up.avif" 
                 alt="Step Up For Students Logo" 
+                width={200}
+                height={128}
                 className="h-32 mx-auto"
               />
             </div>
@@ -84,9 +86,11 @@ export default function StepUpForStudentsPage() {
             {/* Top Row - Both Logos */}
             <div className="flex justify-center items-center gap-16 mb-12">
               <div className="text-center">
-                <img 
+                <Image 
                   src="/logo.avif" 
                   alt="ScoreMax Tutoring Logo" 
+                  width={80}
+                  height={80}
                   className="h-20 mx-auto mb-4"
                 />
                 <h3 className="text-xl font-bold text-black">ScoreMax</h3>
@@ -102,9 +106,11 @@ export default function StepUpForStudentsPage() {
               </div>
               
               <div className="text-center">
-                <img 
+                <Image 
                   src="/step-up.avif" 
                   alt="Step Up For Students Logo" 
+                  width={80}
+                  height={80}
                   className="h-20 mx-auto mb-4"
                 />
                 <h3 className="text-xl font-bold text-black">Step Up</h3>
@@ -155,7 +161,7 @@ export default function StepUpForStudentsPage() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-black mb-4">Get Started!</h3>
                   <p className="text-black mb-4">
-                    Log in or apply for your student's scholarship here.
+                    Log in or apply for your student&apos;s scholarship here.
                   </p>
                   <Link href="https://www.stepupforstudents.org" target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition-colors">
@@ -200,7 +206,7 @@ export default function StepUpForStudentsPage() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-black mb-4">Choose ScoreMax as your provider</h3>
                   <p className="text-black">
-                    Once you've chosen ScoreMax Tutoring as your provider, let us know by filling out the form below to schedule your sessions at no cost!
+                    Once you&apos;ve chosen ScoreMax Tutoring as your provider, let us know by filling out the form below to schedule your sessions at no cost!
                   </p>
                 </div>
               </div>

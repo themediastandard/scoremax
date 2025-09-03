@@ -30,7 +30,7 @@ export default function ContactPage() {
               Get In <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Touch</span>
             </h1>
             <p className="text-2xl lg:text-3xl text-gray-700 leading-relaxed max-w-5xl mx-auto font-medium mb-12">
-              Ready to start your academic journey? Let's discuss how we can help you achieve your goals.
+              Ready to start your academic journey? Let&apos;s discuss how we can help you achieve your goals.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
