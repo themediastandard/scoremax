@@ -54,7 +54,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-start mb-24">
             <div className="relative">
               <div className="w-full max-w-sm h-[380px] bg-gray-200 rounded-3xl shadow-xl overflow-hidden">
-                <Image src="/window.svg" alt="Placeholder headshot" width={600} height={600} className="object-cover w-full h-full" />
+                <Image src="/staff/avi.avif" alt="Avi Spiller - President" width={400} height={380} className="object-cover w-full h-full object-top" />
               </div>
               <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-gray-300 rounded-2xl -z-10"></div>
             </div>
@@ -84,7 +84,7 @@ export default function AboutPage() {
             </div>
             <div className="relative order-1 lg:order-2">
               <div className="w-full max-w-sm h-[380px] bg-gray-200 rounded-3xl shadow-xl overflow-hidden ml-auto">
-                <Image src="/window.svg" alt="Placeholder headshot" width={600} height={600} className="object-cover w-full h-full" />
+                <Image src="/staff/taimir.avif" alt="Taimir Terrell - Vice President" width={400} height={380} className="object-cover w-full h-full" style={{objectPosition: 'center 20%'}} />
               </div>
               <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-gray-300 rounded-2xl -z-10"></div>
             </div>
