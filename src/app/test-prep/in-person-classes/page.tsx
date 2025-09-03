@@ -60,7 +60,7 @@ export default function InPersonClassesPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             
             {/* Left Content */}
-            <div className="space-y-10">
+            <div className="space-y-10 text-center lg:text-left">
 
               
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black">
@@ -71,7 +71,7 @@ export default function InPersonClassesPage() {
                 <span className="text-4xl lg:text-5xl xl:text-6xl">In-Person Classes</span>
               </h1>
               
-              <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
+              <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium mx-auto lg:mx-0">
                 Join our comprehensive in-person SAT/ACT course designed to maximize your test scores. 
                 Learn from expert instructors in a structured classroom environment with 
                 <span className="text-[#517cad] font-semibold"> proven strategies</span> and 

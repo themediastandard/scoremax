@@ -55,10 +55,10 @@ export default function AboutPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
+            <div className="space-y-6 text-center lg:text-left">
 
               <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#517cad]">Full Potential</span></h1>
-              <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
+              <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
             </div>
             <div className="relative">
               <div className="grid grid-cols-2 gap-4">

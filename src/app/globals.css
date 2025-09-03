@@ -151,3 +151,113 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Premium Mobile Navigation Animations */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Premium mobile nav styles */
+.premium-mobile-nav {
+  animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+}
+
+/* Force solid background for mobile nav */
+@media (max-width: 1024px) {
+  .premium-mobile-nav {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+}
+
+.premium-mobile-nav.closing {
+  animation: slideOutToRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-backdrop {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.premium-nav-item {
+  animation: slideDown 0.3s ease-out;
+}
+
+.premium-nav-item:nth-child(1) { animation-delay: 0.1s; }
+.premium-nav-item:nth-child(2) { animation-delay: 0.15s; }
+.premium-nav-item:nth-child(3) { animation-delay: 0.2s; }
+.premium-nav-item:nth-child(4) { animation-delay: 0.25s; }
+.premium-nav-item:nth-child(5) { animation-delay: 0.3s; }
+.premium-nav-item:nth-child(6) { animation-delay: 0.35s; }
+.premium-nav-item:nth-child(7) { animation-delay: 0.4s; }
+
+/* Enhanced touch feedback */
+.touch-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-feedback::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.touch-feedback:active::before {
+  width: 200px;
+  height: 200px;
+}

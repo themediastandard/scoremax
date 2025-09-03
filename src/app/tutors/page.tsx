@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../../components/Header';
-import Breadcrumbs from '../../components/Breadcrumbs';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -109,9 +108,7 @@ export default function TutorsPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Breadcrumbs items={[
-            { label: 'Tutors' }
-          ]} />
+          {/* Breadcrumbs removed per request */}
           <div className="text-center">
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black mb-8">
               Meet Our Expert

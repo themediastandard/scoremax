@@ -126,7 +126,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-[130px] pb-20 lg:pt-[134px] lg:pb-24">
+      <section className="relative pt-[130px] pb-12 sm:pb-16 lg:pt-[134px] lg:pb-24">
         {/* Background Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 right-20 w-64 h-64 bg-[#517cad] rounded-full opacity-15"></div>
@@ -140,10 +140,10 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             
             {/* Left Content */}
-            <div className="space-y-6">
+            <div className="space-y-6 text-center lg:text-left">
 
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
+              <h1 className="text-5xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
                 Unlock Your
                 <br />
                 <span className="text-[#517cad]">Test Score</span> 
@@ -151,32 +151,32 @@ export default function Home() {
                 Potential
               </h1>
               
-              <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
+              <p className="text-xl sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium mx-auto lg:mx-0">
                 Expert 1-on-1 tutoring for <span className="text-[#517cad] font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
                 Join <span className="text-gray-700 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/contact"
-                  className="bg-[#517cad] text-white px-8 py-4 sm:py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px]">
+                  className="bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-3 rounded-full font-semibold text-xs sm:text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[44px] sm:min-h-[48px]">
                   Book Free Consultation
                 </Link>
-                <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-4 sm:py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap touch-manipulation min-h-[48px]">
-                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
-                    <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <button className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md px-6 sm:px-8 py-3 sm:py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap touch-manipulation min-h-[44px] sm:min-h-[48px]">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8 5v10l7-5z"/>
                     </svg>
                   </div>
-                  <span className="text-base font-semibold text-gray-800">See How It Works</span>
+                  <span className="text-sm sm:text-base font-semibold text-gray-800">See How It Works</span>
                 </button>
               </div>
             </div>
             
             {/* Right Content - Image Collage */}
             <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {/* Top Left - Study Session */}
-                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Student studying with books and notes"
@@ -185,28 +185,28 @@ export default function Home() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-blue-600/30 group-hover:bg-blue-600/40 transition-colors duration-300"></div>
-                  <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full shadow-lg"></div>
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute top-4 left-4">
-                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
                       <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
+                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
                       Study Session
                     </div>
-                    <div className="text-white/80 text-sm font-medium mt-1">
+                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
                       Personalized Learning
                     </div>
                   </div>
                 </div>
                 
                 {/* Top Right - Success */}
-                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Happy student celebrating test score success"
@@ -215,28 +215,28 @@ export default function Home() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-green-600/30 group-hover:bg-green-600/40 transition-colors duration-300"></div>
-                  <div className="absolute bottom-4 left-4 w-6 h-6 bg-purple-400 rounded-full shadow-lg"></div>
+                  <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-5 h-5 sm:w-6 sm:h-6 bg-purple-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute top-4 left-4">
-                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
                       <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
+                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
                       Success!
                     </div>
-                    <div className="text-white/80 text-sm font-medium mt-1">
+                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
                       Score Improvement
                     </div>
                   </div>
                 </div>
                 
                 {/* Bottom Left - Online Learning */}
-                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Students collaborating with laptops for online learning"
@@ -245,28 +245,28 @@ export default function Home() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-purple-600/30 group-hover:bg-purple-600/40 transition-colors duration-300"></div>
-                  <div className="absolute top-4 left-4 w-4 h-4 bg-teal-400 rounded-full shadow-lg"></div>
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-3 h-3 sm:w-4 sm:h-4 bg-teal-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute top-4 left-4">
-                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
                       <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
+                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
                       Online Learning
                     </div>
-                    <div className="text-white/80 text-sm font-medium mt-1">
+                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
                       Virtual Sessions
                     </div>
                   </div>
                 </div>
                 
                 {/* Bottom Right - Achievement */}
-                <div className="bg-gray-100 rounded-3xl h-64 relative overflow-hidden group cursor-pointer">
+                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
                   <Image
                     src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
                     alt="Students celebrating graduation and academic achievement"
@@ -275,21 +275,21 @@ export default function Home() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-orange-600/30 group-hover:bg-orange-600/40 transition-colors duration-300"></div>
-                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-blue-400 rounded-full shadow-lg"></div>
+                  <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-8 h-8 sm:w-12 sm:h-12 bg-blue-400 rounded-full shadow-lg"></div>
                   {/* Play Button */}
-                  <div className="absolute top-4 left-4">
-                    <div className="border-2 border-white/80 text-white px-3 py-2 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 5v10l7-5z"/>
                       </svg>
                       <span className="text-xs font-semibold">Watch</span>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                    <div className="text-white font-black text-xl tracking-wide uppercase">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
+                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
                       Achievement
                     </div>
-                    <div className="text-white/80 text-sm font-medium mt-1">
+                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
                       Academic Excellence
                     </div>
                   </div>
@@ -301,7 +301,7 @@ export default function Home() {
       </section>
 
       {/* Trust Signals */}
-      <section className="py-20 bg-gradient-to-r from-gray-50 to-white relative">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-gray-50 to-white relative">
         {/* Background shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-8 left-1/4 w-20 h-20 bg-gray-200 rounded-full opacity-10"></div>
@@ -309,49 +309,49 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {/* A+ BBB Rating */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
-                              <div className="w-16 h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
               </div>
-              <h4 className="font-bold text-lg text-gray-900 mb-2">A+ BBB Rating</h4>
-              <p className="text-gray-600 text-sm">Trusted by families nationwide</p>
+              <h4 className="font-bold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">A+ BBB Rating</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">Trusted by families nationwide</p>
             </div>
 
             {/* Step Up For Students */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
               </div>
-              <h4 className="font-bold text-lg text-gray-900 mb-2">Step Up Approved</h4>
-              <p className="text-gray-600 text-sm">State scholarship accepted</p>
+              <h4 className="font-bold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">Step Up Approved</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">State scholarship accepted</p>
             </div>
 
             {/* 100% Satisfaction Guarantee */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                 </svg>
               </div>
-              <h4 className="font-bold text-lg text-gray-900 mb-2">100% Guarantee</h4>
-              <p className="text-gray-600 text-sm">Satisfaction promised</p>
+              <h4 className="font-bold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">100% Guarantee</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">Satisfaction promised</p>
             </div>
 
             {/* Certified Expert Tutors */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
-              <div className="w-16 h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 group text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#517cad] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
                 </svg>
               </div>
-              <h4 className="font-bold text-lg text-gray-900 mb-2">Expert Tutors</h4>
-              <p className="text-gray-600 text-sm">Certified & experienced</p>
+              <h4 className="font-bold text-base sm:text-lg text-gray-900 mb-1 sm:mb-2">Expert Tutors</h4>
+              <p className="text-gray-600 text-xs sm:text-sm">Certified & experienced</p>
             </div>
           </div>
         </div>
@@ -367,66 +367,66 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-24">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-24">
 
-            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-black mb-6 sm:mb-8 leading-tight">
               Getting Started <span className="text-[#517cad]">Is Easy</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Join thousands of successful students in just three simple steps
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-16 lg:gap-20">
+          <div className="grid lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-20">
             {/* Step 1 */}
             <div className="text-center group relative">
-              <div className="relative mb-12">
-                <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
-                  <span className="text-4xl font-black text-white drop-shadow-lg">1</span>
+              <div className="relative mb-8 sm:mb-12">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#517cad] rounded-2xl sm:rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
+                  <span className="text-2xl sm:text-4xl font-black text-white drop-shadow-lg">1</span>
                 </div>
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-gray-500 rounded-full"></div>
+                <div className="absolute -top-2 sm:-top-3 -right-2 sm:-right-3 w-6 h-6 sm:w-8 sm:h-8 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-2 sm:-bottom-3 -left-2 sm:-left-3 w-4 h-4 sm:w-6 sm:h-6 bg-gray-500 rounded-full"></div>
               </div>
-              <h3 className="text-3xl font-bold mb-6 text-gray-900">Schedule Free Consultation</h3>
-              <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-900">Schedule Free Consultation</h3>
+              <p className="text-gray-600 text-base sm:text-lg lg:text-xl leading-relaxed max-w-sm mx-auto">
                 Tell us about your goals and learning needs. We&apos;ll assess your current level and create a personalized plan.
               </p>
             </div>
 
             {/* Step 2 */}
             <div className="text-center group relative">
-              <div className="relative mb-12">
-                <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
-                  <span className="text-4xl font-black text-white drop-shadow-lg">2</span>
+              <div className="relative mb-8 sm:mb-12">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#517cad] rounded-2xl sm:rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
+                  <span className="text-2xl sm:text-4xl font-black text-white drop-shadow-lg">2</span>
                 </div>
-                <div className="absolute -top-3 -left-3 w-10 h-10 bg-gray-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -right-3 w-5 h-5 bg-gray-500 rounded-full"></div>
+                <div className="absolute -top-2 sm:-top-3 -left-2 sm:-left-3 w-8 h-8 sm:w-10 sm:h-10 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-2 sm:-bottom-3 -right-2 sm:-right-3 w-4 h-4 sm:w-5 sm:h-5 bg-gray-500 rounded-full"></div>
               </div>
-              <h3 className="text-3xl font-bold mb-6 text-gray-900">Get Matched with Expert Tutor</h3>
-              <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-900">Get Matched with Expert Tutor</h3>
+              <p className="text-gray-600 text-base sm:text-lg lg:text-xl leading-relaxed max-w-sm mx-auto">
                 We&apos;ll pair you with a certified tutor who specializes in your subject and understands your learning style.
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="text-center group relative">
-              <div className="relative mb-12">
-                <div className="w-28 h-28 bg-[#517cad] rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
-                  <span className="text-4xl font-black text-white drop-shadow-lg">3</span>
+              <div className="relative mb-8 sm:mb-12">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-[#517cad] rounded-2xl sm:rounded-3xl shadow-lg flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ring-4 ring-gray-100">
+                  <span className="text-2xl sm:text-4xl font-black text-white drop-shadow-lg">3</span>
                 </div>
-                <div className="absolute -top-3 -right-3 w-7 h-7 bg-gray-400 rounded-full shadow-lg"></div>
-                <div className="absolute -bottom-3 -left-3 w-9 h-9 bg-gray-500 rounded-full shadow-lg"></div>
+                <div className="absolute -top-2 sm:-top-3 -right-2 sm:-right-3 w-5 h-5 sm:w-7 sm:h-7 bg-gray-400 rounded-full shadow-lg"></div>
+                <div className="absolute -bottom-2 sm:-bottom-3 -left-2 sm:-left-3 w-7 h-7 sm:w-9 sm:h-9 bg-gray-500 rounded-full shadow-lg"></div>
               </div>
-              <h3 className="text-3xl font-bold mb-6 text-gray-900">Start Improving</h3>
-              <p className="text-gray-600 text-xl leading-relaxed max-w-sm mx-auto">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-gray-900">Start Improving</h3>
+              <p className="text-gray-600 text-base sm:text-lg lg:text-xl leading-relaxed max-w-sm mx-auto">
                 Begin your personalized tutoring sessions and watch your confidence and scores improve week by week.
               </p>
             </div>
           </div>
 
-          <div className="text-center mt-20">
+          <div className="text-center mt-12 sm:mt-16 lg:mt-20">
             <Link href="/contact"
-              className="bg-[#517cad] text-white px-10 py-5 rounded-full font-bold text-xl hover:bg-[#4568a3] transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
+              className="bg-[#517cad] text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-full font-bold text-base sm:text-lg lg:text-xl hover:bg-[#4568a3] transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
               Start Your Free Consultation
             </Link>
           </div>
@@ -443,116 +443,113 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
 
-            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-black mb-6 sm:mb-8 leading-tight">
               Learn from the
               <br />
               <span className="text-[#517cad]">Best in the Field</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Our certified tutors are passionate educators with proven track records of helping students achieve their academic goals
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-12 lg:gap-16">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-16">
             {/* Tutor 1 - Sarah Chen */}
             <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
+              <div className="relative mb-6 sm:mb-8">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg bg-gray-100">
                   <Image
                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Sarah Chen - SAT/ACT Math Specialist"
-                    width={160}
-                    height={160}
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    fill
+                    className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-bold">✓</span>
+                <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Sarah Chen</h3>
-                <div className="text-[#517cad] font-semibold mb-4 h-6">SAT/ACT Math Specialist</div>
-                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+              <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-80 sm:h-96 flex flex-col">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-gray-900 h-6 sm:h-8">Sarah Chen</h3>
+                <div className="text-[#517cad] font-semibold mb-3 sm:mb-4 h-5 sm:h-6 text-sm sm:text-base">SAT/ACT Math Specialist</div>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed h-32 sm:h-40 overflow-hidden">
                   Master&apos;s in Mathematics from MIT. Helped 200+ students improve their SAT math scores by an average of 150 points. 
                   Specializes in breaking down complex concepts into simple, understandable steps.
                 </p>
-                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
-                  <span className="bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">8+ Years Experience</span>
-                  <span className="bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">200+ Students</span>
+                <div className="flex justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500 flex-wrap h-6 sm:h-8 items-center mt-auto">
+                  <span className="bg-blue-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">8+ Years Experience</span>
+                  <span className="bg-green-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">200+ Students</span>
                 </div>
               </div>
             </div>
 
             {/* Tutor 2 - Marcus Johnson */}
             <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
+              <div className="relative mb-6 sm:mb-8">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg bg-gray-100">
                   <Image
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Marcus Johnson - English & Writing Expert"
-                    width={160}
-                    height={160}
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    fill
+                    className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-bold">✓</span>
+                <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Marcus Johnson</h3>
-                <div className="text-green-600 font-semibold mb-4 h-6">English & Writing Expert</div>
-                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+              <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-80 sm:h-96 flex flex-col">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-gray-900 h-6 sm:h-8">Marcus Johnson</h3>
+                <div className="text-green-600 font-semibold mb-3 sm:mb-4 h-5 sm:h-6 text-sm sm:text-base">English & Writing Expert</div>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed h-32 sm:h-40 overflow-hidden">
                   PhD in English Literature from Harvard. Former college admissions counselor with expertise in essay writing and reading comprehension. 
                   Known for his engaging teaching style and ability to boost student confidence.
                 </p>
-                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
-                  <span className="bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">12+ Years Experience</span>
-                  <span className="bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">Harvard PhD</span>
+                <div className="flex justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500 flex-wrap h-6 sm:h-8 items-center mt-auto">
+                  <span className="bg-green-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">12+ Years Experience</span>
+                  <span className="bg-blue-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">Harvard PhD</span>
                 </div>
               </div>
             </div>
 
             {/* Tutor 3 - Dr. Emily Rodriguez */}
             <div className="text-center group">
-              <div className="relative mb-8">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg">
+              <div className="relative mb-6 sm:mb-8">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden ring-4 ring-gray-100 group-hover:ring-gray-200 transition-all duration-300 shadow-md group-hover:shadow-lg bg-gray-100">
                   <Image
                     src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                     alt="Dr. Emily Rodriguez - Science & STEM Specialist"
-                    width={160}
-                    height={160}
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                    fill
+                    className="object-cover object-center group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-bold">✓</span>
+                <div className="absolute -bottom-1 sm:-bottom-2 -right-1 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-96 flex flex-col">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 h-8">Dr. Emily Rodriguez</h3>
-                <div className="text-purple-600 font-semibold mb-4 h-6">Science & STEM Specialist</div>
-                <p className="text-gray-600 text-base mb-6 leading-relaxed h-40 overflow-hidden">
+              <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 h-80 sm:h-96 flex flex-col">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-gray-900 h-6 sm:h-8">Dr. Emily Rodriguez</h3>
+                <div className="text-purple-600 font-semibold mb-3 sm:mb-4 h-5 sm:h-6 text-sm sm:text-base">Science & STEM Specialist</div>
+                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed h-32 sm:h-40 overflow-hidden">
                   PhD in Chemistry from Stanford. Specializes in AP Chemistry, Physics, and Biology. 
                   Her students consistently achieve 4s and 5s on AP exams. Passionate about making science accessible and fun.
                 </p>
-                <div className="flex justify-center space-x-4 text-sm text-gray-500 flex-wrap h-8 items-center mt-auto">
-                  <span className="bg-purple-50 px-3 py-1 rounded-full whitespace-nowrap">10+ Years Experience</span>
-                  <span className="bg-orange-50 px-3 py-1 rounded-full whitespace-nowrap">AP Expert</span>
+                <div className="flex justify-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500 flex-wrap h-6 sm:h-8 items-center mt-auto">
+                  <span className="bg-purple-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">10+ Years Experience</span>
+                  <span className="bg-orange-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">AP Expert</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="text-center mt-16">
+          <div className="text-center mt-12 sm:mt-16">
             <Link href="/tutors"
-              className="bg-[#517cad] text-white px-10 py-4 rounded-full font-bold text-xl hover:bg-[#4568a3] transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
+              className="bg-[#517cad] text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg lg:text-xl hover:bg-[#4568a3] transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105">
               Meet All Our Tutors
             </Link>
           </div>
@@ -569,99 +566,99 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
 
-            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-black mb-6 sm:mb-8 leading-tight">
               Choose Your Path to <span className="text-[#517cad]">Success</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Whether you&apos;re preparing for standardized tests or need help with academic subjects, 
               we have expert tutors ready to help you succeed.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16">
             {/* Test Prep Card */}
-            <div className="bg-white p-10 rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full opacity-60 blur-2xl"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gray-200 rounded-full opacity-40 blur-xl"></div>
+            <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
+              <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-full opacity-60 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 bg-gray-200 rounded-full opacity-40 blur-xl"></div>
               
               <div className="relative z-10">
-                <div className="w-20 h-20 bg-[#517cad] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <div className="text-3xl">📚</div>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#517cad] rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                  <div className="text-2xl sm:text-3xl">📚</div>
                 </div>
-                <h3 className="text-4xl font-black mb-6 text-black">Test Prep</h3>
-                <p className="text-gray-600 text-xl mb-8 leading-relaxed">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 sm:mb-6 text-black">Test Prep</h3>
+                <p className="text-gray-600 text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 leading-relaxed">
                   Prepare for SAT, ACT, GMAT, or GRE with proven strategies and personalized study plans 
                   designed to maximize your score improvement.
                 </p>
                 
-                <div className="space-y-4 mb-10">
+                <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Personalized study plans</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Personalized study plans</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Practice tests and materials</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Practice tests and materials</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Test-taking strategies</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Test-taking strategies</span>
                   </div>
                 </div>
                 
                 <Link href="/services" 
-                  className="inline-block bg-[#517cad] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  className="inline-block bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-sm sm:text-base lg:text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
                   Learn More
                 </Link>
               </div>
             </div>
 
             {/* Academic Help Card */}
-            <div className="bg-white p-10 rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full opacity-60 blur-2xl"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gray-200 rounded-full opacity-40 blur-xl"></div>
+            <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl hover:shadow-lg transition-all duration-500 group relative overflow-hidden border border-gray-100 shadow-sm">
+              <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-full opacity-60 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 bg-gray-200 rounded-full opacity-40 blur-xl"></div>
               
               <div className="relative z-10">
-                <div className="w-20 h-20 bg-[#517cad] rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <div className="text-3xl">🎓</div>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#517cad] rounded-xl sm:rounded-2xl flex items-center justify-center mb-6 sm:mb-8 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                  <div className="text-2xl sm:text-3xl">🎓</div>
                 </div>
-                <h3 className="text-4xl font-black mb-6 text-black">Academic Help</h3>
-                <p className="text-gray-600 text-xl mb-8 leading-relaxed">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 sm:mb-6 text-black">Academic Help</h3>
+                <p className="text-gray-600 text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 leading-relaxed">
                   Get expert help with AP classes, Calculus, Physics, Chemistry, Algebra, Geometry, 
                   and Statistics from certified tutors.
                 </p>
                 
-                <div className="space-y-4 mb-10">
+                <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Subject matter experts</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Subject matter experts</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Homework assistance</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Homework assistance</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#517cad] rounded-full flex items-center justify-center mr-3 sm:mr-4">
+                      <span className="text-white text-xs sm:text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-gray-700 text-lg font-medium">Concept reinforcement</span>
+                    <span className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">Concept reinforcement</span>
                   </div>
                 </div>
                 
                 <Link href="/services" 
-                  className="inline-block bg-[#517cad] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
+                  className="inline-block bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-sm sm:text-base lg:text-lg hover:bg-[#4568a3] transition-all duration-300 shadow-lg hover:shadow-xl group-hover:scale-105">
                   Learn More
                 </Link>
               </div>
@@ -680,77 +677,74 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-24">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-24">
 
-            <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-black mb-6 sm:mb-8 leading-tight">
               Real Results from
               <br />
               <span className="text-[#517cad]">Real Students</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Join thousands of students who have achieved their academic goals with ScoreMax Tutoring
             </p>
           </div>
 
           {/* Success Stories Grid */}
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 mb-24">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 mb-16 sm:mb-20 lg:mb-24">
             {/* Story 1 */}
-            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full mb-6 sm:mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
                 <Image
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
                   alt="Sarah M. - SAT Success Student"
-                  width={96}
-                  height={96}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover object-center"
                   loading="lazy"
                 />
               </div>
               <div className="text-center">
-                <div className="bg-gray-100 text-[#517cad] px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                <div className="bg-gray-100 text-[#517cad] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-bold mb-3 sm:mb-4 inline-block">
                   +280 SAT Points
                 </div>
-                <h4 className="font-bold text-2xl mb-4 text-gray-900">SAT Score Boost</h4>
-                <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">SAT Score Boost</h4>
+                <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
                   &quot;Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference.&quot;
                 </p>
-                <div className="text-[#517cad] font-bold text-lg">- Sarah M.</div>
+                <div className="text-[#517cad] font-bold text-sm sm:text-base lg:text-lg">- Sarah M.</div>
               </div>
             </div>
 
             {/* Story 2 */}
-            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full mb-6 sm:mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
                 <Image
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
                   alt="Marcus T. - GPA Improvement Student"
-                  width={96}
-                  height={96}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover object-center"
                   loading="lazy"
                 />
               </div>
               <div className="text-center">
-                <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                <div className="bg-green-100 text-green-800 px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-bold mb-3 sm:mb-4 inline-block">
                   2.8 → 3.7 GPA
                 </div>
-                <h4 className="font-bold text-2xl mb-4 text-gray-900">GPA Improvement</h4>
-                <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">GPA Improvement</h4>
+                <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
                   &quot;Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I&apos;d struggled with for months.&quot;
                 </p>
-                <div className="text-green-600 font-bold text-lg">- Marcus T.</div>
+                <div className="text-green-600 font-bold text-sm sm:text-base lg:text-lg">- Marcus T.</div>
               </div>
             </div>
 
             {/* Story 3 */}
             <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full mb-6 sm:mb-8 mx-auto overflow-hidden ring-4 ring-gray-100">
                 <Image
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
                   alt="Emma L. - College Acceptance Student"
-                  width={96}
-                  height={96}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover object-center"
                   loading="lazy"
                 />
               </div>
@@ -758,35 +752,34 @@ export default function Home() {
                 <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
                   Dream School Accepted ✓
                 </div>
-                <h4 className="font-bold text-2xl mb-4 text-gray-900">College Acceptance</h4>
-                <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">College Acceptance</h4>
+                <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
                   &quot;Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed.&quot;
                 </p>
-                <div className="text-purple-600 font-bold text-lg">- Emma L.</div>
+                <div className="text-purple-600 font-bold text-sm sm:text-base lg:text-lg">- Emma L.</div>
               </div>
             </div>
 
             {/* Story 4 */}
-            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-              <div className="w-24 h-24 rounded-full mb-8 mx-auto overflow-hidden ring-4 ring-orange-100">
+            <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full mb-6 sm:mb-8 mx-auto overflow-hidden ring-4 ring-orange-100">
                 <Image
                   src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
                   alt="David K. - Chemistry Confidence Student"
-                  width={96}
-                  height={96}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover object-center"
                   loading="lazy"
                 />
               </div>
               <div className="text-center">
-                <div className="bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-bold mb-4 inline-block">
+                <div className="bg-orange-100 text-orange-800 px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-bold mb-3 sm:mb-4 inline-block">
                   Chemistry Mastered 🧪
                 </div>
-                <h4 className="font-bold text-2xl mb-4 text-gray-900">Confidence Boost</h4>
-                <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">Confidence Boost</h4>
+                <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
                   &quot;Finally understand chemistry! My tutor is amazing and made complex topics feel simple.&quot;
                 </p>
-                <div className="text-orange-600 font-bold text-lg">- David K.</div>
+                <div className="text-orange-600 font-bold text-sm sm:text-base lg:text-lg">- David K.</div>
               </div>
             </div>
           </div>
@@ -825,21 +818,21 @@ export default function Home() {
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-4 sm:mb-6">
             Ready to Unlock Your Potential?
           </h2>
-          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto">
             Join thousands of successful students who have achieved their academic goals with ScoreMax Tutoring. 
             Your success story starts here.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 sm:mb-8">
             <Link href="/contact" 
-              className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
+              className="bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base lg:text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
               Book Free Consultation
             </Link>
             <Link href="/pricing" 
-              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-800 transition">
+              className="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base lg:text-lg font-semibold hover:bg-white hover:text-gray-800 transition">
               View Pricing
             </Link>
           </div>
@@ -866,43 +859,43 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
+      <footer className="bg-gray-900 text-white py-8 sm:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             {/* Logo */}
-            <div className="mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center mr-3">
-                  <span className="text-2xl">🎓</span>
+            <div className="mb-6 sm:mb-8">
+              <div className="flex items-center justify-center mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#517cad] rounded-full flex items-center justify-center mr-2 sm:mr-3">
+                  <span className="text-xl sm:text-2xl">🎓</span>
                 </div>
-                <span className="text-3xl font-black">SCOREMAX</span>
+                <span className="text-2xl sm:text-3xl font-black">SCOREMAX</span>
               </div>
             </div>
             
             {/* Contact Info */}
-            <div className="mb-8">
-              <div className="text-lg text-gray-300 mb-2">
+            <div className="mb-6 sm:mb-8">
+              <div className="text-base sm:text-lg text-gray-300 mb-2">
                 (954) 214-8880 | (954) 224-1511
               </div>
-              <div className="text-gray-400">
+              <div className="text-sm sm:text-base text-gray-400">
                 info@scoremaxtutoring.com
               </div>
             </div>
             
             {/* Social Media */}
-            <div className="flex justify-center space-x-6 mb-8">
-              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex justify-center space-x-4 sm:space-x-6 mb-6 sm:mb-8">
+              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
               </a>
-              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
-              <a href="#" className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <a href="#" className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
               </a>
