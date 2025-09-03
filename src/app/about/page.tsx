@@ -48,6 +48,30 @@ export default function AboutPage() {
 
       {/* Hero */}
       <section className="relative pt-[130px] pb-24 lg:pt-[134px] bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+        {/* Person JSON-LD for leadership */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              itemListElement: [
+                {
+                  '@type': 'Person',
+                  name: 'Avi Spiller',
+                  jobTitle: 'President',
+                  worksFor: { '@type': 'Organization', name: 'ScoreMax' }
+                },
+                {
+                  '@type': 'Person',
+                  name: 'Taimir Terrell',
+                  jobTitle: 'Vice President',
+                  worksFor: { '@type': 'Organization', name: 'ScoreMax' }
+                }
+              ]
+            })
+          }}
+        />
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-16 right-24 w-56 h-56 bg-gray-200 rounded-full opacity-20"></div>
           <div className="absolute top-40 right-72 w-24 h-24 bg-gray-300 rounded-full opacity-25"></div>
