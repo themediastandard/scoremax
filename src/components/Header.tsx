@@ -32,9 +32,9 @@ export default function Header() {
 
             {/* Test Prep Dropdown */}
             <div className="relative group">
-              <Link href="/test-prep" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 whitespace-nowrap">
+              <button className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 whitespace-nowrap cursor-pointer">
                 Test Prep
-              </Link>
+              </button>
               <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-0 mt-3 bg-white border border-gray-100 rounded-xl shadow-xl w-56 p-2">
                 <Link href="/test-prep/act" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">ACT</Link>
                 <Link href="/test-prep/sat" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">SAT</Link>

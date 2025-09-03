@@ -49,44 +49,62 @@ export default function AboutPage() {
           <div className="absolute top-20 left-10 w-32 h-32 bg-gray-200 rounded-full opacity-10"></div>
           <div className="absolute bottom-20 right-20 w-24 h-24 bg-gray-300 rounded-full opacity-15"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Avi Spiller */}
-          <div className="grid lg:grid-cols-2 gap-12 items-start mb-24">
-            <div className="relative">
-              <div className="w-full max-w-sm h-[380px] bg-gray-200 rounded-3xl shadow-xl overflow-hidden">
-                <Image src="/staff/avi.avif" alt="Avi Spiller - President" width={400} height={380} className="object-cover w-full h-full object-top" />
-              </div>
-              <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-gray-300 rounded-2xl -z-10"></div>
-            </div>
-            <div>
+          <div className="mb-32">
+            <div className="max-w-4xl mx-auto">
               <div className="uppercase text-sm tracking-widest text-[#517cad] font-semibold mb-2">Avi Spiller</div>
-              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">President</h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed text-base">
-                <p>Avi, a seasoned educator and dedicated mathematician, hails from Cherry Hill, New Jersey. He attended Florida International University, where he pursued a Bachelor of Science in Mathematics Education, marking the inception of a thriving career that spans over three decades. Avi is renowned for his profound dedication to tutoring, having spent more than 30 years supporting students and igniting their passion for mathematics.</p>
-                <p>With over 23 years of experience in a traditional classroom setting, Avi has a deep understanding of the pedagogical processes that help students learn effectively. He couples this with a comprehensive understanding of standardized tests, studying them meticulously to unravel the methodology behind their creation. This unique approach has been instrumental in helping students prepare for these crucial examinations.</p>
-                <p>Avi’s expertise is not confined to general mathematics education. He is a recognized authority in SAT and ACT preparation, having developed robust curriculum models adopted by some of the most prestigious private schools in the nation. His methodology integrates a deep understanding of standardized testing mechanisms, curricular coherence, and individualized student needs, making his approach uniquely effective and efficient.</p>
-                <p>In addition, Avi holds certification in Special Education, reinforcing his commitment to inclusive education. He believes in empowering all students, regardless of their abilities or backgrounds, and showcases this through his commitment, designed meticulously to nurture the academic potential of students and empower them with the knowledge they need to succeed.</p>
+              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">President</h3>
+              
+              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                <p className="mb-6">
+                  <span className="float-left mr-6 mb-2 w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
+                    <Image src="/staff/avi.avif" alt="Avi Spiller" width={256} height={256} className="object-cover w-full h-full object-top" />
+                  </span>
+                  Avi, a seasoned educator and dedicated mathematician, hails from Cherry Hill, New Jersey. He attended Florida International University, where he pursued a Bachelor of Science in Mathematics Education, marking the inception of a thriving career that spans over three decades. Avi is renowned for his profound dedication to tutoring, having spent more than 30 years supporting students and igniting their passion for mathematics.
+                </p>
+                
+                <p className="mb-6">
+                  With over 23 years of experience in a traditional classroom setting, Avi has a deep understanding of the pedagogical processes that help students learn effectively. He couples this with a comprehensive understanding of standardized tests, studying them meticulously to unravel the methodology behind their creation. This unique approach has been instrumental in helping students prepare for these crucial examinations.
+                </p>
+                
+                <p className="mb-6">
+                  Avi's expertise is not confined to general mathematics education. He is a recognized authority in SAT and ACT preparation, having developed robust curriculum models adopted by some of the most prestigious private schools in the nation. His methodology integrates a deep understanding of standardized testing mechanisms, curricular coherence, and individualized student needs, making his approach uniquely effective and efficient.
+                </p>
+                
+                <p>
+                  In addition, Avi holds certification in Special Education, reinforcing his commitment to inclusive education. He believes in empowering all students, regardless of their abilities or backgrounds, and showcases this through his commitment, designed meticulously to nurture the academic potential of students and empower them with the knowledge they need to succeed.
+                </p>
               </div>
             </div>
           </div>
 
           {/* Taimir Terrell */}
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div className="order-2 lg:order-1">
+          <div>
+            <div className="max-w-4xl mx-auto">
               <div className="uppercase text-sm tracking-widest text-[#517cad] font-semibold mb-2">Taimir Terrell</div>
-              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">Vice President</h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed text-base">
-                <p>Taimir is a highly accomplished entrepreneur whose impressive career is a testament to her innate business acumen and unwavering commitment to customer relations. Born into a business-oriented family, Taimir grew up learning sales strategies from her father. Demonstrating extraordinary initiative, she made her first foray into entrepreneurship at just 13 years old when she made her first investment in a business venture.</p>
-                <p>Taimir showcased her transformative leadership abilities when she acquired and rebranded Ed’s Pest Control into Pest-Logic. With her at the helm, she efficiently managed all aspects of the business, from marketing and sales to operations. Her hands-on approach ensured not only efficient service delivery but also the development of cutting-edge office operations. Under her stewardship, the company flourished and emerged as a reputable pest control service provider.</p>
-                <p>Taimir’s relentless drive and strategic decision-making led to a monumental achievement for the company when, after 12 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.</p>
-                <p>Transitioning to a new challenge when she assumed the role of Vice President at ScoreMax, Taimir brought her rich experience and deep-seated passion for making a difference. Taimir continues to bring invaluable insights, seasoned leadership, and a strategic mindset to her role. She is not just a leader but a visionary—a strong, determined, and impactful leader.</p>
+              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">Vice President</h3>
+              
+              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                <p className="mb-6">
+                  <span className="float-left mr-6 mb-2 w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
+                    <Image src="/staff/taimir.avif" alt="Taimir Terrell" width={256} height={256} className="object-cover w-full h-full" style={{objectPosition: 'center 20%'}} />
+                  </span>
+                  Taimir is a highly accomplished entrepreneur whose impressive career is a testament to her innate business acumen and unwavering commitment to customer relations. Born into a business-oriented family, Taimir grew up learning sales strategies from her father. Demonstrating extraordinary initiative, she made her first foray into entrepreneurship at just 13 years old when she made her first investment in a business venture.
+                </p>
+                
+                <p className="mb-6">
+                  Taimir showcased her transformative leadership abilities when she acquired and rebranded Ed's Pest Control into Pest-Logic. With her at the helm, she efficiently managed all aspects of the business, from marketing and sales to operations. Her hands-on approach ensured not only efficient service delivery but also the development of cutting-edge office operations. Under her stewardship, the company flourished and emerged as a reputable pest control service provider.
+                </p>
+                
+                <p className="mb-6">
+                  Taimir's relentless drive and strategic decision-making led to a monumental achievement for the company when, after 12 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
+                </p>
+                
+                <p>
+                  Transitioning to a new challenge when she assumed the role of Vice President at ScoreMax, Taimir brought her rich experience and deep-seated passion for making a difference. Taimir continues to bring invaluable insights, seasoned leadership, and a strategic mindset to her role. She is not just a leader but a visionary—a strong, determined, and impactful leader.
+                </p>
               </div>
-            </div>
-            <div className="relative order-1 lg:order-2">
-              <div className="w-full max-w-sm h-[380px] bg-gray-200 rounded-3xl shadow-xl overflow-hidden ml-auto">
-                <Image src="/staff/taimir.avif" alt="Taimir Terrell - Vice President" width={400} height={380} className="object-cover w-full h-full" style={{objectPosition: 'center 20%'}} />
-              </div>
-              <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-gray-300 rounded-2xl -z-10"></div>
             </div>
           </div>
         </div>

@@ -28,14 +28,16 @@ export default function ACTPage() {
               </div>
             </div>
             
-            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black mb-8">
-              Welcome to
-              <br />
-                              <span className="text-[#517cad]">SCOREMAX</span>
-              <br />
-              <span className="text-4xl lg:text-5xl xl:text-6xl">Your Expert ACT</span>
-              <br />
-              <span className="text-4xl lg:text-5xl xl:text-6xl">Tutoring Solution!</span>
+            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-relaxed tracking-tight text-black mb-8 space-y-4">
+              <div className="text-3xl lg:text-4xl xl:text-5xl text-gray-600 font-semibold mb-2">
+                Welcome to
+              </div>
+              <div className="text-6xl lg:text-7xl xl:text-8xl text-[#517cad] font-black mb-4">
+                SCOREMAX
+              </div>
+              <div className="text-4xl lg:text-5xl xl:text-6xl text-gray-800 font-bold">
+                Your Expert ACT Tutoring Solution!
+              </div>
             </h1>
             
             <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-4xl mx-auto font-medium mb-12">
