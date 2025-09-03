@@ -1,5 +1,44 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'SAT Tutoring Services | Expert SAT Test Prep | ScoreMax',
+  description: 'Professional SAT tutoring services with expert tutors. Improve your SAT scores with personalized test preparation, proven strategies, and comprehensive study plans. Book your free consultation today.',
+  keywords: 'SAT tutoring, SAT test prep, SAT preparation, SAT scores, SAT practice, SAT strategies, college entrance exam, SAT tutoring services',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/test-prep/sat',
+    siteName: 'ScoreMax',
+    title: 'SAT Tutoring Services | Expert SAT Test Prep | ScoreMax',
+    description: 'Professional SAT tutoring services with expert tutors. Improve your SAT scores with personalized test preparation, proven strategies, and comprehensive study plans.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'SAT Tutoring Services - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SAT Tutoring Services | Expert SAT Test Prep',
+    description: 'Professional SAT tutoring services with expert tutors. Improve your SAT scores with personalized test preparation.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/test-prep/sat',
+  },
+};
 
 export default function SATPage() {
   return (

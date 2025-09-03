@@ -1,5 +1,44 @@
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'ACT Tutoring Services | Expert ACT Test Prep | ScoreMax',
+  description: 'Professional ACT tutoring services with expert tutors. Improve your ACT scores with personalized test preparation, proven strategies, and comprehensive study plans. Book your free consultation today.',
+  keywords: 'ACT tutoring, ACT test prep, ACT preparation, ACT scores, ACT practice, ACT strategies, college entrance exam, ACT tutoring services',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/test-prep/act',
+    siteName: 'ScoreMax',
+    title: 'ACT Tutoring Services | Expert ACT Test Prep | ScoreMax',
+    description: 'Professional ACT tutoring services with expert tutors. Improve your ACT scores with personalized test preparation, proven strategies, and comprehensive study plans.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'ACT Tutoring Services - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ACT Tutoring Services | Expert ACT Test Prep',
+    description: 'Professional ACT tutoring services with expert tutors. Improve your ACT scores with personalized test preparation.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/test-prep/act',
+  },
+};
 
 export default function ACTPage() {
   return (

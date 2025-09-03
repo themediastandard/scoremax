@@ -1,10 +1,85 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
+  description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points. Flexible scheduling, proven results, and personalized learning plans.',
+  keywords: 'SAT tutoring, ACT tutoring, test prep, college prep, tutoring services, SAT scores, ACT scores, test preparation, academic tutoring',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com',
+    siteName: 'ScoreMax',
+    title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
+    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points. Flexible scheduling, proven results, and personalized learning plans.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'ScoreMax Tutoring - Expert SAT and ACT Test Preparation',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ScoreMax - Expert SAT & ACT Tutoring',
+    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com',
+  },
+};
 
 export default function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "ScoreMax",
+    "description": "Professional SAT and ACT tutoring services with expert tutors. Help students improve test scores by 280+ points.",
+    "url": "https://scoremax.com",
+    "logo": "https://scoremax.com/logo.avif",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "url": "https://scoremax.com/contact"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "US"
+    },
+    "offers": {
+      "@type": "Offer",
+      "description": "SAT and ACT tutoring services",
+      "category": "Educational Services"
+    },
+    "serviceType": ["SAT Tutoring", "ACT Tutoring", "Test Preparation", "Academic Tutoring"],
+    "areaServed": "United States"
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Header />
 
       {/* Hero Section */}

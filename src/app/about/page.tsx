@@ -1,6 +1,45 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About ScoreMax - Expert Tutoring Team & Company Mission',
+  description: 'Learn about ScoreMax&apos;s expert tutoring team led by Avi and Taimir. Discover our mission to help students achieve academic success through personalized SAT, ACT, and subject tutoring.',
+  keywords: 'about ScoreMax, tutoring team, expert tutors, Avi, Taimir, tutoring company, academic success, personalized tutoring',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/about',
+    siteName: 'ScoreMax',
+    title: 'About ScoreMax - Expert Tutoring Team & Company Mission',
+    description: 'Learn about ScoreMax&apos;s expert tutoring team led by Avi and Taimir. Discover our mission to help students achieve academic success through personalized SAT, ACT, and subject tutoring.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'About ScoreMax Tutoring Team',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About ScoreMax - Expert Tutoring Team',
+    description: 'Learn about ScoreMax&apos;s expert tutoring team and mission to help students achieve academic success.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/about',
+  },
+};
 
 export default function AboutPage() {
   return (

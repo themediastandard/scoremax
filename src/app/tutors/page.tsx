@@ -1,10 +1,99 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../../components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Expert Tutors | Professional SAT, ACT & Subject Tutoring | ScoreMax',
+  description: 'Meet our team of expert tutors with advanced degrees from top universities. Professional SAT, ACT, math, science, and test prep tutoring with proven track records of student success.',
+  keywords: 'expert tutors, SAT tutors, ACT tutors, math tutors, science tutors, test prep tutors, professional tutoring, certified tutors, advanced degrees',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/tutors',
+    siteName: 'ScoreMax',
+    title: 'Expert Tutors | Professional SAT, ACT & Subject Tutoring | ScoreMax',
+    description: 'Meet our team of expert tutors with advanced degrees from top universities. Professional SAT, ACT, math, science, and test prep tutoring with proven track records.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'Expert Tutors - ScoreMax',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Expert Tutors | Professional Tutoring Services',
+    description: 'Meet our team of expert tutors with advanced degrees from top universities. Professional SAT, ACT, and subject tutoring.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/tutors',
+  },
+};
 
 export default function TutorsPage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "ScoreMax Expert Tutors",
+    "description": "Meet our team of expert tutors with advanced degrees from top universities",
+    "url": "https://scoremax.com/tutors",
+    "itemListElement": [
+      {
+        "@type": "Person",
+        "name": "Dr. Sarah Chen",
+        "jobTitle": "Mathematics Specialist",
+        "description": "Ph.D. in Mathematics, MIT. Specializes in advanced mathematics including Calculus, Linear Algebra, and Statistics."
+      },
+      {
+        "@type": "Person", 
+        "name": "Michael Rodriguez",
+        "jobTitle": "Science Expert",
+        "description": "M.S. in Chemistry, Stanford. Brings 6 years of experience in chemistry and physics tutoring."
+      },
+      {
+        "@type": "Person",
+        "name": "Emily Johnson", 
+        "jobTitle": "Test Prep Specialist",
+        "description": "M.Ed. in Education, Harvard. Expert for SAT and ACT preparation with perfect scores on both tests."
+      },
+      {
+        "@type": "Person",
+        "name": "David Kim",
+        "jobTitle": "Advanced Mathematics",
+        "description": "Ph.D. in Applied Mathematics, Caltech. Specializes in advanced mathematics and competitive math competitions."
+      },
+      {
+        "@type": "Person",
+        "name": "Lisa Thompson",
+        "jobTitle": "Biology & Chemistry", 
+        "description": "Ph.D. in Biochemistry, Johns Hopkins. Combines research background with excellent teaching skills."
+      },
+      {
+        "@type": "Person",
+        "name": "James Wilson",
+        "jobTitle": "Physics & Engineering",
+        "description": "M.S. in Physics, Georgia Tech. Brings real-world engineering experience to physics tutoring."
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <Header />
 
       {/* Hero Section */}

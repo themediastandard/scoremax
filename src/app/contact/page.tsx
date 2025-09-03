@@ -1,4 +1,43 @@
 import Header from '@/components/Header';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Contact ScoreMax | Book Free Tutoring Consultation | Get Started Today',
+  description: 'Contact ScoreMax for expert SAT, ACT, and subject tutoring. Book your free consultation today. Get personalized tutoring plans and start improving your test scores.',
+  keywords: 'contact ScoreMax, book tutoring consultation, free consultation, tutoring services, SAT tutoring, ACT tutoring, get started',
+  authors: [{ name: 'ScoreMax Tutoring' }],
+  creator: 'ScoreMax Tutoring',
+  publisher: 'ScoreMax Tutoring',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://scoremax.com/contact',
+    siteName: 'ScoreMax',
+    title: 'Contact ScoreMax | Book Free Tutoring Consultation',
+    description: 'Contact ScoreMax for expert SAT, ACT, and subject tutoring. Book your free consultation today and start improving your test scores.',
+    images: [
+      {
+        url: '/logo.avif',
+        width: 1200,
+        height: 630,
+        alt: 'Contact ScoreMax Tutoring',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact ScoreMax | Book Free Consultation',
+    description: 'Contact ScoreMax for expert SAT, ACT, and subject tutoring. Book your free consultation today.',
+    images: ['/logo.avif'],
+  },
+  alternates: {
+    canonical: 'https://scoremax.com/contact',
+  },
+};
 
 export default function ContactPage() {
   return (
