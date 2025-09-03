@@ -45,18 +45,18 @@ export default function Home() {
                   Join <span className="text-purple-600 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
                 </p>
               
-              <div className="flex flex-col lg:flex-row gap-6 pt-4">
+              <div className="flex flex-col lg:flex-row gap-4 pt-4">
                 <Link href="/contact"
-                  className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-6 py-3 rounded-full font-semibold text-base hover:from-yellow-500 hover:to-orange-500 transition shadow-lg hover:shadow-xl transform hover:scale-105 duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                  className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-8 py-3 rounded-full font-semibold text-sm hover:from-yellow-500 hover:to-orange-500 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
                   Book Free Consultation
                 </Link>
-                <button className="flex items-center space-x-4 bg-white/90 backdrop-blur-md px-6 py-4 rounded-full border border-white/60 shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transform group-hover:scale-110 transition-all duration-300 ring-2 ring-white/30">
-                    <svg className="w-5 h-5 text-white ml-0.5 drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+                <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                    <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8 5v10l7-5z"/>
                     </svg>
                   </div>
-                  <span className="text-lg font-semibold text-gray-800">See How It Works</span>
+                  <span className="text-base font-semibold text-gray-800">See How It Works</span>
                 </button>
               </div>
             </div>
