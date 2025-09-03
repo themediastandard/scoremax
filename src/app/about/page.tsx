@@ -1,47 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import Header from '../../components/Header';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
-      {/* Navigation (matches home) */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-24">
-            <Link href="/" className="flex items-center">
-              <Image src="/logo.avif" alt="ScoreMax Logo" width={100} height={100} priority />
-            </Link>
-            <div className="hidden lg:flex items-center space-x-10">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
-                Home
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link href="/about" className="text-gray-900 font-semibold text-sm tracking-wider hover:text-blue-600 transition-colors duration-300 relative group">
-                About Us
-                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-600"></span>
-              </Link>
-              <Link href="/test-prep" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
-                Test Prep
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link href="/college-high-school" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
-                College & High School
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-              <Link href="/step-up-for-students" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group">
-                Step Up For Students
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </div>
-            <Link href="/contact" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 border border-blue-500/20">Book Free Consultation</Link>
-            <button className="lg:hidden">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero */}
       <section className="relative pt-36 pb-24 lg:pt-40 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
