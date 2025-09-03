@@ -25,11 +25,6 @@ export default function Header() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
 
-            <Link href="/about" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
-              About Us
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
             {/* Test Prep Dropdown */}
             <div className="relative group">
               <button className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 whitespace-nowrap cursor-pointer">
@@ -44,15 +39,19 @@ export default function Header() {
 
             {/* College & High School Dropdown */}
             <div className="relative group">
-              <Link href="/college-high-school" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 whitespace-nowrap">
+              <button className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 whitespace-nowrap cursor-pointer">
                 College & High School
-              </Link>
+              </button>
               <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-0 mt-3 bg-white border border-gray-100 rounded-xl shadow-xl w-72 p-2">
-                <a href="https://example.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">College Advising (external)</a>
                 <Link href="/college-high-school/college-tutoring" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">College Tutoring</Link>
                 <Link href="/college-high-school/high-school-tutoring" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">High School Tutoring</Link>
               </div>
             </div>
+
+            <Link href="/tutors" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
+              Tutors
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
 
             <Link href="/step-up-for-students" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
               Step Up For Students
@@ -61,6 +60,11 @@ export default function Header() {
 
             <Link href="/contact" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
               Get In Touch
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
+            <Link href="/about" className="text-gray-700 hover:text-blue-600 font-semibold text-sm tracking-wider transition-colors duration-300 relative group whitespace-nowrap">
+              About Us
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
 
@@ -89,7 +93,6 @@ export default function Header() {
         <div className="lg:hidden bg-white border-t border-gray-100">
           <div className="w-full px-8 py-4 space-y-2">
             <Link href="/" className="block py-2 text-gray-800 font-medium">Home</Link>
-            <Link href="/about" className="block py-2 text-gray-800 font-medium">About Us</Link>
             <div className="pt-2">
               <div className="text-gray-500 uppercase text-xs tracking-wider mb-1">Test Prep</div>
               <div className="pl-4 space-y-1">
@@ -101,13 +104,14 @@ export default function Header() {
             <div className="pt-2">
               <div className="text-gray-500 uppercase text-xs tracking-wider mb-1">College & High School</div>
               <div className="pl-4 space-y-1">
-                <a href="https://example.com" target="_blank" rel="noopener noreferrer" className="block py-1 text-gray-700">College Advising (external)</a>
                 <Link href="/college-high-school/college-tutoring" className="block py-1 text-gray-700">College Tutoring</Link>
                 <Link href="/college-high-school/high-school-tutoring" className="block py-1 text-gray-700">High School Tutoring</Link>
               </div>
             </div>
+            <Link href="/tutors" className="block py-2 text-gray-800 font-medium">Tutors</Link>
             <Link href="/step-up-for-students" className="block py-2 text-gray-800 font-medium">Step Up For Students</Link>
             <Link href="/contact" className="block py-2 text-gray-800 font-medium">Get In Touch</Link>
+            <Link href="/about" className="block py-2 text-gray-800 font-medium">About Us</Link>
 
             <Link href="/contact" className="inline-flex items-center justify-center w-full bg-blue-600 text-white py-3 rounded-lg font-semibold mt-2">Book Free Consultation</Link>
           </div>

@@ -7,7 +7,7 @@ export default function InPersonClassesPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 bg-gradient-to-b from-white to-gray-50">
+      <section className="relative pt-[130px] pb-20 bg-gradient-to-b from-white to-gray-50">
         {/* Background Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 right-20 w-64 h-64 bg-gray-200 rounded-full opacity-10"></div>

@@ -6,7 +6,7 @@ export default function ContactPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
+      <section className="pt-[130px] pb-20 relative overflow-hidden">
         {/* Premium Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 right-20 w-40 h-40 bg-gray-200 rounded-full opacity-40 blur-sm"></div>

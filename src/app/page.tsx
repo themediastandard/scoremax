@@ -8,7 +8,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-36 lg:pb-24">
+      <section className="relative pt-[130px] pb-20 lg:pt-[134px] lg:pb-24">
         {/* Background Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 right-20 w-64 h-64 bg-[#517cad] rounded-full opacity-15"></div>
@@ -252,9 +252,7 @@ export default function Home() {
           <div className="text-center mb-24">
 
             <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
-              Getting Started is as
-              <br />
-              <span className="text-[#517cad]">Easy as 1-2-3</span>
+              Getting Started <span className="text-[#517cad]">Is Easy</span>
             </h2>
             <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Join thousands of successful students in just three simple steps

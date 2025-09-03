@@ -8,7 +8,7 @@ export default function AboutPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-32 pb-24 lg:pt-36 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+      <section className="relative pt-[130px] pb-24 lg:pt-[134px] bg-gradient-to-b from-white to-gray-50 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-16 right-24 w-56 h-56 bg-gray-200 rounded-full opacity-20"></div>
           <div className="absolute top-40 right-72 w-24 h-24 bg-gray-300 rounded-full opacity-25"></div>
