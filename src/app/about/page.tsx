@@ -67,7 +67,7 @@ export default function AboutPage() {
                 </p>
                 
                 <p className="mb-6">
-                  Avi's expertise is not confined to general mathematics education. He is a recognized authority in SAT and ACT preparation, having developed robust curriculum models adopted by some of the most prestigious private schools in the nation. His methodology integrates a deep understanding of standardized testing mechanisms, curricular coherence, and individualized student needs, making his approach uniquely effective and efficient.
+                  Avi&apos;s expertise is not confined to general mathematics education. He is a recognized authority in SAT and ACT preparation, having developed robust curriculum models adopted by some of the most prestigious private schools in the nation. His methodology integrates a deep understanding of standardized testing mechanisms, curricular coherence, and individualized student needs, making his approach uniquely effective and efficient.
                 </p>
                 
                 <p>
@@ -92,11 +92,11 @@ export default function AboutPage() {
                 </p>
                 
                 <p className="mb-6">
-                  Taimir showcased her transformative leadership abilities when she acquired and rebranded Ed's Pest Control into Pest-Logic. With her at the helm, she efficiently managed all aspects of the business, from marketing and sales to operations. Her hands-on approach ensured not only efficient service delivery but also the development of cutting-edge office operations. Under her stewardship, the company flourished and emerged as a reputable pest control service provider.
+                  Taimir showcased her transformative leadership abilities when she acquired and rebranded Ed&apos;s Pest Control into Pest-Logic. With her at the helm, she efficiently managed all aspects of the business, from marketing and sales to operations. Her hands-on approach ensured not only efficient service delivery but also the development of cutting-edge office operations. Under her stewardship, the company flourished and emerged as a reputable pest control service provider.
                 </p>
                 
                 <p className="mb-6">
-                  Taimir's relentless drive and strategic decision-making led to a monumental achievement for the company when, after 12 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
+                  Taimir&apos;s relentless drive and strategic decision-making led to a monumental achievement for the company when, after 12 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
                 </p>
                 
                 <p>
