@@ -18,12 +18,7 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <div className="inline-block mb-8">
-              <div className="bg-gray-100 px-6 py-3 rounded-full">
-                <div className="text-sm font-bold text-[#517cad] tracking-wide uppercase flex items-center">
-                  <span className="w-2 h-2 bg-[#517cad] rounded-full mr-2"></span>
-                  Premium Tutoring Services
-                </div>
-              </div>
+
             </div>
             
             <h1 className="text-6xl lg:text-7xl xl:text-8xl font-black leading-tight tracking-tight text-black mb-8">

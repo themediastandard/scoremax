@@ -19,14 +19,7 @@ export default function ACTPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <div className="inline-block mb-8">
-              <div className="bg-gray-100 px-4 py-2 rounded-full">
-                <div className="text-sm font-bold text-gray-700 tracking-wide uppercase flex items-center">
-                  <span className="w-2 h-2 bg-gray-600 rounded-full mr-2"></span>
-                  Expert ACT Tutoring
-                </div>
-              </div>
-            </div>
+
             
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-relaxed tracking-tight text-black mb-8 space-y-4">
               <div className="text-3xl lg:text-4xl xl:text-5xl text-gray-600 font-semibold mb-2">
@@ -77,11 +70,7 @@ export default function ACTPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-gray-700 tracking-wider uppercase">
-                Why Choose ScoreMax
-              </div>
-            </div>
+
             <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
               Your Path to <span className="text-[#517cad]">ACT Success</span>
             </h2>

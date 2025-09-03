@@ -23,14 +23,7 @@ export default function InPersonClassesPage() {
             
             {/* Left Content */}
             <div className="space-y-10">
-              <div className="inline-block">
-                <div className="bg-gray-100 px-4 py-2 rounded-full">
-                  <div className="text-sm font-bold text-gray-700 tracking-wide uppercase flex items-center">
-                    <span className="w-2 h-2 bg-gray-600 rounded-full mr-2"></span>
-                    In-Person Classes
-                  </div>
-                </div>
-              </div>
+
               
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black">
                 The Ultimate
@@ -108,11 +101,7 @@ export default function InPersonClassesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
-                Why Choose In-Person Classes
-              </div>
-            </div>
+
             <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
               Your Path to <span className="text-[#517cad]">Test Success</span>
             </h2>

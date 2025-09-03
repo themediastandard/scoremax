@@ -63,11 +63,7 @@ export default function StepUpForStudentsPage() {
       <section className="py-20 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-block bg-gradient-to-r from-red-100 to-blue-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-red-800 tracking-wider uppercase">
-                Partnership Announcement
-              </div>
-            </div>
+
             <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
               Two Organizations, <span className="text-red-700">One Mission</span>
             </h2>

@@ -8,7 +8,7 @@ export default function AboutPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-24 lg:pt-40 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+      <section className="relative pt-32 pb-24 lg:pt-36 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-16 right-24 w-56 h-56 bg-gray-200 rounded-full opacity-20"></div>
           <div className="absolute top-40 right-72 w-24 h-24 bg-gray-300 rounded-full opacity-25"></div>
@@ -17,9 +17,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <div className="inline-block bg-gray-100 px-4 py-2 rounded-full">
-                <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">About ScoreMax</div>
-              </div>
+
               <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#517cad]">Full Potential</span></h1>
               <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
             </div>
@@ -118,9 +116,7 @@ export default function AboutPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <div className="inline-block bg-gray-100 px-4 py-2 rounded-full mb-4">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">Our Community Involvement</div>
-            </div>
+
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">We are committed to making a positive impact in our communities. Through partnerships and scholarship donations, we help pave the way for the next generation of leaders and innovators.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center">

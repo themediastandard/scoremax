@@ -8,7 +8,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center pt-16">
+      <section className="relative pt-32 pb-20 lg:pt-36 lg:pb-24">
         {/* Background Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 right-20 w-64 h-64 bg-[#517cad] rounded-full opacity-15"></div>
@@ -22,15 +22,8 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             
             {/* Left Content */}
-            <div className="space-y-10">
-              <div className="inline-block">
-                <div className="bg-gray-100 px-4 py-2 rounded-full">
-                  <div className="text-sm font-bold text-[#517cad] tracking-wide uppercase flex items-center">
-                    <span className="w-2 h-2 bg-[#517cad] rounded-full mr-2"></span>
-                    100% SATISFACTION GUARANTEE
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-6">
+
               
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
                 Unlock Your
@@ -257,11 +250,7 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-24">
-            <div className="inline-block bg-gray-100 px-4 py-2 rounded-full mb-6">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
-                How It Works
-              </div>
-            </div>
+
             <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Getting Started is as
               <br />
@@ -339,11 +328,7 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
-            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
-                Meet Our Expert Tutors
-              </div>
-            </div>
+
             <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Learn from the
               <br />
@@ -469,11 +454,7 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
-            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
-                WHY CHOOSE US
-              </div>
-            </div>
+
             <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Choose Your Path to <span className="text-[#517cad]">Success</span>
             </h2>
@@ -584,11 +565,7 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-24">
-            <div className="inline-block bg-gray-100 px-6 py-3 rounded-full mb-8">
-              <div className="text-sm font-bold text-[#517cad] tracking-wider uppercase">
-                Experience the Magic of Learning
-              </div>
-            </div>
+
             <h2 className="text-5xl lg:text-6xl font-black text-black mb-8 leading-tight">
               Real Results from
               <br />
