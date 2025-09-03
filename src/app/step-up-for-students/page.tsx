@@ -89,11 +89,10 @@ export default function StepUpForStudentsPage() {
                 <Image 
                   src="/logo.avif" 
                   alt="ScoreMax Tutoring Logo" 
-                  width={80}
-                  height={80}
-                  className="h-20 mx-auto mb-4"
+                  width={300}
+                  height={300}
+                  className="w-60 mx-auto"
                 />
-                <h3 className="text-xl font-bold text-black">ScoreMax</h3>
               </div>
               
               {/* Partnership Arrow */}
@@ -109,11 +108,10 @@ export default function StepUpForStudentsPage() {
                 <Image 
                   src="/step-up.avif" 
                   alt="Step Up For Students Logo" 
-                  width={80}
-                  height={80}
-                  className="h-20 mx-auto mb-4"
+                  width={240}
+                  height={240}
+                  className="w-48 mx-auto"
                 />
-                <h3 className="text-xl font-bold text-black">Step Up</h3>
               </div>
             </div>
 
