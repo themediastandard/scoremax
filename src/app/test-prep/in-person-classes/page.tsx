@@ -11,11 +11,11 @@ export default function InPersonClassesPage() {
       <section className="relative pt-32 pb-20 bg-gradient-to-b from-white to-gray-50">
         {/* Background Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-64 h-64 bg-yellow-200 rounded-full opacity-20"></div>
-          <div className="absolute top-40 right-80 w-32 h-32 bg-blue-200 rounded-full opacity-30"></div>
-          <div className="absolute bottom-40 right-60 w-20 h-20 bg-green-200 rounded-full opacity-40"></div>
-          <div className="absolute bottom-80 left-40 w-40 h-40 bg-purple-200 rounded-full opacity-25"></div>
-          <div className="absolute top-60 left-20 w-24 h-24 bg-orange-200 rounded-full opacity-35"></div>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-gray-200 rounded-full opacity-10"></div>
+          <div className="absolute top-40 right-80 w-32 h-32 bg-gray-300 rounded-full opacity-15"></div>
+          <div className="absolute bottom-40 right-60 w-20 h-20 bg-gray-200 rounded-full opacity-20"></div>
+          <div className="absolute bottom-80 left-40 w-40 h-40 bg-gray-300 rounded-full opacity-12"></div>
+          <div className="absolute top-60 left-20 w-24 h-24 bg-gray-200 rounded-full opacity-18"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -24,9 +24,9 @@ export default function InPersonClassesPage() {
             {/* Left Content */}
             <div className="space-y-10">
               <div className="inline-block">
-                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 px-4 py-2 rounded-full">
-                  <div className="text-sm font-bold text-yellow-800 tracking-wide uppercase flex items-center">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <div className="bg-gray-100 px-4 py-2 rounded-full">
+                  <div className="text-sm font-bold text-gray-700 tracking-wide uppercase flex items-center">
+                    <span className="w-2 h-2 bg-gray-600 rounded-full mr-2"></span>
                     In-Person Classes
                   </div>
                 </div>
@@ -35,7 +35,7 @@ export default function InPersonClassesPage() {
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black">
                 The Ultimate
                 <br />
-                <span className="text-yellow-600">SAT/ACT Course</span>
+                <span className="text-[#517cad]">SAT/ACT Course</span>
                 <br />
                 <span className="text-4xl lg:text-5xl xl:text-6xl">In-Person Classes</span>
               </h1>
@@ -43,17 +43,17 @@ export default function InPersonClassesPage() {
               <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
                 Join our comprehensive in-person SAT/ACT course designed to maximize your test scores. 
                 Learn from expert instructors in a structured classroom environment with 
-                <span className="text-yellow-600 font-semibold"> proven strategies</span> and 
-                <span className="text-blue-600 font-semibold"> hands-on practice</span>.
+                <span className="text-[#517cad] font-semibold"> proven strategies</span> and 
+                <span className="text-gray-700 font-semibold"> hands-on practice</span>.
               </p>
               
               <div className="flex flex-col lg:flex-row gap-4 pt-4">
                 <Link href="/contact"
-                  className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-8 py-3 rounded-full font-semibold text-sm hover:from-yellow-500 hover:to-orange-500 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                  className="bg-[#517cad] text-white px-8 py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
                   Enroll Now
                 </Link>
                 <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
                     <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8 5v10l7-5z"/>
                     </svg>

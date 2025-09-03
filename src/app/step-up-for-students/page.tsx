@@ -26,32 +26,28 @@ export default function StepUpForStudentsPage() {
                 alt="Step Up For Students Logo" 
                 width={200}
                 height={128}
-                className="h-32 mx-auto"
+                className="w-48 mx-auto"
               />
             </div>
             
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black mt-2 mb-6">
-              Step Up For
-              <br />
-              <span className="text-red-600">Students</span>
-              <br />
-              <span className="text-4xl lg:text-5xl xl:text-6xl">Scholarship Program</span>
+              Scholarship Program
             </h1>
             
             <p className="text-xl lg:text-2xl text-black leading-relaxed max-w-4xl mx-auto font-medium mb-10">
               Step Up For Students supports students and families in building a stronger future through an education that fits their needs. 
               Their scholarships open doors with 
-              <span className="text-red-600 font-semibold"> tuition, transportation</span>, and 
-              <span className="text-blue-600 font-semibold"> educational resources</span>.
+              <span className="text-red-700 font-semibold"> tuition, transportation</span>, and 
+              <span className="text-gray-700 font-semibold"> educational resources</span>.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="#steps"
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-3 rounded-full font-semibold text-sm hover:from-red-600 hover:to-red-700 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                className="bg-red-700 text-white px-8 py-3 rounded-full font-semibold text-sm hover:bg-red-800 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
                 Get Started
               </Link>
               <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-600 via-red-700 to-blue-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                <div className="w-8 h-8 bg-red-700 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
                   <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8 5v10l7-5z"/>
                   </svg>
@@ -73,7 +69,7 @@ export default function StepUpForStudentsPage() {
               </div>
             </div>
             <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
-              Two Organizations, <span className="text-red-600">One Mission</span>
+              Two Organizations, <span className="text-red-700">One Mission</span>
             </h2>
             <p className="text-xl text-black max-w-4xl mx-auto leading-relaxed">
               ScoreMax Tutoring and Step Up For Students are now working together to provide 
@@ -97,7 +93,7 @@ export default function StepUpForStudentsPage() {
               
               {/* Partnership Arrow */}
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center shadow-lg">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -117,9 +113,9 @@ export default function StepUpForStudentsPage() {
 
             {/* Bottom Row - Partnership Result */}
             <div className="text-center">
-              <div className="bg-gradient-to-r from-red-50 to-blue-50 p-8 rounded-3xl border border-red-100">
+              <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                  <div className="w-8 h-8 bg-red-700 rounded-full flex items-center justify-center mr-3">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -127,7 +123,7 @@ export default function StepUpForStudentsPage() {
                   <h3 className="text-2xl font-bold text-black">Partnership Success</h3>
                 </div>
                 <p className="text-lg text-black leading-relaxed">
-                  <span className="font-semibold text-red-600">Free expert tutoring</span> for Step Up scholarship recipients
+                  <span className="font-semibold text-red-700">Free expert tutoring</span> for Step Up scholarship recipients
                 </p>
               </div>
             </div>
@@ -142,7 +138,7 @@ export default function StepUpForStudentsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
-              How to Get Started with <span className="text-red-600">Step Up</span>
+              How to Get Started with <span className="text-red-700">Step Up</span>
             </h2>
             <p className="text-xl text-black max-w-3xl mx-auto">
               Follow these simple steps to use your Step Up scholarship with ScoreMax Tutoring
@@ -153,7 +149,7 @@ export default function StepUpForStudentsPage() {
             {/* Step 1 */}
             <div className="bg-white p-8 rounded-3xl border border-gray-100">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-lg font-bold">1</span>
                 </div>
                 <div className="flex-1">
@@ -162,7 +158,7 @@ export default function StepUpForStudentsPage() {
                     Log in or apply for your student&apos;s scholarship here.
                   </p>
                   <Link href="https://www.stepupforstudents.org" target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition-colors">
+                    className="inline-flex items-center text-red-700 font-semibold hover:text-red-800 transition-colors">
                     Visit Step Up For Students
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -175,7 +171,7 @@ export default function StepUpForStudentsPage() {
             {/* Step 2 */}
             <div className="bg-white p-8 rounded-3xl border border-gray-100">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-lg font-bold">2</span>
                 </div>
                 <div className="flex-1">
@@ -198,7 +194,7 @@ export default function StepUpForStudentsPage() {
             {/* Step 3 */}
             <div className="bg-white p-8 rounded-3xl border border-gray-100">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-lg font-bold">3</span>
                 </div>
                 <div className="flex-1">
@@ -213,7 +209,7 @@ export default function StepUpForStudentsPage() {
             {/* Step 4 - Contact Form */}
             <div className="bg-white p-8 rounded-3xl border border-gray-100">
               <div className="flex items-start space-x-4 mb-8">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-lg font-bold">4</span>
                 </div>
                 <div className="flex-1">
@@ -272,7 +268,7 @@ export default function StepUpForStudentsPage() {
                 <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full bg-red-700 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-red-800 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Start Your Tutoring Journey
                   </button>
@@ -306,7 +302,7 @@ export default function StepUpForStudentsPage() {
               Get Started Now
             </Link>
             <Link href="/contact" 
-              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-red-600 transition">
+              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-red-700 transition">
               Contact Us
             </Link>
           </div>
@@ -365,7 +361,7 @@ export default function StepUpForStudentsPage() {
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
-              <a href="#" className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <a href="#" className="w-12 h-12 bg-red-700 rounded-full flex items-center justify-center hover:bg-red-800 transition-all duration-300 shadow-lg hover:shadow-xl">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
