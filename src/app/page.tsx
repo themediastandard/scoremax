@@ -143,7 +143,7 @@ export default function Home() {
             <div className="space-y-6">
 
               
-              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
                 Unlock Your
                 <br />
                 <span className="text-[#517cad]">Test Score</span> 
@@ -151,17 +151,17 @@ export default function Home() {
                 Potential
               </h1>
               
-                              <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
-                  Expert 1-on-1 tutoring for <span className="text-[#517cad] font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
-                  Join <span className="text-gray-700 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
-                </p>
+              <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium">
+                Expert 1-on-1 tutoring for <span className="text-[#517cad] font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
+                Join <span className="text-gray-700 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
+              </p>
               
-              <div className="flex flex-col lg:flex-row gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/contact"
-                  className="bg-[#517cad] text-white px-8 py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                  className="bg-[#517cad] text-white px-8 py-4 sm:py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px]">
                   Book Free Consultation
                 </Link>
-                <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
+                <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-4 sm:py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap touch-manipulation min-h-[48px]">
                   <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
                     <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8 5v10l7-5z"/>
