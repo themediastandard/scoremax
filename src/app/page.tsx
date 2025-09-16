@@ -5,6 +5,7 @@ import VideoHero from '../components/VideoHero';
 import StickyBottomCTA from '../components/StickyBottomCTA';
 import DualCTA from '../components/DualCTA';
 import IntroBanner from '../components/IntroBanner';
+import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -149,25 +150,51 @@ export default function Home() {
       <section className="py-10 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/test-prep/sat" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
-              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
-              <div className="mt-1 text-xl font-bold text-gray-900">SAT Tutoring</div>
-              <div className="mt-1 text-sm text-gray-600">Personalized plans, practice, and strategies.</div>
-                </Link>
-            <Link href="/test-prep/act" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
-              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
-              <div className="mt-1 text-xl font-bold text-gray-900">ACT Tutoring</div>
-              <div className="mt-1 text-sm text-gray-600">Targeted prep to raise composite scores.</div>
-            </Link>
-            <Link href="/college-high-school/high-school-tutoring" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
-              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
-              <div className="mt-1 text-xl font-bold text-gray-900">Academic Help</div>
-              <div className="mt-1 text-sm text-gray-600">APs, math, science, writing, and more.</div>
-            </Link>
-                  </div>
+            <Link href="/test-prep/sat" className="group relative overflow-hidden p-5 min-h-[140px] border border-[#517cad]/20 bg-white shadow-sm hover:shadow-md transition">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#517cad]/10 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(81,124,173,0.12),rgba(81,124,173,0)_60%)] pointer-events-none" />
+              <div className="flex items-start justify-between relative z-10">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
+                  <div className="mt-1 text-lg font-medium text-gray-900">SAT Tutoring</div>
+                </div>
+                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
               </div>
+              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Personalized plans, practice, and strategies.</div>
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
+            </Link>
+            <Link href="/test-prep/act" className="group relative overflow-hidden p-5 min-h-[140px] border border-[#517cad]/20 bg-white shadow-sm hover:shadow-md transition">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#517cad]/10 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(81,124,173,0.12),rgba(81,124,173,0)_60%)] pointer-events-none" />
+              <div className="flex items-start justify-between relative z-10">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
+                  <div className="mt-1 text-lg font-medium text-gray-900">ACT Tutoring</div>
+                </div>
+                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
+              </div>
+              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Targeted prep to raise composite scores.</div>
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
+            </Link>
+            <Link href="/subjects?interest=LSAT" className="group relative overflow-hidden p-5 min-h-[140px] border border-[#517cad]/20 bg-white shadow-sm hover:shadow-md transition">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#517cad]/10 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(81,124,173,0.12),rgba(81,124,173,0)_60%)] pointer-events-none" />
+              <div className="flex items-start justify-between relative z-10">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
+                  <div className="mt-1 text-lg font-medium text-gray-900">LSAT Tutoring</div>
+                </div>
+                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
+              </div>
+              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Focused prep for logic games, reasoning, and reading comp.</div>
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
+            </Link>
+          </div>
+        </div>
       </section>
 
+      {/* Step Up for Students highlight - dedicated section */}
+      <StepUpSection />
       {/* About + inline video section (minimal) */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
@@ -195,39 +222,69 @@ export default function Home() {
       </section>
 
       {/* Browse by category grid (minimal) */}
-      <section className="py-16 bg-white">
+      <section className="pt-4 pb-12 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <h3 className="text-2xl font-black text-gray-900 mb-6">Browse Services</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">SAT Prep</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">Test Prep</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">SAT Prep</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
-            <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">ACT Prep</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">Test Prep</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">ACT Prep</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
-            <Link href="/test-prep/in-person-classes" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/test-prep/in-person-classes" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="In-Person Classes" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/30" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">In-Person Classes</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">Classes</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">In-Person Classes</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
-            <Link href="/college-high-school/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/college-high-school/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="/Images/student-1.png" alt="College Tutoring" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">College Tutoring</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">College</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">College Tutoring</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
-            <Link href="/college-high-school/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/college-high-school/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop" alt="High School Tutoring" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">High School Tutoring</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">High School</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">High School Tutoring</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
-            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1200&auto=format&fit=crop" alt="Meet Our Tutors" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">Browse Subjects</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">Subjects</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-bold">Browse Subjects</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-white/10" />
             </Link>
                     </div>
                   </div>

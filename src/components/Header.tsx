@@ -13,13 +13,22 @@ interface HeaderProps {
 
 export default function Header({ variant = 'default' }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  if (typeof window !== 'undefined') {
+    // lightweight scroll listener for header polish
+    window.addEventListener('scroll', () => {
+      const s = window.scrollY > 4;
+      if (s !== scrolled) setScrolled(s);
+    }, { passive: true });
+  }
   const [menuOpen, setMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
 
   if (variant === 'minimal') {
     return (
       <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm border-gray-100'}`}>
         <div className="w-full px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between h-16">
             <div className="relative">
@@ -69,7 +78,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
   if (variant === 'ogee') {
     return (
       <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm border-gray-100'}`}>
         <div className="w-full px-4 lg:px-6">
           <div className="grid grid-cols-3 items-center h-16">
             {/* Logo far left */}
@@ -84,7 +93,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               <Link href="/" className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">Home</Link>
               {/* Test Prep dropdown */}
               <div className="relative group">
-                <button className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">Test Prep</button>
+                <button className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">Test Prep</button>
                 <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 absolute left-0 top-full pt-4">
                   <div className="w-56 bg-white shadow-xl border border-gray-100 p-2">
                     <Link href="/test-prep/sat" className="block px-4 py-2 hover:bg-gray-50 text-sm text-gray-700">SAT</Link>
@@ -95,7 +104,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               </div>
               {/* College & High School dropdown */}
               <div className="relative group">
-                <button className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">College & High School</button>
+                <button className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">College & High School</button>
                 <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 absolute left-0 top-full pt-4">
                   <div className="w-72 bg-white shadow-xl border border-gray-100 p-2">
                     <Link href="/college-high-school/college-tutoring" className="block px-4 py-2 hover:bg-gray-50 text-sm text-gray-700">College Tutoring</Link>
@@ -105,7 +114,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               </div>
               {/* Subjects mega dropdown */}
               <div className="relative group">
-                <button className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">Subjects</button>
+                <button className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">Subjects</button>
                 <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 absolute left-1/2 -translate-x-1/2 top-full pt-4">
                   <div className="w-[920px] bg-white shadow-xl border border-gray-100 p-8 grid grid-cols-12 gap-8">
                     {/* Test Prep column */}
@@ -166,9 +175,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                   </div>
                 </div>
               </div>
-              <Link href="/step-up-for-students" className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">Step Up For Students</Link>
-              <Link href="/contact" className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">Get In Touch</Link>
-              <Link href="/about" className="text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap">About Us</Link>
+              <Link href="/step-up-for-students" className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">Step Up For Students</Link>
+              <Link href="/contact" className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">Get In Touch</Link>
+              <Link href="/about" className="relative text-xs tracking-[0.18em] uppercase text-gray-800 hover:text-black whitespace-nowrap after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-[#c79d3c] hover:after:w-full after:transition-all after:duration-200">About Us</Link>
             </div>
 
             {/* Right icons far right */}
@@ -209,7 +218,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
 
   return (
     <>
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm border-gray-100'}`}>
       <div className="w-full px-8 lg:px-12">
         <div className="flex items-center justify-between h-24">
           <div className="flex-shrink-0">
