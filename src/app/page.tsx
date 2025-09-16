@@ -133,10 +133,6 @@ export default function Home() {
       <VideoHero
         mp4Src="/video/video1.mp4"
         posterSrc="/logo.avif"
-        headline="Clean, Efficient Tutoring"
-        subheadline="Expert 1-on-1 SAT, ACT Tutoring"
-        ctaHref="/contact"
-        ctaLabel="Start Free Consultation"
       />
 
       {/* Ogee-style intro banner */}
@@ -289,18 +285,18 @@ export default function Home() {
           <h3 className="text-2xl font-black text-gray-900 mb-6">Students love ScoreMax</h3>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="rounded-2xl bg-white border border-gray-200 p-6">
-              <div className="text-sm font-semibold text-[#c79d3c] mb-2">+280 SAT Points</div>
-              <p className="text-gray-700">"I improved my SAT by 280 points in 3 months. The plan kept me focused."</p>
+              <div className="text-sm font-medium text-[#c79d3c] mb-2">+280 SAT Points</div>
+              <p className="text-gray-700">&quot;I improved my SAT by 280 points in 3 months. The plan kept me focused.&quot;</p>
               <div className="mt-3 text-sm text-gray-500">— Sarah M.</div>
                   </div>
             <div className="rounded-2xl bg-white border border-gray-200 p-6">
-              <div className="text-sm font-semibold text-green-600 mb-2">2.8 → 3.7 GPA</div>
-              <p className="text-gray-700">"Went from struggling to confident in AP Calc thanks to weekly sessions."</p>
+              <div className="text-sm font-medium text-green-600 mb-2">2.8 → 3.7 GPA</div>
+              <p className="text-gray-700">&quot;Went from struggling to confident in AP Calc thanks to weekly sessions.&quot;</p>
               <div className="mt-3 text-sm text-gray-500">— Marcus T.</div>
                 </div>
             <div className="rounded-2xl bg-white border border-gray-200 p-6">
-              <div className="text-sm font-semibold text-purple-600 mb-2">Dream School ✓</div>
-              <p className="text-gray-700">"Improved my ACT and got into my first choice. The coaching was amazing."</p>
+              <div className="text-sm font-medium text-purple-600 mb-2">Dream School ✓</div>
+              <p className="text-gray-700">&quot;Improved my ACT and got into my first choice. The coaching was amazing.&quot;</p>
               <div className="mt-3 text-sm text-gray-500">— Emma L.</div>
             </div>
           </div>

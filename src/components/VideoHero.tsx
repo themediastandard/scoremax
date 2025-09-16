@@ -1,25 +1,16 @@
 "use client";
 
-import Link from 'next/link';
-
 interface VideoHeroProps {
   mp4Src?: string;
   webmSrc?: string;
   posterSrc?: string;
-  headline: string;
-  subheadline?: string;
-  ctaHref: string;
-  ctaLabel: string;
+  // headline/subheadline/cta removed; simple video only
 }
 
 export default function VideoHero({
   mp4Src = "/video/video1.mp4",
   webmSrc = "/video/video2.mp4",
-  posterSrc = "/logo.avif",
-  headline,
-  subheadline,
-  ctaHref,
-  ctaLabel
+  posterSrc = "/logo.avif"
 }: VideoHeroProps) {
   return (
     <section className="relative w-full overflow-hidden">
