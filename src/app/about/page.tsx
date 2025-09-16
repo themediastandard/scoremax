@@ -81,7 +81,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 text-center lg:text-left">
 
-              <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#517cad]">Full Potential</span></h1>
+              <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#c79d3c]">Full Potential</span></h1>
               <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
             </div>
             <div className="relative">
@@ -114,7 +114,7 @@ export default function AboutPage() {
           {/* Avi Spiller */}
           <div className="mb-32">
             <div className="max-w-4xl mx-auto">
-              <div className="uppercase text-sm tracking-widest text-[#517cad] font-semibold mb-2">Avi Spiller</div>
+              <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-2">Avi Spiller</div>
               <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">President</h3>
               
               <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
@@ -143,7 +143,7 @@ export default function AboutPage() {
           {/* Taimir Terrell */}
           <div>
             <div className="max-w-4xl mx-auto">
-              <div className="uppercase text-sm tracking-widest text-[#517cad] font-semibold mb-2">Taimir Terrell</div>
+              <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-2">Taimir Terrell</div>
               <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">Vice President</h3>
               
               <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
@@ -202,7 +202,7 @@ export default function AboutPage() {
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">Ready to Learn More?</h2>
           <p className="text-lg mb-8 opacity-90">Book a free consultation and discover how ScoreMax can help you reach your goals.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">Book Free Consultation</Link>
+            <Link href="/contact" className="bg-[#c79d3c] text-white px-8 py-4 rounded-full text-lg font-semibold hover:brightness-95 transition shadow-lg">Book Free Consultation</Link>
             <Link href="/pricing" className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-800 transition">View Pricing</Link>
           </div>
         </div>
@@ -215,7 +215,7 @@ export default function AboutPage() {
             {/* Logo */}
             <div className="mb-8">
               <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center mr-3">
+                <div className="w-12 h-12 bg-[#c79d3c] rounded-full flex items-center justify-center mr-3">
                   <span className="text-2xl">🎓</span>
                 </div>
                 <span className="text-3xl font-black">SCOREMAX</span>

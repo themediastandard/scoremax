@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../components/Header';
+import VideoHero from '../components/VideoHero';
+import StickyBottomCTA from '../components/StickyBottomCTA';
+import DualCTA from '../components/DualCTA';
+import IntroBanner from '../components/IntroBanner';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -123,182 +127,138 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
       />
-      <Header />
+      <Header variant="ogee" />
 
-      {/* Hero Section */}
-      <section className="relative pt-[130px] pb-12 sm:pb-16 lg:pt-[134px] lg:pb-24">
-        {/* Background Geometric Shapes */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-64 h-64 bg-[#517cad] rounded-full opacity-15"></div>
-          <div className="absolute top-40 right-80 w-32 h-32 bg-gray-300 rounded-full opacity-20"></div>
-          <div className="absolute bottom-40 right-60 w-20 h-20 bg-[#517cad] rounded-full opacity-25"></div>
-          <div className="absolute bottom-80 left-40 w-40 h-40 bg-gray-200 rounded-full opacity-20"></div>
-          <div className="absolute top-60 left-20 w-24 h-24 bg-[#517cad] rounded-full opacity-20"></div>
-        </div>
+      {/* Video Hero */}
+      <VideoHero
+        mp4Src="/video/video1.mp4"
+        posterSrc="/logo.avif"
+        headline="Clean, Efficient Tutoring"
+        subheadline="Expert 1-on-1 SAT, ACT Tutoring"
+        ctaHref="/contact"
+        ctaLabel="Start Free Consultation"
+      />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            
-            {/* Left Content */}
-            <div className="space-y-6 text-center lg:text-left">
+      {/* Ogee-style intro banner */}
+      <IntroBanner />
 
-              
-              <h1 className="text-5xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight font-heading text-black">
-                Unlock Your
-                <br />
-                <span className="text-[#517cad]">Test Score</span> 
-                <br />
-                Potential
-              </h1>
-              
-              <p className="text-xl sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-xl font-medium mx-auto lg:mx-0">
-                Expert 1-on-1 tutoring for <span className="text-[#517cad] font-semibold">SAT, ACT, GMAT, GRE</span> and academic subjects. 
-                Join <span className="text-gray-700 font-semibold">thousands of students</span> who&apos;ve boosted their scores with personalized learning.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link href="/contact"
-                  className="bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-3 rounded-full font-semibold text-xs sm:text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[44px] sm:min-h-[48px]">
-                  Book Free Consultation
+      {/* Highlight two primary offerings */}
+      <DualCTA />
+
+      {/* Quick services strip (minimal) */}
+      <section className="py-10 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link href="/test-prep/sat" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
+              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
+              <div className="mt-1 text-xl font-bold text-gray-900">SAT Tutoring</div>
+              <div className="mt-1 text-sm text-gray-600">Personalized plans, practice, and strategies.</div>
                 </Link>
-                <button className="flex items-center space-x-2 sm:space-x-3 bg-white/90 backdrop-blur-md px-6 sm:px-8 py-3 sm:py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap touch-manipulation min-h-[44px] sm:min-h-[48px]">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M8 5v10l7-5z"/>
-                    </svg>
+            <Link href="/test-prep/act" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
+              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
+              <div className="mt-1 text-xl font-bold text-gray-900">ACT Tutoring</div>
+              <div className="mt-1 text-sm text-gray-600">Targeted prep to raise composite scores.</div>
+            </Link>
+            <Link href="/college-high-school/high-school-tutoring" className="rounded-xl border border-gray-200 p-6 hover:bg-gray-50">
+              <div className="text-xs uppercase tracking-wider text-gray-500">Service</div>
+              <div className="mt-1 text-xl font-bold text-gray-900">Academic Help</div>
+              <div className="mt-1 text-sm text-gray-600">APs, math, science, writing, and more.</div>
+            </Link>
                   </div>
-                  <span className="text-sm sm:text-base font-semibold text-gray-800">See How It Works</span>
-                </button>
               </div>
-            </div>
-            
-            {/* Right Content - Image Collage */}
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {/* Top Left - Study Session */}
-                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
-                  <Image
-                    src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                    alt="Student studying with books and notes"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-blue-600/30 group-hover:bg-blue-600/40 transition-colors duration-300"></div>
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full shadow-lg"></div>
-                  {/* Play Button */}
-                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 5v10l7-5z"/>
-                      </svg>
-                      <span className="text-xs font-semibold">Watch</span>
+      </section>
+
+      {/* About + inline video section (minimal) */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-3xl font-black text-gray-900">Beyond clean tutoring. Results without compromise.</h2>
+            <p className="mt-3 text-gray-600">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
+            <div className="mt-6">
+              <Link href="/contact" className="inline-flex rounded-full bg-[#c79d3c] text-white px-6 py-3 font-semibold hover:brightness-95">Book Free Consultation</Link>
+                    </div>
+            <div className="mt-4 flex gap-4 text-sm text-gray-600">
+              <span>✓ Step Up For Students accepted</span>
+              <span>✓ A+ BBB Rating</span>
+                  </div>
+                    </div>
+          <div className="relative aspect-video rounded-2xl overflow-hidden bg-black">
+            <Image
+              src="/Images/student-2.png"
+              alt="College students studying"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 ring-1 ring-black/10" />
+          </div>
+                  </div>
+      </section>
+
+      {/* Browse by category grid (minimal) */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <h3 className="text-2xl font-black text-gray-900 mb-6">Browse Services</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">SAT Prep</div>
+            </Link>
+            <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">ACT Prep</div>
+            </Link>
+            <Link href="/test-prep/in-person-classes" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="In-Person Classes" fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">In-Person Classes</div>
+            </Link>
+            <Link href="/college-high-school/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="/Images/student-1.png" alt="College Tutoring" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">College Tutoring</div>
+            </Link>
+            <Link href="/college-high-school/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop" alt="High School Tutoring" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">High School Tutoring</div>
+            </Link>
+            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200">
+              <Image src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1200&auto=format&fit=crop" alt="Meet Our Tutors" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white font-bold text-xl">Browse Subjects</div>
+            </Link>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
-                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
-                      Study Session
+      </section>
+
+      {/* Testimonials lite (minimal) */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h3 className="text-2xl font-black text-gray-900 mb-6">Students love ScoreMax</h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="rounded-2xl bg-white border border-gray-200 p-6">
+              <div className="text-sm font-semibold text-[#c79d3c] mb-2">+280 SAT Points</div>
+              <p className="text-gray-700">“I improved my SAT by 280 points in 3 months. The plan kept me focused.”</p>
+              <div className="mt-3 text-sm text-gray-500">— Sarah M.</div>
                     </div>
-                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
-                      Personalized Learning
-                    </div>
+            <div className="rounded-2xl bg-white border border-gray-200 p-6">
+              <div className="text-sm font-semibold text-green-600 mb-2">2.8 → 3.7 GPA</div>
+              <p className="text-gray-700">“Went from struggling to confident in AP Calc thanks to weekly sessions.”</p>
+              <div className="mt-3 text-sm text-gray-500">— Marcus T.</div>
                   </div>
-                </div>
-                
-                {/* Top Right - Success */}
-                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
-                  <Image
-                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                    alt="Happy student celebrating test score success"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-green-600/30 group-hover:bg-green-600/40 transition-colors duration-300"></div>
-                  <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-5 h-5 sm:w-6 sm:h-6 bg-purple-400 rounded-full shadow-lg"></div>
-                  {/* Play Button */}
-                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 5v10l7-5z"/>
-                      </svg>
-                      <span className="text-xs font-semibold">Watch</span>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
-                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
-                      Success!
-                    </div>
-                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
-                      Score Improvement
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Bottom Left - Online Learning */}
-                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
-                  <Image
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                    alt="Students collaborating with laptops for online learning"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-purple-600/30 group-hover:bg-purple-600/40 transition-colors duration-300"></div>
-                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-3 h-3 sm:w-4 sm:h-4 bg-teal-400 rounded-full shadow-lg"></div>
-                  {/* Play Button */}
-                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 5v10l7-5z"/>
-                      </svg>
-                      <span className="text-xs font-semibold">Watch</span>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
-                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
-                      Online Learning
-                    </div>
-                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
-                      Virtual Sessions
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Bottom Right - Achievement */}
-                <div className="bg-gray-100 rounded-2xl sm:rounded-3xl h-48 sm:h-64 relative overflow-hidden group cursor-pointer">
-                  <Image
-                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-                    alt="Students celebrating graduation and academic achievement"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-orange-600/30 group-hover:bg-orange-600/40 transition-colors duration-300"></div>
-                  <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-8 h-8 sm:w-12 sm:h-12 bg-blue-400 rounded-full shadow-lg"></div>
-                  {/* Play Button */}
-                  <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                    <div className="border-2 border-white/80 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all duration-300 group-hover:scale-105 backdrop-blur-sm flex items-center space-x-1">
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 5v10l7-5z"/>
-                      </svg>
-                      <span className="text-xs font-semibold">Watch</span>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6">
-                    <div className="text-white font-black text-lg sm:text-xl tracking-wide uppercase">
-                      Achievement
-                    </div>
-                    <div className="text-white/80 text-xs sm:text-sm font-medium mt-1">
-                      Academic Excellence
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-2xl bg-white border border-gray-200 p-6">
+              <div className="text-sm font-semibold text-purple-600 mb-2">Dream School ✓</div>
+              <p className="text-gray-700">“Improved my ACT and got into my first choice. The coaching was amazing.”</p>
+              <div className="mt-3 text-sm text-gray-500">— Emma L.</div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Hide legacy sections below to keep page minimal */}
+      <div className="hidden">
 
       {/* Trust Signals */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-gray-50 to-white relative">
@@ -809,6 +769,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA Section */}
+      </div>
       <section className="py-32 bg-gray-800 text-white relative overflow-hidden">
         {/* Background shapes */}
         <div className="absolute inset-0">
@@ -828,7 +789,7 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6 sm:mb-8">
             <Link href="/contact" 
-              className="bg-[#517cad] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base lg:text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
+              className="bg-[#c79d3c] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base lg:text-lg font-semibold hover:brightness-95 transition shadow-lg">
               Book Free Consultation
             </Link>
             <Link href="/pricing" 
@@ -858,6 +819,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Sticky bottom CTA */}
+      <StickyBottomCTA href="/contact" label="Book Now" />
+
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 sm:py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -865,10 +829,7 @@ export default function Home() {
             {/* Logo */}
             <div className="mb-6 sm:mb-8">
               <div className="flex items-center justify-center mb-3 sm:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#517cad] rounded-full flex items-center justify-center mr-2 sm:mr-3">
-                  <span className="text-xl sm:text-2xl">🎓</span>
-                </div>
-                <span className="text-2xl sm:text-3xl font-black">SCOREMAX</span>
+                <img src="/score-max-logo-nobg.png" alt="ScoreMax" className="h-[72px] sm:h-[90px] w-auto" />
               </div>
             </div>
             

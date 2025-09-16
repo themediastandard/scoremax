@@ -3,13 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-inter);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-raleway);
-  --font-mono: var(--font-raleway);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +24,34 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-raleway), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* Heading typography to echo the reference look */
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-chronicle), var(--font-heading), Georgia, serif;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+/* Sleeker default weights */
+body {
+  font-weight: 400;
+}
+
+/* Normalize bold classes for a clean look */
+:where(.font-bold, .font-black, .font-semibold) {
+  font-weight: 500 !important;
+}
+
+/* Global square corners override */
+:where(.rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl, .rounded-full, .sm\:rounded, .sm\:rounded-md, .sm\:rounded-lg, .sm\:rounded-xl, .sm\:rounded-2xl, .sm\:rounded-3xl, .sm\:rounded-full, .lg\:rounded, .lg\:rounded-md, .lg\:rounded-lg, .lg\:rounded-xl, .lg\:rounded-2xl, .lg\:rounded-3xl, .lg\:rounded-full) {
+  border-radius: 0 !important;
+}
+
+/* Also neutralize component-specific rounded utilities */
+:where([class*="rounded-"]) {
+  border-radius: 0 !important;
 }
 
 /* Ensure text colors render properly */
@@ -139,7 +168,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #517cad;
+  outline: 2px solid #c79d3c;
   outline-offset: 2px;
 }
 

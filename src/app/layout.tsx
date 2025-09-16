@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
+import { Inter, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
 
-const raleway = Raleway({
-  variable: "--font-raleway",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+});
+
+// Approximate Chronicle Display look with Cormorant Garamond for headings
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+});
+const chronicleApprox = Cormorant_Garamond({
+  variable: "--font-chronicle",
+  subsets: ["latin"],
+  weight: ["400","500","600","700"],
 });
 
 export const metadata: Metadata = {
@@ -31,7 +42,7 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
-  themeColor: '#517cad',
+  themeColor: '#c79d3c',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -54,7 +65,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${raleway.variable} antialiased`}>
+      <body className={`${inter.variable} ${playfair.variable} ${chronicleApprox.variable} antialiased`}>
         <MobileOptimizations />
         {/* WebSite JSON-LD with SearchAction */}
         <script
