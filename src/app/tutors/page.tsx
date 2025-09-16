@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import Header from '../../components/Header';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -94,7 +93,7 @@ export default function TutorsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <Header />
+      {/* Header removed; global in layout */}
 
       {/* Hero Section */}
       <section className="relative pt-[130px] pb-20 bg-gradient-to-b from-white to-gray-50">

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Header from '../../../components/Header';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { Metadata } from 'next';
 
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
 export default function SATPage() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
-      <Header />
+      {/* Header removed; global in layout */}
 
       {/* Hero Section */}
       <section className="relative pt-[130px] pb-20 bg-gradient-to-b from-white to-gray-50">
@@ -66,7 +65,7 @@ export default function SATPage() {
               <div className="text-3xl lg:text-4xl xl:text-5xl text-gray-600 font-semibold mb-2">
                 Welcome to
               </div>
-              <div className="text-6xl lg:text-7xl xl:text-8xl text-[#517cad] font-black mb-4">
+              <div className="text-6xl lg:text-7xl xl:text-8xl text-[#c79d3c] font-black mb-4">
                 SCOREMAX
               </div>
               <div className="text-4xl lg:text-5xl xl:text-6xl text-gray-800 font-bold">
@@ -77,17 +76,17 @@ export default function SATPage() {
             <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-4xl mx-auto font-medium mb-12">
               At ScoreMax, we understand the importance of achieving high scores on the SAT for college admissions. 
               That&apos;s why we&apos;re here to provide you with 
-              <span className="text-[#517cad] font-semibold"> top-notch SAT tutoring services</span> that will 
+              <span className="text-[#c79d3c] font-medium"> top-notch SAT tutoring services</span> that will 
               <span className="text-gray-700 font-semibold"> maximize your potential</span> and help you reach your desired score.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/contact"
-                  className="bg-[#517cad] text-white px-8 py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                  className="bg-[#c79d3c] text-white px-8 py-3 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
                   Book Free Consultation
                 </Link>
                 <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                  <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                  <div className="w-8 h-8 bg-[#c79d3c] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
                     <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M8 5v10l7-5z"/>
                     </svg>
@@ -117,7 +116,7 @@ export default function SATPage() {
           <div className="text-center mb-16">
 
             <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
-              Your Path to <span className="text-[#517cad]">SAT Success</span>
+              Your Path to <span className="text-[#c79d3c]">SAT Success</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               We provide everything you need to maximize your SAT score and achieve your college admission goals
@@ -128,7 +127,7 @@ export default function SATPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {/* Benefit 1 - Experienced Tutors */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">👨‍🏫</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Experienced Tutors</h3>
@@ -140,7 +139,7 @@ export default function SATPage() {
 
             {/* Benefit 2 - Customized Approach */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🎯</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Customized Approach</h3>
@@ -152,7 +151,7 @@ export default function SATPage() {
 
             {/* Benefit 3 - Comprehensive Curriculum */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">📚</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Comprehensive Curriculum</h3>
@@ -164,7 +163,7 @@ export default function SATPage() {
 
             {/* Benefit 4 - Proven Strategies */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">⚡</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Proven Strategies</h3>
@@ -176,7 +175,7 @@ export default function SATPage() {
 
             {/* Benefit 5 - Continuous Support */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🤝</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Continuous Support</h3>
@@ -225,7 +224,7 @@ export default function SATPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
-              Master All <span className="text-[#517cad]">SAT Sections</span>
+              Master All <span className="text-[#c79d3c]">SAT Sections</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Our comprehensive approach covers every aspect of the SAT to ensure you&apos;re fully prepared for test day
@@ -235,7 +234,7 @@ export default function SATPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Reading Section */}
             <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">📖</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Reading</h3>
@@ -250,7 +249,7 @@ export default function SATPage() {
 
             {/* Writing & Language Section */}
             <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">✍️</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Writing & Language</h3>
@@ -265,7 +264,7 @@ export default function SATPage() {
 
             {/* Math Section */}
             <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🔢</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Math</h3>
@@ -282,7 +281,7 @@ export default function SATPage() {
           {/* Optional Essay Section */}
           <div className="mt-12 max-w-2xl mx-auto">
             <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">📝</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Optional Essay</h3>
@@ -349,49 +348,7 @@ export default function SATPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            {/* Logo */}
-            <div className="mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-2xl">🎓</span>
-                </div>
-                <span className="text-3xl font-black">SCOREMAX</span>
-              </div>
-            </div>
-            
-            {/* Contact Info */}
-            <div className="mb-8">
-              <div className="text-lg text-gray-300 mb-2">
-                (954) 214-8880 | (954) 224-1511
-              </div>
-            </div>
-            
-            {/* Social Media */}
-            <div className="flex justify-center space-x-6 mb-8">
-              <a href="#" className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-              <a href="#" className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="#" className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </a>
-            </div>
-            
-
-          </div>
-        </div>
-      </footer>
+      {/* Footer removed; global in layout */}
     </div>
   );
 }

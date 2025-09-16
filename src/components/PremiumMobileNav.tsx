@@ -98,7 +98,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         }}
       >
         {/* Header (brand removed per request) */}
-        <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-gradient-to-r from-[#517cad] to-[#4568a3]">
+        <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-[#c79d3c]">
           <button
             onClick={onClose}
             className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors duration-200 touch-manipulation"
@@ -157,7 +157,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                     onClick={handleLinkClick}
                     className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                   >
-                    <span className="font-semibold text-gray-900 text-lg group-hover:text-[#517cad] transition-colors duration-200">
+                    <span className="font-medium text-gray-900 text-lg group-hover:text-[#c79d3c] transition-colors duration-200">
                       {item.label}
                     </span>
                   </Link>
@@ -172,7 +172,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
           <Link
             href="/contact"
             onClick={handleLinkClick}
-            className="w-full bg-[#517cad] text-white px-6 py-4 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px]"
+            className="w-full bg-[#c79d3c] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px]"
           >
             Book Free Consultation
           </Link>

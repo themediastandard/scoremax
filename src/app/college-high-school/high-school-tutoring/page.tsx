@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Header from '../../../components/Header';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -43,7 +42,7 @@ export const metadata: Metadata = {
 export default function HighSchoolTutoringPage() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
-      <Header />
+      {/* Header removed; global in layout */}
 
       {/* Hero Section */}
       <section className="relative pt-[130px] pb-20 bg-gradient-to-b from-white to-gray-50">
@@ -61,7 +60,7 @@ export default function HighSchoolTutoringPage() {
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-tight tracking-tight text-black mb-8">
               Unlock Success with Our
               <br />
-              <span className="text-[#517cad]">High School Tutoring</span>
+              <span className="text-[#c79d3c]">High School Tutoring</span>
               <br />
               Services
             </h1>
@@ -78,11 +77,11 @@ export default function HighSchoolTutoringPage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact"
-                className="bg-[#517cad] text-white px-8 py-3 rounded-full font-semibold text-sm hover:bg-[#4568a3] transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
+                className="bg-[#c79d3c] text-white px-8 py-3 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
                 Book Free Consultation
               </Link>
               <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                <div className="w-8 h-8 bg-[#517cad] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                <div className="w-8 h-8 bg-[#c79d3c] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
                   <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8 5v10l7-5z"/>
                   </svg>
@@ -106,7 +105,7 @@ export default function HighSchoolTutoringPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
-              Our <span className="text-[#517cad]">Services</span>
+              Our <span className="text-[#c79d3c]">Services</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Comprehensive tutoring services designed to help high school students excel in their academic journey
@@ -116,7 +115,7 @@ export default function HighSchoolTutoringPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Mathematics Mastery */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">📐</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Mathematics Mastery</h3>
@@ -138,7 +137,7 @@ export default function HighSchoolTutoringPage() {
 
             {/* Science Success */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🔬</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Science Success</h3>
@@ -158,7 +157,7 @@ export default function HighSchoolTutoringPage() {
 
             {/* Personalized Learning */}
             <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-16 h-16 bg-[#c79d3c] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <span className="text-2xl">🎯</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Personalized Learning</h3>
@@ -178,7 +177,7 @@ export default function HighSchoolTutoringPage() {
             {/* Left Content */}
             <div>
               <h2 className="text-4xl lg:text-5xl font-black text-black mb-6 leading-tight">
-                Why Choose <span className="text-[#517cad]">ScoreMax?</span>
+                Why Choose <span className="text-[#c79d3c]">ScoreMax?</span>
               </h2>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 We provide the expertise, flexibility, and personalized attention that high school students need to succeed.
@@ -189,7 +188,7 @@ export default function HighSchoolTutoringPage() {
             <div className="space-y-8">
               {/* Expert Tutors */}
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-[#c79d3c] rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-xl">👨‍🏫</span>
                 </div>
                 <div>
@@ -202,7 +201,7 @@ export default function HighSchoolTutoringPage() {
 
               {/* Flexible Schedule */}
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-[#c79d3c] rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-xl">⏰</span>
                 </div>
                 <div>
@@ -215,7 +214,7 @@ export default function HighSchoolTutoringPage() {
 
               {/* Success-Driven */}
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-[#517cad] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-[#c79d3c] rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-xl">🏆</span>
                 </div>
                 <div>
@@ -250,7 +249,7 @@ export default function HighSchoolTutoringPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="/contact" 
-              className="bg-[#517cad] text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-[#4568a3] transition shadow-lg">
+              className="bg-[#c79d3c] text-white px-8 py-4 rounded-none text-lg font-medium hover:brightness-95 transition shadow-lg">
               Book Free Consultation
             </Link>
             <Link href="/pricing" 
