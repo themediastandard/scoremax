@@ -714,7 +714,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">SAT Score Boost</h4>
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
-                  "Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference."
+                  &quot;Improved my SAT score by 280 points in just 3 months! The personalized approach made all the difference.&quot;
                 </p>
                 <div className="text-[#517cad] font-bold text-sm sm:text-base lg:text-lg">- Sarah M.</div>
               </div>
@@ -737,7 +737,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">GPA Improvement</h4>
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
-                  "Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I&apos;d struggled with for months."
+                  &quot;Went from a 2.8 to 3.7 GPA in my AP Calculus class. My tutor helped me understand concepts I&apos;d struggled with for months.&quot;
                 </p>
                 <div className="text-green-600 font-bold text-sm sm:text-base lg:text-lg">- Marcus T.</div>
               </div>
@@ -760,7 +760,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">College Acceptance</h4>
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
-                  "Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed."
+                  &quot;Got into my dream school thanks to my improved ACT score! ScoreMax gave me the confidence I needed.&quot;
                 </p>
                 <div className="text-purple-600 font-bold text-sm sm:text-base lg:text-lg">- Emma L.</div>
               </div>
@@ -783,7 +783,7 @@ export default function Home() {
                 </div>
                 <h4 className="font-bold text-lg sm:text-xl lg:text-2xl mb-3 sm:mb-4 text-gray-900">Confidence Boost</h4>
                 <p className="text-gray-600 text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 leading-relaxed">
-                  "Finally understand chemistry! My tutor is amazing and made complex topics feel simple."
+                  &quot;Finally understand chemistry! My tutor is amazing and made complex topics feel simple.&quot;
                 </p>
                 <div className="text-orange-600 font-bold text-sm sm:text-base lg:text-lg">- David K.</div>
               </div>
