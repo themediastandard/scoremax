@@ -141,79 +141,9 @@ export default function Home() {
       {/* Highlight two primary offerings */}
       <DualCTA />
 
-      {/* Quick services strip (minimal) */}
-      <section className="py-10 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/test-prep/sat" className="group relative overflow-hidden p-5 min-h-[140px] border border-black/5 bg-white shadow-sm hover:shadow-md transition">
-              <div className="flex items-start justify-between relative z-10">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
-                  <div className="mt-1 text-lg font-medium text-gray-900">SAT Tutoring</div>
-                  </div>
-                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
-              </div>
-              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Personalized plans, practice, and strategies.</div>
-              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
-            </Link>
-            <Link href="/test-prep/act" className="group relative overflow-hidden p-5 min-h-[140px] border border-black/5 bg-white shadow-sm hover:shadow-md transition">
-              <div className="flex items-start justify-between relative z-10">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
-                  <div className="mt-1 text-lg font-medium text-gray-900">ACT Tutoring</div>
-            </div>
-                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
-                    </div>
-              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Targeted prep to raise composite scores.</div>
-              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
-            </Link>
-            <Link href="/subjects?interest=LSAT" className="group relative overflow-hidden p-5 min-h-[140px] border border-black/5 bg-white shadow-sm hover:shadow-md transition">
-              <div className="flex items-start justify-between relative z-10">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-gray-800/90">Service</div>
-                  <div className="mt-1 text-lg font-medium text-gray-900">LSAT Tutoring</div>
-                  </div>
-                <span className="text-gray-500 group-hover:text-gray-700 transition">→</span>
-                    </div>
-              <div className="mt-2 text-sm text-gray-800/90 relative z-10">Focused prep for logic games, reasoning, and reading comp.</div>
-              <div className="absolute inset-0 pointer-events-none ring-1 ring-black/5" />
-            </Link>
-                    </div>
-                  </div>
-      </section>
-
-      {/* Browse by category grid (minimal) */}
-      {/* About + inline video section (minimal) */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 className="text-3xl font-black text-gray-900">Beyond clean tutoring. Results without compromise.</h2>
-            <p className="mt-3 text-gray-600">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
-            <div className="mt-6">
-              <Link href="/contact" className="inline-flex rounded-full bg-[#c79d3c] text-white px-6 py-3 font-semibold hover:brightness-95">Book Free Consultation</Link>
-                    </div>
-            <div className="mt-4 flex gap-4 text-sm text-gray-600">
-              <span>✓ Step Up For Students accepted</span>
-              <span>✓ A+ BBB Rating</span>
-                  </div>
-                    </div>
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-black">
-                  <Image
-              src="/Images/student-2.png"
-              alt="College students studying"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 ring-1 ring-black/10" />
-                    </div>
-                  </div>
-      </section>
-
-      {/* Step Up for Students highlight - move below Browse Services */}
-      <StepUpSection />
+      {/* Browse Services moved up under DualCTA */}
       <section className="pt-4 pb-12 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-2xl font-black text-gray-900 mb-6">Browse Services</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill className="object-cover" />
@@ -240,7 +170,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/80">Classes</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-bold">In-Person Classes</div>
+                <div className="text-xl font-bold">LSAT Prep</div>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                   </div>
               <div className="absolute inset-0 ring-1 ring-white/10" />
@@ -278,6 +208,36 @@ export default function Home() {
                     </div>
                     </div>
       </section>
+
+      {/* Browse by category grid (minimal) */}
+      {/* About + inline video section (minimal) */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-3xl font-black text-gray-900">Beyond clean tutoring. Results without compromise.</h2>
+            <p className="mt-3 text-gray-600">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
+            <div className="mt-6">
+              <Link href="/contact" className="inline-flex rounded-full bg-[#c79d3c] text-white px-6 py-3 font-semibold hover:brightness-95">Book Free Consultation</Link>
+                    </div>
+            <div className="mt-4 flex gap-4 text-sm text-gray-600">
+              <span>✓ Step Up For Students accepted</span>
+              <span>✓ A+ BBB Rating</span>
+                  </div>
+                    </div>
+          <div className="relative aspect-video rounded-2xl overflow-hidden bg-black">
+                  <Image
+              src="/Images/student-2.png"
+              alt="College students studying"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 ring-1 ring-black/10" />
+                    </div>
+                  </div>
+      </section>
+
+      {/* Step Up for Students highlight - remains below Browse Services */}
+      <StepUpSection />
 
       {/* Testimonials lite (minimal) */}
       <section className="py-16 bg-gray-50">
@@ -818,8 +778,7 @@ export default function Home() {
         </div>
       {/* Final CTA removed */}
 
-      {/* Sticky bottom CTA */}
-      <StickyBottomCTA href="/contact" label="Book Now" />
+      {/* Sticky bottom CTA removed */}
 
       {/* Footer now rendered globally in RootLayout */}
     </div>
