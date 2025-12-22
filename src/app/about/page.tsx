@@ -142,7 +142,7 @@ export default function AboutPage() {
                 </p>
                 
                 <p className="mb-6">
-                  Taimir&apos;s relentless drive and strategic decision-making led to a monumental achievement for the company when, after 12 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
+                  Taimir&apos;s relentless drive and strategic decision-making led to a monumental achievement for the company when, after 17 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
                 </p>
                 
                 <p>
