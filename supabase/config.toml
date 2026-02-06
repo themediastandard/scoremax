@@ -1,0 +1,6 @@
+[project]
+id = "fceekjlispfjduetumrf"
+name = "Score Max"
+organization = "themediastandard.com"
+region = "us-west-2"
+database_host = "db.fceekjlispfjduetumrf.supabase.co"
