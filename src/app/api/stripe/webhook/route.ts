@@ -50,11 +50,27 @@ export async function POST(req: Request) {
             await supabaseAdmin.from('customers').update({ stripe_customer_id: stripeCustomerId }).eq('id', customerByEmail.id)
             customer = customerByEmail
         } else {
-            // Create New Customer
+            // Create Auth Account + Customer for guest checkout
+            let profileId: string | null = null
+            const inviteResult = await supabaseAdmin.auth.admin.inviteUserByEmail(contactEmail, {
+                data: { full_name: contactName, role: 'customer' },
+                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+            })
+
+            if (inviteResult.data?.user) {
+                profileId = inviteResult.data.user.id
+            } else if (inviteResult.error?.message?.includes('already been registered')) {
+                // User has auth account but no customer record — find and link
+                const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+                const existingUser = existingUsers?.users?.find((u) => u.email === contactEmail)
+                if (existingUser) profileId = existingUser.id
+            }
+
             const { data: newCustomer } = await supabaseAdmin.from('customers').insert({
                 full_name: contactName,
                 email: contactEmail,
                 stripe_customer_id: stripeCustomerId,
+                ...(profileId && { profile_id: profileId }),
             }).select().single()
             customer = newCustomer
         }

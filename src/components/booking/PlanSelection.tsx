@@ -58,6 +58,13 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
   const isACT = subjects.some(id => subjectMap[id]?.slug === 'act')
   const singleRate = getSingleRate()
 
+  const packageList = pricing.filter(p => p.type === 'package').map(pkg => {
+    const packageHourlyCents = pkg.price_cents / pkg.included_hours
+    const singleRateCents = singleRate * 100
+    const savingsPercent = singleRateCents > 0 ? Math.round(((singleRateCents - packageHourlyCents) / singleRateCents) * 100) : null
+    return { pkg, savingsPercent }
+  })
+
   // Existing Credits View
   if (memberStatus?.hasCredits && !processing) {
     return (
@@ -308,37 +315,38 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
         <h3 className="font-semibold text-lg text-[#1e293b]">Prepaid Packages</h3>
         <p className="text-sm text-gray-600">Pay upfront for a block of sessions. Valid for 6 months—ideal for short-term goals.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {pricing.filter(p => p.type === 'package').map(pkg => {
-            const packageHourlyCents = pkg.price_cents / pkg.included_hours
-            const singleRateCents = singleRate * 100
-            const savingsPercent = singleRateCents > 0
-              ? Math.round(((singleRateCents - packageHourlyCents) / singleRateCents) * 100)
-              : null
-            
-            return (
-            <Card key={pkg.id} className="border-gray-200 bg-white hover:border-gray-300 hover:shadow-md transition-all">
+          {packageList.map(({ pkg, savingsPercent }) => (
+            <Card key={pkg.id} className="border-gray-200 bg-white hover:border-[#517cad]/50 hover:shadow-lg transition-all">
               <CardHeader>
                 <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                <div className="mt-2">
+                <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-[#1e293b]">${pkg.price_cents / 100}</span>
+                  <span className="text-gray-500 text-sm">for {pkg.included_hours} hours</span>
                 </div>
-                <p className="text-sm text-[#517cad] font-medium">${(pkg.price_cents / pkg.included_hours / 100).toFixed(0)}/hr • {pkg.included_hours} hours</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#517cad]">${(pkg.price_cents / pkg.included_hours / 100).toFixed(0)}/hr</span>
+                  {savingsPercent != null && savingsPercent > 0 && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs font-semibold">
+                      Save {savingsPercent}%
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null ? `Save ${savingsPercent}% vs Single Rate` : 'Save vs Single Rate'}</strong></li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> {pkg.included_hours} one-hour sessions</li>
+                <ul className="space-y-2.5 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null && savingsPercent > 0 ? `Save ${savingsPercent}% vs single session` : 'Discounted rate vs single session'}</strong></li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> {pkg.included_hours} one-hour sessions included</li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Valid for 6 months</li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Best for short-term goals</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Ideal for short-term goals</li>
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full border-[#517cad] text-[#517cad] hover:bg-[#517cad] hover:text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: pkg.price_cents, name: pkg.name })}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: pkg.price_cents, name: pkg.name })}>
                   Select Package
                 </Button>
               </CardFooter>
             </Card>
-          )})}
+          ))}
         </div>
       </div>
       
