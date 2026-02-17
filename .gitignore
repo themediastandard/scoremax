@@ -20,6 +20,9 @@
 # production
 /build
 
+# project scope (internal work log)
+project_scope.md
+
 # misc
 .DS_Store
 *.pem
