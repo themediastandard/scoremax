@@ -10,19 +10,40 @@ import {
   Settings, 
   LogOut, 
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  CreditCard
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface DashboardSidebarProps {
   role: 'admin' | 'tutor' | 'customer'
+  fullName?: string | null
+  membershipTier?: string | null
 }
 
-export function DashboardSidebar({ role }: DashboardSidebarProps) {
+export function DashboardSidebar({ role, fullName, membershipTier: serverTier }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [tier, setTier] = useState<string | null>(serverTier ?? null)
+
+  useEffect(() => {
+    if (serverTier != null) setTier(serverTier)
+  }, [serverTier])
+
+  useEffect(() => {
+    if (role !== 'customer') return
+    let cancelled = false
+    fetch('/api/account/membership/tier')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!cancelled && data?.membershipTier != null) setTier(data.membershipTier)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [role, pathname])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -40,6 +61,12 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
       label: 'My Orders',
       href: '/dashboard/orders',
       icon: BookOpen,
+      roles: ['customer']
+    },
+    {
+      label: 'My Subscription',
+      href: '/dashboard/subscription',
+      icon: CreditCard,
       roles: ['customer']
     },
     {
@@ -79,12 +106,25 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200 w-64">
       <div className="p-6 border-b border-gray-100">
-        <Link href="/" className="text-2xl font-serif font-bold text-[#1e293b]">
-          ScoreMax
-        </Link>
-        <div className="mt-2 text-xs font-medium uppercase tracking-wider text-gray-500">
-          {role} Portal
-        </div>
+        {role === 'customer' && fullName ? (
+          <>
+            <p className="text-lg font-semibold text-[#1e293b] truncate">
+              {fullName}
+            </p>
+            <p className="mt-1 text-xs font-medium text-gray-500 truncate">
+              {tier ? `${tier} Member` : 'No active subscription'}
+            </p>
+          </>
+        ) : (
+          <>
+            <Link href="/" className="text-2xl font-serif font-bold text-[#1e293b]">
+              ScoreMax
+            </Link>
+            <div className="mt-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+              {role} Portal
+            </div>
+          </>
+        )}
       </div>
       
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

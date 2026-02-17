@@ -48,6 +48,7 @@ export function HeaderUserMenu() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    router.push('/')
     router.refresh()
   }
 
@@ -76,7 +77,7 @@ export function HeaderUserMenu() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleSignOut}
+              onSelect={handleSignOut}
               className="flex items-center gap-2 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />

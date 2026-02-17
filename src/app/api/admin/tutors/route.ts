@@ -14,12 +14,14 @@ export async function GET() {
   return NextResponse.json(data)
 }
 
+const emptyToNull = (v: unknown) => (v === '' || v === undefined ? null : v)
+
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const { full_name, email, phone, bio, photo_url, specialties, password } = body
 
   if (!email || !password || !full_name) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    return NextResponse.json({ error: 'Missing required fields: name, email, and password' }, { status: 400 })
   }
 
   // 1. Create Auth User (Trigger creates Profile)
@@ -31,22 +33,23 @@ export async function POST(req: NextRequest) {
   })
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 })
+    const msg = authError.message?.toLowerCase().includes('already')
+      ? 'That email is already registered. Use a different email or invite them to log in as an existing user.'
+      : authError.message
+    return NextResponse.json({ error: msg }, { status: 400 })
   }
 
   // 2. Create Tutor Record linked to Auth User
-  // Note: Profile creation is handled by trigger on auth.users insert
-  // We link to profile_id which matches authUser.user.id
   const { data: tutor, error: tutorError } = await supabaseAdmin
     .from('tutors')
     .insert({
       profile_id: authUser.user.id,
-      full_name,
-      email,
-      phone,
-      bio,
-      photo_url,
-      specialties,
+      full_name: String(full_name).trim(),
+      email: String(email).trim().toLowerCase(),
+      phone: emptyToNull(phone),
+      bio: emptyToNull(bio),
+      photo_url: emptyToNull(photo_url),
+      specialties: Array.isArray(specialties) && specialties.length > 0 ? specialties : null,
       is_active: true
     })
     .select()

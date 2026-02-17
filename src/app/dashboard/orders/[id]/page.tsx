@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm' // Client component
+import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
+import { formatDateTime, formatAmount } from '@/lib/order-format'
+import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard } from 'lucide-react'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -23,15 +26,39 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     .single()
     
   if (error || !order) {
-    return <div>Order not found</div>
+    return (
+      <div className="space-y-6">
+        <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#517cad] hover:text-[#3b5c85]">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to orders
+        </Link>
+        <Card className="py-12 text-center">
+          <CardContent>
+            <p className="text-gray-500">Order not found</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
   
   // Check access
   if (profile?.role === 'customer') {
-    // Ensure customer owns this order
     const { data: customer } = await supabase.from('customers').select('id').eq('profile_id', user.id).single()
     if (order.customer_id !== customer?.id) {
-      return <div>Access Denied</div>
+      return (
+        <div className="space-y-6">
+          <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#517cad] hover:text-[#3b5c85]">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to orders
+          </Link>
+          <Card className="py-12 text-center">
+            <CardContent>
+              <p className="text-gray-600 font-medium">Access denied</p>
+              <p className="text-sm text-gray-500 mt-1">You don&apos;t have permission to view this order.</p>
+            </CardContent>
+          </Card>
+        </div>
+      )
     }
   }
   
@@ -43,47 +70,102 @@ export default async function OrderDetailPage({ params }: { params: { id: string
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Order Details</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <Card>
+    <div className="space-y-8">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/dashboard/orders"
+          className="inline-flex items-center text-sm text-gray-500 hover:text-[#517cad] transition-colors"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Back
+        </Link>
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Order Details</h1>
+          <p className="mt-0.5 text-sm text-gray-500">
+            {new Date(order.created_at).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="border-gray-100 shadow-sm">
             <CardHeader>
-              <CardTitle>Session Information</CardTitle>
+              <CardTitle className="text-xl">Session</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Subjects</div>
-                  {/* Need to fetch subject names properly or just show count */}
-                  <div className="text-lg">{order.subjects?.length || 1} Selected</div>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
+                    <BookOpen className="h-5 w-5 text-[#517cad]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</p>
+                    <p className="text-lg font-medium text-[#1e293b]">{order.subjects?.length || 1} Selected</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Session Type</div>
-                  <div className="text-lg capitalize">{order.session_type}</div>
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
+                    <Video className="h-5 w-5 text-[#517cad]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session Type</p>
+                    <p className="text-lg font-medium text-[#1e293b] capitalize">{order.session_type}</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Requested Days</div>
-                  <div className="text-lg">{order.available_days?.join(', ') || 'Any'}</div>
+                <div className="flex gap-4 col-span-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                    <Calendar className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
+                    <p className={`text-lg font-medium ${order.confirmed_start ? 'text-[#1e293b]' : 'text-gray-500 italic'}`}>
+                      {order.confirmed_start ? (
+                        <>
+                          {formatDateTime(order.confirmed_start)}
+                          {order.confirmed_end && (
+                            <span className="text-gray-600">
+                              {' – '}
+                              {new Date(order.confirmed_end).toLocaleTimeString(undefined, {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        'Not yet scheduled'
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Time Preference</div>
-                  <div className="text-lg">{order.available_time_start} - {order.available_time_end}</div>
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
+                    <User className="h-5 w-5 text-[#517cad]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
+                    <p className="text-lg font-medium text-[#1e293b]">{order.tutors?.full_name || 'Unassigned'}</p>
+                  </div>
                 </div>
               </div>
-              
-              <div>
-                <div className="text-sm font-medium text-gray-500 mb-1">Customer Notes</div>
-                <div className="bg-gray-50 p-3 rounded text-gray-700">{order.notes || 'None'}</div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Notes</p>
+                <div className="rounded-lg bg-slate-50/80 p-4 text-gray-700">{order.notes || 'None'}</div>
               </div>
             </CardContent>
           </Card>
-          
+
           {profile?.role === 'admin' && (
-            <Card>
+            <Card className="border-gray-100 shadow-sm">
               <CardHeader>
-                <CardTitle>Assignment & Status</CardTitle>
+                <CardTitle className="text-xl">Assignment & Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <OrderAssignForm order={order} tutors={tutors} />
@@ -91,53 +173,64 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             </Card>
           )}
         </div>
-        
+
         <div className="space-y-6">
-          <Card>
+          <Card className="border-gray-100 shadow-sm">
             <CardHeader>
-              <CardTitle>Customer</CardTitle>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <User className="h-5 w-5 text-[#c79d3c]" />
+                Customer
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div>
-                <div className="text-sm text-gray-500">Name</div>
-                <div className="font-medium">{order.customers?.full_name}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</p>
+                <p className="font-medium">{order.customers?.full_name}</p>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Email</div>
-                <div>{order.customers?.email}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
+                <p className="text-[#517cad]">{order.customers?.email}</p>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Phone</div>
-                <div>{order.customers?.phone}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</p>
+                <p>{order.customers?.phone || '—'}</p>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Grade</div>
-                <div>{order.customers?.student_grade || 'N/A'}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</p>
+                <p>{order.customers?.student_grade || '—'}</p>
               </div>
             </CardContent>
           </Card>
-          
-          <Card>
+
+          <Card className="border-gray-100 shadow-sm">
             <CardHeader>
-              <CardTitle>Payment</CardTitle>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-[#c79d3c]" />
+                Payment
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div>
-                <div className="text-sm text-gray-500">Type</div>
-                <div className="font-medium capitalize">{order.payment_type}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</p>
+                <p className="font-medium capitalize">{order.payment_type}</p>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Amount</div>
-                <div className="font-medium">${(order.amount_cents / 100).toFixed(2)}</div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</p>
+                <p className="font-bold text-lg">{formatAmount(order.amount_cents)}</p>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Status</div>
-                <div className={`inline-flex px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                  ${order.status === 'active' ? 'bg-green-100 text-green-800' : 
-                    order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
-                    'bg-gray-100 text-gray-800'}`}>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
+                <span
+                  className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${
+                    order.status === 'active'
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : order.status === 'processing'
+                        ? 'bg-amber-50 text-amber-700'
+                        : 'bg-slate-100 text-slate-700'
+                  }`}
+                >
                   {order.status}
-                </div>
+                </span>
               </div>
             </CardContent>
           </Card>

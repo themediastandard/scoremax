@@ -202,7 +202,8 @@ export default function BookPage() {
         })
         
         if (res.ok) {
-           router.push('/book/confirmation')
+           const data = await res.json()
+           router.push(data?.id ? `/book/confirmation?booking_id=${data.id}` : '/book/confirmation')
         } else {
            const err = await res.json()
            alert(err.error || 'Failed to submit booking')

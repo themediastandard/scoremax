@@ -119,6 +119,32 @@ export async function POST(req: Request) {
             amount_cents: session.amount_total,
             status: 'active'
         })
+    } else if (planType === 'membership' && customer && session.subscription) {
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        const priceId = subscription.items?.data?.[0]?.price?.id
+        const { data: pricing } = await supabaseAdmin
+            .from('pricing')
+            .select('name, included_hours')
+            .eq('stripe_price_id', priceId)
+            .eq('type', 'membership')
+            .single()
+        const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
+        const includedHours = pricing?.included_hours ?? 2
+        await supabaseAdmin.from('memberships').insert({
+            customer_id: customer.id,
+            tier,
+            stripe_subscription_id: subscription.id,
+            status: 'active',
+            included_hours: includedHours,
+            used_hours: 0,
+            rollover_hours: 0,
+            current_period_start: subscription.current_period_start
+                ? new Date(subscription.current_period_start * 1000).toISOString()
+                : null,
+            current_period_end: subscription.current_period_end
+                ? new Date(subscription.current_period_end * 1000).toISOString()
+                : null,
+        })
     }
 
     // 5. Notify Admin
@@ -139,6 +165,24 @@ export async function POST(req: Request) {
             `
         })
     }
+  }
+
+  // Handle subscription updates and cancellation (sync period dates, handle cancel)
+  if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object as any
+    const membershipStatus = subscription.status === 'active' ? 'active' : 'canceled'
+    await supabaseAdmin
+      .from('memberships')
+      .update({
+        status: membershipStatus,
+        current_period_start: subscription.current_period_start
+          ? new Date(subscription.current_period_start * 1000).toISOString()
+          : null,
+        current_period_end: subscription.current_period_end
+          ? new Date(subscription.current_period_end * 1000).toISOString()
+          : null,
+      })
+      .eq('stripe_subscription_id', subscription.id)
   }
 
   return NextResponse.json({ received: true })

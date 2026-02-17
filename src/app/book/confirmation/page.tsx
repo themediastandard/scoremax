@@ -8,16 +8,23 @@ function ConfirmationContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
+  const bookingId = searchParams.get('booking_id')
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bookingDetails, setBookingDetails] = useState<any>(null)
   
   useEffect(() => {
-    if (sessionId) {
-      // TODO: Fetch booking details by session_id
-      // For now just show success
+    const param = sessionId
+      ? `session_id=${encodeURIComponent(sessionId)}`
+      : bookingId
+        ? `booking_id=${encodeURIComponent(bookingId)}`
+        : null
+    if (param) {
+      fetch(`/api/booking/confirmation?${param}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => data && setBookingDetails(data))
+        .catch(() => setBookingDetails(null))
     }
-  }, [sessionId])
+  }, [sessionId, bookingId])
 
   return (
     <ConfirmationView 

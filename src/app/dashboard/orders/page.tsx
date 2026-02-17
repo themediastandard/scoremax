@@ -1,5 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { formatPlanLabel, formatAmount } from '@/lib/order-format'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ChevronRight, Calendar, User, BookOpen, Video } from 'lucide-react'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -7,87 +13,179 @@ export default async function OrdersPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  
-  // Fetch orders based on role
+
   let query = supabase.from('booking_requests').select(`
     *,
     customers (full_name, email),
     tutors (full_name)
   `).order('created_at', { ascending: false })
-  
+
   if (profile?.role === 'customer') {
-    // Get customer ID
     const { data: customer } = await supabase.from('customers').select('id').eq('profile_id', user.id).single()
     if (customer) {
       query = query.eq('customer_id', customer.id)
     } else {
-      query = query.eq('customer_id', '00000000-0000-0000-0000-000000000000') // None
+      query = query.eq('customer_id', '00000000-0000-0000-0000-000000000000')
     }
   }
-  
-  const { data: orders } = await query
+
+  const [{ data: orders }, { data: subjects }] = await Promise.all([
+    query,
+    supabase.from('subjects').select('id, name'),
+  ])
+
+  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+  const getSubjectNames = (ids: string[] | null) =>
+    (ids ?? []).map((id) => subjectMap.get(id)).filter(Boolean).join(', ') || '—'
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Orders</h1>
-      
-      <div className="bg-white rounded-md shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject(s)</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              {profile?.role === 'admin' && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              )}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {orders?.map((order: any) => (
-              <tr key={order.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {/* Need to fetch subject names or store them? We store IDs. Fetching names is N+1 unless joined.
-                      For now just showing ID count or something. Ideally we join subjects.
-                      Supabase doesn't support array joins easily in one query without RPC or flattening.
-                      Actually we can just show "Tutoring Session" for MVP or fetch subjects client side.
-                   */}
-                   {order.subjects?.length || 1} Subject(s)
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                    ${order.status === 'active' ? 'bg-green-100 text-green-800' : 
-                      order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
-                      order.status === 'completed' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
-                    {order.status}
-                  </span>
-                </td>
-                {profile?.role === 'admin' && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.customers?.full_name}
-                  </td>
-                )}
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {order.tutors?.full_name || 'Unassigned'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href={`/dashboard/orders/${order.id}`} className="text-[#517cad] hover:text-[#3b5c85]">View</a>
-                </td>
-              </tr>
-            ))}
-            {orders?.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">No orders found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Orders</h1>
+        <p className="mt-1 text-gray-500">View and manage your tutoring sessions</p>
       </div>
+
+      {orders?.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <BookOpen className="h-12 w-12 text-gray-300 mb-4" />
+            <p className="text-gray-500 font-medium">No orders yet</p>
+            <p className="text-sm text-gray-400 mt-1">Your tutoring sessions will appear here</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {orders?.map((order: any) => (
+            <Card
+              key={order.id}
+              className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md hover:border-[#517cad]/30 transition-all duration-200"
+            >
+              <CardHeader className="pb-3 px-6 sm:px-8">
+                <div className="flex flex-wrap items-center justify-between gap-6">
+                  <div className="flex flex-wrap items-center gap-5">
+                    <span className="text-sm text-gray-500 font-medium">
+                      {new Date(order.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </span>
+                    <Badge variant="secondary" className="font-medium bg-slate-100 text-slate-700">
+                      {formatPlanLabel(order)}
+                    </Badge>
+                    {formatAmount(order.amount_cents) !== 'Credit' && (
+                      <span className="text-sm font-bold text-[#1e293b]">{formatAmount(order.amount_cents)}</span>
+                    )}
+                    <span
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                        order.status === 'active'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : order.status === 'processing'
+                            ? 'bg-amber-50 text-amber-700'
+                            : order.status === 'completed'
+                              ? 'bg-slate-100 text-slate-700'
+                              : 'bg-red-50 text-red-700'
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                  <Button variant="outline" size="sm" asChild className="border-[#517cad]/40 text-[#517cad] hover:bg-[#517cad]/5">
+                    <Link href={`/dashboard/orders/${order.id}`} className="gap-1">
+                      View
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0 px-6 sm:px-8">
+                <div
+                  className={`grid w-full grid-cols-2 gap-y-6 gap-x-12 sm:grid-cols-4 ${
+                    profile?.role === 'admin' ? 'md:grid-cols-5' : ''
+                  }`}
+                >
+                  <div className="flex gap-4">
+                    <BookOpen className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</p>
+                      <p className="text-gray-900 font-medium">{getSubjectNames(order.subjects)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <Video className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session</p>
+                      <p className="text-gray-900 font-medium capitalize">{order.session_type || '—'}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <Calendar
+                      className={`h-5 w-5 shrink-0 mt-0.5 ${order.confirmed_start ? 'text-emerald-600' : 'text-gray-400'}`}
+                    />
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
+                      {order.confirmed_start ? (
+                        <>
+                          <span className="font-medium text-gray-900">
+                            {new Date(order.confirmed_start).toLocaleDateString(undefined, {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </span>
+                          <span className="text-gray-600 text-sm font-medium">
+                            {new Date(order.confirmed_start).toLocaleTimeString(undefined, {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            })}
+                            {order.confirmed_end && (
+                              <>
+                                {' – '}
+                                {new Date(order.confirmed_end).toLocaleTimeString(undefined, {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}
+                              </>
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-medium text-gray-500 italic">Not yet scheduled</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <User className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
+                      <p className="text-gray-900 font-medium">{order.tutors?.full_name || 'Unassigned'}</p>
+                    </div>
+                  </div>
+                  {profile?.role === 'admin' && (
+                    <div className="flex gap-4">
+                      <User className="h-5 w-5 text-[#c79d3c]/70 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</p>
+                        <p className="text-gray-900 font-medium">{order.customers?.full_name ?? '—'}</p>
+                        {order.customers?.email && (
+                          <p className="text-gray-500 text-xs mt-0.5">{order.customers.email}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {order.notes && (
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Notes</p>
+                    <p className="text-gray-700 text-sm">{order.notes}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

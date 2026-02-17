@@ -64,8 +64,8 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
       })
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.message || 'Failed to save tutor')
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || err.message || 'Failed to save tutor')
       }
 
       setOpen(false)

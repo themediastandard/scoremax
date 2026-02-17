@@ -167,8 +167,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: 325000, name: 'Combined SAT+ACT Course' })}>
-                    Enroll Now
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: 325000, name: 'Combined SAT+ACT Course' })} disabled={processing}>
+                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -189,8 +189,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: 250000, name: 'Full SAT Course' })}>
-                    Enroll Now
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: 250000, name: 'Full SAT Course' })} disabled={processing}>
+                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -210,8 +210,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 250000, name: 'Full ACT Course' })}>
-                    Enroll Now
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 250000, name: 'Full ACT Course' })} disabled={processing}>
+                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>
               </Card>
@@ -243,8 +243,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full" onClick={() => onSelect({ type: 'sat-course-inperson', price: 89500, name: 'In-Person SAT Course' })}>
-                Enroll in In-Person Course
+              <Button className="w-full" onClick={() => onSelect({ type: 'sat-course-inperson', price: 89500, name: 'In-Person SAT Course' })} disabled={processing}>
+                {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll in In-Person Course'}
               </Button>
             </CardFooter>
           </Card>
@@ -290,8 +290,9 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
                 <Button 
                   className={`w-full ${plan.tier === 'core' ? 'bg-[#c79d3c] hover:bg-[#b58b2a]' : ''}`}
                   onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_price_id, name: plan.name })}
+                  disabled={processing}
                 >
-                  Join & Book
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Join & Book'}
                 </Button>
               </CardFooter>
             </Card>
@@ -332,8 +333,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: pkg.price_cents, name: pkg.name })}>
-                  Select Package
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: pkg.price_cents, name: pkg.name })} disabled={processing}>
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
             </Card>
@@ -363,8 +364,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
             </ul>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })}>
-              Book Single Session for ${singleRate}
+            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })} disabled={processing}>
+              {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : `Book Single Session for $${singleRate}`}
             </Button>
           </CardFooter>
         </Card>
