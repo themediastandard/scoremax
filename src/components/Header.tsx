@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import PremiumMobileNav from './PremiumMobileNav';
+import { HeaderUserMenu } from './HeaderUserMenu';
 
 type HeaderVariant = 'default' | 'minimal' | 'ogee';
 
@@ -182,15 +183,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
 
             {/* Right icons far right */}
             <div className="flex items-center space-x-4 justify-self-end">
-              <button aria-label="Search" className="p-2 hover:text-black text-gray-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z"/></svg>
-              </button>
-              <Link href="/login" aria-label="Account" className="p-2 hover:text-black text-gray-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              </Link>
-              <Link href="#" aria-label="Cart" className="p-2 hover:text-black text-gray-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 22a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
-              </Link>
+              <HeaderUserMenu />
               {/* Mobile burger */}
               <button 
                 className="md:hidden p-2 rounded hover:bg-gray-100" 
