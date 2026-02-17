@@ -111,7 +111,11 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
             <p className="text-lg font-semibold text-[#1e293b] truncate">
               {fullName}
             </p>
-            <p className="mt-1 text-xs font-medium text-gray-500 truncate">
+            <p className={`mt-1 text-xs font-medium truncate ${
+              tier === 'Core'
+                ? 'text-[#c79d3c] font-semibold'
+                : 'text-gray-500'
+            }`}>
               {tier ? `${tier} Member` : 'No active subscription'}
             </p>
           </>

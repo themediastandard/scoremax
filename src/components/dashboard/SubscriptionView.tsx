@@ -32,6 +32,12 @@ function formatTierName(tier: string): string {
   return map[tier?.toLowerCase()] ?? tier ?? 'Membership'
 }
 
+const TIER_PRICE_CENTS: Record<string, number> = {
+  starter: 29900,
+  core: 54900,
+  premier: 89900,
+}
+
 export function SubscriptionView({ membership, hasStripeCustomer }: SubscriptionViewProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -84,13 +90,26 @@ export function SubscriptionView({ membership, hasStripeCustomer }: Subscription
   return (
     <div className="space-y-6">
       {membership ? (
-        <Card className="border-gray-100 shadow-sm">
+        <Card
+          className={
+            membership.tier?.toLowerCase() === 'core'
+              ? 'border-2 border-[#c79d3c] shadow-md bg-gradient-to-br from-amber-50/50 to-white'
+              : 'border-gray-100 shadow-sm'
+          }
+        >
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-[#c79d3c]" />
-                {formatTierName(membership.tier)}
-              </CardTitle>
+              <div>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-[#c79d3c]" />
+                  {formatTierName(membership.tier)}
+                </CardTitle>
+                {membership.tier?.toLowerCase() === 'core' && (
+                  <p className="mt-1 text-lg font-semibold text-[#c79d3c]">
+                    ${(TIER_PRICE_CENTS.core / 100).toLocaleString()}/mo
+                  </p>
+                )}
+              </div>
               <Badge
                 variant="secondary"
                 className={
