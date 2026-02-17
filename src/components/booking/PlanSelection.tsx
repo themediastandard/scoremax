@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, Star, Loader2, BadgePercent } from 'lucide-react'
+import { Check, Star, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 interface PlanSelectionProps {
@@ -120,154 +120,143 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
     )
   }
 
+  const OptionSection = ({ optionNum, title, description, children }: { optionNum: number; title: string; description?: string; children: React.ReactNode }) => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-black text-sm font-bold text-white aspect-square">
+          {optionNum}
+        </span>
+        <div>
+          <h3 className="font-semibold text-lg text-[#1e293b]">{title}</h3>
+          {description && <p className="text-sm text-gray-600">{description}</p>}
+        </div>
+      </div>
+      {children}
+    </div>
+  )
+
   return (
     <div className="space-y-8">
-      {/* SAT/ACT Course Options */}
+      <div className="rounded-lg border border-[#c79d3c]/30 bg-amber-50/30 px-4 py-3">
+        <p className="text-center font-medium text-[#1e293b]">
+          Choose <span className="font-bold">one</span> plan below. Pick the option that works best for you.
+        </p>
+      </div>
+
+      {/* SAT/ACT Exam Prep - shown when applicable, before options */}
       {(isSAT || isACT) && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <h3 className="font-semibold text-lg text-[#1e293b] flex items-center">
             <Star className="w-5 h-5 text-[#c79d3c] mr-2 fill-current" />
-            Comprehensive Course Programs
+            Exam Prep Course Programs
           </h3>
-          
+          <p className="text-sm text-gray-600">Structured curriculum for SAT/ACT. Choose one of these or a plan below.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {/* Combined SAT+ACT */}
-             {isSAT && isACT && (
-               <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden md:col-span-2">
-                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
-                 <CardHeader>
-                   <CardTitle>Combined SAT+ACT Course</CardTitle>
-                   <div className="mt-2"><span className="text-3xl font-bold">$3,250</span></div>
-                   <p className="text-sm text-gray-500">13 Sessions • Full Prep for Both Exams</p>
-                 </CardHeader>
-                 <CardContent>
-                   <ul className="space-y-2 text-sm">
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum covering both tests</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling (2-4x/week)</li>
-                   </ul>
-                 </CardContent>
-                 <CardFooter>
-                   <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: 325000, name: 'Combined SAT+ACT Course' })}>
-                     Enroll Now
-                   </Button>
-                 </CardFooter>
-               </Card>
-             )}
-
-             {/* SAT Course */}
-             {isSAT && !isACT && (
-               <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
-                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
-                 <CardHeader>
-                   <CardTitle>Full SAT Course</CardTitle>
-                   <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
-                   <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
-                 </CardHeader>
-                 <CardContent>
-                   <ul className="space-y-2 text-sm">
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling</li>
-                   </ul>
-                 </CardContent>
-                 <CardFooter>
-                   <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: 250000, name: 'Full SAT Course' })}>
-                     Enroll Now
-                   </Button>
-                 </CardFooter>
-               </Card>
-             )}
-
-             {/* ACT Course */}
-             {isACT && !isSAT && (
-               <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
-                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
-                 <CardHeader>
-                   <CardTitle>Full ACT Course</CardTitle>
-                   <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
-                   <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
-                 </CardHeader>
-                 <CardContent>
-                   <ul className="space-y-2 text-sm">
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
-                   </ul>
-                 </CardContent>
-                 <CardFooter>
-                   <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 250000, name: 'Full ACT Course' })}>
-                     Enroll Now
-                   </Button>
-                 </CardFooter>
-               </Card>
-             )}
-
-             {/* Single Session Option */}
-             <Card className="border-gray-200 bg-slate-50/50 hover:border-gray-300 transition-colors">
-               <CardHeader>
-                 <CardTitle className="text-xl">Single Session</CardTitle>
-                 <div className="mt-2">
-                   <span className="text-3xl font-bold text-[#1e293b]">${singleRate}</span>
-                   <span className="text-gray-500 text-sm ml-1">/hr</span>
-                 </div>
-                 <p className="text-sm text-gray-600">Pay as you go • No commitment</p>
-               </CardHeader>
-               <CardContent>
-                 <ul className="space-y-2 text-sm">
-                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> No contract required</li>
-                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Book sessions individually</li>
-                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Flexibility to try before committing</li>
-                 </ul>
-               </CardContent>
-               <CardFooter>
-                 <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })}>
-                   Book Single Session
-                 </Button>
-               </CardFooter>
-             </Card>
+            {isSAT && isACT && (
+              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden md:col-span-2">
+                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
+                <CardHeader>
+                  <CardTitle>Combined SAT+ACT Course</CardTitle>
+                  <div className="mt-2"><span className="text-3xl font-bold">$3,250</span></div>
+                  <p className="text-sm text-gray-500">13 Sessions • Full Prep for Both Exams</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum covering both tests</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling (2-4x/week)</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: 325000, name: 'Combined SAT+ACT Course' })}>
+                    Enroll Now
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+            {isSAT && !isACT && (
+              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
+                <CardHeader>
+                  <CardTitle>Full SAT Course</CardTitle>
+                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
+                  <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: 250000, name: 'Full SAT Course' })}>
+                    Enroll Now
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+            {isACT && !isSAT && (
+              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
+                <CardHeader>
+                  <CardTitle>Full ACT Course</CardTitle>
+                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
+                  <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 250000, name: 'Full ACT Course' })}>
+                    Enroll Now
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
           </div>
         </div>
       )}
 
-      {/* In-Person SAT Course */}
+      {/* In-Person SAT Course - when SAT + in-person */}
       {(isSAT && sessionType === 'in-person') && (
         <div className="space-y-4">
-           <h3 className="font-semibold text-lg text-[#1e293b]">In-Person Program</h3>
-           <Card className="border-[#1e293b] border-2 bg-slate-50">
-             <CardHeader>
-               <CardTitle>In-Person SAT Course (Sawgrass, FL)</CardTitle>
-               <div className="mt-2"><span className="text-3xl font-bold">$895</span></div>
-               <p className="text-sm text-gray-500">5-Week Program</p>
-             </CardHeader>
-             <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ul className="space-y-2 text-sm">
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Small group (max 15 students)</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 2 sessions/week (2 hrs each)</li>
-                  </ul>
-                  <ul className="space-y-2 text-sm">
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Includes diagnostics + materials</li>
-                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> <strong>Bonus:</strong> 2 hours 1:1 included</li>
-                  </ul>
-                </div>
-             </CardContent>
-             <CardFooter>
-               <Button className="w-full" onClick={() => onSelect({ type: 'sat-course-inperson', price: 89500, name: 'In-Person SAT Course' })}>
-                 Enroll in In-Person Course
-               </Button>
-             </CardFooter>
-           </Card>
+          <h3 className="font-semibold text-lg text-[#1e293b]">In-Person Program</h3>
+          <Card className="border-[#1e293b] border-2 bg-white max-w-xl">
+            <CardHeader>
+              <CardTitle>In-Person SAT Course (Sawgrass, FL)</CardTitle>
+              <div className="mt-2"><span className="text-3xl font-bold">$895</span></div>
+              <p className="text-sm text-gray-500">5-Week Program</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Small group (max 15 students)</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 2 sessions/week (2 hrs each)</li>
+                </ul>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Includes diagnostics + materials</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> <strong>Bonus:</strong> 2 hours 1:1 included</li>
+                </ul>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full" onClick={() => onSelect({ type: 'sat-course-inperson', price: 89500, name: 'In-Person SAT Course' })}>
+                Enroll in In-Person Course
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       )}
 
-      {/* Memberships */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-lg text-[#1e293b]">Monthly Memberships</h3>
-        <div className="flex items-center gap-3 text-gray-700 text-sm bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-          <BadgePercent className="h-5 w-5 text-[#c79d3c] shrink-0" />
-          <p className="flex-1">
-            Save money with a monthly membership—discounted rates vs. single sessions. Cancel anytime, no commitment. Or choose a prepaid or single session below.
-          </p>
-        </div>
+      {/* Option 1: Monthly Memberships */}
+      <OptionSection
+        optionNum={1}
+        title="Monthly Membership"
+        description="Best for ongoing support. Cancel anytime—no commitment."
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {pricing.filter(p => p.type === 'membership').map(plan => {
             const membershipHourlyCents = plan.price_cents / plan.included_hours
@@ -289,12 +278,12 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-2 text-sm">
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> <strong>{savingsPercent != null ? `Save ${savingsPercent}% vs Single Rate` : 'Save vs Single Rate'}</strong></li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> <strong>Cancel anytime</strong></li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Priority Scheduling</li>
-                  {plan.tier !== 'starter' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Video Library Access</li>}
-                  {plan.tier === 'premier' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Weekend Access</li>}
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Rollover (1 hr/mo)</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null ? `Save ${savingsPercent}% vs Single Rate` : 'Save vs Single Rate'}</strong></li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>Cancel anytime</strong></li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Priority Scheduling</li>
+                  {plan.tier !== 'starter' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Video Library Access</li>}
+                  {plan.tier === 'premier' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Weekend Access</li>}
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Rollover (1 hr/mo)</li>
                 </ul>
               </CardContent>
               <CardFooter>
@@ -308,12 +297,14 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
             </Card>
           )})}
         </div>
-      </div>
-      
-      {/* Packages */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-lg text-[#1e293b]">Prepaid Packages</h3>
-        <p className="text-sm text-gray-600">Pay upfront for a block of sessions. Valid for 6 months—ideal for short-term goals.</p>
+      </OptionSection>
+
+      {/* Option 2: Prepaid Packages */}
+      <OptionSection
+        optionNum={2}
+        title="Prepaid Packages"
+        description="Pay upfront for a block of sessions. Valid 6 months—ideal for short-term goals."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {packageList.map(({ pkg, savingsPercent }) => (
             <Card key={pkg.id} className="border-gray-200 bg-white hover:border-[#517cad]/50 hover:shadow-lg transition-all">
@@ -348,35 +339,36 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
             </Card>
           ))}
         </div>
-      </div>
-      
-      {/* Fallback Single Session for non-SAT */}
-      {(!isSAT && !isACT) && (
-        <div className="space-y-4 pt-8 border-t border-gray-200">
-          <h3 className="font-semibold text-lg text-[#1e293b]">Single Session</h3>
-          <Card className="border-gray-200 bg-slate-50/50 max-w-md">
-            <CardHeader>
-              <CardTitle>Pay As You Go</CardTitle>
-              <div className="mt-2">
-                <span className="text-3xl font-bold text-[#1e293b]">${singleRate}</span>
-                <span className="text-gray-500 text-sm ml-1">/hr</span>
-              </div>
-              <p className="text-sm text-gray-600">No contract • Book individually</p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> No commitment required</li>
-                <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Perfect to try before committing</li>
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })}>
-                Book Single Session for ${singleRate}
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      )}
+      </OptionSection>
+
+      {/* Option 3: Single Session */}
+      <OptionSection
+        optionNum={3}
+        title="Single Session"
+        description="Pay as you go. No commitment—perfect to try before committing."
+      >
+        <Card className="border-gray-200 bg-slate-50/50 hover:border-gray-300 transition-colors max-w-md">
+          <CardHeader>
+            <CardTitle className="text-xl">Pay As You Go</CardTitle>
+            <div className="mt-2">
+              <span className="text-3xl font-bold text-[#1e293b]">${singleRate}</span>
+              <span className="text-gray-500 text-sm ml-1">/hr</span>
+            </div>
+            <p className="text-sm text-gray-600">No contract • Book individually</p>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> No commitment required</li>
+              <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Flexibility to try before committing</li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })}>
+              Book Single Session for ${singleRate}
+            </Button>
+          </CardFooter>
+        </Card>
+      </OptionSection>
     </div>
   )
 }
