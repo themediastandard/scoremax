@@ -38,6 +38,19 @@ export default async function OrdersPage() {
   const getSubjectNames = (ids: string[] | null) =>
     (ids ?? []).map((id) => subjectMap.get(id)).filter(Boolean).join(', ') || '—'
 
+  const getOrderCardBorder = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'border-2 border-emerald-500/60 shadow-sm'
+      case 'processing':
+        return 'border-2 border-amber-500/60 shadow-sm'
+      case 'completed':
+        return 'border-2 border-slate-300 shadow-sm'
+      default:
+        return 'border-2 border-red-500/60 shadow-sm'
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -58,7 +71,7 @@ export default async function OrdersPage() {
           {orders?.map((order: any) => (
             <Card
               key={order.id}
-              className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md hover:border-[#517cad]/30 transition-all duration-200"
+              className={`overflow-hidden ${getOrderCardBorder(order.status)} hover:shadow-md transition-all duration-200`}
             >
               <CardHeader className="pb-3 px-6 sm:px-8">
                 <div className="flex flex-wrap items-center justify-between gap-6">
@@ -175,12 +188,6 @@ export default async function OrdersPage() {
                     </div>
                   )}
                 </div>
-                {order.notes && (
-                  <div className="mt-6 pt-6 border-t border-gray-100">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Notes</p>
-                    <p className="text-gray-700 text-sm">{order.notes}</p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}
