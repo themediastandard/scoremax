@@ -50,6 +50,10 @@ const navItems: NavItem[] = [
   {
     label: 'About Us',
     href: '/about'
+  },
+  {
+    label: 'Client Login',
+    href: '/login'
   }
 ];
 
@@ -113,7 +117,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto py-6">
           <nav className="px-6 space-y-2">
-            {navItems.map((item, index) => (
+            {navItems.map((item) => (
               <div key={item.label} className="premium-nav-item">
                 {item.children ? (
                   <div>

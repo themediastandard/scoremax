@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import VideoHero from '../components/VideoHero';
-import StickyBottomCTA from '../components/StickyBottomCTA';
 import DualCTA from '../components/DualCTA';
 import IntroBanner from '../components/IntroBanner';
 import StepUpSection from '../components/StepUpSection';
