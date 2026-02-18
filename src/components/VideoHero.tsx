@@ -43,13 +43,13 @@ export default function VideoHero({
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={ctaHref}
-              className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-7 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors"
+              className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-7 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]"
             >
               {ctaText}
             </Link>
             <Link
               href={secondaryHref}
-              className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-7 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-7 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors font-[family-name:var(--font-playfair)]"
             >
               {secondaryText}
             </Link>

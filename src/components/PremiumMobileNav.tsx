@@ -15,24 +15,40 @@ interface NavItem {
   children?: NavItem[];
 }
 
-const navItems: NavItem[] = [
+interface NavSection {
+  title: string;
+  links: { label: string; href: string }[];
+}
+
+interface TutoringNavItem {
+  label: string;
+  sections?: NavSection[];
+}
+
+const navItems: (NavItem | TutoringNavItem)[] = [
   {
     label: 'Home',
     href: '/'
   },
   {
-    label: 'Test Prep',
-    children: [
-      { label: 'SAT Tutoring', href: '/test-prep/sat' },
-      { label: 'ACT Tutoring', href: '/test-prep/act' },
-      { label: 'In-Person Classes', href: '/test-prep/in-person-classes' }
-    ]
-  },
-  {
-    label: 'College & High School',
-    children: [
-      { label: 'College Tutoring', href: '/college-high-school/college-tutoring' },
-      { label: 'High School Tutoring', href: '/college-high-school/high-school-tutoring' }
+    label: 'Tutoring',
+    sections: [
+      {
+        title: 'Test Prep',
+        links: [
+          { label: 'SAT Tutoring', href: '/test-prep/sat' },
+          { label: 'ACT Tutoring', href: '/test-prep/act' },
+          { label: 'In-Person Classes', href: '/test-prep/in-person-classes' }
+        ]
+      },
+      {
+        title: 'Academic Tutoring',
+        links: [
+          { label: 'College Tutoring', href: '/college-high-school/college-tutoring' },
+          { label: 'High School Tutoring', href: '/college-high-school/high-school-tutoring' },
+          { label: 'Subjects', href: '/subjects' }
+        ]
+      }
     ]
   },
   {
@@ -120,17 +136,17 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto py-6">
-          <nav className="px-6 space-y-2">
+          <nav className="px-6 space-y-2 font-[family-name:var(--font-playfair)]">
             {navItems.map((item) => (
               <div key={item.label} className="premium-nav-item">
-                {item.children ? (
+                {'sections' in item && item.sections ? (
                   <div>
                     <button
                       onClick={() => toggleExpanded(item.label)}
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold text-gray-900 text-lg">{item.label}</span>
+                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,8 +154,47 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                         </svg>
                       </div>
                     </button>
-                    
-                    {/* Dropdown */}
+                    <div className={`overflow-hidden transition-all duration-300 ease-out ${
+                      expandedItems.has(item.label) ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}>
+                      <div className="pl-6 pr-4 py-2 space-y-4">
+                        {item.sections.map((section) => (
+                          <div key={section.title}>
+                            <div className="text-[11px] font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
+                            <div className="space-y-1">
+                              {section.links.map((link) => (
+                                <Link
+                                  key={link.label}
+                                  href={link.href}
+                                  onClick={handleLinkClick}
+                                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 touch-manipulation group touch-feedback"
+                                >
+                                  <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 uppercase">
+                                    {link.label}
+                                  </span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : 'children' in item && item.children ? (
+                  <div>
+                    <button
+                      onClick={() => toggleExpanded(item.label)}
+                      className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
+                      </div>
+                      <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
+                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </button>
                     <div className={`overflow-hidden transition-all duration-300 ease-out ${
                       expandedItems.has(item.label) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                     }`}>
@@ -151,7 +206,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                             onClick={handleLinkClick}
                             className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 touch-manipulation group touch-feedback"
                           >
-                            <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200">
+                            <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 uppercase">
                               {child.label}
                             </span>
                           </Link>
@@ -159,17 +214,17 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       </div>
                     </div>
                   </div>
-                ) : (
+                ) : 'href' in item && item.href ? (
                   <Link
-                    href={item.href!}
+                    href={item.href}
                     onClick={handleLinkClick}
                     className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                   >
-                    <span className="font-medium text-gray-900 text-lg group-hover:text-[#c79d3c] transition-colors duration-200">
+                    <span className="font-medium text-gray-900 text-lg group-hover:text-[#c79d3c] transition-colors duration-200 uppercase">
                       {item.label}
                     </span>
                   </Link>
-                )}
+                ) : null}
               </div>
             ))}
           </nav>
@@ -180,7 +235,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
           <Link
             href="/contact"
             onClick={handleLinkClick}
-            className="w-full bg-[#c79d3c] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px]"
+            className="w-full bg-[#c79d3c] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px] font-[family-name:var(--font-playfair)]"
           >
             Book Free Consultation
           </Link>

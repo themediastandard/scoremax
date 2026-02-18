@@ -210,7 +210,7 @@ export default function Home() {
             <div className="w-10 h-[2px] bg-[#c79d3c] mt-4 mb-5" />
             <p className="text-gray-500 text-sm leading-relaxed">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">Book Free Consultation</Link>
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">Book Free Consultation</Link>
             </div>
             <div className="mt-5 flex gap-5 text-xs text-gray-400">
               <span>Step Up For Students accepted</span>

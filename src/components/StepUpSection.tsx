@@ -18,8 +18,8 @@ export default function StepUpSection() {
             tutoring that fits both budget and schedule.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/step-up-for-students" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">Learn About Step Up</Link>
-            <Link href="/contact" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">Check Eligibility</Link>
+            <Link href="/step-up-for-students" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">Learn About Step Up</Link>
+            <Link href="/contact" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors font-[family-name:var(--font-playfair)]">Check Eligibility</Link>
           </div>
           <div className="mt-5 text-xs text-gray-400">SAT  ·  ACT  ·  Elementary  ·  Middle  ·  High School  ·  College</div>
         </div>

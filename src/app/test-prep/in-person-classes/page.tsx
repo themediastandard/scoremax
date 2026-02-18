@@ -57,8 +57,8 @@ export default function InPersonClassesPage() {
               <p className="text-gray-500 text-sm leading-relaxed max-w-lg mb-8">
                 Join our comprehensive in-person course designed to maximize your test scores. Learn from expert instructors in a structured classroom with proven strategies and hands-on practice.
               </p>
-              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
-                Enroll Now
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+                Book Free Consultation
               </Link>
             </div>
             
@@ -250,10 +250,10 @@ export default function InPersonClassesPage() {
             Take the first step toward your dream score. Limited spots available for our next session.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
-              Enroll Now
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+              Book Free Consultation
             </Link>
-            <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
+            <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors font-[family-name:var(--font-playfair)]">
               View Pricing
             </Link>
           </div>
