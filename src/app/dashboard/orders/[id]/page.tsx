@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
 import { formatDateTime, formatAmount } from '@/lib/order-format'
-import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard } from 'lucide-react'
+import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, VideoIcon } from 'lucide-react'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -161,6 +161,21 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   </div>
                 </div>
               </div>
+
+              {order.meet_url && (
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Google Meet</p>
+                  <a
+                    href={order.meet_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-emerald-700 font-medium hover:bg-emerald-100 transition-colors"
+                  >
+                    <VideoIcon className="h-5 w-5" />
+                    Join Meeting
+                  </a>
+                </div>
+              )}
 
               {order.notes && (
                 <div className="pt-4 border-t border-gray-100">

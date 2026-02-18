@@ -28,7 +28,73 @@ async function handleStatusChange(booking: any, newStatus: string) {
     const startTime = new Date(booking.confirmed_start)
     const endTime = new Date(booking.confirmed_end)
 
-    // Send Student Confirmation Email
+    const isOnline = booking.session_type === 'online'
+    const meetConference = isOnline ? {
+      conferenceData: {
+        createRequest: {
+          requestId: `scoremax-${booking.id}`,
+          conferenceSolutionKey: { type: 'hangoutsMeet' }
+        }
+      }
+    } : {}
+
+    const eventBody = {
+      summary: `ScoreMax: ${isOnline ? 'Online' : 'In-Person'} Session`,
+      description: `Student: ${booking.customers.full_name}\nTutor: ${booking.tutors.full_name}\nLocation: ${isOnline ? 'Online (Google Meet)' : 'Sawgrass, FL'}`,
+      start: { dateTime: startTime.toISOString() },
+      end: { dateTime: endTime.toISOString() },
+    }
+
+    // Tutor Calendar (creates the Meet link for online sessions)
+    if (booking.tutors?.google_refresh_token) {
+      try {
+        const tutorAuth = getAuthClient(booking.tutors.google_refresh_token)
+        const event = await calendar.events.insert({
+          auth: tutorAuth,
+          calendarId: 'primary',
+          conferenceDataVersion: isOnline ? 1 : 0,
+          requestBody: {
+            ...eventBody,
+            ...meetConference,
+            summary: `ScoreMax Session: ${booking.customers.full_name}`
+          }
+        })
+        updates.tutor_calendar_event_id = event.data.id
+        if (event.data.hangoutLink) {
+          updates.meet_url = event.data.hangoutLink
+        }
+      } catch (error) {
+        console.error('Failed to create tutor calendar event', error)
+      }
+    }
+
+    // Student Calendar (includes Meet link if one was created)
+    if (booking.customers?.google_refresh_token) {
+      try {
+        const studentAuth = getAuthClient(booking.customers.google_refresh_token)
+        const studentEventBody = { ...eventBody, summary: `ScoreMax Session: ${booking.tutors.full_name}` }
+        if (updates.meet_url) {
+          studentEventBody.description += `\n\nGoogle Meet: ${updates.meet_url}`
+        }
+        const event = await calendar.events.insert({
+          auth: studentAuth,
+          calendarId: 'primary',
+          conferenceDataVersion: isOnline ? 1 : 0,
+          requestBody: {
+            ...studentEventBody,
+            ...meetConference,
+          }
+        })
+        updates.student_calendar_event_id = event.data.id
+      } catch (error) {
+        console.error('Failed to create student calendar event', error)
+      }
+    }
+
+    const locationText = isOnline
+      ? `Online (Google Meet)${updates.meet_url ? ` - <a href="${updates.meet_url}">Join Meeting</a>` : ''}`
+      : 'Sawgrass, FL'
+
     await resend.emails.send({
       from: 'ScoreMax <noreply@scoremax.com>',
       to: booking.customers.email,
@@ -39,11 +105,10 @@ async function handleStatusChange(booking: any, newStatus: string) {
         <p>Your tutoring session has been confirmed!</p>
         <p><strong>Tutor:</strong> ${booking.tutors.full_name}</p>
         <p><strong>Time:</strong> ${startTime.toLocaleString()}</p>
-        <p><strong>Location:</strong> ${booking.session_type === 'in-person' ? 'Sawgrass, FL' : 'Online (Zoom)'}</p>
+        <p><strong>Location:</strong> ${locationText}</p>
       `
     })
 
-    // Send Tutor Notification
     await resend.emails.send({
       from: 'ScoreMax <noreply@scoremax.com>',
       to: booking.tutors.email,
@@ -54,53 +119,9 @@ async function handleStatusChange(booking: any, newStatus: string) {
         <p>You have been assigned a new session.</p>
         <p><strong>Student:</strong> ${booking.customers.full_name}</p>
         <p><strong>Time:</strong> ${startTime.toLocaleString()}</p>
-        <p><strong>Location:</strong> ${booking.session_type === 'in-person' ? 'Sawgrass, FL' : 'Online (Zoom)'}</p>
+        <p><strong>Location:</strong> ${locationText}</p>
       `
     })
-
-    // Create Calendar Events
-    const eventBody = {
-      summary: `ScoreMax: ${booking.session_type === 'in-person' ? 'In-Person' : 'Online'} Session`,
-      description: `Student: ${booking.customers.full_name}\nTutor: ${booking.tutors.full_name}\nLocation: ${booking.session_type === 'in-person' ? 'Sawgrass, FL' : 'Online'}`,
-      start: { dateTime: startTime.toISOString() },
-      end: { dateTime: endTime.toISOString() },
-    }
-
-    // Tutor Calendar
-    if (booking.tutors?.google_refresh_token) {
-      try {
-        const tutorAuth = getAuthClient(booking.tutors.google_refresh_token)
-        const event = await calendar.events.insert({
-          auth: tutorAuth,
-          calendarId: 'primary',
-          requestBody: {
-            ...eventBody,
-            summary: `ScoreMax Session: ${booking.customers.full_name}`
-          }
-        })
-        updates.tutor_calendar_event_id = event.data.id
-      } catch (error) {
-        console.error('Failed to create tutor calendar event', error)
-      }
-    }
-
-    // Student Calendar
-    if (booking.customers?.google_refresh_token) {
-      try {
-        const studentAuth = getAuthClient(booking.customers.google_refresh_token)
-        const event = await calendar.events.insert({
-          auth: studentAuth,
-          calendarId: 'primary',
-          requestBody: {
-            ...eventBody,
-            summary: `ScoreMax Session: ${booking.tutors.full_name}`
-          }
-        })
-        updates.student_calendar_event_id = event.data.id
-      } catch (error) {
-         console.error('Failed to create student calendar event', error)
-      }
-    }
   }
 
   // 2. Active -> Completed
@@ -170,6 +191,44 @@ async function handleStatusChange(booking: any, newStatus: string) {
   return updates
 }
 
+async function handleReschedule(booking: any, newStart: string, newEnd: string) {
+  const updates: any = {}
+  const startTime = new Date(newStart)
+  const endTime = new Date(newEnd)
+
+  if (booking.tutor_calendar_event_id && booking.tutors?.google_refresh_token) {
+    try {
+      const tutorAuth = getAuthClient(booking.tutors.google_refresh_token)
+      await calendar.events.patch({
+        auth: tutorAuth,
+        calendarId: 'primary',
+        eventId: booking.tutor_calendar_event_id,
+        requestBody: {
+          start: { dateTime: startTime.toISOString() },
+          end: { dateTime: endTime.toISOString() },
+        }
+      })
+    } catch (e) { console.error('Failed to update tutor calendar event', e) }
+  }
+
+  if (booking.student_calendar_event_id && booking.customers?.google_refresh_token) {
+    try {
+      const studentAuth = getAuthClient(booking.customers.google_refresh_token)
+      await calendar.events.patch({
+        auth: studentAuth,
+        calendarId: 'primary',
+        eventId: booking.student_calendar_event_id,
+        requestBody: {
+          start: { dateTime: startTime.toISOString() },
+          end: { dateTime: endTime.toISOString() },
+        }
+      })
+    } catch (e) { console.error('Failed to update student calendar event', e) }
+  }
+
+  return updates
+}
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { data, error } = await supabaseAdmin
     .from('booking_requests')
@@ -235,6 +294,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     } catch (err: any) {
       return NextResponse.json({ error: err.message }, { status: 400 })
     }
+  }
+
+  // Handle reschedule on active bookings (status unchanged but times changed)
+  const statusUnchanged = !status || status === currentBooking.status
+  const timesChanged = (confirmed_start && confirmed_start !== currentBooking.confirmed_start) ||
+    (confirmed_end && confirmed_end !== currentBooking.confirmed_end)
+  if (statusUnchanged && currentBooking.status === 'active' && timesChanged) {
+    const rescheduleUpdates = await handleReschedule(
+      currentBooking,
+      confirmed_start || currentBooking.confirmed_start,
+      confirmed_end || currentBooking.confirmed_end
+    )
+    updates = { ...updates, ...rescheduleUpdates }
   }
 
   // Update Database
