@@ -1,28 +1,20 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { getCustomerMembership } from '@/lib/customer-membership'
-
-export const dynamic = 'force-dynamic'
+import { getAuthUser, getProfile } from '@/lib/auth'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   
   if (!user) {
     redirect('/login')
   }
   
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, full_name')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfile(user.id)
     
   if (!profile) {
     redirect('/login')

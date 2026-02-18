@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Cormorant_Garamond } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
 import { HeaderFooterWrapper } from "../components/HeaderFooterWrapper";
@@ -9,15 +9,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// Approximate Chronicle Display look with Cormorant Garamond for headings
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
-});
-const chronicleApprox = Cormorant_Garamond({
-  variable: "--font-chronicle",
-  subsets: ["latin"],
-  weight: ["400","500","600","700"],
 });
 
 export const metadata: Metadata = {
@@ -66,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} ${chronicleApprox.variable} antialiased`}>
+      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <MobileOptimizations />
         {/* WebSite JSON-LD with SearchAction */}
         <script

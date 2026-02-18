@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PremiumMobileNav from './PremiumMobileNav';
 import { HeaderUserMenu } from './HeaderUserMenu';
 
@@ -15,15 +15,15 @@ interface HeaderProps {
 export default function Header({ variant = 'default' }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  if (typeof window !== 'undefined') {
-    // lightweight scroll listener for header polish
-    window.addEventListener('scroll', () => {
-      const s = window.scrollY > 4;
-      if (s !== scrolled) setScrolled(s);
-    }, { passive: true });
-  }
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 4);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   const [servicesOpen, setServicesOpen] = useState(false);
 
   if (variant === 'minimal') {

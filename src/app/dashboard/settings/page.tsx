@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProfileForm } from '@/components/dashboard/ProfileForm'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getAuthUser, getProfile } from '@/lib/auth'
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+  const profile = await getProfile(user.id)
+  const supabase = await createClient()
 
   let customerData = null
   let isGoogleConnected = false

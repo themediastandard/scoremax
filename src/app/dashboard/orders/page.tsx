@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, Calendar, User, BookOpen, Video } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
+import { getAuthUser, getProfile } from '@/lib/auth'
 
 export default async function OrdersPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const profile = await getProfile(user.id)
+  const supabase = await createClient()
 
   let query = supabase.from('booking_requests').select(`
     *,

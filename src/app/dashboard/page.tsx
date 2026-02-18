@@ -6,62 +6,55 @@ import { Button } from '@/components/ui/button'
 import { formatPlanLabel } from '@/lib/order-format'
 import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard, Video, MapPin } from 'lucide-react'
 import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
+import { getAuthUser, getProfile } from '@/lib/auth'
 
 export default async function DashboardHome() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+  const user = await getAuthUser()
   if (!user) redirect('/login')
   
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, full_name')
-    .eq('id', user.id)
-    .single()
-    
+  const profile = await getProfile(user.id)
   if (!profile) return <div>Profile not found</div>
+
+  const supabase = await createClient()
   
   // ADMIN VIEW
   if (profile.role === 'admin') {
-    // Fetch stats
-    // We can call our API or fetch directly. Fetching directly is faster/SSR.
-    // For MVP simplicity, let's fetch directly here.
-    
-    // Pending Orders
-    const { count: pendingCount } = await supabase
-      .from('booking_requests')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'processing')
-      
-    // Active Sessions
-    const { count: activeCount } = await supabase
-      .from('booking_requests')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-      
-    // Active Members
-    const { count: memberCount } = await supabase
-      .from('memberships')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
-
-    const { count: customerCount } = await supabase
-      .from('customers')
-      .select('*', { count: 'exact', head: true })
-
-    const { data: pendingOrders } = await supabase
-      .from('booking_requests')
-      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, subjects, session_type, customers(full_name)')
-      .eq('status', 'processing')
-      .order('created_at', { ascending: false })
-      .limit(10)
-
-    const { data: activeOrders } = await supabase
-      .from('booking_requests')
-      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, subjects, session_type, customers(full_name), tutors(full_name)')
-      .eq('status', 'active')
-      .order('confirmed_start', { ascending: true })
-      .limit(10)
+    const [
+      { count: pendingCount },
+      { count: activeCount },
+      { count: memberCount },
+      { count: customerCount },
+      { data: pendingOrders },
+      { data: activeOrders },
+    ] = await Promise.all([
+      supabase
+        .from('booking_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'processing'),
+      supabase
+        .from('booking_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      supabase
+        .from('memberships')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      supabase
+        .from('customers')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('booking_requests')
+        .select('id, created_at, status, payment_type, amount_cents, confirmed_start, subjects, session_type, customers(full_name)')
+        .eq('status', 'processing')
+        .order('created_at', { ascending: false })
+        .limit(10),
+      supabase
+        .from('booking_requests')
+        .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, subjects, session_type, customers(full_name), tutors(full_name)')
+        .eq('status', 'active')
+        .order('confirmed_start', { ascending: true })
+        .limit(10),
+    ])
 
     return (
       <div className="space-y-8">

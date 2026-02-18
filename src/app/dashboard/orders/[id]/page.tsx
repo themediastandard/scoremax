@@ -7,13 +7,14 @@ import { formatDateTime, formatAmount } from '@/lib/order-format'
 import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, Clock } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
+import { getAuthUser, getProfile } from '@/lib/auth'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const profile = await getProfile(user.id)
+  const supabase = await createClient()
   
   // Fetch order
   const { data: order, error } = await supabase

@@ -46,7 +46,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [role, pathname])
+  }, [role])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
