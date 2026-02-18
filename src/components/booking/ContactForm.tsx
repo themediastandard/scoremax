@@ -19,12 +19,16 @@ interface ContactFormProps {
   onChange: (value: any) => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onMemberCheck: (status: any) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  externalMemberStatus?: any
 }
 
-export function ContactForm({ value, onChange, onMemberCheck }: ContactFormProps) {
+export function ContactForm({ value, onChange, onMemberCheck, externalMemberStatus }: ContactFormProps) {
   const [checking, setChecking] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [memberStatus, setMemberStatus] = useState<any>(null)
+  const [internalMemberStatus, setInternalMemberStatus] = useState<any>(null)
+
+  const memberStatus = internalMemberStatus || externalMemberStatus
 
   const handleBlur = async () => {
     if (!value.email || !value.email.includes('@')) return
@@ -33,7 +37,7 @@ export function ContactForm({ value, onChange, onMemberCheck }: ContactFormProps
     try {
       const res = await fetch(`/api/customer/check?email=${encodeURIComponent(value.email)}`)
       const data = await res.json()
-      setMemberStatus(data)
+      setInternalMemberStatus(data)
       onMemberCheck(data)
     } catch (err) {
       console.error(err)
@@ -83,25 +87,23 @@ export function ContactForm({ value, onChange, onMemberCheck }: ContactFormProps
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
+          <Label htmlFor="phone">Phone Number</Label>
           <Input 
             id="phone" 
             type="tel" 
             value={value.phone} 
             onChange={(e) => handleChange('phone', e.target.value)} 
             placeholder="(555) 123-4567"
-            required
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="grade">Student Grade <span className="text-red-500">*</span></Label>
+          <Label htmlFor="grade">Student Grade (Optional)</Label>
           <Input 
             id="grade" 
             value={value.studentGrade} 
             onChange={(e) => handleChange('studentGrade', e.target.value)} 
             placeholder="e.g. 11th Grade"
-            required
           />
         </div>
       </div>

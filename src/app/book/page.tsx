@@ -91,6 +91,7 @@ export default function BookPage() {
   
   const { 
     state, 
+    setState,
     revealed, 
     setRevealed, 
     memberStatus, 
@@ -124,6 +125,42 @@ export default function BookPage() {
         console.error(err)
         setLoadingSubjects(false)
       })
+  }, [])
+
+  const [prefilled, setPrefilled] = useState(false)
+
+  useEffect(() => {
+    if (prefilled) return
+    async function prefillContact() {
+      try {
+        const res = await fetch('/api/account/profile')
+        if (!res.ok) return
+        const data = await res.json()
+        if (!data.email) return
+
+        setState(prev => ({
+          ...prev,
+          contact: {
+            fullName: data.fullName || prev.contact.fullName,
+            email: data.email || prev.contact.email,
+            phone: data.phone || prev.contact.phone,
+            studentGrade: data.studentGrade || prev.contact.studentGrade,
+            notes: prev.contact.notes
+          }
+        }))
+        setPrefilled(true)
+
+        const checkRes = await fetch(`/api/customer/check?email=${encodeURIComponent(data.email)}`)
+        if (checkRes.ok) {
+          const memberData = await checkRes.json()
+          setMemberStatus(memberData)
+        }
+      } catch {
+        // Not signed in or API error
+      }
+    }
+    prefillContact()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Derived state for summaries
@@ -356,11 +393,12 @@ export default function BookPage() {
                 value={state.contact} 
                 onChange={(contact) => updateContact(contact)} 
                 onMemberCheck={(status) => setMemberStatus(status)}
+                externalMemberStatus={memberStatus}
               />
               <div className="flex justify-end pt-4">
                 <Button 
                   onClick={() => handleNext('contact')} 
-                  disabled={!state.contact.email || !state.contact.fullName || !state.contact.phone || !state.contact.studentGrade}
+                  disabled={!state.contact.email || !state.contact.fullName}
                   className="bg-[#1e293b]"
                 >
                   See Options

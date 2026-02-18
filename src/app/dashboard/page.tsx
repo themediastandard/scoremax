@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { formatPlanLabel } from '@/lib/order-format'
-import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle } from 'lucide-react'
+import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard } from 'lucide-react'
 
 export default async function DashboardHome() {
   const supabase = await createClient()
@@ -257,105 +257,198 @@ export default async function DashboardHome() {
     .eq('profile_id', user.id)
     .maybeSingle()
 
-  const { data: orders } = await supabase
-    .from('booking_requests')
-    .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, tutors(full_name)')
-    .eq('customer_id', customer?.id ?? '00000000-0000-0000-0000-000000000000')
-    .order('created_at', { ascending: false })
-    .limit(5)
+  const customerId = customer?.id ?? '00000000-0000-0000-0000-000000000000'
+
+  const [{ data: orders }, { data: subjects }, { data: membership }] = await Promise.all([
+    supabase
+      .from('booking_requests')
+      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, session_type, subjects, tutors(full_name)')
+      .eq('customer_id', customerId)
+      .in('status', ['processing', 'active'])
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase.from('subjects').select('id, name'),
+    supabase
+      .from('memberships')
+      .select('tier, status, included_hours, used_hours, rollover_hours, current_period_end')
+      .eq('customer_id', customerId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .maybeSingle()
+      .then(r => r)
+  ])
+
+  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+  const creditsRemaining = membership
+    ? (membership.included_hours + membership.rollover_hours) - membership.used_hours
+    : 0
+  const tierLabel = membership?.tier
+    ? membership.tier.charAt(0).toUpperCase() + membership.tier.slice(1)
+    : null
 
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-[#f8fafc] border-dashed border-2 border-gray-200 flex flex-col items-center justify-center p-8 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Need help with a subject?</h3>
-          <p className="text-gray-500 mb-6">Book a new tutoring session or enroll in a course.</p>
-          <Link href="/book">
-            <Button size="lg" className="bg-[#c79d3c] hover:bg-[#b58b2a]">Book a Session</Button>
-          </Link>
+      {membership ? (
+        <Card className={`shadow-sm ${tierLabel === 'Core' ? 'border-2 border-[#c79d3c] bg-gradient-to-br from-amber-50/40 to-white' : 'border-gray-100'}`}>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${tierLabel === 'Core' ? 'bg-[#c79d3c]/10' : 'bg-[#517cad]/10'}`}>
+                  <CreditCard className={`h-6 w-6 ${tierLabel === 'Core' ? 'text-[#c79d3c]' : 'text-[#517cad]'}`} />
+                </div>
+                <div>
+                  <p className={`text-lg font-semibold ${tierLabel === 'Core' ? 'text-[#c79d3c]' : 'text-[#1e293b]'}`}>
+                    {tierLabel} Membership
+                  </p>
+                  {membership.current_period_end && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Renews {new Date(membership.current_period_end).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-[#1e293b]">{creditsRemaining}</p>
+                  <p className="text-xs text-gray-500">Credits left</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-gray-400">{membership.used_hours}</p>
+                  <p className="text-xs text-gray-500">Used</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-gray-300">{membership.included_hours}</p>
+                  <p className="text-xs text-gray-500">Included</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-500 mb-4">View your booking history and status.</p>
-            <Link href="/dashboard/orders">
-              <Button variant="outline" className="w-full">View My Orders</Button>
+      ) : (
+        <Card className="border-dashed border-2 border-gray-200 bg-[#f8fafc]">
+          <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-[#1e293b]">No active membership</p>
+              <p className="text-sm text-gray-500 mt-0.5">Subscribe to get session credits and member pricing.</p>
+            </div>
+            <Link href="/book">
+              <Button className="bg-[#c79d3c] hover:bg-[#b58b2a]">View Plans</Button>
             </Link>
           </CardContent>
         </Card>
+      )}
+
+      <div className="flex flex-wrap gap-3">
+        <Link href="/book">
+          <Button className="bg-[#c79d3c] hover:bg-[#b58b2a]">Book a Session</Button>
+        </Link>
+        <Link href="/dashboard/orders">
+          <Button variant="outline">View All Orders</Button>
+        </Link>
+        {membership && (
+          <Link href="/dashboard/subscription">
+            <Button variant="outline">Manage Subscription</Button>
+          </Link>
+        )}
       </div>
 
       {orders && orders.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-[#517cad]" />
-              Active Orders
-            </CardTitle>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-serif font-bold text-[#1e293b]">Your Upcoming Sessions</h2>
             <Link href="/dashboard/orders">
               <Button variant="ghost" size="sm" className="text-[#517cad]">
                 View all <ChevronRight className="h-4 w-4 ml-0.5" />
               </Button>
             </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {orders.map((order: any) => (
+          </div>
+          <div className="space-y-4">
+            {orders.map((order: any) => {
+              const subjectNames = (order.subjects ?? [])
+                .map((id: string) => subjectMap.get(id))
+                .filter(Boolean)
+                .join(', ')
+              const isActive = order.status === 'active'
+              const isProcessing = order.status === 'processing'
+
+              return (
                 <Link
                   key={order.id}
                   href={`/dashboard/orders/${order.id}`}
-                  className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/80 hover:border-[#517cad]/30 transition-colors"
+                  className={`block rounded-xl border-2 p-5 transition-colors ${
+                    isActive
+                      ? 'border-emerald-200 bg-emerald-50/30 hover:border-emerald-300'
+                      : isProcessing
+                        ? 'border-amber-200 bg-amber-50/30 hover:border-amber-300'
+                        : 'border-gray-100 hover:border-gray-200'
+                  }`}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                          order.status === 'active'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : order.status === 'processing'
-                              ? 'bg-amber-50 text-amber-700'
-                              : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                      <span className="font-medium text-[#1e293b]">{formatPlanLabel(order)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      {order.confirmed_start ? (
-                        <>
-                          <Calendar className="h-4 w-4 shrink-0" />
-                          <span>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                            isActive
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}
+                        >
+                          {isActive ? 'Confirmed' : 'Pending'}
+                        </span>
+                        <span className="text-sm text-gray-400 capitalize">{order.session_type}</span>
+                      </div>
+
+                      {subjectNames && (
+                        <p className="font-medium text-[#1e293b]">{subjectNames}</p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-600">
+                        {order.confirmed_start ? (
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
                             {new Date(order.confirmed_start).toLocaleDateString(undefined, {
                               weekday: 'short',
                               month: 'short',
                               day: 'numeric',
-                            })}{' '}
+                            })}
+                            {', '}
                             {new Date(order.confirmed_start).toLocaleTimeString(undefined, {
                               hour: 'numeric',
                               minute: '2-digit',
                             })}
+                            {order.confirmed_end && (
+                              <span className="text-gray-400">
+                                {' – '}
+                                {new Date(order.confirmed_end).toLocaleTimeString(undefined, {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            )}
                           </span>
-                        </>
-                      ) : (
-                        <span className="italic">Not yet scheduled</span>
-                      )}
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <span className="flex items-center gap-1.5 italic text-gray-400">
+                            <Calendar className="h-4 w-4 shrink-0" />
+                            Awaiting scheduling
+                          </span>
+                        )}
+                        {order.tutors?.full_name && (
+                          <span className="flex items-center gap-1.5">
+                            <Users className="h-4 w-4 text-gray-400 shrink-0" />
+                            {order.tutors.full_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    <ChevronRight className="h-5 w-5 text-gray-300 shrink-0 mt-1" />
                   </div>
-                  {order.tutors?.full_name && (
-                    <p className="text-xs text-gray-500 mt-2">Tutor: {order.tutors.full_name}</p>
-                  )}
                 </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              )
+            })}
+          </div>
+        </div>
       )}
     </div>
   )
