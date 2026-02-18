@@ -12,7 +12,7 @@ const quickLinks = [
   { label: "Pricing", href: "/pricing" },
   { label: "Book a Session", href: "/book" },
   { label: "Contact", href: "/contact" },
-  { label: "Step Up For Students", href: "/step-up-for-students" },
+  { label: "Scholarship", href: "/step-up-for-students" },
 ];
 
 const serviceLinks = [

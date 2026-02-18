@@ -10,7 +10,7 @@ export default function StepUpSection() {
         </div>
         <div className="md:order-2 order-1">
           <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Florida Scholarship Provider</div>
-          <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Step Up For Students</h3>
+          <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Scholarship</h3>
           <div className="w-10 h-[2px] bg-[#c79d3c] mt-4 mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed">
             Being a Step Up For Students provider for the State of Florida is a huge financial convenience for

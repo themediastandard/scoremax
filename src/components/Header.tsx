@@ -39,11 +39,11 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               </button>
               {menuOpen && (
                 <div className="absolute mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl p-2 z-50 uppercase font-[family-name:var(--font-playfair)]">
-                  <Link href="/" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">Home</Link>
-                  <Link href="/tutors" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">Tutors</Link>
-                  <Link href="/step-up-for-students" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">Step Up For Students</Link>
-                  <Link href="/contact" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">Contact</Link>
-                  <Link href="/about" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700">About</Link>
+                  <Link href="/" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-base text-gray-700">Home</Link>
+                  <Link href="/tutors" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-base text-gray-700">Tutors</Link>
+                  <Link href="/step-up-for-students" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-base text-gray-700">Scholarship</Link>
+                  <Link href="/about" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-base text-gray-700">About</Link>
+                  <Link href="/contact" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-base text-gray-700">Contact</Link>
                 </div>
               )}
             </div>
@@ -64,23 +64,23 @@ export default function Header({ variant = 'default' }: HeaderProps) {
 <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                            <Link href="/test-prep/act" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                            <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
+                            <Link href="/test-prep/act" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
+                            <Link href="/test-prep/in-person-classes" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
                           </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
                       <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                       <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                       <div className="space-y-0.5">
-                        <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                        <Link href="/college-high-school/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                        <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
+                        <Link href="/college-high-school/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
                       </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
                       <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                       <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                      <Link href="/subjects" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                      <Link href="/subjects" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                     </div>
                   </div>
                 </div>
@@ -110,9 +110,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             {/* Desktop nav */}
             <div className="hidden md:flex items-center justify-center justify-self-center font-[family-name:var(--font-playfair)] uppercase">
               <div className="flex items-center gap-7">
-                <Link href="/" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Home</Link>
+                <Link href="/" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Home</Link>
                 <div className="relative group">
-                  <button className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                  <button className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
                     Tutoring
                     <svg className="w-3 h-3 text-gray-300 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
@@ -123,32 +123,32 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                            <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                            <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
+                            <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
+                            <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
                           <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                            <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                            <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
+                            <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
                           <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                          <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                          <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <Link href="/step-up-for-students" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Step Up For Students</Link>
-                <Link href="/pricing" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Pricing</Link>
-                <Link href="/contact" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Contact</Link>
-                <Link href="/about" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">About Us</Link>
+                <Link href="/step-up-for-students" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Scholarship</Link>
+                <Link href="/pricing" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Pricing</Link>
+                <Link href="/about" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">About Us</Link>
+                <Link href="/contact" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Contact</Link>
               </div>
             </div>
 
@@ -192,11 +192,11 @@ export default function Header({ variant = 'default' }: HeaderProps) {
           </div>
           <div className="hidden lg:flex items-center justify-center flex-1 uppercase font-[family-name:var(--font-playfair)]">
             <div className="flex items-center divide-x divide-gray-200">
-              <Link href="/" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
                 Home
               </Link>
               <div className="relative group px-4">
-                <button className="text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                <button className="text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
                   Tutoring
                   <svg className="w-3 h-3 opacity-40 group-hover:opacity-70 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
@@ -207,36 +207,36 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                         <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
-                          <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                          <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                          <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                          <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
+                          <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
+                          <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
                         <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
-                          <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                          <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                          <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
+                          <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
                         <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                        <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[12px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                        <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <Link href="/step-up-for-students" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
-                Step Up For Students
+              <Link href="/step-up-for-students" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+                Scholarship
               </Link>
-              <Link href="/contact" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
-                Contact
-              </Link>
-              <Link href="/about" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/about" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
                 About Us
+              </Link>
+              <Link href="/contact" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+                Contact
               </Link>
             </div>
           </div>

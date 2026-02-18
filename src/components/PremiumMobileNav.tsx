@@ -60,16 +60,16 @@ const navItems: (NavItem | TutoringNavItem)[] = [
     href: '/pricing'
   },
   {
-    label: 'Step Up For Students',
+    label: 'Scholarship',
     href: '/step-up-for-students'
-  },
-  {
-    label: 'Contact',
-    href: '/contact'
   },
   {
     label: 'About Us',
     href: '/about'
+  },
+  {
+    label: 'Contact',
+    href: '/contact'
   },
   {
     label: 'Client Login',
@@ -146,7 +146,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
+                        <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +160,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       <div className="pl-6 pr-4 py-2 space-y-4">
                         {item.sections.map((section) => (
                           <div key={section.title}>
-                            <div className="text-[11px] font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
+                            <div className="text-[12px] font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
                             <div className="space-y-1">
                               {section.links.map((link) => (
                                 <Link
@@ -169,7 +169,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                                   onClick={handleLinkClick}
                                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 touch-manipulation group touch-feedback"
                                 >
-                                  <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 uppercase">
+                                  <span className="font-medium text-gray-700 text-base group-hover:text-gray-900 transition-colors duration-200 uppercase">
                                     {link.label}
                                   </span>
                                 </Link>
@@ -187,7 +187,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
+                        <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                             onClick={handleLinkClick}
                             className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 touch-manipulation group touch-feedback"
                           >
-                            <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 uppercase">
+                            <span className="font-medium text-gray-700 text-base group-hover:text-gray-900 transition-colors duration-200 uppercase">
                               {child.label}
                             </span>
                           </Link>
@@ -220,7 +220,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                     onClick={handleLinkClick}
                     className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                   >
-                    <span className="font-medium text-gray-900 text-lg group-hover:text-[#c79d3c] transition-colors duration-200 uppercase">
+                    <span className="font-medium text-gray-900 text-xl group-hover:text-[#c79d3c] transition-colors duration-200 uppercase">
                       {item.label}
                     </span>
                   </Link>
