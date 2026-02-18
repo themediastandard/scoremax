@@ -2,7 +2,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import VideoHero from '../components/VideoHero';
 import DualCTA from '../components/DualCTA';
-import IntroBanner from '../components/IntroBanner';
 import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
 
@@ -131,8 +130,7 @@ export default function Home() {
       {/* Video Hero */}
       <VideoHero mp4Src="/video/video1.mp4" />
 
-      {/* Ogee-style intro banner */}
-      <IntroBanner />
+      {/* IntroBanner removed */}
 
       {/* Highlight two primary offerings */}
       <DualCTA />

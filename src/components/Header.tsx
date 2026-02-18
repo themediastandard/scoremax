@@ -79,7 +79,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
   if (variant === 'ogee') {
     return (
       <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm border-gray-100'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm'}`}>
         <div className="w-full px-4 lg:px-6">
           <div className="grid grid-cols-3 items-center h-16">
             {/* Logo far left */}
