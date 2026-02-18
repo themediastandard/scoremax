@@ -44,6 +44,10 @@ export default async function DashboardHome() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active')
 
+    const { count: customerCount } = await supabase
+      .from('customers')
+      .select('*', { count: 'exact', head: true })
+
     const { data: pendingOrders } = await supabase
       .from('booking_requests')
       .select('id, created_at, status, payment_type, amount_cents, confirmed_start, subjects, session_type, customers(full_name)')
@@ -62,7 +66,7 @@ export default async function DashboardHome() {
       <div className="space-y-8">
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pending Orders</CardTitle>
@@ -90,6 +94,16 @@ export default async function DashboardHome() {
             <CardContent>
               <div className="text-4xl font-bold text-green-600">{memberCount || 0}</div>
               <p className="text-xs text-gray-500 mt-1">Paying subscribers</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Customers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-[#1e293b]">{customerCount || 0}</div>
+              <p className="text-xs text-gray-500 mt-1">Registered accounts</p>
             </CardContent>
           </Card>
         </div>

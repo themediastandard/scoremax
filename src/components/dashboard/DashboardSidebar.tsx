@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils'
 import { 
   LayoutDashboard, 
   Calendar, 
-  Users, 
+  Users,
+  UserCheck,
   Settings, 
   LogOut, 
   BookOpen,
@@ -78,6 +79,12 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
       href: '/dashboard/sessions',
       icon: Calendar,
       roles: ['admin', 'tutor']
+    },
+    {
+      label: 'Customers',
+      href: '/dashboard/customers',
+      icon: UserCheck,
+      roles: ['admin']
     },
     {
       label: 'Tutors',
