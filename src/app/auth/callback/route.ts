@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
       token_hash,
     })
     if (!error) {
-      // Profile created via trigger
+      if (type === 'recovery' || type === 'invite') {
+        return NextResponse.redirect(new URL('/reset-password', request.url))
+      }
       return NextResponse.redirect(new URL(next, request.url))
     }
   } else if (code) {

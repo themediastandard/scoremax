@@ -84,9 +84,9 @@ export default async function SettingsPage() {
               <div className="font-medium">Password</div>
               <p className="text-sm text-gray-500">Update your account password.</p>
             </div>
-            <form action="/api/auth/reset-password" method="POST">
-              <Button type="submit" variant="outline">Change Password</Button>
-            </form>
+            <Button variant="outline" asChild>
+              <a href="/forgot-password">Change Password</a>
+            </Button>
           </div>
         </CardContent>
       </Card>
