@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { HeaderFooterWrapper } from "../components/HeaderFooterWrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -89,9 +88,9 @@ export default function RootLayout({
             })
           }}
         />
-        <Header variant="ogee" />
-        {children}
-        <Footer />
+        <HeaderFooterWrapper>
+          {children}
+        </HeaderFooterWrapper>
       </body>
     </html>
   );

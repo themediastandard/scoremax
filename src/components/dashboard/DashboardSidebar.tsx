@@ -14,7 +14,6 @@ import {
   CreditCard
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 interface DashboardSidebarProps {
@@ -25,7 +24,6 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ role, fullName, membershipTier: serverTier }: DashboardSidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const supabase = createClient()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
 
@@ -47,7 +45,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   const links = [
@@ -154,10 +152,11 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
         })}
       </nav>
       
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-4 border-t border-gray-100 shrink-0">
         <button
+          type="button"
           onClick={handleSignOut}
-          className="flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="group flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer touch-manipulation"
         >
           <LogOut className="mr-3 h-5 w-5 text-gray-400 group-hover:text-red-600" />
           Sign Out

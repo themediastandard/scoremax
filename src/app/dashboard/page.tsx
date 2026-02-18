@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { formatPlanLabel } from '@/lib/order-format'
+import { ChevronRight, Calendar, BookOpen } from 'lucide-react'
 
 export default async function DashboardHome() {
   const supabase = await createClient()
@@ -130,6 +132,19 @@ export default async function DashboardHome() {
   }
   
   // CUSTOMER VIEW
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('id')
+    .eq('profile_id', user.id)
+    .maybeSingle()
+
+  const { data: orders } = await supabase
+    .from('booking_requests')
+    .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, tutors(full_name)')
+    .eq('customer_id', customer?.id ?? '00000000-0000-0000-0000-000000000000')
+    .order('created_at', { ascending: false })
+    .limit(5)
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
@@ -155,6 +170,74 @@ export default async function DashboardHome() {
           </CardContent>
         </Card>
       </div>
+
+      {orders && orders.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-[#517cad]" />
+              Active Orders
+            </CardTitle>
+            <Link href="/dashboard/orders">
+              <Button variant="ghost" size="sm" className="text-[#517cad]">
+                View all <ChevronRight className="h-4 w-4 ml-0.5" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {orders.map((order: any) => (
+                <Link
+                  key={order.id}
+                  href={`/dashboard/orders/${order.id}`}
+                  className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/80 hover:border-[#517cad]/30 transition-colors"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                          order.status === 'active'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : order.status === 'processing'
+                              ? 'bg-amber-50 text-amber-700'
+                              : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                      <span className="font-medium text-[#1e293b]">{formatPlanLabel(order)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      {order.confirmed_start ? (
+                        <>
+                          <Calendar className="h-4 w-4 shrink-0" />
+                          <span>
+                            {new Date(order.confirmed_start).toLocaleDateString(undefined, {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                            })}{' '}
+                            {new Date(order.confirmed_start).toLocaleTimeString(undefined, {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="italic">Not yet scheduled</span>
+                      )}
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                  {order.tutors?.full_name && (
+                    <p className="text-xs text-gray-500 mt-2">Tutor: {order.tutors.full_name}</p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
