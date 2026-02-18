@@ -19,7 +19,7 @@ export default async function OrdersPage() {
     *,
     customers (full_name, email),
     tutors (full_name)
-  `).order('created_at', { ascending: false })
+  `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
   if (profile?.role === 'customer') {
     const { data: customer } = await supabase.from('customers').select('id').eq('profile_id', user.id).single()

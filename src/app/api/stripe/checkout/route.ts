@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
             available_time_end: booking_details.available_time_end,
             timezone: booking_details.timezone,
             session_type: booking_details.session_type,
-            status: 'processing',
+            status: 'pending_payment',
             payment_type: plan_type,
             notes: booking_details.notes,
             amount_cents: plan_type === 'single' ? price_cents : 0

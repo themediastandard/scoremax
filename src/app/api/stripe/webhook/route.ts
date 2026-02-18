@@ -50,29 +50,44 @@ export async function POST(req: Request) {
             await supabaseAdmin.from('customers').update({ stripe_customer_id: stripeCustomerId }).eq('id', customerByEmail.id)
             customer = customerByEmail
         } else {
-            // Create Auth Account + Customer for guest checkout
-            let profileId: string | null = null
+            // Create Auth Account for guest checkout
             const inviteResult = await supabaseAdmin.auth.admin.inviteUserByEmail(contactEmail, {
                 data: { full_name: contactName, role: 'customer' },
                 redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
             })
 
+            let profileId: string | null = null
             if (inviteResult.data?.user) {
                 profileId = inviteResult.data.user.id
             } else if (inviteResult.error?.message?.includes('already been registered')) {
-                // User has auth account but no customer record — find and link
                 const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
                 const existingUser = existingUsers?.users?.find((u) => u.email === contactEmail)
                 if (existingUser) profileId = existingUser.id
             }
 
-            const { data: newCustomer } = await supabaseAdmin.from('customers').insert({
-                full_name: contactName,
-                email: contactEmail,
-                stripe_customer_id: stripeCustomerId,
-                ...(profileId && { profile_id: profileId }),
-            }).select().single()
-            customer = newCustomer
+            // The on_auth_user_created trigger may have already created a customer record.
+            // Check for it before attempting an insert.
+            const { data: triggerCreated } = await supabaseAdmin
+                .from('customers')
+                .select('*')
+                .eq('email', contactEmail)
+                .single()
+
+            if (triggerCreated) {
+                await supabaseAdmin.from('customers').update({
+                    stripe_customer_id: stripeCustomerId,
+                    full_name: contactName,
+                }).eq('id', triggerCreated.id)
+                customer = { ...triggerCreated, stripe_customer_id: stripeCustomerId }
+            } else {
+                const { data: newCustomer } = await supabaseAdmin.from('customers').insert({
+                    full_name: contactName,
+                    email: contactEmail,
+                    stripe_customer_id: stripeCustomerId,
+                    ...(profileId && { profile_id: profileId }),
+                }).select().single()
+                customer = newCustomer
+            }
         }
     }
 
@@ -82,7 +97,7 @@ export async function POST(req: Request) {
             customer_id: customer.id,
             status: 'processing',
             stripe_payment_intent_id: session.payment_intent || session.subscription
-        }).eq('id', bookingId)
+        }).eq('id', bookingId).in('status', ['pending_payment', 'processing'])
     }
 
     // 3. Record Payment
@@ -164,6 +179,18 @@ export async function POST(req: Request) {
                 <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders">View Orders</a></p>
             `
         })
+    }
+  }
+
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object as any
+    const bookingId = session.metadata?.booking_request_id
+    if (bookingId) {
+      await supabaseAdmin
+        .from('booking_requests')
+        .delete()
+        .eq('id', bookingId)
+        .eq('status', 'pending_payment')
     }
   }
 
