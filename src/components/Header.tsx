@@ -117,9 +117,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               <div className="flex items-center gap-7">
                 <Link href="/" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">Home</Link>
                 <div className="relative group">
-                  <button className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                  <button className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-2 uppercase" aria-haspopup="true" aria-expanded="false">
                     Tutoring
-                    <svg className="w-3 h-3 text-gray-300 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    <svg className="w-4 h-4 text-[#b08a30] transition-transform duration-200 group-hover:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 ease-out absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50">
                     <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
@@ -204,9 +204,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                 Home
               </Link>
               <div className="relative group px-4">
-                <button className="text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                <button className="text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-2 uppercase" aria-haspopup="true" aria-expanded="false">
                   Tutoring
-                  <svg className="w-3 h-3 opacity-40 group-hover:opacity-70 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  <svg className="w-4 h-4 text-[#b08a30] transition-transform duration-200 group-hover:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 ease-out absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50">
                   <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
