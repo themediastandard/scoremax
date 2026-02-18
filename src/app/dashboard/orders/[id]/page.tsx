@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
 import { formatDateTime, formatAmount } from '@/lib/order-format'
-import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, VideoIcon, Clock } from 'lucide-react'
+import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, Clock } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
+import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -195,18 +196,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 </div>
               )}
 
-              {order.meet_url && (
+              {order.meet_url && order.confirmed_start && order.confirmed_end && (
                 <div className="pt-4 border-t border-gray-100">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Google Meet</p>
-                  <a
-                    href={order.meet_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-emerald-700 font-medium hover:bg-emerald-100 transition-colors"
-                  >
-                    <VideoIcon className="h-5 w-5" />
-                    Join Meeting
-                  </a>
+                  <JoinClassButton
+                    meetUrl={order.meet_url}
+                    sessionStart={order.confirmed_start}
+                    sessionEnd={order.confirmed_end}
+                  />
                 </div>
               )}
 

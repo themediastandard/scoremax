@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CreditCard, Calendar, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { CreditCard, Calendar, Clock, AlertCircle, Loader2, Check, ArrowUp, ArrowDown } from 'lucide-react'
 import { useState } from 'react'
 
 interface Membership {
@@ -18,9 +18,19 @@ interface Membership {
   stripe_subscription_id: string | null
 }
 
+interface Plan {
+  id: string
+  name: string
+  tier: string
+  price_cents: number
+  included_hours: number
+  stripe_price_id: string
+}
+
 interface SubscriptionViewProps {
   membership: Membership | null
   hasStripeCustomer: boolean
+  plans: Plan[]
 }
 
 function formatTierName(tier: string): string {
@@ -32,13 +42,30 @@ function formatTierName(tier: string): string {
   return map[tier?.toLowerCase()] ?? tier ?? 'Membership'
 }
 
-const TIER_PRICE_CENTS: Record<string, number> = {
-  starter: 29900,
-  core: 54900,
-  premier: 89900,
+const TIER_ORDER: Record<string, number> = { starter: 0, core: 1, premier: 2 }
+
+const TIER_FEATURES: Record<string, string[]> = {
+  starter: [
+    'Priority scheduling',
+    'Rollover (1 hr/mo)',
+    'Cancel anytime',
+  ],
+  core: [
+    'Priority scheduling',
+    'Video library access',
+    'Rollover (1 hr/mo)',
+    'Cancel anytime',
+  ],
+  premier: [
+    'Priority scheduling',
+    'Video library access',
+    'Weekend access',
+    'Rollover (1 hr/mo)',
+    'Cancel anytime',
+  ],
 }
 
-export function SubscriptionView({ membership, hasStripeCustomer }: SubscriptionViewProps) {
+export function SubscriptionView({ membership, hasStripeCustomer, plans }: SubscriptionViewProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -60,20 +87,39 @@ export function SubscriptionView({ membership, hasStripeCustomer }: Subscription
     }
   }
 
+  const currentTierRank = membership ? (TIER_ORDER[membership.tier?.toLowerCase()] ?? -1) : -1
+
   if (!membership && !hasStripeCustomer) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <CreditCard className="h-12 w-12 text-gray-300 mb-4" />
-          <p className="text-gray-500 font-medium">No active subscription</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Subscribe to a membership plan to unlock tutoring credits and manage your subscription here.
-          </p>
-          <Button asChild className="mt-6 bg-[#c79d3c] hover:bg-[#b58b2a]">
-            <a href="/book">Browse Plans</a>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="space-y-8">
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <CreditCard className="h-12 w-12 text-gray-300 mb-4" />
+            <p className="text-gray-500 font-medium">No active subscription</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Subscribe to a membership plan to unlock tutoring credits.
+            </p>
+          </CardContent>
+        </Card>
+
+        {plans.length > 0 && (
+          <PlansGrid
+            plans={plans}
+            currentTier={null}
+            currentTierRank={-1}
+            onSelect={handleManageSubscription}
+            loading={loading}
+            isNewSubscriber
+          />
+        )}
+
+        {error && (
+          <div className="flex items-center gap-2 text-sm text-red-600">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {error}
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -88,7 +134,7 @@ export function SubscriptionView({ membership, hasStripeCustomer }: Subscription
     : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {membership ? (
         <Card
           className={
@@ -104,11 +150,9 @@ export function SubscriptionView({ membership, hasStripeCustomer }: Subscription
                   <CreditCard className="h-5 w-5 text-[#c79d3c]" />
                   {formatTierName(membership.tier)}
                 </CardTitle>
-                {membership.tier?.toLowerCase() === 'core' && (
-                  <p className="mt-1 text-lg font-semibold text-[#c79d3c]">
-                    ${(TIER_PRICE_CENTS.core / 100).toLocaleString()}/mo
-                  </p>
-                )}
+                <p className="mt-1 text-lg font-semibold text-[#c79d3c]">
+                  ${(plans.find(p => p.tier === membership.tier)?.price_cents ?? 0) / 100}/mo
+                </p>
               </div>
               <Badge
                 variant="secondary"
@@ -205,6 +249,141 @@ export function SubscriptionView({ membership, hasStripeCustomer }: Subscription
           </CardContent>
         </Card>
       )}
+
+      {plans.length > 0 && (
+        <PlansGrid
+          plans={plans}
+          currentTier={membership?.tier?.toLowerCase() ?? null}
+          currentTierRank={currentTierRank}
+          onSelect={handleManageSubscription}
+          loading={loading}
+        />
+      )}
+    </div>
+  )
+}
+
+function PlansGrid({
+  plans,
+  currentTier,
+  currentTierRank,
+  onSelect,
+  loading,
+  isNewSubscriber,
+}: {
+  plans: Plan[]
+  currentTier: string | null
+  currentTierRank: number
+  onSelect: () => void
+  loading: boolean
+  isNewSubscriber?: boolean
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-xl font-serif font-bold text-[#1e293b]">
+          {currentTier ? 'Switch Plans' : 'Choose a Plan'}
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          {currentTier
+            ? 'Changes take effect at the start of your next billing cycle.'
+            : 'Pick the membership that fits your needs.'}
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {plans.map((plan) => {
+          const tierKey = plan.tier?.toLowerCase()
+          const isCurrent = tierKey === currentTier
+          const planRank = TIER_ORDER[tierKey] ?? -1
+          const isUpgrade = currentTier !== null && planRank > currentTierRank
+          const isDowngrade = currentTier !== null && planRank < currentTierRank
+          const features = TIER_FEATURES[tierKey] ?? []
+          const isCore = tierKey === 'core'
+
+          return (
+            <Card
+              key={plan.id}
+              className={`flex flex-col relative ${
+                isCurrent
+                  ? 'border-2 border-emerald-500 shadow-md bg-emerald-50/30'
+                  : isCore && !currentTier
+                    ? 'border-2 border-[#c79d3c] shadow-lg'
+                    : 'border-gray-200 hover:border-gray-300 transition-colors'
+              }`}
+            >
+              {isCurrent && (
+                <div className="bg-emerald-500 text-white text-center text-xs py-1.5 uppercase font-bold tracking-wider">
+                  Current Plan
+                </div>
+              )}
+              {isCore && !currentTier && (
+                <div className="bg-[#c79d3c] text-white text-center text-xs py-1.5 uppercase font-bold tracking-wider">
+                  Most Popular
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="text-xl">{plan.name}</CardTitle>
+                <div className="mt-2">
+                  <span className="text-3xl font-bold text-[#1e293b]">${plan.price_cents / 100}</span>
+                  <span className="text-gray-500 text-sm">/mo</span>
+                </div>
+                <p className="text-sm text-[#517cad] font-medium">{plan.included_hours} hours included</p>
+                <p className="text-xs text-gray-400">${Math.round(plan.price_cents / plan.included_hours / 100)}/hr effective rate</p>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-2 text-sm">
+                  {features.map((f) => (
+                    <li key={f} className="flex items-start">
+                      <Check className="w-4 h-4 mr-2 text-emerald-500 mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <div className="px-6 pb-6">
+                {isCurrent ? (
+                  <Button disabled variant="outline" className="w-full text-emerald-700 border-emerald-300">
+                    Your current plan
+                  </Button>
+                ) : isNewSubscriber ? (
+                  <Button
+                    className={`w-full ${isCore ? 'bg-[#c79d3c] hover:bg-[#b58b2a]' : 'bg-[#1e293b] hover:bg-[#334155]'}`}
+                    asChild
+                  >
+                    <a href="/book">Get Started</a>
+                  </Button>
+                ) : (
+                  <Button
+                    className={`w-full gap-1.5 ${
+                      isUpgrade
+                        ? 'bg-[#c79d3c] hover:bg-[#b58b2a]'
+                        : 'bg-[#1e293b] hover:bg-[#334155]'
+                    }`}
+                    onClick={onSelect}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isUpgrade ? (
+                      <>
+                        <ArrowUp className="h-4 w-4" />
+                        Upgrade
+                      </>
+                    ) : isDowngrade ? (
+                      <>
+                        <ArrowDown className="h-4 w-4" />
+                        Downgrade
+                      </>
+                    ) : (
+                      'Switch Plan'
+                    )}
+                  </Button>
+                )}
+              </div>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }

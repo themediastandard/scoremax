@@ -98,6 +98,12 @@ export default async function SubscriptionPage() {
     }
   }
 
+  const { data: plans } = await supabaseAdmin
+    .from('pricing')
+    .select('id, name, tier, price_cents, included_hours, stripe_price_id')
+    .eq('type', 'membership')
+    .order('price_cents', { ascending: true })
+
   return (
     <div className="space-y-8">
       <div>
@@ -107,6 +113,7 @@ export default async function SubscriptionPage() {
       <SubscriptionView
         membership={membership ?? null}
         hasStripeCustomer={!!customer?.stripe_customer_id}
+        plans={plans ?? []}
       />
     </div>
   )
