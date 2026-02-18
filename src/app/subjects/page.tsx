@@ -65,6 +65,20 @@ export default function SubjectsPage() {
           </div>
         </div>
       </section>
+
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Ready to Book a Session?</h2>
+          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <p className="text-gray-500 text-sm leading-relaxed max-w-xl mx-auto mb-8">
+            Choose a subject above to share your interest, or book directly. We will match you with an expert tutor who fits your goals and schedule.
+          </p>
+          <Link href="/book" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-8 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+            Book A Session
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
