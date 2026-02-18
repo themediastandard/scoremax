@@ -42,138 +42,115 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-50 overflow-hidden">
+    <div className="min-h-screen bg-white overflow-hidden">
       {/* Header removed; global in layout */}
 
-      {/* Hero */}
-      <section className="relative pt-[130px] pb-24 lg:pt-[134px] bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-        {/* Person JSON-LD for leadership */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'ItemList',
-              itemListElement: [
-                {
-                  '@type': 'Person',
-                  name: 'Avi Spiller',
-                  jobTitle: 'President',
-                  worksFor: { '@type': 'Organization', name: 'ScoreMax' }
-                },
-                {
-                  '@type': 'Person',
-                  name: 'Taimir Terrell',
-                  jobTitle: 'Vice President',
-                  worksFor: { '@type': 'Organization', name: 'ScoreMax' }
-                }
-              ]
-            })
-          }}
-        />
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-16 right-24 w-56 h-56 bg-gray-200 rounded-full opacity-20"></div>
-          <div className="absolute top-40 right-72 w-24 h-24 bg-gray-300 rounded-full opacity-25"></div>
-          <div className="absolute bottom-24 left-24 w-32 h-32 bg-gray-200 rounded-full opacity-20"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="min-h-[380px] flex items-center justify-center">
-            <div className="space-y-6 text-center max-w-3xl mx-auto">
+      {/* Person JSON-LD for leadership */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            itemListElement: [
+              {
+                '@type': 'Person',
+                name: 'Avi Spiller',
+                jobTitle: 'President',
+                worksFor: { '@type': 'Organization', name: 'ScoreMax' }
+              },
+              {
+                '@type': 'Person',
+                name: 'Taimir Terrell',
+                jobTitle: 'Vice President',
+                worksFor: { '@type': 'Organization', name: 'ScoreMax' }
+              }
+            ]
+          })
+        }}
+      />
 
-              <h1 className="text-4xl lg:text-6xl font-black leading-tight tracking-tight text-black">Committed to Helping Students Reach Their <span className="text-[#c79d3c]">Full Potential</span></h1>
-              <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">With decades of combined experience, our leadership team brings a passion for education, data-driven instruction, and a relentless commitment to student success.</p>
-            </div>
-          </div>
+      {/* Leadership Section Header */}
+      <section className="pt-32 pb-4 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-3">Our Leadership</div>
+          <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">The People Behind ScoreMax</h2>
+          <p className="text-gray-500 max-w-2xl mx-auto">Decades of combined experience in education, test preparation, and business leadership.</p>
         </div>
       </section>
 
-      {/* Leadership Bios */}
-      <section className="py-24 bg-gradient-to-b from-white to-gray-50 relative">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gray-200 rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 right-20 w-24 h-24 bg-gray-300 rounded-full opacity-15"></div>
-        </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Avi Spiller */}
-          <div className="mb-32">
-            <div className="max-w-4xl mx-auto">
-              <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-2">Avi Spiller</div>
-              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">President</h3>
-              
-              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                <p className="mb-6">
-                  <span className="float-left mr-6 mb-2 w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
-                    <Image src="/staff/avi.avif" alt="Avi Spiller" width={256} height={256} className="object-cover w-full h-full object-top" />
-                  </span>
-                  Avi, a seasoned educator and dedicated mathematician, hails from Cherry Hill, New Jersey. He attended Florida International University, where he pursued a Bachelor of Science in Mathematics Education, marking the inception of a thriving career that spans over three decades. Avi is renowned for his profound dedication to tutoring, having spent more than 30 years supporting students and igniting their passion for mathematics.
-                </p>
-                
-                <p className="mb-6">
-                  With over 23 years of experience in a traditional classroom setting, Avi has a deep understanding of the pedagogical processes that help students learn effectively. He couples this with a comprehensive understanding of standardized tests, studying them meticulously to unravel the methodology behind their creation. This unique approach has been instrumental in helping students prepare for these crucial examinations.
-                </p>
-                
-                <p className="mb-6">
-                  Avi&apos;s expertise is not confined to general mathematics education. He is a recognized authority in SAT and ACT preparation, having developed robust curriculum models adopted by some of the most prestigious private schools in the nation. His methodology integrates a deep understanding of standardized testing mechanisms, curricular coherence, and individualized student needs, making his approach uniquely effective and efficient.
-                </p>
-                
-                <p>
-                  In addition, Avi holds certification in Special Education, reinforcing his commitment to inclusive education. He believes in empowering all students, regardless of their abilities or backgrounds, and showcases this through his commitment, designed meticulously to nurture the academic potential of students and empower them with the knowledge they need to succeed.
-                </p>
-              </div>
+      {/* Avi Spiller */}
+      <section className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0 bg-gray-50 rounded-2xl overflow-hidden">
+            <div className="relative min-h-[280px] md:min-h-[auto]">
+              <Image src="/Images/avi-new.png" alt="Avi Spiller" fill className="object-cover object-top" />
             </div>
-          </div>
+            <div className="p-8 md:p-12 flex flex-col justify-center">
+              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">President</div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Avi Spiller</h3>
+              <div className="w-10 h-[2px] bg-[#c79d3c] mb-6" />
 
-          {/* Taimir Terrell */}
-          <div>
-            <div className="max-w-4xl mx-auto">
-              <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-2">Taimir Terrell</div>
-              <h3 className="text-3xl lg:text-4xl font-black text-gray-900 mb-6">Vice President</h3>
-              
-              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                <p className="mb-6">
-                  <span className="float-left mr-6 mb-2 w-48 h-48 lg:w-64 lg:h-64 rounded-2xl overflow-hidden shadow-lg">
-                    <Image src="/staff/taimir-profile.JPG" alt="Taimir Terrell" width={256} height={256} className="object-cover w-full h-full" style={{objectPosition: 'center 20%'}} />
-                  </span>
-                  Taimir is a highly accomplished entrepreneur whose impressive career is a testament to her innate business acumen and unwavering commitment to customer relations. Born into a business-oriented family, Taimir grew up learning sales strategies from her father. Demonstrating extraordinary initiative, she made her first foray into entrepreneurship at just 13 years old when she made her first investment in a business venture.
-                </p>
-                
-                <p className="mb-6">
-                  Taimir showcased her transformative leadership abilities when she acquired and rebranded Ed&apos;s Pest Control into Pest-Logic. With her at the helm, she efficiently managed all aspects of the business, from marketing and sales to operations. Her hands-on approach ensured not only efficient service delivery but also the development of cutting-edge office operations. Under her stewardship, the company flourished and emerged as a reputable pest control service provider.
-                </p>
-                
-                <p className="mb-6">
-                  Taimir&apos;s relentless drive and strategic decision-making led to a monumental achievement for the company when, after 17 years at the helm, she sold Pest-Logic to one of the largest pest control companies in the nation. This landmark accomplishment further solidified her reputation as a seasoned businesswoman with a knack for making shrewd business decisions.
-                </p>
-                
-                <p>
-                  Transitioning to a new challenge when she assumed the role of Vice President at ScoreMax, Taimir brought her rich experience and deep-seated passion for making a difference. Taimir continues to bring invaluable insights, seasoned leadership, and a strategic mindset to her role. She is not just a leader but a visionary—a strong, determined, and impactful leader.
-                </p>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">30+</div>
+                  <div className="text-xs text-gray-500 mt-1">Years Tutoring</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">23+</div>
+                  <div className="text-xs text-gray-500 mt-1">Years Teaching</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">B.S.</div>
+                  <div className="text-xs text-gray-500 mt-1">Math Education</div>
+                </div>
+              </div>
+
+              <div className="text-gray-600 text-sm leading-relaxed space-y-3">
+                <p>Avi, a seasoned educator and dedicated mathematician from Cherry Hill, New Jersey, attended Florida International University where he pursued a Bachelor of Science in Mathematics Education, marking the start of a career spanning over three decades.</p>
+                <p>A recognized authority in SAT and ACT preparation, Avi has developed curriculum models adopted by some of the most prestigious private schools in the nation. He also holds certification in Special Education, reinforcing his commitment to empowering all students.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Community Involvement */}
-      <section className="py-24 bg-gradient-to-b from-gray-50 to-white relative">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-8 left-1/4 w-20 h-20 bg-gray-200 rounded-full opacity-10"></div>
-          <div className="absolute bottom-8 right-1/3 w-16 h-16 bg-gray-300 rounded-full opacity-15"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
+      {/* Taimir Terrell */}
+      <section className="pb-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-0 bg-gray-50 rounded-2xl overflow-hidden">
+            <div className="p-8 md:p-12 flex flex-col justify-center md:order-1 order-2">
+              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">Vice President</div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Taimir Terrell</h3>
+              <div className="w-10 h-[2px] bg-[#c79d3c] mb-6" />
 
-            <p className="text-gray-600 text-lg max-w-3xl mx-auto">We are committed to making a positive impact in our communities. Through partnerships and scholarship donations, we help pave the way for the next generation of leaders and innovators.</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="h-20 bg-white rounded-xl border border-gray-100 shadow-sm flex items-center justify-center">
-                <span className="text-gray-400 text-sm">Logo</span>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">17+</div>
+                  <div className="text-xs text-gray-500 mt-1">Years as CEO</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">13</div>
+                  <div className="text-xs text-gray-500 mt-1">Started Age</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-[#c79d3c]">VP</div>
+                  <div className="text-xs text-gray-500 mt-1">ScoreMax</div>
+                </div>
               </div>
-            ))}
+
+              <div className="text-gray-600 text-sm leading-relaxed space-y-3">
+                <p>Taimir is a highly accomplished entrepreneur whose career is a testament to her innate business acumen. Born into a business-oriented family, she made her first investment at just 13 years old and went on to acquire and grow Pest-Logic over 17 years before selling to a national firm.</p>
+                <p>Now as Vice President at ScoreMax, Taimir brings invaluable insights, seasoned leadership, and a strategic mindset. She is not just a leader but a visionary, a strong, determined, and impactful force behind the company.</p>
+              </div>
+            </div>
+            <div className="relative min-h-[280px] md:min-h-[auto] md:order-2 order-1">
+              <Image src="/Images/tai-new.png" alt="Taimir Terrell" fill className="object-cover object-top" />
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* CTA Footer Banner removed for cleaner layout */}
 
