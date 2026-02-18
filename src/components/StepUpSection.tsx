@@ -4,9 +4,9 @@ import Link from 'next/link';
 export default function StepUpSection() {
   return (
     <section className="py-10 bg-[#fff6f6]">
-      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-6 items-center">
-        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-transparent md:order-1 order-2 flex items-center justify-center">
-          <Image src="/step-up.avif" alt="Step Up for Students" width={800} height={600} className="w-auto h-[128px] sm:h-[148px] md:h-[170px] lg:h-[192px]" />
+      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+        <div className="relative aspect-video rounded-2xl overflow-hidden bg-transparent md:order-1 order-2 flex items-center justify-start">
+          <Image src="/step-up.avif" alt="Step Up for Students" width={800} height={600} className="w-auto h-[148px] sm:h-[175px] md:h-[200px] lg:h-[235px]" />
         </div>
         <div className="md:order-2 order-1">
           <div className="text-[11px] tracking-[0.2em] uppercase text-gray-500">Florida Scholarship Provider</div>
