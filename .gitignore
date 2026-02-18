@@ -23,6 +23,9 @@
 # project scope (internal work log)
 project_scope.md
 
+# internal docs
+docs/
+
 # misc
 .DS_Store
 *.pem

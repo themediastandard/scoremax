@@ -27,6 +27,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
   const pathname = usePathname()
   const supabase = createClient()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
+  const [credits, setCredits] = useState<number | null>(null)
 
   useEffect(() => {
     if (serverTier != null) setTier(serverTier)
@@ -38,7 +39,10 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
     fetch('/api/account/membership/tier')
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        if (!cancelled && data?.membershipTier != null) setTier(data.membershipTier)
+        if (!cancelled) {
+          if (data?.membershipTier != null) setTier(data.membershipTier)
+          if (data?.credits != null) setCredits(data.credits)
+        }
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -116,13 +120,20 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
             <p className="text-lg font-semibold text-[#1e293b] truncate">
               {fullName}
             </p>
-            <p className={`mt-1 text-xs font-medium truncate ${
-              tier === 'Core'
-                ? 'text-[#c79d3c] font-semibold'
-                : 'text-gray-500'
-            }`}>
-              {tier ? `${tier} Member` : 'No active subscription'}
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className={`text-xs font-medium truncate ${
+                tier === 'Core'
+                  ? 'text-[#c79d3c] font-semibold'
+                  : 'text-gray-500'
+              }`}>
+                {tier ? `${tier} Member` : 'No active subscription'}
+              </p>
+              {credits != null && credits >= 0 && (
+                <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#517cad]">
+                  {credits} {credits === 1 ? 'credit' : 'credits'}
+                </span>
+              )}
+            </div>
           </>
         ) : (
           <>

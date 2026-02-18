@@ -13,7 +13,12 @@ export async function GET() {
   }
 
   const result = await getCustomerMembership(user.id, user.email ?? null)
+  const m = result?.membership
+  const credits = m
+    ? (m.included_hours + m.rollover_hours) - m.used_hours
+    : null
   return NextResponse.json({
     membershipTier: result?.membershipTier ?? null,
+    credits,
   })
 }
