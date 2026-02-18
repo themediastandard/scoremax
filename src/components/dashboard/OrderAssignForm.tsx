@@ -18,7 +18,7 @@ export function OrderAssignForm({ order, tutors }: { order: any, tutors: any[] }
   const [date, setDate] = useState(order.confirmed_start ? new Date(order.confirmed_start).toISOString().split('T')[0] : '')
   const [time, setTime] = useState(order.confirmed_start ? new Date(order.confirmed_start).toTimeString().substring(0, 5) : '')
   const [status, setStatus] = useState(order.status)
-  const [internalNotes, setInternalNotes] = useState(order.notes || '')
+  const [internalNotes, setInternalNotes] = useState(order.internal_notes || '')
 
   const handleSave = async () => {
     setLoading(true)
@@ -45,7 +45,7 @@ export function OrderAssignForm({ order, tutors }: { order: any, tutors: any[] }
           confirmed_start: confirmedStart,
           confirmed_end: confirmedEnd,
           status,
-          notes: internalNotes
+          internal_notes: internalNotes
         })
       })
       

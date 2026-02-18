@@ -73,36 +73,36 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
       })
       const sub = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') ?? subs.data[0]
       if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
-        const priceId = sub.items?.data?.[0]?.price?.id
-        const { data: pricing } = await supabaseAdmin
-          .from('pricing')
-          .select('name, included_hours')
-          .eq('stripe_price_id', priceId)
-          .eq('type', 'membership')
+        const existing = await supabaseAdmin
+          .from('memberships')
+          .select('tier')
+          .eq('stripe_subscription_id', sub.id)
           .maybeSingle()
-      const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
-      const includedHours = pricing?.included_hours ?? 2
-        const { error } = await supabaseAdmin.from('memberships').insert({
-          customer_id: customer.id,
-          tier,
-          stripe_subscription_id: sub.id,
-          status: 'active',
-          included_hours: includedHours,
-          used_hours: 0,
-          rollover_hours: 0,
-          current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-        })
-        if (!error) {
-          membership = { tier }
+          .then((r) => r.data)
+        if (existing) {
+          membership = existing
         } else {
-          const existing = await supabaseAdmin
-            .from('memberships')
-            .select('tier')
-            .eq('stripe_subscription_id', sub.id)
+          const priceId = sub.items?.data?.[0]?.price?.id
+          const { data: pricing } = await supabaseAdmin
+            .from('pricing')
+            .select('name, included_hours')
+            .eq('stripe_price_id', priceId)
+            .eq('type', 'membership')
             .maybeSingle()
-            .then((r) => r.data)
-          if (existing) membership = existing
+          const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
+          const includedHours = pricing?.included_hours ?? 2
+          await supabaseAdmin.from('memberships').insert({
+            customer_id: customer.id,
+            tier,
+            stripe_subscription_id: sub.id,
+            status: 'active',
+            included_hours: includedHours,
+            used_hours: 0,
+            rollover_hours: 0,
+            current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          })
+          membership = { tier }
         }
       }
     } catch {

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { formatPlanLabel } from '@/lib/order-format'
-import { ChevronRight, Calendar, BookOpen } from 'lucide-react'
+import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle } from 'lucide-react'
 
 export default async function DashboardHome() {
   const supabase = await createClient()
@@ -43,7 +43,21 @@ export default async function DashboardHome() {
       .from('memberships')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active')
-      
+
+    const { data: pendingOrders } = await supabase
+      .from('booking_requests')
+      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, subjects, session_type, customers(full_name)')
+      .eq('status', 'processing')
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    const { data: activeOrders } = await supabase
+      .from('booking_requests')
+      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, subjects, session_type, customers(full_name), tutors(full_name)')
+      .eq('status', 'active')
+      .order('confirmed_start', { ascending: true })
+      .limit(10)
+
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
@@ -76,6 +90,97 @@ export default async function DashboardHome() {
             <CardContent>
               <div className="text-4xl font-bold text-green-600">{memberCount || 0}</div>
               <p className="text-xs text-gray-500 mt-1">Paying subscribers</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-600" />
+                Pending Orders
+              </CardTitle>
+              <Link href="/dashboard/orders">
+                <Button variant="ghost" size="sm" className="text-[#517cad]">
+                  View all <ChevronRight className="h-4 w-4 ml-0.5" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {pendingOrders && pendingOrders.length > 0 ? (
+                <div className="space-y-3">
+                  {pendingOrders.map((order: any) => (
+                    <Link
+                      key={order.id}
+                      href={`/dashboard/orders/${order.id}`}
+                      className="block rounded-lg border border-amber-100 p-4 hover:bg-amber-50/40 hover:border-amber-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-[#1e293b]">{order.customers?.full_name || 'Unknown'}</p>
+                          <p className="text-xs text-gray-500 mt-0.5 capitalize">{order.session_type} session</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>{new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm py-4 text-center">No pending orders</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                Active Sessions
+              </CardTitle>
+              <Link href="/dashboard/orders">
+                <Button variant="ghost" size="sm" className="text-[#517cad]">
+                  View all <ChevronRight className="h-4 w-4 ml-0.5" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {activeOrders && activeOrders.length > 0 ? (
+                <div className="space-y-3">
+                  {activeOrders.map((order: any) => (
+                    <Link
+                      key={order.id}
+                      href={`/dashboard/orders/${order.id}`}
+                      className="block rounded-lg border border-emerald-100 p-4 hover:bg-emerald-50/40 hover:border-emerald-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-[#1e293b]">{order.customers?.full_name || 'Unknown'}</p>
+                          {order.tutors?.full_name && (
+                            <p className="text-xs text-gray-500 mt-0.5">Tutor: {order.tutors.full_name}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          {order.confirmed_start ? (
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 shrink-0" />
+                              {new Date(order.confirmed_start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                          ) : (
+                            <span className="italic text-xs">Not scheduled</span>
+                          )}
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm py-4 text-center">No active sessions</p>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -62,6 +62,9 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     }
   }
   
+  const { data: subjects } = await supabase.from('subjects').select('id, name')
+  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+
   // Fetch tutors for assignment dropdown (if admin)
   let tutors = []
   if (profile?.role === 'admin') {
@@ -71,25 +74,23 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
+      <div>
         <Link
           href="/dashboard/orders"
           className="inline-flex items-center text-sm text-gray-500 hover:text-[#517cad] transition-colors"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Back
+          Back to orders
         </Link>
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Order Details</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
-            {new Date(order.created_at).toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
-        </div>
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b] mt-6">Order Details</h1>
+        <p className="mt-0.5 text-sm text-gray-500">
+          {new Date(order.created_at).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -106,7 +107,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   </div>
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</p>
-                    <p className="text-lg font-medium text-[#1e293b]">{order.subjects?.length || 1} Selected</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {order.subjects?.map((id: string) => (
+                        <span key={id} className="px-2.5 py-0.5 rounded-full bg-[#517cad]/10 text-sm font-medium text-[#1e293b]">
+                          {subjectMap.get(id) || id}
+                        </span>
+                      )) || <span className="text-sm text-gray-500">None</span>}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -118,11 +125,20 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     <p className="text-lg font-medium text-[#1e293b] capitalize">{order.session_type}</p>
                   </div>
                 </div>
-                <div className="flex gap-4 col-span-2">
+                <div className="flex gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
+                    <User className="h-5 w-5 text-[#517cad]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
+                    <p className="text-lg font-medium text-[#1e293b]">{order.tutors?.full_name || 'Unassigned'}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
                     <Calendar className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
                     <p className={`text-lg font-medium ${order.confirmed_start ? 'text-[#1e293b]' : 'text-gray-500 italic'}`}>
                       {order.confirmed_start ? (
@@ -144,21 +160,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
-                    <User className="h-5 w-5 text-[#517cad]" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
-                    <p className="text-lg font-medium text-[#1e293b]">{order.tutors?.full_name || 'Unassigned'}</p>
-                  </div>
-                </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Notes</p>
-                <div className="rounded-lg bg-slate-50/80 p-4 text-gray-700">{order.notes || 'None'}</div>
-              </div>
+              {order.notes && (
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Customer Notes</p>
+                  <div className="rounded-lg bg-slate-50/80 p-4 text-gray-700">{order.notes}</div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

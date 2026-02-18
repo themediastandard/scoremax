@@ -194,7 +194,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const body = await req.json()
-  const { assigned_tutor_id, confirmed_start, confirmed_end, status, notes } = body
+  const { assigned_tutor_id, confirmed_start, confirmed_end, status, internal_notes } = body
 
   // Fetch current booking with tokens
   const { data: currentBooking, error: fetchError } = await supabaseAdmin
@@ -220,7 +220,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     confirmed_start,
     confirmed_end,
     status,
-    notes
+    internal_notes
   }
 
   // Handle Status Logic
