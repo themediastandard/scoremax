@@ -65,7 +65,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                 <div className="absolute right-0 mt-2 bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] z-50 min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                   <div className="grid grid-cols-3 py-5">
                     <div className="px-6">
-<div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
+<div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
                             <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
@@ -74,7 +74,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
-                      <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
+                      <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                       <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                       <div className="space-y-0.5">
                         <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
@@ -82,7 +82,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                       </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
-                      <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
+                      <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                       <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                       <Link href="/subjects" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                     </div>
@@ -125,7 +125,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                     <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                       <div className="grid grid-cols-3 py-5">
                         <div className="px-6">
-                          <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
+                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
                             <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
@@ -134,7 +134,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
-                          <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
+                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
                             <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
@@ -142,7 +142,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
-                          <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
+                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                           <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                           <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                         </div>
@@ -212,7 +212,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                   <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                     <div className="grid grid-cols-3 py-5">
                       <div className="px-6">
-                        <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
+                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
                           <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
@@ -221,7 +221,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
-                        <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
+                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
                           <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
@@ -229,7 +229,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
-                        <div className="text-[9px] font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
+                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
                         <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
                         <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
                       </div>

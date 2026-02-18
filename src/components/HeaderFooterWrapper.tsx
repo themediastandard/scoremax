@@ -7,12 +7,14 @@ import Footer from './Footer'
 export function HeaderFooterWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isDashboard = pathname.startsWith('/dashboard')
+  const isAuthPage = pathname === '/login' || pathname === '/register'
+  const showHeaderFooter = !isDashboard && !isAuthPage
 
   return (
     <>
-      {!isDashboard && <Header variant="ogee" />}
+      {showHeaderFooter && <Header variant="ogee" />}
       {children}
-      {!isDashboard && <Footer />}
+      {showHeaderFooter && <Footer />}
     </>
   )
 }

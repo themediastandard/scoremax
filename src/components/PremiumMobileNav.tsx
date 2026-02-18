@@ -160,7 +160,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       <div className="pl-6 pr-4 py-2 space-y-4">
                         {item.sections.map((section) => (
                           <div key={section.title}>
-                            <div className="text-[12px] font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
+                            <div className="text-sm font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
                             <div className="space-y-1">
                               {section.links.map((link) => (
                                 <Link

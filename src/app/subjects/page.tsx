@@ -51,13 +51,12 @@ export default function SubjectsPage() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {cat.items.map((item) => (
-                    <Link
+                    <span
                       key={item}
-                      href={`/contact?interest=${encodeURIComponent(item)}`}
-                      className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-[#c79d3c]/5 border border-[#c79d3c]/20 hover:bg-[#c79d3c]/10 hover:text-[#c79d3c] hover:border-[#c79d3c]/40 transition-all duration-200"
+                      className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-[#c79d3c]/5 border border-[#c79d3c]/20"
                     >
                       {item}
-                    </Link>
+                    </span>
                   ))}
                 </div>
               </div>

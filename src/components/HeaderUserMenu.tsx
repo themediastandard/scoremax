@@ -12,27 +12,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User, LogOut, LayoutDashboard } from 'lucide-react'
+import { User, UserPlus, LogOut, LayoutDashboard } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export function HeaderUserMenu() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const client = createClient()
+    let cancelled = false
     const getInitial = async () => {
-      const { data: { user: u } } = await client.auth.getUser()
-      setUser(u)
-      if (u) {
-        const { data: profile } = await client.from('profiles').select('role').eq('id', u.id).single()
-        setRole(profile?.role ?? null)
-      } else {
-        setRole(null)
+      try {
+        const { data: { user: u } } = await client.auth.getUser()
+        if (cancelled) return
+        setUser(u)
+        if (u) {
+          const { data: profile } = await client.from('profiles').select('role').eq('id', u.id).single()
+          setRole(profile?.role ?? null)
+        } else {
+          setRole(null)
+        }
+      } catch {
+        if (!cancelled) setUser(null)
+      } finally {
+        if (!cancelled) setIsLoading(false)
       }
     }
+    const timeout = setTimeout(() => setIsLoading(false), 3000)
     getInitial()
     const { data: { subscription } } = client.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null)
@@ -43,7 +53,11 @@ export function HeaderUserMenu() {
         setRole(null)
       }
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [])
 
   const handleSignOut = async () => {
@@ -55,12 +69,16 @@ export function HeaderUserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button aria-label="Account" className="p-2 hover:text-black text-gray-700">
+        <button aria-label="Account" className="p-2 rounded-lg hover:bg-gray-100 hover:text-black text-gray-700 cursor-pointer transition-colors">
           <User className="w-5 h-5" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {user ? (
+        {isLoading ? (
+          <DropdownMenuItem disabled className="text-gray-500">
+            Checking...
+          </DropdownMenuItem>
+        ) : user ? (
           <>
             {(role === 'admin' || role === 'tutor') && (
               <>
@@ -94,6 +112,7 @@ export function HeaderUserMenu() {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/register" className="flex items-center gap-2 cursor-pointer">
+                <UserPlus className="w-4 h-4" />
                 Register
               </Link>
             </DropdownMenuItem>
