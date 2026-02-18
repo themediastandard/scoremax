@@ -52,7 +52,11 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               <Image src="/Images/score-max-logo-wide.png" alt="ScoreMax Logo" width={140} height={32} priority className="h-6 w-auto" />
             </Link>
 
-            <div className="relative">
+            <div className="flex items-center gap-2">
+              <Link href="/book" className="hidden sm:inline-flex items-center justify-center bg-[#c79d3c] text-white px-4 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
+                Book A Session
+              </Link>
+              <div className="relative">
               <button onClick={() => setServicesOpen(!servicesOpen)} aria-expanded={servicesOpen} aria-haspopup="true" className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#c79d3c] text-white text-xs font-semibold hover:brightness-95 shadow-md font-[family-name:var(--font-playfair)]">
                 <span>Services</span>
                 <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor"><path d="M5.25 7.5L10 12.25 14.75 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -85,6 +89,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
@@ -154,6 +159,9 @@ export default function Header({ variant = 'default' }: HeaderProps) {
 
             {/* Right icons far right */}
             <div className="flex items-center space-x-4 justify-self-end">
+              <Link href="/book" className="hidden md:inline-flex items-center justify-center bg-[#c79d3c] text-white px-5 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
+                Book A Session
+              </Link>
               <HeaderUserMenu />
               {/* Mobile burger */}
               <button 
@@ -241,9 +249,12 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </div>
           </div>
           <div className="flex-shrink-0 flex items-center space-x-4">
-            <div className="hidden sm:block">
-              <Link href="/contact" className="bg-[#c79d3c] text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:brightness-95 transform hover:scale-105 transition-all duration-300 border border-[#c79d3c]/20 font-[family-name:var(--font-playfair)]">
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/contact" className="border border-gray-300 text-gray-700 px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:bg-gray-50 transition-colors font-[family-name:var(--font-playfair)]">
                 Book Free Consultation
+              </Link>
+              <Link href="/book" className="bg-[#c79d3c] text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:brightness-95 transform hover:scale-105 transition-all duration-300 border border-[#c79d3c]/20 font-[family-name:var(--font-playfair)]">
+                Book A Session
               </Link>
             </div>
             <button 
