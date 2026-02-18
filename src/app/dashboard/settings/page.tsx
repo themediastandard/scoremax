@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { ProfileForm } from '@/components/dashboard/ProfileForm'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -11,40 +11,46 @@ export default async function SettingsPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-  
-  // Fetch Google Calendar status based on role
+
+  let customerData = null
   let isGoogleConnected = false
-  if (profile?.role === 'tutor') {
-    const { data } = await supabase.from('tutors').select('google_calendar_connected').eq('profile_id', user.id).single()
+
+  if (profile?.role === 'customer') {
+    const { data } = await supabaseAdmin
+      .from('customers')
+      .select('full_name, phone, student_grade, google_calendar_connected')
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    customerData = data
     isGoogleConnected = data?.google_calendar_connected || false
-  } else if (profile?.role === 'customer') {
-    const { data } = await supabase.from('customers').select('google_calendar_connected').eq('profile_id', user.id).single()
+  } else if (profile?.role === 'tutor') {
+    const { data } = await supabase.from('tutors').select('google_calendar_connected').eq('profile_id', user.id).single()
     isGoogleConnected = data?.google_calendar_connected || false
   }
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Settings</h1>
+      <div>
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Settings</h1>
+        <p className="mt-1 text-gray-500">Manage your account</p>
+      </div>
       
-      <Card>
+      <Card className="border-gray-100 shadow-sm">
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input defaultValue={profile?.full_name} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input defaultValue={profile?.email} readOnly />
-            </div>
-          </div>
+        <CardContent>
+          <ProfileForm
+            fullName={customerData?.full_name || profile?.full_name || ''}
+            email={profile?.email || user.email || ''}
+            phone={customerData?.phone || ''}
+            studentGrade={customerData?.student_grade || ''}
+            role={profile?.role || 'customer'}
+          />
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="border-gray-100 shadow-sm">
         <CardHeader>
           <CardTitle>Integrations</CardTitle>
         </CardHeader>
@@ -64,6 +70,23 @@ export default async function SettingsPage() {
                 <Button type="submit" variant="outline">Connect</Button>
               </form>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-gray-100 shadow-sm">
+        <CardHeader>
+          <CardTitle>Security</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Password</div>
+              <p className="text-sm text-gray-500">Update your account password.</p>
+            </div>
+            <form action="/api/auth/reset-password" method="POST">
+              <Button type="submit" variant="outline">Change Password</Button>
+            </form>
           </div>
         </CardContent>
       </Card>

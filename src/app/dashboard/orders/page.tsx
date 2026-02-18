@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, Calendar, User, BookOpen, Video } from 'lucide-react'
+import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -103,12 +104,17 @@ export default async function OrdersPage() {
                       {order.status}
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" asChild className="border-[#517cad]/40 text-[#517cad] hover:bg-[#517cad]/5">
-                    <Link href={`/dashboard/orders/${order.id}`} className="gap-1">
-                      View
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {order.stripe_payment_intent_id && (
+                      <ReceiptButton bookingId={order.id} compact />
+                    )}
+                    <Button variant="outline" size="sm" asChild className="border-[#517cad]/40 text-[#517cad] hover:bg-[#517cad]/5">
+                      <Link href={`/dashboard/orders/${order.id}`} className="gap-1">
+                        View
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0 px-6 sm:px-8">

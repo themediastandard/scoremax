@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
 import { formatDateTime, formatAmount } from '@/lib/order-format'
 import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, VideoIcon, Clock } from 'lucide-react'
+import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -288,6 +289,9 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   {order.status === 'refunded' ? 'Refunded' : (order.stripe_payment_intent_id || order.payment_type === 'membership') ? 'Paid' : 'Pending'}
                 </span>
               </div>
+              {order.stripe_payment_intent_id && (
+                <ReceiptButton bookingId={order.id} />
+              )}
             </CardContent>
           </Card>
         </div>
