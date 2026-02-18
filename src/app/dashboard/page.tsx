@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { formatPlanLabel } from '@/lib/order-format'
 import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard } from 'lucide-react'
+import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 
 export default async function DashboardHome() {
   const supabase = await createClient()
@@ -262,7 +263,7 @@ export default async function DashboardHome() {
   const [{ data: orders }, { data: subjects }, { data: membership }] = await Promise.all([
     supabase
       .from('booking_requests')
-      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, session_type, subjects, tutors(full_name)')
+      .select('id, created_at, status, payment_type, amount_cents, confirmed_start, confirmed_end, session_type, subjects, meet_url, tutors(full_name)')
       .eq('customer_id', customerId)
       .in('status', ['processing', 'active'])
       .order('created_at', { ascending: false })
@@ -434,15 +435,30 @@ export default async function DashboardHome() {
                             Awaiting scheduling
                           </span>
                         )}
-                        {order.tutors?.full_name && (
-                          <span className="flex items-center gap-1.5">
-                            <Users className="h-4 w-4 text-gray-400 shrink-0" />
-                            {order.tutors.full_name}
-                          </span>
-                        )}
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-300 shrink-0 mt-1" />
+                    <div className="flex flex-col items-end justify-between gap-2 shrink-0 self-stretch">
+                      {order.tutors?.full_name && (
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#517cad]/10">
+                            <Users className="h-4 w-4 text-[#517cad]" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-400">Your Tutor</p>
+                            <p className="text-sm font-semibold text-[#1e293b]">{order.tutors.full_name}</p>
+                          </div>
+                        </div>
+                      )}
+                      {isActive && order.session_type === 'online' && order.meet_url && order.confirmed_start && order.confirmed_end ? (
+                        <JoinClassButton
+                          meetUrl={order.meet_url}
+                          sessionStart={order.confirmed_start}
+                          sessionEnd={order.confirmed_end}
+                        />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-gray-300 mt-1" />
+                      )}
+                    </div>
                   </div>
                 </Link>
               )
