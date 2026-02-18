@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
 import { HeaderFooterWrapper } from "../components/HeaderFooterWrapper";
@@ -13,6 +13,12 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
 });
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+});
+
 
 export const metadata: Metadata = {
   title: "ScoreMax Tutoring | Unlock Your Test Score Potential",
@@ -60,7 +66,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+      <body className={`${inter.variable} ${playfair.variable} ${dmSans.variable} antialiased`}>
         <MobileOptimizations />
         {/* WebSite JSON-LD with SearchAction */}
         <script
