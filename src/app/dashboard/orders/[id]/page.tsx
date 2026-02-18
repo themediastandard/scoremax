@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
 import { formatDateTime, formatAmount } from '@/lib/order-format'
-import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, VideoIcon } from 'lucide-react'
+import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, VideoIcon, Clock } from 'lucide-react'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -83,14 +83,18 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           Back to orders
         </Link>
         <h1 className="text-3xl font-serif font-bold text-[#1e293b] mt-6">Order Details</h1>
-        <p className="mt-0.5 text-sm text-gray-500">
-          {new Date(order.created_at).toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </p>
+        <div className="flex items-center gap-3 mt-0.5">
+          <p className="text-sm text-gray-500">
+            {new Date(order.created_at).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </p>
+          <span className="text-gray-300">|</span>
+          <p className="text-sm text-gray-400 font-mono">{order.id.slice(0, 8).toUpperCase()}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -161,6 +165,34 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   </div>
                 </div>
               </div>
+
+              {profile?.role === 'admin' && (order.available_days || order.available_time_start) && (
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5" />
+                    Requested Availability
+                  </p>
+                  <div className="rounded-lg bg-amber-50/60 border border-amber-100 p-4 space-y-2">
+                    {order.available_days && order.available_days.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {order.available_days.map((day: string) => (
+                          <span key={day} className="px-2.5 py-0.5 rounded-full bg-white border border-amber-200 text-sm font-medium text-amber-800 capitalize">
+                            {day}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {(order.available_time_start || order.available_time_end) && (
+                      <p className="text-sm text-amber-800">
+                        {order.available_time_start && order.available_time_end
+                          ? `${order.available_time_start} – ${order.available_time_end}`
+                          : order.available_time_start || order.available_time_end}
+                        {order.timezone && <span className="text-amber-600 ml-1">({order.timezone})</span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {order.meet_url && (
                 <div className="pt-4 border-t border-gray-100">
@@ -243,17 +275,17 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 <p className="font-bold text-lg">{formatAmount(order.amount_cents)}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</p>
                 <span
                   className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${
-                    order.status === 'active'
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : order.status === 'processing'
-                        ? 'bg-amber-50 text-amber-700'
-                        : 'bg-slate-100 text-slate-700'
+                    order.status === 'refunded'
+                      ? 'bg-red-50 text-red-700'
+                      : order.stripe_payment_intent_id || order.payment_type === 'membership'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'bg-amber-50 text-amber-700'
                   }`}
                 >
-                  {order.status}
+                  {order.status === 'refunded' ? 'Refunded' : (order.stripe_payment_intent_id || order.payment_type === 'membership') ? 'Paid' : 'Pending'}
                 </span>
               </div>
             </CardContent>

@@ -83,23 +83,25 @@ export function ContactForm({ value, onChange, onMemberCheck }: ContactFormProps
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
           <Input 
             id="phone" 
             type="tel" 
             value={value.phone} 
             onChange={(e) => handleChange('phone', e.target.value)} 
             placeholder="(555) 123-4567"
+            required
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="grade">Student Grade (Optional)</Label>
+          <Label htmlFor="grade">Student Grade <span className="text-red-500">*</span></Label>
           <Input 
             id="grade" 
             value={value.studentGrade} 
             onChange={(e) => handleChange('studentGrade', e.target.value)} 
             placeholder="e.g. 11th Grade"
+            required
           />
         </div>
       </div>

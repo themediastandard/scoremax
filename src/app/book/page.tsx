@@ -360,7 +360,7 @@ export default function BookPage() {
               <div className="flex justify-end pt-4">
                 <Button 
                   onClick={() => handleNext('contact')} 
-                  disabled={!state.contact.email || !state.contact.fullName}
+                  disabled={!state.contact.email || !state.contact.fullName || !state.contact.phone || !state.contact.studentGrade}
                   className="bg-[#1e293b]"
                 >
                   See Options
