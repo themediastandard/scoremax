@@ -60,7 +60,7 @@ export default async function CustomersPage() {
                           variant="outline"
                           className={
                             membership.tier === 'core'
-                              ? 'border-[#c79d3c] text-[#c79d3c]'
+                              ? 'border-[#b08a30] text-[#b08a30]'
                               : 'border-[#517cad] text-[#517cad]'
                           }
                         >

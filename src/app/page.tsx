@@ -139,7 +139,7 @@ export default function Home() {
       <section className="pt-4 pb-16 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-8">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Our Services</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Services</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900">Browse by Subject</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -205,14 +205,14 @@ export default function Home() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why ScoreMax</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why ScoreMax</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Results Without Compromise</h2>
-            <div className="w-10 h-[2px] bg-[#c79d3c] mt-4 mb-5" />
-            <p className="text-gray-500 text-sm leading-relaxed">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
+            <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-5" />
+            <p className="text-gray-700 text-sm leading-relaxed">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">Book Free Consultation</Link>
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Book Free Consultation</Link>
             </div>
-            <div className="mt-5 flex gap-5 text-xs text-gray-400">
+            <div className="mt-5 flex gap-5 text-xs text-gray-800">
               <span>Scholarship accepted</span>
               <span>A+ BBB Rating</span>
             </div>
@@ -232,44 +232,44 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Book Your Session in Minutes</h2>
-            <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
-            <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
+            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
+            <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto">
               Our simple booking process makes it easy to schedule tutoring that fits your goals and schedule. Choose your subject, share your availability, and we match you with an expert tutor.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-lg text-[#c79d3c] font-bold">1</span>
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg text-[#b08a30] font-bold">1</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Choose Subject & Plan</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Select the subject you need help with and the tutoring package that works for you. We offer flexible options from single sessions to monthly memberships.</p>
+              <p className="text-gray-700 text-sm leading-relaxed">Select the subject you need help with and the tutoring package that works for you. We offer flexible options from single sessions to monthly memberships.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-lg text-[#c79d3c] font-bold">2</span>
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg text-[#b08a30] font-bold">2</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Share Your Availability</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Tell us when you are free. We match you with an expert tutor who fits your schedule, whether online or in person.</p>
+              <p className="text-gray-700 text-sm leading-relaxed">Tell us when you are free. We match you with an expert tutor who fits your schedule, whether online or in person.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-lg text-[#c79d3c] font-bold">3</span>
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg text-[#b08a30] font-bold">3</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Start Learning</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Once confirmed, you will meet your tutor and begin your personalized sessions. Track progress and adjust as needed.</p>
+              <p className="text-gray-700 text-sm leading-relaxed">Once confirmed, you will meet your tutor and begin your personalized sessions. Track progress and adjust as needed.</p>
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-8 md:p-10 text-center">
             <h3 className="font-[family-name:var(--font-playfair)] text-xl lg:text-2xl text-gray-900 mb-3">Why Book a Session?</h3>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-6">
+            <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto mb-6">
               Every session gets you closer to your goals. Our tutors are handpicked experts who adapt to your learning style. Whether you need a score boost for the SAT, help in calculus, or ongoing academic support, booking is the first step toward results.
             </p>
-            <Link href="/book" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-8 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+            <Link href="/book" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-8 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
               Book A Session
             </Link>
           </div>
@@ -283,33 +283,33 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Testimonials</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Testimonials</div>
             <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900">Students Love ScoreMax</h3>
-            <a href="https://www.google.com/search?q=ScoreMax+tutoring" target="_blank" rel="noopener noreferrer" className="text-[#c79d3c] text-sm mt-2 inline-block hover:underline font-medium">
+            <a href="https://www.google.com/search?q=ScoreMax+tutoring" target="_blank" rel="noopener noreferrer" className="text-[#b08a30] text-sm mt-2 inline-block hover:underline font-medium">
               View all reviews on Google →
             </a>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8">
-              <div className="text-xs text-[#c79d3c] font-medium mb-3">Google Review</div>
-              <div className="text-2xl font-bold text-[#c79d3c] mb-1">+280</div>
-              <div className="text-xs text-gray-400 mb-4">SAT Point Increase</div>
-              <p className="text-gray-600 text-sm leading-relaxed">&quot;I improved my SAT by 280 points in 3 months. The plan kept me focused.&quot;</p>
-              <div className="mt-4 text-xs text-gray-400">Sarah M.</div>
+              <div className="text-xs text-[#b08a30] font-medium mb-3">Google Review</div>
+              <div className="text-2xl font-bold text-[#b08a30] mb-1">+280</div>
+              <div className="text-xs text-gray-800 mb-4">SAT Point Increase</div>
+              <p className="text-gray-800 text-sm leading-relaxed">&quot;I improved my SAT by 280 points in 3 months. The plan kept me focused.&quot;</p>
+              <div className="mt-4 text-xs text-gray-800">Sarah M.</div>
             </div>
             <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8">
-              <div className="text-xs text-[#c79d3c] font-medium mb-3">Google Review</div>
-              <div className="text-2xl font-bold text-[#c79d3c] mb-1">3.7</div>
-              <div className="text-xs text-gray-400 mb-4">GPA from 2.8</div>
-              <p className="text-gray-600 text-sm leading-relaxed">&quot;Went from struggling to confident in AP Calc thanks to weekly sessions.&quot;</p>
-              <div className="mt-4 text-xs text-gray-400">Marcus T.</div>
+              <div className="text-xs text-[#b08a30] font-medium mb-3">Google Review</div>
+              <div className="text-2xl font-bold text-[#b08a30] mb-1">3.7</div>
+              <div className="text-xs text-gray-800 mb-4">GPA from 2.8</div>
+              <p className="text-gray-800 text-sm leading-relaxed">&quot;Went from struggling to confident in AP Calc thanks to weekly sessions.&quot;</p>
+              <div className="mt-4 text-xs text-gray-800">Marcus T.</div>
             </div>
             <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8">
-              <div className="text-xs text-[#c79d3c] font-medium mb-3">Google Review</div>
-              <div className="text-2xl font-bold text-[#c79d3c] mb-1">Top Choice</div>
-              <div className="text-xs text-gray-400 mb-4">College Accepted</div>
-              <p className="text-gray-600 text-sm leading-relaxed">&quot;Improved my ACT and got into my first choice. The coaching was amazing.&quot;</p>
-              <div className="mt-4 text-xs text-gray-400">Emma L.</div>
+              <div className="text-xs text-[#b08a30] font-medium mb-3">Google Review</div>
+              <div className="text-2xl font-bold text-[#b08a30] mb-1">Top Choice</div>
+              <div className="text-xs text-gray-800 mb-4">College Accepted</div>
+              <p className="text-gray-800 text-sm leading-relaxed">&quot;Improved my ACT and got into my first choice. The coaching was amazing.&quot;</p>
+              <div className="mt-4 text-xs text-gray-800">Emma L.</div>
             </div>
           </div>
         </div>

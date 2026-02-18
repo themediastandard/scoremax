@@ -122,7 +122,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         }}
       >
         {/* Header (brand removed per request) */}
-        <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-[#c79d3c]">
+        <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-[#b08a30]">
           <button
             onClick={onClose}
             className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors duration-200 touch-manipulation"
@@ -160,7 +160,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       <div className="pl-6 pr-4 py-2 space-y-4">
                         {item.sections.map((section) => (
                           <div key={section.title}>
-                            <div className="text-sm font-semibold text-[#c79d3c] tracking-wider uppercase mb-1.5">{section.title}</div>
+                            <div className="text-sm font-semibold text-[#b08a30] tracking-wider uppercase mb-1.5">{section.title}</div>
                             <div className="space-y-1">
                               {section.links.map((link) => (
                                 <Link
@@ -220,7 +220,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                     onClick={handleLinkClick}
                     className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                   >
-                    <span className="font-medium text-gray-900 text-xl group-hover:text-[#c79d3c] transition-colors duration-200 uppercase">
+                    <span className="font-medium text-gray-900 text-xl group-hover:text-[#b08a30] transition-colors duration-200 uppercase">
                       {item.label}
                     </span>
                   </Link>
@@ -235,7 +235,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
           <Link
             href="/contact"
             onClick={handleLinkClick}
-            className="w-full bg-[#c79d3c] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px] font-[family-name:var(--font-playfair)]"
+            className="w-full bg-[#b08a30] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px] font-[family-name:var(--font-playfair)]"
           >
             Book Free Consultation
           </Link>

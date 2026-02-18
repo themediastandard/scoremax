@@ -47,15 +47,15 @@ export default function CollegeTutoringPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">College</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">College</div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
             Expert College Tutoring
           </h1>
-          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-8">
             We provide specialized college tutoring to help you master advanced subjects and achieve academic excellence. Whether you&apos;re tackling complex mathematics, sciences, or challenging coursework, our expert tutors are here to guide you.
           </p>
-          <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+          <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
             Book Free Consultation
           </Link>
         </div>
@@ -65,7 +65,7 @@ export default function CollegeTutoringPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Our Services</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Services</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Comprehensive College Support
             </h2>
@@ -76,7 +76,7 @@ export default function CollegeTutoringPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Algebra & Calculus</h3>
@@ -89,7 +89,7 @@ export default function CollegeTutoringPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Physics & Chemistry</h3>
@@ -102,7 +102,7 @@ export default function CollegeTutoringPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Personalized Learning</h3>
@@ -121,7 +121,7 @@ export default function CollegeTutoringPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why Choose Us</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why Choose Us</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Expertise, Flexibility & Results
             </h2>
@@ -132,7 +132,7 @@ export default function CollegeTutoringPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-lg">✓</span>
               </div>
               <div>
@@ -144,7 +144,7 @@ export default function CollegeTutoringPage() {
             </div>
 
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-lg">✓</span>
               </div>
               <div>
@@ -156,7 +156,7 @@ export default function CollegeTutoringPage() {
             </div>
 
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-lg">✓</span>
               </div>
               <div>
@@ -173,7 +173,7 @@ export default function CollegeTutoringPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
             Ready to Excel in College?
           </h2>
@@ -181,7 +181,7 @@ export default function CollegeTutoringPage() {
             Join hundreds of college students who have achieved academic success with ScoreMax.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
               Book Free Consultation
             </Link>
             <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">

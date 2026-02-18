@@ -184,7 +184,7 @@ export default async function OrdersPage() {
                   </div>
                   {profile?.role === 'admin' && (
                     <div className="flex gap-4">
-                      <User className="h-5 w-5 text-[#c79d3c]/70 shrink-0 mt-0.5" />
+                      <User className="h-5 w-5 text-[#b08a30]/70 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</p>
                         <p className="text-gray-900 font-medium">{order.customers?.full_name ?? '—'}</p>

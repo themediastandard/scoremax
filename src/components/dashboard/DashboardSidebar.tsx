@@ -123,7 +123,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
             <div className="flex items-center gap-2 mt-1">
               <p className={`text-xs font-medium truncate ${
                 tier === 'Core'
-                  ? 'text-[#c79d3c] font-semibold'
+                  ? 'text-[#b08a30] font-semibold'
                   : 'text-gray-500'
               }`}>
                 {tier ? `${tier} Member` : 'No active subscription'}

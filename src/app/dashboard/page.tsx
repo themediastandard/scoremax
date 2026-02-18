@@ -66,7 +66,7 @@ export default async function DashboardHome() {
               <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pending Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#c79d3c]">{pendingCount || 0}</div>
+              <div className="text-4xl font-bold text-[#b08a30]">{pendingCount || 0}</div>
               <p className="text-xs text-gray-500 mt-1">Requires attention</p>
             </CardContent>
           </Card>
@@ -334,15 +334,15 @@ export default async function DashboardHome() {
       )}
       
       {membership ? (
-        <Card className={`shadow-sm ${tierLabel === 'Core' ? 'border-2 border-[#c79d3c] bg-gradient-to-br from-amber-50/40 to-white' : 'border-gray-100'}`}>
+        <Card className={`shadow-sm ${tierLabel === 'Core' ? 'border-2 border-[#b08a30] bg-gradient-to-br from-amber-50/40 to-white' : 'border-gray-100'}`}>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${tierLabel === 'Core' ? 'bg-[#c79d3c]/10' : 'bg-[#517cad]/10'}`}>
-                  <CreditCard className={`h-6 w-6 ${tierLabel === 'Core' ? 'text-[#c79d3c]' : 'text-[#517cad]'}`} />
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${tierLabel === 'Core' ? 'bg-[#b08a30]/10' : 'bg-[#517cad]/10'}`}>
+                  <CreditCard className={`h-6 w-6 ${tierLabel === 'Core' ? 'text-[#b08a30]' : 'text-[#517cad]'}`} />
                 </div>
                 <div>
-                  <p className={`text-lg font-semibold ${tierLabel === 'Core' ? 'text-[#c79d3c]' : 'text-[#1e293b]'}`}>
+                  <p className={`text-lg font-semibold ${tierLabel === 'Core' ? 'text-[#b08a30]' : 'text-[#1e293b]'}`}>
                     {tierLabel} Membership
                   </p>
                   {membership.current_period_end && (
@@ -388,7 +388,7 @@ export default async function DashboardHome() {
               <p className="text-sm text-gray-500 mt-0.5">Subscribe to get session credits and member pricing.</p>
             </div>
             <Link href="/book">
-              <Button className="bg-[#c79d3c] hover:bg-[#b58b2a]">View Plans</Button>
+              <Button className="bg-[#b08a30] hover:bg-[#b58b2a]">View Plans</Button>
             </Link>
           </CardContent>
         </Card>
@@ -396,7 +396,7 @@ export default async function DashboardHome() {
 
       <div className="flex flex-wrap gap-3">
         <Link href="/book">
-          <Button className="bg-[#c79d3c] hover:bg-[#b58b2a]">Book a Session</Button>
+          <Button className="bg-[#b08a30] hover:bg-[#b58b2a]">Book a Session</Button>
         </Link>
         <Link href="/dashboard/orders">
           <Button variant="outline">View All Orders</Button>
@@ -530,7 +530,7 @@ export default async function DashboardHome() {
               <p className="font-semibold text-[#1e293b]">No upcoming sessions</p>
               <p className="text-sm text-gray-500 mt-1 mb-5">Ready to keep learning? Book your next session.</p>
               <Link href="/book">
-                <Button className="bg-[#c79d3c] hover:bg-[#b58b2a]">Book a Session</Button>
+                <Button className="bg-[#b08a30] hover:bg-[#b58b2a]">Book a Session</Button>
               </Link>
             </CardContent>
           </Card>

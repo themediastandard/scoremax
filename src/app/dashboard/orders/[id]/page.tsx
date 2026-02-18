@@ -233,7 +233,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <Card className="border-gray-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2">
-                <User className="h-5 w-5 text-[#c79d3c]" />
+                <User className="h-5 w-5 text-[#b08a30]" />
                 Customer
               </CardTitle>
             </CardHeader>
@@ -260,7 +260,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <Card className="border-gray-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-[#c79d3c]" />
+                <CreditCard className="h-5 w-5 text-[#b08a30]" />
                 Payment
               </CardTitle>
             </CardHeader>

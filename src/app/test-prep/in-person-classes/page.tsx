@@ -49,15 +49,15 @@ export default function InPersonClassesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">In Person</div>
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">In Person</div>
               <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
                 SAT & ACT In-Person Classes
               </h1>
-              <div className="w-10 h-[2px] bg-[#c79d3c] mb-5" />
+              <div className="w-10 h-[2px] bg-[#b08a30] mb-5" />
               <p className="text-gray-500 text-sm leading-relaxed max-w-lg mb-8">
                 Join our comprehensive in-person course designed to maximize your test scores. Learn from expert instructors in a structured classroom with proven strategies and hands-on practice.
               </p>
-              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
                 Book Free Consultation
               </Link>
             </div>
@@ -70,11 +70,11 @@ export default function InPersonClassesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-white rounded-lg border border-gray-100">
-                    <div className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-[#c79d3c] mb-1">2</div>
+                    <div className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-[#b08a30] mb-1">2</div>
                     <div className="text-xs text-gray-500">Days per Week</div>
                   </div>
                   <div className="text-center p-4 bg-white rounded-lg border border-gray-100">
-                    <div className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-[#c79d3c] mb-1">5</div>
+                    <div className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-[#b08a30] mb-1">5</div>
                     <div className="text-xs text-gray-500">Weeks Total</div>
                   </div>
                 </div>
@@ -89,7 +89,7 @@ export default function InPersonClassesPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why Choose Us</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why Choose Us</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Your Path to Test Success
             </h2>
@@ -100,7 +100,7 @@ export default function InPersonClassesPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Expert Instruction</h3>
@@ -110,7 +110,7 @@ export default function InPersonClassesPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Structured Learning</h3>
@@ -120,7 +120,7 @@ export default function InPersonClassesPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Hands-on Practice</h3>
@@ -130,7 +130,7 @@ export default function InPersonClassesPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Peer Learning</h3>
@@ -140,7 +140,7 @@ export default function InPersonClassesPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Immediate Feedback</h3>
@@ -150,7 +150,7 @@ export default function InPersonClassesPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Proven Results</h3>
@@ -163,20 +163,20 @@ export default function InPersonClassesPage() {
           {/* Stats Section */}
           <div className="mt-12 rounded-2xl bg-gray-100 border border-gray-100 p-10">
             <div className="text-center mb-8">
-              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">Proven Results</div>
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-2">Proven Results</div>
               <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Our Track Record</h3>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">+200</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">+200</div>
                 <div className="text-sm text-gray-500">Average Score Improvement</div>
               </div>
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">95%</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">95%</div>
                 <div className="text-sm text-gray-500">Students See Improvement</div>
               </div>
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">300+</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">300+</div>
                 <div className="text-sm text-gray-500">Students Enrolled</div>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function InPersonClassesPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Course Details</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Course Details</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Schedule & Curriculum
             </h2>
@@ -207,10 +207,10 @@ export default function InPersonClassesPage() {
               </div>
               <h4 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-4">What You&apos;ll Get</h4>
               <ul className="space-y-2 text-sm text-gray-500">
-                <li className="flex items-center gap-2"><span className="text-[#c79d3c]">✓</span> Expert instruction from certified tutors</li>
-                <li className="flex items-center gap-2"><span className="text-[#c79d3c]">✓</span> Comprehensive study materials</li>
-                <li className="flex items-center gap-2"><span className="text-[#c79d3c]">✓</span> Practice tests and assessments</li>
-                <li className="flex items-center gap-2"><span className="text-[#c79d3c]">✓</span> Small class sizes for individual attention</li>
+                <li className="flex items-center gap-2"><span className="text-[#b08a30]">✓</span> Expert instruction from certified tutors</li>
+                <li className="flex items-center gap-2"><span className="text-[#b08a30]">✓</span> Comprehensive study materials</li>
+                <li className="flex items-center gap-2"><span className="text-[#b08a30]">✓</span> Practice tests and assessments</li>
+                <li className="flex items-center gap-2"><span className="text-[#b08a30]">✓</span> Small class sizes for individual attention</li>
               </ul>
             </div>
 
@@ -242,7 +242,7 @@ export default function InPersonClassesPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
             Ready to Join Our In-Person Course?
           </h2>
@@ -250,7 +250,7 @@ export default function InPersonClassesPage() {
             Take the first step toward your dream score. Limited spots available for our next session.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
               Book Free Consultation
             </Link>
             <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors font-[family-name:var(--font-playfair)]">

@@ -43,45 +43,45 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left panel: premium branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#1e293b] flex-col p-12 xl:p-16">
+        <Link href="/" className="inline-block w-fit shrink-0">
+          <Image
+            src="/Images/score-max-logo-wide.png"
+            alt="ScoreMax"
+            width={200}
+            height={50}
+            className="h-8 w-auto brightness-0 invert"
+          />
+        </Link>
         <div className="flex-1 flex flex-col justify-center">
           <div className="space-y-8">
-          <Link href="/" className="inline-block w-fit">
-            <Image
-              src="/Images/score-max-logo-white.png"
-              alt="ScoreMax"
-              width={200}
-              height={50}
-              className="h-12 w-auto"
-            />
-          </Link>
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
             Welcome back
           </div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl xl:text-4xl text-white leading-tight tracking-tight">
             Unlock your test score potential
           </h2>
-          <div className="w-10 h-[2px] bg-[#c79d3c]" />
-          <p className="text-slate-300 text-sm leading-relaxed max-w-md">
+          <div className="w-10 h-[2px] bg-[#b08a30]" />
+          <p className="font-[family-name:var(--font-playfair)] text-slate-300 text-sm leading-relaxed max-w-md">
             Expert 1-on-1 tutoring for SAT, ACT, and academic subjects. Personalized study plans that deliver results.
           </p>
           <div className="flex flex-col gap-4 pt-4">
-            <div className="flex items-center gap-3 text-slate-200">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-[#c79d3c]" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#b08a30]/15 border border-[#b08a30]/30 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-6 h-6 text-[#b08a30]" strokeWidth={1.5} />
               </div>
-              <span className="text-sm leading-relaxed">Certified expert tutors</span>
+              <span className="font-[family-name:var(--font-playfair)] text-base text-white leading-relaxed">Certified expert tutors</span>
             </div>
-            <div className="flex items-center gap-3 text-slate-200">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-[#c79d3c]" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#b08a30]/15 border border-[#b08a30]/30 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-6 h-6 text-[#b08a30]" strokeWidth={1.5} />
               </div>
-              <span className="text-sm leading-relaxed">Proven score improvements</span>
+              <span className="font-[family-name:var(--font-playfair)] text-base text-white leading-relaxed">Proven score improvements</span>
             </div>
-            <div className="flex items-center gap-3 text-slate-200">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 flex items-center justify-center">
-                <Award className="w-5 h-5 text-[#c79d3c]" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#b08a30]/15 border border-[#b08a30]/30 flex items-center justify-center shrink-0">
+                <Award className="w-6 h-6 text-[#b08a30]" strokeWidth={1.5} />
               </div>
-              <span className="text-sm leading-relaxed">Personalized learning plans</span>
+              <span className="font-[family-name:var(--font-playfair)] text-base text-white leading-relaxed">Personalized learning plans</span>
             </div>
           </div>
         </div>
@@ -94,22 +94,22 @@ export default function LoginPage() {
           <div className="lg:hidden mb-8 flex justify-center">
             <Link href="/">
               <Image
-                src="/Images/score-max-logo-black.png"
+                src="/Images/score-max-logo-wide.png"
                 alt="ScoreMax"
                 width={140}
                 height={36}
-                className="h-9 w-auto"
+                className="h-7 w-auto"
               />
             </Link>
           </div>
           <div className="text-center">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Account
             </div>
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-black mb-2">
               Sign in to ScoreMax
             </h1>
-            <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
             <p className="text-black text-sm leading-relaxed mb-8">
               Welcome back. Enter your details to continue.
             </p>
@@ -144,7 +144,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" tabIndex={-1} className="text-sm text-[#c79d3c] hover:underline font-medium">
+                <Link href="/forgot-password" tabIndex={-1} className="text-sm text-[#b08a30] hover:underline font-medium">
                   Forgot password?
                 </Link>
               </div>
@@ -171,14 +171,14 @@ export default function LoginPage() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full h-11 bg-[#c79d3c] hover:bg-[#b08a30] text-white font-[family-name:var(--font-playfair)]" disabled={loading}>
+            <Button type="submit" className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign In'}
             </Button>
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-[#c79d3c] hover:underline font-medium font-[family-name:var(--font-playfair)]">
+            <Link href="/register" className="text-[#b08a30] hover:underline font-medium font-[family-name:var(--font-playfair)]">
               Sign up
             </Link>
           </p>

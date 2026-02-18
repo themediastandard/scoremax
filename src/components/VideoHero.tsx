@@ -30,20 +30,20 @@ export default function VideoHero({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-12 md:py-20 md:min-h-[70vh] items-center">
           {/* Left: Content */}
           <div className="flex flex-col justify-center order-2 md:order-1">
-          <div className="w-2 h-12 bg-[#c79d3c] mb-8 hidden md:block" />
+          <div className="w-2 h-12 bg-[#b08a30] mb-8 hidden md:block" />
 
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl sm:text-5xl lg:text-6xl text-gray-900 leading-tight tracking-tight">
             {headline}
           </h1>
 
-          <p className="mt-5 text-base sm:text-lg text-gray-500 leading-relaxed max-w-lg">
+          <p className="mt-5 text-base sm:text-lg text-gray-700 leading-relaxed max-w-lg">
             {subtitle}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={ctaHref}
-              className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-7 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]"
+              className="inline-flex items-center justify-center bg-[#b08a30] text-white px-7 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]"
             >
               {ctaText}
             </Link>
@@ -78,7 +78,7 @@ export default function VideoHero({
 
       {/* Scroll indicator */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-1 animate-bounce">
-        <ChevronDown className="w-5 h-5 text-gray-400" />
+        <ChevronDown className="w-5 h-5 text-gray-600" />
       </div>
     </section>
   );

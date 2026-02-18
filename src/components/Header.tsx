@@ -53,38 +53,38 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </Link>
 
             <div className="flex items-center gap-2">
-              <Link href="/book" className="hidden sm:inline-flex items-center justify-center bg-[#c79d3c] text-white px-4 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
+              <Link href="/book" className="hidden sm:inline-flex items-center justify-center bg-[#b08a30] text-white px-4 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
                 Book A Session
               </Link>
               <div className="relative">
-              <button onClick={() => setServicesOpen(!servicesOpen)} aria-expanded={servicesOpen} aria-haspopup="true" className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#c79d3c] text-white text-xs font-semibold hover:brightness-95 shadow-md font-[family-name:var(--font-playfair)]">
+              <button onClick={() => setServicesOpen(!servicesOpen)} aria-expanded={servicesOpen} aria-haspopup="true" className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#b08a30] text-white text-xs font-semibold hover:brightness-95 shadow-md font-[family-name:var(--font-playfair)]">
                 <span>Services</span>
                 <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor"><path d="M5.25 7.5L10 12.25 14.75 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
               {servicesOpen && (
-                <div className="absolute right-0 mt-2 bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] z-50 min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
+                <div className="absolute right-0 mt-2 bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] z-50 min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                   <div className="grid grid-cols-3 py-5">
                     <div className="px-6">
-<div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
-                          <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+<div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Test Prep</div>
+                          <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                            <Link href="/test-prep/act" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                            <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
+                            <Link href="/test-prep/act" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
+                            <Link href="/test-prep/in-person-classes" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                           </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
-                      <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
-                      <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+                      <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
+                      <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                       <div className="space-y-0.5">
-                        <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                        <Link href="/college-high-school/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                        <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                        <Link href="/college-high-school/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
                       </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
-                      <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
-                      <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                      <Link href="/subjects" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                      <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Subjects</div>
+                      <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
+                      <Link href="/subjects" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Browse All Subjects</Link>
                     </div>
                   </div>
                 </div>
@@ -115,51 +115,51 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             {/* Desktop nav */}
             <div className="hidden md:flex items-center justify-center justify-self-center font-[family-name:var(--font-playfair)] uppercase">
               <div className="flex items-center gap-7">
-                <Link href="/" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Home</Link>
+                <Link href="/" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">Home</Link>
                 <div className="relative group">
-                  <button className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                  <button className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
                     Tutoring
                     <svg className="w-3 h-3 text-gray-300 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 ease-out absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50">
-                    <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
+                    <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                       <div className="grid grid-cols-3 py-5">
                         <div className="px-6">
-                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
-                          <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+                          <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Test Prep</div>
+                          <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                            <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                            <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
+                            <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
+                            <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
-                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
-                          <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+                          <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
+                          <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                            <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                            <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                            <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
-                          <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
-                          <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                          <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                          <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Subjects</div>
+                          <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
+                          <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Browse All Subjects</Link>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <Link href="/step-up-for-students" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Scholarship</Link>
-                <Link href="/pricing" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Pricing</Link>
-                <Link href="/about" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">About Us</Link>
-                <Link href="/contact" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Contact</Link>
+                <Link href="/step-up-for-students" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">Scholarship</Link>
+                <Link href="/pricing" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">Pricing</Link>
+                <Link href="/about" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">About Us</Link>
+                <Link href="/contact" className="text-[15px] font-medium tracking-wide text-gray-800 hover:text-[#b08a30] transition-colors whitespace-nowrap">Contact</Link>
               </div>
             </div>
 
             {/* Right icons far right */}
             <div className="flex items-center space-x-4 justify-self-end">
-              <Link href="/book" className="hidden md:inline-flex items-center justify-center bg-[#c79d3c] text-white px-5 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
+              <Link href="/book" className="hidden md:inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
                 Book A Session
               </Link>
               <HeaderUserMenu />
@@ -200,50 +200,50 @@ export default function Header({ variant = 'default' }: HeaderProps) {
           </div>
           <div className="hidden lg:flex items-center justify-center flex-1 uppercase font-[family-name:var(--font-playfair)]">
             <div className="flex items-center divide-x divide-gray-200">
-              <Link href="/" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/" className="px-4 text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap">
                 Home
               </Link>
               <div className="relative group px-4">
-                <button className="text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
+                <button className="text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap cursor-pointer flex items-center gap-1 uppercase">
                   Tutoring
                   <svg className="w-3 h-3 opacity-40 group-hover:opacity-70 transition-transform duration-200 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 ease-out absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50">
-                  <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#c79d3c] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
+                  <div className="bg-white rounded-xl border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
                     <div className="grid grid-cols-3 py-5">
                       <div className="px-6">
-                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Test Prep</div>
-                        <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+                        <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Test Prep</div>
+                        <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
-                          <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">SAT Tutoring</Link>
-                          <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">ACT Tutoring</Link>
-                          <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">In-Person Classes</Link>
+                          <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
+                          <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
+                          <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
-                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Academic</div>
-                        <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
+                        <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
+                        <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
-                          <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">College Tutoring</Link>
-                          <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">High School Tutoring</Link>
+                          <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                          <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
-                        <div className="text-xs font-semibold text-[#c79d3c] tracking-wider uppercase">Subjects</div>
-                        <div className="w-5 h-0.5 bg-[#c79d3c]/60 mt-1.5 mb-2 rounded-full" />
-                        <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#c79d3c] hover:bg-[#c79d3c]/8 transition-colors">Browse All Subjects</Link>
+                        <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Subjects</div>
+                        <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
+                        <Link href="/subjects" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Browse All Subjects</Link>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <Link href="/step-up-for-students" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/step-up-for-students" className="px-4 text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap">
                 Scholarship
               </Link>
-              <Link href="/about" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/about" className="px-4 text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap">
                 About Us
               </Link>
-              <Link href="/contact" className="px-4 text-base text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
+              <Link href="/contact" className="px-4 text-base text-gray-500 hover:text-[#b08a30] transition-colors duration-200 whitespace-nowrap">
                 Contact
               </Link>
             </div>
@@ -253,7 +253,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
               <Link href="/contact" className="border border-gray-300 text-gray-700 px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:bg-gray-50 transition-colors font-[family-name:var(--font-playfair)]">
                 Book Free Consultation
               </Link>
-              <Link href="/book" className="bg-[#c79d3c] text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:brightness-95 transform hover:scale-105 transition-all duration-300 border border-[#c79d3c]/20 font-[family-name:var(--font-playfair)]">
+              <Link href="/book" className="bg-[#b08a30] text-white px-6 py-2 rounded-full font-semibold text-xs tracking-wide uppercase shadow-lg hover:shadow-xl hover:brightness-95 transform hover:scale-105 transition-all duration-300 border border-[#b08a30]/20 font-[family-name:var(--font-playfair)]">
                 Book A Session
               </Link>
             </div>

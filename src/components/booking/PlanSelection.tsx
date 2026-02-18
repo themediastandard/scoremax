@@ -71,11 +71,11 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
       <div className="space-y-6">
         <h2 className="text-2xl font-serif text-[#1e293b]">How would you like to pay?</h2>
         
-        <Card className="border-[#c79d3c] bg-amber-50/20">
+        <Card className="border-[#b08a30] bg-amber-50/20">
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               <span>Use Existing Credit</span>
-              <Badge className="bg-[#c79d3c] hover:bg-[#b58b2a]">Recommended</Badge>
+              <Badge className="bg-[#b08a30] hover:bg-[#b58b2a]">Recommended</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -137,7 +137,7 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg border border-[#c79d3c]/30 bg-amber-50/30 px-4 py-3">
+      <div className="rounded-lg border border-[#b08a30]/30 bg-amber-50/30 px-4 py-3">
         <p className="text-center font-medium text-[#1e293b]">
           Choose <span className="font-bold">one</span> plan below. Pick the option that works best for you.
         </p>
@@ -147,7 +147,7 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
       {(isSAT || isACT) && (
         <div className="space-y-4">
           <h3 className="font-semibold text-lg text-[#1e293b] flex items-center">
-            <Star className="w-5 h-5 text-[#c79d3c] mr-2 fill-current" />
+            <Star className="w-5 h-5 text-[#b08a30] mr-2 fill-current" />
             Exam Prep Course Programs
           </h3>
           <p className="text-sm text-gray-600">Structured curriculum for SAT/ACT. Choose one of these or a plan below.</p>
@@ -266,8 +266,8 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
               : null
             
             return (
-            <Card key={plan.id} className={`flex flex-col ${plan.tier === 'core' ? 'border-[#c79d3c] border-2 shadow-lg scale-105 z-10' : 'border-gray-200'}`}>
-              {plan.tier === 'core' && <div className="bg-[#c79d3c] text-white text-center text-xs py-1 uppercase font-bold tracking-wider">Most Popular</div>}
+            <Card key={plan.id} className={`flex flex-col ${plan.tier === 'core' ? 'border-[#b08a30] border-2 shadow-lg scale-105 z-10' : 'border-gray-200'}`}>
+              {plan.tier === 'core' && <div className="bg-[#b08a30] text-white text-center text-xs py-1 uppercase font-bold tracking-wider">Most Popular</div>}
               <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <div className="mt-2">
@@ -288,7 +288,7 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
               </CardContent>
               <CardFooter>
                 <Button 
-                  className={`w-full ${plan.tier === 'core' ? 'bg-[#c79d3c] hover:bg-[#b58b2a]' : ''}`}
+                  className={`w-full ${plan.tier === 'core' ? 'bg-[#b08a30] hover:bg-[#b58b2a]' : ''}`}
                   onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_price_id, name: plan.name })}
                   disabled={processing}
                 >

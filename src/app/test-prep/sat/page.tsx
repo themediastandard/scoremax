@@ -47,15 +47,15 @@ export default function SATPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Test Prep</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
             Expert SAT Tutoring
           </h1>
-          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-8">
             We understand the importance of achieving high SAT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you reach your desired score.
           </p>
-          <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+          <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
             Book Free Consultation
           </Link>
         </div>
@@ -65,7 +65,7 @@ export default function SATPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why Choose Us</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why Choose Us</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Your Path to SAT Success
             </h2>
@@ -76,7 +76,7 @@ export default function SATPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Experienced Tutors</h3>
@@ -87,7 +87,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Customized Approach</h3>
@@ -98,7 +98,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Comprehensive Curriculum</h3>
@@ -109,7 +109,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Proven Strategies</h3>
@@ -120,7 +120,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Continuous Support</h3>
@@ -131,7 +131,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Score Improvement Track Record</h3>
@@ -145,20 +145,20 @@ export default function SATPage() {
           {/* Stats Section */}
           <div className="mt-12 rounded-2xl bg-gray-100 border border-gray-100 p-10">
             <div className="text-center mb-8">
-              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">Proven Results</div>
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-2">Proven Results</div>
               <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Our Track Record</h3>
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">+280</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">+280</div>
                 <div className="text-sm text-gray-500">Average Score Improvement</div>
               </div>
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">95%</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">95%</div>
                 <div className="text-sm text-gray-500">Students See Improvement</div>
               </div>
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">800+</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">800+</div>
                 <div className="text-sm text-gray-500">SAT Students Helped</div>
               </div>
             </div>
@@ -170,7 +170,7 @@ export default function SATPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Test Structure</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Structure</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Master All SAT Sections
             </h2>
@@ -181,7 +181,7 @@ export default function SATPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Reading</h3>
@@ -195,7 +195,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Writing & Language</h3>
@@ -209,7 +209,7 @@ export default function SATPage() {
             </div>
 
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Math</h3>
@@ -225,7 +225,7 @@ export default function SATPage() {
 
           <div className="mt-10 max-w-2xl mx-auto">
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Essay (Discontinued)</h3>
@@ -238,7 +238,7 @@ export default function SATPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
             Ready to Ace Your SAT?
           </h2>
@@ -246,7 +246,7 @@ export default function SATPage() {
             Join hundreds of students who have achieved their target SAT scores with ScoreMax.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
               Book Free Consultation
             </Link>
             <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">

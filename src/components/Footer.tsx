@@ -51,7 +51,7 @@ export default function Footer() {
                 className="h-16 w-auto"
               />
             </Link>
-            <p className="text-sm leading-relaxed text-white/80 mb-6">
+            <p className="text-sm leading-relaxed text-white/50 mb-6">
               Empowering students to reach their full academic potential through
               personalized, expert tutoring.
             </p>
@@ -61,7 +61,7 @@ export default function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-9 h-9 flex items-center justify-center bg-gray-700 text-white hover:bg-[#c79d3c] transition-colors duration-200"
+                  className="w-9 h-9 flex items-center justify-center bg-gray-700 text-white hover:bg-[#b08a30] transition-colors duration-200"
                 >
                   <social.icon className="w-4 h-4" />
                 </a>
@@ -71,7 +71,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
               Quick Links
             </h3>
             <ul className="space-y-3">
@@ -79,7 +79,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white hover:text-[#c79d3c] transition-colors duration-200"
+                    className="text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -90,7 +90,7 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
               Services
             </h3>
             <ul className="space-y-3">
@@ -98,7 +98,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white hover:text-[#c79d3c] transition-colors duration-200"
+                    className="text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -109,34 +109,34 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
               Contact Us
             </h3>
             <ul className="space-y-4">
               <li>
                 <a
                   href="tel:9542148880"
-                  className="flex items-center gap-3 text-sm text-white hover:text-[#c79d3c] transition-colors duration-200"
+                  className="flex items-center gap-3 text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
                 >
-                  <Phone className="w-4 h-4 text-[#c79d3c] shrink-0" />
+                  <Phone className="w-4 h-4 text-[#b08a30] shrink-0" />
                   (954) 214-8880
                 </a>
               </li>
               <li>
                 <a
                   href="tel:9542241511"
-                  className="flex items-center gap-3 text-sm text-white hover:text-[#c79d3c] transition-colors duration-200"
+                  className="flex items-center gap-3 text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
                 >
-                  <Phone className="w-4 h-4 text-[#c79d3c] shrink-0" />
+                  <Phone className="w-4 h-4 text-[#b08a30] shrink-0" />
                   (954) 224-1511
                 </a>
               </li>
               <li>
                 <a
                   href="mailto:info@scoremaxtutoring.com"
-                  className="flex items-center gap-3 text-sm text-white hover:text-[#c79d3c] transition-colors duration-200"
+                  className="flex items-center gap-3 text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
                 >
-                  <Mail className="w-4 h-4 text-[#c79d3c] shrink-0" />
+                  <Mail className="w-4 h-4 text-[#b08a30] shrink-0" />
                   info@scoremaxtutoring.com
                 </a>
               </li>
@@ -145,7 +145,7 @@ export default function Footer() {
             <div className="mt-6">
               <Link
                 href="/contact"
-                className="inline-block bg-[#c79d3c] text-white text-sm font-medium px-5 py-2.5 hover:bg-[#b08a30] transition-colors duration-200"
+                className="inline-block bg-[#b08a30] text-white text-sm font-medium px-5 py-2.5 hover:bg-[#9a7628] transition-colors duration-200 font-[family-name:var(--font-playfair)]"
               >
                 Book Free Consultation
               </Link>
@@ -158,19 +158,19 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/70">
+          <p className="text-xs text-white/50">
             &copy; {currentYear} ScoreMax Tutoring. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link
               href="/privacy"
-              className="text-xs text-white/70 hover:text-white transition-colors duration-200"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms"
-              className="text-xs text-white/70 hover:text-white transition-colors duration-200"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
             >
               Terms of Service
             </Link>

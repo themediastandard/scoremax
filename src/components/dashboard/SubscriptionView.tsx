@@ -139,7 +139,7 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
         <Card
           className={
             membership.tier?.toLowerCase() === 'core'
-              ? 'border-2 border-[#c79d3c] shadow-md bg-gradient-to-br from-amber-50/50 to-white'
+              ? 'border-2 border-[#b08a30] shadow-md bg-gradient-to-br from-amber-50/50 to-white'
               : 'border-gray-100 shadow-sm'
           }
         >
@@ -147,10 +147,10 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-[#c79d3c]" />
+                  <CreditCard className="h-5 w-5 text-[#b08a30]" />
                   {formatTierName(membership.tier)}
                 </CardTitle>
-                <p className="mt-1 text-lg font-semibold text-[#c79d3c]">
+                <p className="mt-1 text-lg font-semibold text-[#b08a30]">
                   ${(plans.find(p => p.tier === membership.tier)?.price_cents ?? 0) / 100}/mo
                 </p>
               </div>
@@ -307,7 +307,7 @@ function PlansGrid({
                 isCurrent
                   ? 'border-2 border-emerald-500 shadow-md bg-emerald-50/30'
                   : isCore && !currentTier
-                    ? 'border-2 border-[#c79d3c] shadow-lg'
+                    ? 'border-2 border-[#b08a30] shadow-lg'
                     : 'border-gray-200 hover:border-gray-300 transition-colors'
               }`}
             >
@@ -317,7 +317,7 @@ function PlansGrid({
                 </div>
               )}
               {isCore && !currentTier && (
-                <div className="bg-[#c79d3c] text-white text-center text-xs py-1.5 uppercase font-bold tracking-wider">
+                <div className="bg-[#b08a30] text-white text-center text-xs py-1.5 uppercase font-bold tracking-wider">
                   Most Popular
                 </div>
               )}
@@ -347,7 +347,7 @@ function PlansGrid({
                   </Button>
                 ) : isNewSubscriber ? (
                   <Button
-                    className={`w-full ${isCore ? 'bg-[#c79d3c] hover:bg-[#b58b2a]' : 'bg-[#1e293b] hover:bg-[#334155]'}`}
+                    className={`w-full ${isCore ? 'bg-[#b08a30] hover:bg-[#b58b2a]' : 'bg-[#1e293b] hover:bg-[#334155]'}`}
                     asChild
                   >
                     <a href="/book">Get Started</a>
@@ -356,7 +356,7 @@ function PlansGrid({
                   <Button
                     className={`w-full gap-1.5 ${
                       isUpgrade
-                        ? 'bg-[#c79d3c] hover:bg-[#b58b2a]'
+                        ? 'bg-[#b08a30] hover:bg-[#b58b2a]'
                         : 'bg-[#1e293b] hover:bg-[#334155]'
                     }`}
                     onClick={onSelect}

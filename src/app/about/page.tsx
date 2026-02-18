@@ -73,7 +73,7 @@ export default function AboutPage() {
       {/* Leadership Section Header */}
       <section className="pt-32 pb-4 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-sm tracking-widest text-[#c79d3c] font-semibold mb-3">Our Leadership</div>
+          <div className="uppercase text-sm tracking-widest text-[#b08a30] font-semibold mb-3">Our Leadership</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">The People Behind ScoreMax</h2>
           <p className="text-gray-500 max-w-2xl mx-auto">Decades of combined experience in education, test preparation, and business leadership.</p>
         </div>
@@ -87,21 +87,21 @@ export default function AboutPage() {
               <Image src="/Images/avi-new.png" alt="Avi Spiller" fill className="object-cover object-top" />
             </div>
             <div className="p-8 md:p-12 flex flex-col justify-center">
-              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">President</div>
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-2">President</div>
               <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Avi Spiller</h3>
-              <div className="w-10 h-[2px] bg-[#c79d3c] mb-6" />
+              <div className="w-10 h-[2px] bg-[#b08a30] mb-6" />
 
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">30+</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">30+</div>
                   <div className="text-xs text-gray-500 mt-1">Years Tutoring</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">23+</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">23+</div>
                   <div className="text-xs text-gray-500 mt-1">Years Teaching</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">B.S.</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">B.S.</div>
                   <div className="text-xs text-gray-500 mt-1">Math Education</div>
                 </div>
               </div>
@@ -120,21 +120,21 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-0 bg-gray-50 rounded-2xl overflow-hidden">
             <div className="p-8 md:p-12 flex flex-col justify-center md:order-1 order-2">
-              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">Vice President</div>
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-2">Vice President</div>
               <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Taimir Terrell</h3>
-              <div className="w-10 h-[2px] bg-[#c79d3c] mb-6" />
+              <div className="w-10 h-[2px] bg-[#b08a30] mb-6" />
 
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">17+</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">17+</div>
                   <div className="text-xs text-gray-500 mt-1">Years as CEO</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">13</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">13</div>
                   <div className="text-xs text-gray-500 mt-1">Started Age</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#c79d3c]">VP</div>
+                  <div className="text-2xl font-bold text-[#b08a30]">VP</div>
                   <div className="text-xs text-gray-500 mt-1">ScoreMax</div>
                 </div>
               </div>

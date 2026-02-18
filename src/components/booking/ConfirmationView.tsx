@@ -29,14 +29,14 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
         </p>
       </div>
       
-      <Card className="border-t-4 border-t-[#c79d3c]">
+      <Card className="border-t-4 border-t-[#b08a30]">
         <CardHeader>
           <CardTitle>Booking Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {bookingDetails?.plan && (
             <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <CreditCard className="w-5 h-5 text-[#c79d3c] mt-0.5 shrink-0" />
+              <CreditCard className="w-5 h-5 text-[#b08a30] mt-0.5 shrink-0" />
               <div>
                 <p className="font-medium">What you purchased</p>
                 <p className="text-lg font-semibold text-[#1e293b]">

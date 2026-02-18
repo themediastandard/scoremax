@@ -14,7 +14,7 @@ export default function DualCTA() {
             <h3 className="text-xl sm:text-2xl text-white font-[family-name:var(--font-playfair)]">5 Week SAT Classes</h3>
             <p className="mt-1 text-white/80 text-sm leading-relaxed max-w-md">Strategy, practice tests, and weekly progress checks.</p>
             <div className="mt-4">
-              <Link href="/test-prep/in-person-classes" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">Register for SAT Classes</Link>
+              <Link href="/test-prep/in-person-classes" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Register for SAT Classes</Link>
             </div>
           </div>
         </div>
@@ -27,7 +27,7 @@ export default function DualCTA() {
             <h3 className="text-xl sm:text-2xl text-white font-[family-name:var(--font-playfair)]">1 on 1 Tutoring Nationwide</h3>
             <p className="mt-1 text-white/80 text-sm leading-relaxed max-w-md">Personalized tutoring for SAT, ACT, and academics.</p>
             <div className="mt-4 flex gap-3 flex-wrap">
-              <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#b08a30] transition-colors font-[family-name:var(--font-playfair)]">Book Virtual Tutoring</Link>
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Book Virtual Tutoring</Link>
               <Link href="/subjects" className="inline-flex items-center justify-center border border-white/40 text-white px-5 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors font-[family-name:var(--font-playfair)]">Browse Subjects</Link>
             </div>
           </div>

@@ -97,16 +97,16 @@ export default function TutorsPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Our Team</div>
+          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Team</div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
             Meet Our Expert Tutoring Team
           </h1>
-          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-8">
             Our tutors bring years of experience, advanced degrees, and a passion for helping students succeed. 
             Each is carefully selected for expertise and proven track record.
           </p>
-          <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+          <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
             Book Free Consultation
           </Link>
         </div>
@@ -116,7 +116,7 @@ export default function TutorsPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Expert Tutors</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Expert Tutors</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Dedicated to Your Success
             </h2>
@@ -139,7 +139,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">Dr. Sarah Chen</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Mathematics Specialist</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Mathematics Specialist</p>
                 <p className="text-xs text-gray-500">Ph.D. in Mathematics, MIT</p>
               </div>
               <div className="space-y-3">
@@ -169,7 +169,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">Michael Rodriguez</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Science Expert</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Science Expert</p>
                 <p className="text-xs text-gray-500">M.S. in Chemistry, Stanford</p>
               </div>
               <div className="space-y-3">
@@ -199,7 +199,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">Emily Johnson</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Test Prep Specialist</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Test Prep Specialist</p>
                 <p className="text-xs text-gray-500">M.Ed. in Education, Harvard</p>
               </div>
               <div className="space-y-3">
@@ -229,7 +229,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">David Kim</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Advanced Mathematics</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Advanced Mathematics</p>
                 <p className="text-xs text-gray-500">Ph.D. in Applied Mathematics, Caltech</p>
               </div>
               <div className="space-y-3">
@@ -259,7 +259,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">Lisa Thompson</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Biology & Chemistry</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Biology & Chemistry</p>
                 <p className="text-xs text-gray-500">Ph.D. in Biochemistry, Johns Hopkins</p>
               </div>
               <div className="space-y-3">
@@ -289,7 +289,7 @@ export default function TutorsPage() {
                   />
                 </div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-2">James Wilson</h3>
-                <p className="text-sm text-[#c79d3c] font-medium mb-2">Physics & Engineering</p>
+                <p className="text-sm text-[#b08a30] font-medium mb-2">Physics & Engineering</p>
                 <p className="text-xs text-gray-500">M.S. in Physics, Georgia Tech</p>
               </div>
               <div className="space-y-3">
@@ -313,7 +313,7 @@ export default function TutorsPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why Choose Us</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why Choose Us</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Rigorous Selection, Proven Results
             </h2>
@@ -324,7 +324,7 @@ export default function TutorsPage() {
 
           <div className="grid md:grid-cols-2 gap-8">
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-lg">✓</span>
                 </div>
                 <div>
@@ -337,7 +337,7 @@ export default function TutorsPage() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-lg">✓</span>
                 </div>
                 <div>
@@ -350,7 +350,7 @@ export default function TutorsPage() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-lg">✓</span>
                 </div>
                 <div>
@@ -363,7 +363,7 @@ export default function TutorsPage() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-lg">✓</span>
                 </div>
                 <div>
@@ -382,7 +382,7 @@ export default function TutorsPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Our Process</div>
+            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Process</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               How We Match You
             </h2>
@@ -393,7 +393,7 @@ export default function TutorsPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-[#c79d3c] rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-[#b08a30] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-white">1</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Assessment</h3>
@@ -402,7 +402,7 @@ export default function TutorsPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-[#c79d3c] rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-[#b08a30] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-white">2</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Matching</h3>
@@ -411,7 +411,7 @@ export default function TutorsPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-[#c79d3c] rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-[#b08a30] rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg font-bold text-white">3</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Success</h3>
@@ -433,7 +433,7 @@ export default function TutorsPage() {
             Join hundreds of students who have found their ideal tutor match and achieved academic success with ScoreMax.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
               Book Free Consultation
             </Link>
             <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
