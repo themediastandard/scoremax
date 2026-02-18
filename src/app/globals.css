@@ -127,6 +127,11 @@
   border-radius: 0 !important;
 }
 
+/* Force circle for partnership arrow (bypasses square override) */
+.rounded-circle {
+  border-radius: 50% !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

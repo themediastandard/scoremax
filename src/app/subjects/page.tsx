@@ -22,33 +22,43 @@ const categories = [
 export default function SubjectsPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="font-heading text-3xl sm:text-4xl font-medium text-gray-900">Choose a Subject</h1>
-        <p className="mt-2 text-sm text-gray-600">Pick the subject you need help with and we’ll match you with the right plan.</p>
-
-        <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.map((cat) => (
-            <div key={cat.title} className="border border-gray-200 p-5 bg-white">
-              <h2 className="text-lg font-medium text-gray-900">{cat.title}</h2>
-              <ul className="mt-2 space-y-1 text-sm text-gray-700 list-disc list-inside">
-                {cat.items.map((item) => (
-                  <li key={item}>
-                    <Link href={`/contact?interest=${encodeURIComponent(item)}`} className="hover:underline">{item}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+      <section className="pt-32 pb-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Our Subjects</div>
+          <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
+            Choose a Subject
+          </h1>
+          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <p className="text-gray-500 text-sm leading-relaxed max-w-xl mx-auto">
+            Pick the subject you need help with and we&apos;ll match you with the right plan.
+          </p>
         </div>
+      </section>
 
-        <div className="mt-8">
-          <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-5 py-2 text-sm">Not sure? Talk to us</Link>
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((cat) => (
+              <div key={cat.title} className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h2 className="font-[family-name:var(--font-playfair)] text-xl text-gray-900 mb-4">{cat.title}</h2>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  {cat.items.map((item) => (
+                    <li key={item}>
+                      <Link href={`/contact?interest=${encodeURIComponent(item)}`} className="hover:text-[#c79d3c] transition-colors">{item}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+              Not Sure? Talk to Us
+            </Link>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
-
-
-
-

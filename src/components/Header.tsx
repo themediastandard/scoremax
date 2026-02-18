@@ -180,7 +180,8 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                   </div>
                 </div>
                 <Link href="/step-up-for-students" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Step Up For Students</Link>
-                <Link href="/contact" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Get In Touch</Link>
+                <Link href="/pricing" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Pricing</Link>
+                <Link href="/contact" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">Contact</Link>
                 <Link href="/about" className="text-[13px] font-medium tracking-wide text-gray-800 hover:text-[#c79d3c] transition-colors whitespace-nowrap">About Us</Link>
               </div>
             </div>
@@ -301,7 +302,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                 Step Up For Students
               </Link>
               <Link href="/contact" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
-                Get In Touch
+                Contact
               </Link>
               <Link href="/about" className="px-4 text-sm text-gray-500 hover:text-[#c79d3c] transition-colors duration-200 whitespace-nowrap">
                 About Us

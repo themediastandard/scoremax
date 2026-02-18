@@ -40,11 +40,15 @@ const navItems: NavItem[] = [
     href: '/tutors'
   },
   {
+    label: 'Pricing',
+    href: '/pricing'
+  },
+  {
     label: 'Step Up For Students',
     href: '/step-up-for-students'
   },
   {
-    label: 'Get In Touch',
+    label: 'Contact',
     href: '/contact'
   },
   {

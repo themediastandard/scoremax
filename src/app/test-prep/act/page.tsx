@@ -41,149 +41,99 @@ export const metadata: Metadata = {
 
 export default function ACTPage() {
   return (
-    <div className="min-h-screen bg-gray-50 overflow-hidden">
+    <div className="min-h-screen bg-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative pt-[130px] pb-20 bg-gradient-to-b from-white to-gray-50">
-        {/* Background Geometric Shapes */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 right-20 w-64 h-64 bg-gray-200 rounded-full opacity-10"></div>
-          <div className="absolute top-40 right-80 w-32 h-32 bg-gray-300 rounded-full opacity-15"></div>
-          <div className="absolute bottom-40 right-60 w-20 h-20 bg-gray-200 rounded-full opacity-20"></div>
-          <div className="absolute bottom-80 left-40 w-40 h-40 bg-gray-300 rounded-full opacity-12"></div>
-          <div className="absolute top-60 left-20 w-24 h-24 bg-gray-200 rounded-full opacity-18"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center">
-
-            
-            <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black leading-relaxed tracking-tight text-black mb-8 space-y-4">
-              <div className="text-3xl lg:text-4xl xl:text-5xl text-gray-600 font-semibold mb-2">
-                Welcome to
-              </div>
-              <div className="text-6xl lg:text-7xl xl:text-8xl text-[#c79d3c] font-black mb-4">
-                SCOREMAX
-              </div>
-              <div className="text-4xl lg:text-5xl xl:text-6xl text-gray-800 font-bold">
-                Your Expert ACT Tutoring Solution!
-              </div>
-            </h1>
-            
-            <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-4xl mx-auto font-medium mb-12">
-              At ScoreMax, we understand the significance of achieving exceptional scores on the ACT for college admissions. 
-              That&apos;s why we&apos;re here to provide you with unparalleled ACT tutoring services that will empower you to 
-              <span className="text-[#517cad] font-semibold"> maximize your potential</span> and 
-              <span className="text-gray-700 font-semibold"> conquer the test</span>.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact"
-                className="bg-[#c79d3c] text-white px-8 py-3 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center">
-                Book Free Consultation
-              </Link>
-              <button className="flex items-center space-x-3 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full border border-white/60 shadow-md hover:shadow-lg hover:bg-white transition-all duration-300 group whitespace-nowrap">
-                <div className="w-8 h-8 bg-[#c79d3c] rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transform group-hover:scale-105 transition-all duration-300">
-                  <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 5v10l7-5z"/>
-                  </svg>
-                </div>
-                <span className="text-base font-semibold text-gray-800">See How It Works</span>
-              </button>
-            </div>
-          </div>
+      <section className="pt-32 pb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Test Prep</div>
+          <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
+            Expert ACT Tutoring
+          </h1>
+          <div className="w-10 h-[2px] bg-[#c79d3c] mx-auto mb-5" />
+          <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-8">
+            We understand the significance of achieving exceptional ACT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you conquer the test.
+          </p>
+          <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
+            Book Free Consultation
+          </Link>
         </div>
       </section>
 
       {/* Why Choose ScoreMax Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
-        {/* Background shapes */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 w-40 h-40 bg-blue-200 rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 right-20 w-32 h-32 bg-red-200 rounded-full opacity-15"></div>
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-yellow-200 rounded-full opacity-20"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Header */}
-          <div className="text-center mb-16">
-
-            <h2 className="text-4xl lg:text-6xl font-black text-black mb-6 leading-tight">
-              Your Path to <span className="text-[#517cad]">ACT Success</span>
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Why Choose Us</div>
+            <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
+              Your Path to ACT Success
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We provide everything you need to maximize your ACT score and achieve your college admission goals
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              We provide everything you need to maximize your ACT score and achieve your college admission goals.
             </p>
           </div>
 
-          {/* Benefits Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {/* Benefit 1 - Seasoned Tutors */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">👨‍🏫</span>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Seasoned Tutors</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Seasoned Tutors</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 Our team consists of experienced ACT experts who have helped hundreds of students achieve their target scores. 
                 Each tutor is carefully selected for their expertise and teaching ability.
               </p>
             </div>
 
-            {/* Benefit 2 - Personalized Approach */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">🎯</span>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Personalized Approach</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Personalized Approach</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 We customize our tutoring sessions to meet your individual learning needs and goals. 
                 No two students are the same, and neither are our teaching methods.
               </p>
             </div>
 
-            {/* Benefit 3 - Comprehensive Curriculum */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">📚</span>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Comprehensive Curriculum</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Comprehensive Curriculum</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 Our meticulously designed curriculum covers all ACT subject areas including English, Math, Reading, and Science. 
                 We provide study materials, practice tests, and proven strategies.
               </p>
             </div>
 
-            {/* Benefit 4 - Proven Strategies */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">⚡</span>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Proven Strategies</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Proven Strategies</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 Learn effective test-taking strategies and tactics that have helped thousands of students improve their scores. 
                 Our methods are time-tested and results-driven.
               </p>
             </div>
 
-            {/* Benefit 5 - Ongoing Support */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">🤝</span>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ongoing Support</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Ongoing Support</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 Receive continuous support and guidance throughout your ACT preparation journey. 
                 We&apos;re here to help you stay motivated and on track to achieve your goals.
               </p>
             </div>
 
-            {/* Benefit 6 - Score Guarantee */}
-            <div className="bg-white p-8 rounded-3xl hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-[#517cad] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">🏆</span>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Score Improvement Guarantee</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Score Improvement Track Record</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
                 We&apos;re so confident in our methods that we guarantee score improvement. 
                 Join the thousands of students who have achieved their target scores with ScoreMax.
               </p>
@@ -191,20 +141,23 @@ export default function ACTPage() {
           </div>
 
           {/* Stats Section */}
-          <div className="bg-gray-900 rounded-none p-12 text-white text-center">
-            <h3 className="text-3xl font-bold mb-8">Proven Results</h3>
-            <div className="grid md:grid-cols-3 gap-8">
+          <div className="mt-12 rounded-2xl bg-gray-100 border border-gray-100 p-10">
+            <div className="text-center mb-8">
+              <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-2">Proven Results</div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Our Track Record</h3>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="text-4xl font-black mb-2">+7</div>
-                <div className="text-lg opacity-90">Average Score Improvement</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">+7</div>
+                <div className="text-sm text-gray-500">Average Composite Point Improvement</div>
               </div>
               <div>
-                <div className="text-4xl font-black mb-2">95%</div>
-                <div className="text-lg opacity-90">Students See Improvement</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">95%</div>
+                <div className="text-sm text-gray-500">Students See Improvement</div>
               </div>
               <div>
-                <div className="text-4xl font-black mb-2">500+</div>
-                <div className="text-lg opacity-90">ACT Students Helped</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#c79d3c] mb-1">500+</div>
+                <div className="text-sm text-gray-500">ACT Students Helped</div>
               </div>
             </div>
           </div>
@@ -212,26 +165,26 @@ export default function ACTPage() {
       </section>
 
       {/* ACT Test Sections */}
-      <section className="py-20 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-black text-black mb-6">
-              Master All <span className="text-[#517cad]">ACT Sections</span>
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Test Structure</div>
+            <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
+              Master All ACT Sections
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our comprehensive approach covers every aspect of the ACT to ensure you&apos;re fully prepared for test day
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">
+              Our comprehensive approach covers every aspect of the ACT to ensure you&apos;re fully prepared for test day.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* English Section */}
-            <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">📝</span>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">English</h3>
-              <p className="text-gray-600 mb-4">75 questions, 45 minutes</p>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">English</h3>
+              <p className="text-gray-500 text-sm mb-3">75 questions, 45 minutes</p>
+              <ul className="text-sm text-gray-500 space-y-1">
                 <li>• Grammar & Usage</li>
                 <li>• Sentence Structure</li>
                 <li>• Rhetorical Skills</li>
@@ -239,14 +192,13 @@ export default function ACTPage() {
               </ul>
             </div>
 
-            {/* Math Section */}
-            <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">🔢</span>
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Math</h3>
-              <p className="text-gray-600 mb-4">60 questions, 60 minutes</p>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Math</h3>
+              <p className="text-gray-500 text-sm mb-3">60 questions, 60 minutes</p>
+              <ul className="text-sm text-gray-500 space-y-1">
                 <li>• Pre-Algebra</li>
                 <li>• Elementary Algebra</li>
                 <li>• Intermediate Algebra</li>
@@ -256,14 +208,13 @@ export default function ACTPage() {
               </ul>
             </div>
 
-            {/* Reading Section */}
-            <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">📖</span>
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Reading</h3>
-              <p className="text-gray-600 mb-4">40 questions, 35 minutes</p>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Reading</h3>
+              <p className="text-gray-500 text-sm mb-3">40 questions, 35 minutes</p>
+              <ul className="text-sm text-gray-500 space-y-1">
                 <li>• Prose Fiction</li>
                 <li>• Social Studies</li>
                 <li>• Humanities</li>
@@ -271,14 +222,13 @@ export default function ACTPage() {
               </ul>
             </div>
 
-            {/* Science Section */}
-            <div className="bg-white p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 group border border-gray-200">
-              <div className="w-16 h-16 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-2xl">🔬</span>
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#c79d3c]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Science</h3>
-              <p className="text-gray-600 mb-4">40 questions, 35 minutes</p>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Science</h3>
+              <p className="text-gray-500 text-sm mb-3">40 questions, 35 minutes</p>
+              <ul className="text-sm text-gray-500 space-y-1">
                 <li>• Data Representation</li>
                 <li>• Research Summaries</li>
                 <li>• Conflicting Viewpoints</li>
@@ -290,51 +240,22 @@ export default function ACTPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-red-600 text-white relative overflow-hidden">
-        {/* Background shapes */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full opacity-10"></div>
-          <div className="absolute bottom-20 left-20 w-24 h-24 bg-yellow-400 rounded-full opacity-20"></div>
-          <div className="absolute top-40 left-40 w-16 h-16 bg-pink-400 rounded-full opacity-15"></div>
-        </div>
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="uppercase text-xs tracking-widest text-[#c79d3c] font-semibold mb-3">Get Started</div>
+          <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
             Ready to Ace Your ACT?
           </h2>
-          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join hundreds of students who have achieved their target ACT scores with ScoreMax. 
-            Your path to college success starts here.
+          <p className="text-gray-500 text-sm max-w-lg mx-auto mb-8">
+            Join hundreds of students who have achieved their target ACT scores with ScoreMax.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link href="/contact" 
-              className="bg-yellow-400 text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-500 transition shadow-lg">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/contact" className="inline-flex items-center justify-center bg-[#c79d3c] text-white px-6 py-3 text-sm font-medium hover:bg-[#b08a30] transition-colors">
               Book Free Consultation
             </Link>
-            <Link href="/pricing" 
-              className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition">
+            <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
               View Pricing
             </Link>
-          </div>
-          
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm opacity-80">
-            <div className="flex items-center space-x-2">
-              <span>✓</span>
-              <span>Free consultation</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>✓</span>
-              <span>Personalized study plans</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>✓</span>
-              <span>Expert ACT tutors</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>✓</span>
-              <span>Proven strategies</span>
-            </div>
           </div>
         </div>
       </section>

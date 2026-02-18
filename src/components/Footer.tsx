@@ -9,8 +9,9 @@ const quickLinks = [
   { label: "About Us", href: "/about" },
   { label: "Tutors", href: "/tutors" },
   { label: "Subjects", href: "/subjects" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Book a Session", href: "/book" },
-  { label: "Get In Touch", href: "/contact" },
+  { label: "Contact", href: "/contact" },
   { label: "Step Up For Students", href: "/step-up-for-students" },
 ];
 
