@@ -17,10 +17,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const body = await req.json()
-  
-  // Remove fields that shouldn't be updated directly via PATCH if any
+
+  // Remove fields that shouldn't be updated directly via PATCH
+  // password lives in Supabase Auth, not in the tutors table
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, profile_id, created_at, ...updates } = body
+  const { id, profile_id, created_at, password, ...updates } = body
 
   const { data, error } = await supabaseAdmin
     .from('tutors')
