@@ -40,6 +40,7 @@ export async function POST(req: Request) {
         .single()
 
     let isGuestCheckout = false
+    let tempPassword: string | null = null
     if (!customer) {
         // Check by Email
         const { data: customerByEmail } = await supabaseAdmin
@@ -54,30 +55,25 @@ export async function POST(req: Request) {
             customer = customerByEmail
         } else {
             isGuestCheckout = true
-            const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : planType)
-            const inviteResult = await supabaseAdmin.auth.admin.inviteUserByEmail(contactEmail, {
-                data: {
-                    full_name: contactName,
-                    role: 'customer',
-                    invite_context: 'guest_checkout',
-                    plan_type: planType,
-                    plan_name: planLabel,
-                    amount_cents: session.amount_total,
-                },
-                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+            tempPassword = Math.random().toString(36).slice(2, 6).toUpperCase()
+              + Math.random().toString(36).slice(2, 6)
+
+            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                email: contactEmail,
+                password: tempPassword,
+                email_confirm: true,
+                user_metadata: { full_name: contactName, role: 'customer' },
             })
 
             let profileId: string | null = null
-            if (inviteResult.data?.user) {
-                profileId = inviteResult.data.user.id
-            } else if (inviteResult.error?.message?.includes('already been registered')) {
+            if (authUser?.user) {
+                profileId = authUser.user.id
+            } else if (authError?.message?.toLowerCase().includes('already')) {
                 const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
                 const existingUser = existingUsers?.users?.find((u) => u.email === contactEmail)
                 if (existingUser) profileId = existingUser.id
             }
 
-            // The on_auth_user_created trigger may have already created a customer record.
-            // Check for it before attempting an insert.
             const { data: triggerCreated } = await supabaseAdmin
                 .from('customers')
                 .select('*')
@@ -198,9 +194,20 @@ export async function POST(req: Request) {
     }
 
     // 6. Notify Customer (post-payment confirmation)
-    // Guest checkout: combined email sent via Send Email hook (invite + purchase). Skip separate confirmation.
-    if (contactEmail && !isGuestCheckout) {
+    if (contactEmail) {
       const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
+      const purchaseBody = `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
+      const nextSteps = '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
+
+      const accountBody = isGuestCheckout && tempPassword
+        ? [
+            '<p style="margin: 0 0 16px 0;">We\'ve created an account for you. Use the credentials below to sign in and view your dashboard:</p>',
+            `<p style="margin: 0 0 4px 0;"><strong style="color: #1e293b;">Email:</strong> ${contactEmail}</p>`,
+            `<p style="margin: 0 0 16px 0;"><strong style="color: #1e293b;">Temporary Password:</strong> ${tempPassword}</p>`,
+            '<p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">You can change your password anytime from your account settings.</p>',
+          ].join('')
+        : ''
+
       await resend.emails.send({
         ...getEmailDefaults(),
         to: contactEmail,
@@ -208,12 +215,9 @@ export async function POST(req: Request) {
         html: emailLayout({
           title: 'Thank You for Your Purchase',
           greeting: `Hi ${contactName || 'there'},`,
-          body: [
-            `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`,
-            '<p style="margin: 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>',
-          ].join(''),
-          ctaText: 'View Dashboard',
-          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+          body: purchaseBody + nextSteps + accountBody,
+          ctaText: 'Sign In to Your Dashboard',
+          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
         }),
       })
     }
