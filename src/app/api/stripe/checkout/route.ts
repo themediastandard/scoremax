@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             status: 'pending_payment',
             payment_type: plan_type,
             notes: booking_details.notes,
-            amount_cents: plan_type === 'single' ? price_cents : 0
+            amount_cents: price_cents || 0
         })
         .select()
         .single()

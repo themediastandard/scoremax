@@ -23,7 +23,8 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       *,
       customers (full_name, email, phone, student_grade, notes),
       tutors (id, full_name),
-      course_enrollments (course_type)
+      course_enrollments (course_type),
+      payments (amount_cents)
     `)
     .eq('id', params.id)
     .single()
@@ -271,7 +272,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</p>
-                <p className="font-bold text-lg">{formatAmount(order.amount_cents)}</p>
+                <p className="font-bold text-lg">{formatAmount(order.amount_cents || order.payments?.[0]?.amount_cents)}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</p>

@@ -25,7 +25,8 @@ export function formatPlanLabel(order: {
 
 /** Format amount for display */
 export function formatAmount(cents: number | null | undefined): string {
-  if (cents == null || cents === 0) return 'Credit'
+  if (cents == null) return '—'
+  if (cents === 0) return 'Free (Credit)'
   return `$${(cents / 100).toLocaleString()}`
 }
 

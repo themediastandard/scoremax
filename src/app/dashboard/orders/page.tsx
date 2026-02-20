@@ -19,7 +19,8 @@ export default async function OrdersPage() {
   let query = supabase.from('booking_requests').select(`
     *,
     customers (full_name, email),
-    tutors (full_name)
+    tutors (full_name),
+    payments (amount_cents)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
   if (profile?.role === 'customer') {
@@ -88,9 +89,10 @@ export default async function OrdersPage() {
                     <Badge variant="secondary" className="font-medium bg-slate-100 text-slate-700">
                       {formatPlanLabel(order)}
                     </Badge>
-                    {formatAmount(order.amount_cents) !== 'Credit' && (
-                      <span className="text-sm font-bold text-[#1e293b]">{formatAmount(order.amount_cents)}</span>
-                    )}
+                    {(() => {
+                      const amt = order.amount_cents || order.payments?.[0]?.amount_cents
+                      return amt ? <span className="text-sm font-bold text-[#1e293b]">{formatAmount(amt)}</span> : null
+                    })()}
                     <span
                       className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
                         order.status === 'active'
