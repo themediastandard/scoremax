@@ -72,7 +72,16 @@ export async function POST(req: NextRequest) {
     headers[k.toLowerCase()] = v
   })
 
-  let user: { email: string; user_metadata?: { full_name?: string } }
+  let user: {
+    email: string
+    user_metadata?: {
+      full_name?: string
+      invite_context?: string
+      plan_type?: string
+      plan_name?: string
+      amount_cents?: number
+    }
+  }
   let emailData: {
     token_hash: string
     redirect_to: string
@@ -82,7 +91,16 @@ export async function POST(req: NextRequest) {
   try {
     const wh = new Webhook(hookSecret)
     const verified = wh.verify(payload, headers) as {
-      user: { email: string; user_metadata?: { full_name?: string } }
+      user: {
+        email: string
+        user_metadata?: {
+          full_name?: string
+          invite_context?: string
+          plan_type?: string
+          plan_name?: string
+          amount_cents?: number
+        }
+      }
       email_data: {
         token_hash: string
         redirect_to: string
@@ -101,8 +119,6 @@ export async function POST(req: NextRequest) {
 
   const { token_hash, redirect_to, email_action_type } = emailData
   const actionType = email_action_type || 'signup'
-  const config = EMAIL_CONFIG[actionType] || EMAIL_CONFIG.signup
-
   const verifyType = actionType === 'magic_link' ? 'magiclink' : actionType
   const verifyUrl = buildVerifyUrl(
     token_hash,
@@ -113,11 +129,50 @@ export async function POST(req: NextRequest) {
   const fullName = user.user_metadata?.full_name
   const greeting = fullName ? `Hi ${fullName},` : undefined
 
+  const isGuestCheckout =
+    actionType === 'invite' && user.user_metadata?.invite_context === 'guest_checkout'
+
+  let subject: string
+  let title: string
+  let body: string
+  let ctaText: string
+  let ctaUrl: string
+
+  if (isGuestCheckout) {
+    const planLabel =
+      user.user_metadata?.plan_name ||
+      (user.user_metadata?.plan_type === 'membership'
+        ? 'membership'
+        : user.user_metadata?.plan_type === 'package'
+          ? 'tutoring package'
+          : 'course')
+    const amount =
+      user.user_metadata?.amount_cents != null
+        ? `$${(user.user_metadata.amount_cents / 100).toLocaleString()}`
+        : ''
+    subject = 'Thank you for your purchase'
+    title = 'Thank You for Your Purchase'
+    body = [
+      `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}${amount ? ` (${amount})` : ''}.</p>`,
+      '<p style="margin: 0 0 16px 0;">We have created an account for you. Set your password below to access your dashboard, view sessions, and manage your tutoring.</p>',
+      '<p style="margin: 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>',
+    ].join('')
+    ctaText = 'Set your password & sign in'
+    ctaUrl = verifyUrl
+  } else {
+    const config = EMAIL_CONFIG[actionType] || EMAIL_CONFIG.signup
+    subject = config.subject
+    title = config.title
+    body = config.body
+    ctaText = config.ctaText
+    ctaUrl = verifyUrl
+  }
+
   const html = emailLayout({
-    title: config.title,
-    body: config.body,
-    ctaText: config.ctaText,
-    ctaUrl: verifyUrl,
+    title,
+    body,
+    ctaText,
+    ctaUrl,
     greeting,
   })
 
@@ -125,7 +180,7 @@ export async function POST(req: NextRequest) {
   const { error } = await resend.emails.send({
     from,
     to: user.email,
-    subject: config.subject,
+    subject,
     html,
   })
 

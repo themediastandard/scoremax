@@ -388,7 +388,7 @@ export default function BookPage() {
               <div className="flex justify-end pt-4">
                 <Button 
                   onClick={() => handleNext('availability')} 
-                  disabled={state.availability.days.length === 0}
+                  disabled={state.availability.days.length === 0 || !state.availability.startTime || !state.availability.endTime}
                   className="bg-[#1e293b]"
                 >
                   Continue

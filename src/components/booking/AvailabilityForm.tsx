@@ -110,12 +110,12 @@ export function AvailabilityForm({ value, onChange }: AvailabilityFormProps) {
       {/* Time Range */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="startTime">Earliest Start Time</Label>
+          <Label htmlFor="startTime">Earliest Start Time <span className="text-red-500">*</span></Label>
           <Select 
             value={value.startTime} 
             onValueChange={(val) => handleChange('startTime', val)}
           >
-            <SelectTrigger id="startTime" className="w-full">
+            <SelectTrigger id="startTime" className={`w-full ${!value.startTime ? 'border-red-300' : ''}`}>
               <SelectValue placeholder="Select start time" />
             </SelectTrigger>
             <SelectContent 
@@ -133,12 +133,12 @@ export function AvailabilityForm({ value, onChange }: AvailabilityFormProps) {
           <span className="text-xs text-gray-400">Between 7:00 AM and 10:00 PM</span>
         </div>
         <div>
-          <Label htmlFor="endTime">Latest End Time</Label>
+          <Label htmlFor="endTime">Latest End Time <span className="text-red-500">*</span></Label>
           <Select 
             value={value.endTime} 
             onValueChange={(val) => handleChange('endTime', val)}
           >
-            <SelectTrigger id="endTime" className="w-full">
+            <SelectTrigger id="endTime" className={`w-full ${!value.endTime ? 'border-red-300' : ''}`}>
               <SelectValue placeholder="Select end time" />
             </SelectTrigger>
             <SelectContent 

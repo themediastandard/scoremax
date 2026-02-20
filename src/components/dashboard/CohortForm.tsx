@@ -84,7 +84,7 @@ export function CohortForm({ cohort }: CohortFormProps) {
       start_date: startDate,
       end_date: endDate,
       max_students: parseInt(formData.get('max_students') as string) || 15,
-      price_cents: parseInt(formData.get('price_cents') as string) || 89500,
+      price_cents: Math.round(parseFloat(formData.get('price_dollars') as string) * 100) || 89500,
       status: status,
     }
 
@@ -169,12 +169,14 @@ export function CohortForm({ cohort }: CohortFormProps) {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="price_cents">Price (Cents)</Label>
+              <Label htmlFor="price_dollars">Price ($)</Label>
               <Input 
-                id="price_cents" 
-                name="price_cents" 
+                id="price_dollars" 
+                name="price_dollars" 
                 type="number" 
-                defaultValue={cohort?.price_cents ?? 89500} 
+                step="0.01"
+                min="0"
+                defaultValue={cohort ? (cohort.price_cents / 100).toFixed(2) : '895.00'} 
                 required 
               />
             </div>

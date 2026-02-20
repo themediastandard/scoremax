@@ -39,6 +39,7 @@ export async function POST(req: Request) {
         .eq('stripe_customer_id', stripeCustomerId)
         .single()
 
+    let isGuestCheckout = false
     if (!customer) {
         // Check by Email
         const { data: customerByEmail } = await supabaseAdmin
@@ -52,9 +53,17 @@ export async function POST(req: Request) {
             await supabaseAdmin.from('customers').update({ stripe_customer_id: stripeCustomerId }).eq('id', customerByEmail.id)
             customer = customerByEmail
         } else {
-            // Create Auth Account for guest checkout
+            isGuestCheckout = true
+            const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : planType)
             const inviteResult = await supabaseAdmin.auth.admin.inviteUserByEmail(contactEmail, {
-                data: { full_name: contactName, role: 'customer' },
+                data: {
+                    full_name: contactName,
+                    role: 'customer',
+                    invite_context: 'guest_checkout',
+                    plan_type: planType,
+                    plan_name: planLabel,
+                    amount_cents: session.amount_total,
+                },
                 redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
             })
 
@@ -189,7 +198,8 @@ export async function POST(req: Request) {
     }
 
     // 6. Notify Customer (post-payment confirmation)
-    if (contactEmail) {
+    // Guest checkout: combined email sent via Send Email hook (invite + purchase). Skip separate confirmation.
+    if (contactEmail && !isGuestCheckout) {
       const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
       await resend.emails.send({
         ...getEmailDefaults(),
