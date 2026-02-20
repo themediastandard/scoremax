@@ -2,7 +2,8 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend } from '@/lib/resend'
+import { resend, getEmailDefaults } from '@/lib/resend'
+import { emailLayout, detailRow } from '@/lib/email-templates'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -168,17 +169,40 @@ export async function POST(req: Request) {
     
     if (adminEmails.length > 0) {
         await resend.emails.send({
-            from: 'ScoreMax <noreply@scoremax.com>',
+            ...getEmailDefaults(),
             to: adminEmails,
             subject: 'New Payment & Booking',
-            html: `
-                <h1>New Payment Received</h1>
-                <p><strong>Customer:</strong> ${contactName}</p>
-                <p><strong>Amount:</strong> $${session.amount_total / 100}</p>
-                <p><strong>Plan:</strong> ${planType}</p>
-                <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders">View Orders</a></p>
-            `
+            html: emailLayout({
+              title: 'New Payment Received',
+              body: [
+                detailRow('Customer:', contactName),
+                detailRow('Amount:', `$${session.amount_total / 100}`),
+                detailRow('Plan:', planType),
+              ].join(''),
+              ctaText: 'View Orders',
+              ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders`,
+            }),
         })
+    }
+
+    // 6. Notify Customer (post-payment confirmation)
+    if (contactEmail) {
+      const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
+      await resend.emails.send({
+        ...getEmailDefaults(),
+        to: contactEmail,
+        subject: 'Thank you for your purchase',
+        html: emailLayout({
+          title: 'Thank You for Your Purchase',
+          greeting: `Hi ${contactName || 'there'},`,
+          body: [
+            `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`,
+            '<p style="margin: 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>',
+          ].join(''),
+          ctaText: 'View Dashboard',
+          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        }),
+      })
     }
   }
 

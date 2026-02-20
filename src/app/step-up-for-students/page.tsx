@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { StepUpForm } from '@/components/StepUpForm';
 
 export const metadata: Metadata = {
   title: 'Step Up For Students Partnership | ScoreMax Tutoring',
@@ -215,62 +216,7 @@ export default function StepUpForStudentsPage() {
                 </div>
               </div>
               
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="firstName" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2">First Name</label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      className="w-full px-4 py-3 border border-gray-200 focus:ring-2 focus:ring-[#b08a30] focus:border-gray-200 focus:outline-none transition-all bg-gray-50 focus:bg-white placeholder-gray-400"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      className="w-full px-4 py-3 border border-gray-200 focus:ring-2 focus:ring-[#b08a30] focus:border-gray-200 focus:outline-none transition-all bg-gray-50 focus:bg-white placeholder-gray-400"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2">Email Address <span className="text-[#b08a30]">*</span></label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    className="w-full px-4 py-3 border border-gray-200 focus:ring-2 focus:ring-[#b08a30] focus:border-gray-200 focus:outline-none transition-all bg-gray-50 focus:bg-white placeholder-gray-400"
-                    placeholder="Enter your email address"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="phone" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2">Phone Number</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    className="w-full px-4 py-3 border border-gray-200 focus:ring-2 focus:ring-[#b08a30] focus:border-gray-200 focus:outline-none transition-all bg-gray-50 focus:bg-white placeholder-gray-400"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-                
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors"
-                  >
-                    Start Your Tutoring Journey
-                  </button>
-                </div>
-              </form>
+              <StepUpForm />
             </div>
           </div>
         </div>

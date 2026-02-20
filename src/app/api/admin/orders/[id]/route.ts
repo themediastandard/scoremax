@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend } from '@/lib/resend'
+import { resend, getEmailDefaults } from '@/lib/resend'
+import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import { google } from 'googleapis'
 import { stripe } from '@/lib/stripe'
@@ -96,46 +97,51 @@ async function handleStatusChange(booking: any, newStatus: string) {
       : 'Sawgrass, FL'
 
     await resend.emails.send({
-      from: 'ScoreMax <noreply@scoremax.com>',
+      ...getEmailDefaults(),
       to: booking.customers.email,
       subject: 'Booking Confirmed: Your session is scheduled',
-      html: `
-        <h1>Session Confirmed</h1>
-        <p>Hi ${booking.customers.full_name},</p>
-        <p>Your tutoring session has been confirmed!</p>
-        <p><strong>Tutor:</strong> ${booking.tutors.full_name}</p>
-        <p><strong>Time:</strong> ${startTime.toLocaleString()}</p>
-        <p><strong>Location:</strong> ${locationText}</p>
-      `
+      html: emailLayout({
+        title: 'Session Confirmed',
+        greeting: `Hi ${booking.customers.full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed!</p>',
+          detailRow('Tutor:', booking.tutors.full_name),
+          detailRow('Time:', startTime.toLocaleString()),
+          detailRow('Location:', locationText),
+        ].join(''),
+      }),
     })
 
     await resend.emails.send({
-      from: 'ScoreMax <noreply@scoremax.com>',
+      ...getEmailDefaults(),
       to: booking.tutors.email,
       subject: 'New Session Assigned',
-      html: `
-        <h1>New Session</h1>
-        <p>Hi ${booking.tutors.full_name},</p>
-        <p>You have been assigned a new session.</p>
-        <p><strong>Student:</strong> ${booking.customers.full_name}</p>
-        <p><strong>Time:</strong> ${startTime.toLocaleString()}</p>
-        <p><strong>Location:</strong> ${locationText}</p>
-      `
+      html: emailLayout({
+        title: 'New Session Assigned',
+        greeting: `Hi ${booking.tutors.full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">You have been assigned a new session.</p>',
+          detailRow('Student:', booking.customers.full_name),
+          detailRow('Time:', startTime.toLocaleString()),
+          detailRow('Location:', locationText),
+        ].join(''),
+      }),
     })
   }
 
   // 2. Active -> Completed
   if (booking.status === 'active' && newStatus === 'completed') {
     await resend.emails.send({
-      from: 'ScoreMax <noreply@scoremax.com>',
+      ...getEmailDefaults(),
       to: booking.customers.email,
       subject: 'Thank you for choosing ScoreMax',
-      html: `
-        <h1>Session Completed</h1>
-        <p>Hi ${booking.customers.full_name},</p>
-        <p>We hope you had a great session! Please leave us a review.</p>
-        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/book">Book Another Session</a></p>
-      `
+      html: emailLayout({
+        title: 'Session Completed',
+        greeting: `Hi ${booking.customers.full_name},`,
+        body: '<p style="margin: 0;">We hope you had a great session! Please leave us a review.</p>',
+        ctaText: 'Book Another Session',
+        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
+      }),
     })
   }
 
@@ -143,14 +149,14 @@ async function handleStatusChange(booking: any, newStatus: string) {
   if (newStatus === 'refunded') {
     // Refund Email
     await resend.emails.send({
-      from: 'ScoreMax <noreply@scoremax.com>',
+      ...getEmailDefaults(),
       to: booking.customers.email,
       subject: 'Refund Processed',
-      html: `
-        <h1>Refund Processed</h1>
-        <p>Hi ${booking.customers.full_name},</p>
-        <p>Your session has been cancelled and a refund has been initiated.</p>
-      `
+      html: emailLayout({
+        title: 'Refund Processed',
+        greeting: `Hi ${booking.customers.full_name},`,
+        body: '<p style="margin: 0;">Your session has been cancelled and a refund has been initiated.</p>',
+      }),
     })
 
     // Delete Calendar Events

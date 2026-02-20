@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend } from '@/lib/resend'
+import { resend, getEmailDefaults } from '@/lib/resend'
+import { emailLayout, detailRow } from '@/lib/email-templates'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -97,29 +98,32 @@ export async function POST(req: NextRequest) {
 
   if (adminEmails.length > 0) {
     await resend.emails.send({
-        from: 'ScoreMax <noreply@scoremax.com>',
+        ...getEmailDefaults(),
         to: adminEmails,
         subject: `New Booking Request (${creditSource} Credit Used)`,
-        html: `
-          <h1>New Booking Request</h1>
-          <p><strong>Customer:</strong> ${customer.full_name}</p>
-          <p><strong>Payment:</strong> Credit Used (${creditSource})</p>
-          <p><strong>Status:</strong> Processing (Needs assignment)</p>
-          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${booking.id}">View Order</a></p>
-        `
+        html: emailLayout({
+          title: 'New Booking Request',
+          body: [
+            detailRow('Customer:', customer.full_name),
+            detailRow('Payment:', `Credit Used (${creditSource})`),
+            detailRow('Status:', 'Processing (Needs assignment)'),
+          ].join(''),
+          ctaText: 'View Order',
+          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${booking.id}`,
+        }),
     })
   }
   
   // Notify Student
   await resend.emails.send({
-      from: 'ScoreMax <noreply@scoremax.com>',
+      ...getEmailDefaults(),
       to: customer.email,
       subject: 'Booking Request Received',
-      html: `
-        <h1>Request Received</h1>
-        <p>Hi ${customer.full_name},</p>
-        <p>We received your booking request. We will assign a tutor and confirm the time shortly.</p>
-      `
+      html: emailLayout({
+        title: 'Request Received',
+        greeting: `Hi ${customer.full_name},`,
+        body: '<p style="margin: 0;">We received your booking request. We will assign a tutor and confirm the time shortly.</p>',
+      }),
   })
 
   return NextResponse.json(booking)
