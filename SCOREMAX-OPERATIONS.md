@@ -214,6 +214,18 @@ Best for short-term goals or families who want to prepay without a subscription.
 | Calendar integration  | ICS file in confirmation email (no Google/Outlook sync for MVP) |
 | Session duration      | 1 hour (standard)                                         |
 
+### Auth Email Hook (Resend)
+
+Guest checkout customers receive a branded invite email via Resend instead of Supabase’s default.
+
+**Setup**
+
+1. Supabase Dashboard → Auth → Hooks → Send Email hook
+2. Create hook, set URL to `https://scoremaxtutor.netlify.app/api/auth/send-email` (or your deployed app URL)
+3. Generate secret, add to env as `SEND_EMAIL_HOOK_SECRET`
+4. Ensure `RESEND_API_KEY` and `NEXT_PUBLIC_SUPABASE_URL` are set
+5. Enable the hook and turn on Email Provider in Auth settings
+
 ---
 
 ## Admin Panel (In MVP)
