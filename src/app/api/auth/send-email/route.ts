@@ -8,7 +8,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://scoremaxtutor.netlif
 
 function buildVerifyUrl(tokenHash: string, type: string, redirectTo: string): string {
   const params = new URLSearchParams({
-    token_hash: tokenHash,
+    token: tokenHash,
     type,
     redirect_to: redirectTo,
   })
