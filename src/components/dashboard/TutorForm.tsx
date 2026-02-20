@@ -44,7 +44,7 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
 
     const data = {
       full_name: formData.get('full_name'),
-      email: formData.get('email'),
+      email: isEditing ? tutor!.email : formData.get('email'),
       phone: formData.get('phone'),
       bio: formData.get('bio'),
       photo_url: formData.get('photo_url'),
