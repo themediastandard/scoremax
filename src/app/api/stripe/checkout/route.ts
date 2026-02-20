@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { plan_type, price_id, price_cents, booking_details } = body
+    const { plan_type, plan_name, price_id, price_cents, booking_details } = body
     // plan_type: 'single', 'membership', 'package', 'course', 'sat-course-inperson'
     
     const supabase = await createClient()
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
             price_data: {
                 currency: 'usd',
                 product_data: {
-                    name: getProductName(plan_type, price_cents, booking_details),
+                    name: plan_name || getProductName(plan_type, price_cents, booking_details),
                 },
                 unit_amount: price_cents,
             },
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
         metadata: {
             booking_request_id: booking.id,
             plan_type,
+            plan_name: plan_name || plan_type,
             user_id: user?.id,
             contact_name: booking_details.full_name,
             contact_email: booking_details.email

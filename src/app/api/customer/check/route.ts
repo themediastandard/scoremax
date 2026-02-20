@@ -2,21 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET(req: NextRequest) {
-  const email = req.nextUrl.searchParams.get('email')
-  
+  const raw = req.nextUrl.searchParams.get('email')
+  const email = raw?.trim().toLowerCase()
+
   if (!email) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 })
   }
-  
-  // Use supabaseAdmin to bypass RLS since we are checking for existence/credits
-  // explicitly for the booking flow (before user is potentially logged in)
-  
-  // Find customer by email
+
+  // Use supabaseAdmin to bypass RLS - match email case-insensitively (emails are case-insensitive)
   const { data: customer, error: customerError } = await supabaseAdmin
     .from('customers')
     .select('id, full_name')
-    .eq('email', email)
-    .single()
+    .ilike('email', email)
+    .maybeSingle()
   
   if (customerError && customerError.code !== 'PGRST116') { // PGRST116 = not found
     return NextResponse.json({ error: customerError.message }, { status: 500 })

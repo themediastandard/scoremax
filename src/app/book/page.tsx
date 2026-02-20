@@ -163,6 +163,22 @@ export default function BookPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Re-check member status when entering Plan section (ensures we have current credits for the entered email)
+  useEffect(() => {
+    if (activeSection !== 'plan') return
+    const email = state.contact.email?.trim()
+    if (!email?.includes('@')) return
+
+    let cancelled = false
+    fetch(`/api/customer/check?email=${encodeURIComponent(email)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setMemberStatus(data)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [activeSection, state.contact.email])
+
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')
   const isSAT = state.subjects.some(id => subjectMap[id]?.slug === 'sat')
@@ -261,6 +277,7 @@ export default function BookPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
            plan_type: plan.type,
+           plan_name: plan.name,
            price_id: plan.priceId,
            price_cents: plan.price,
            booking_details: {

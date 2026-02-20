@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     const metadata = session.metadata
     const bookingId = metadata.booking_request_id
     const planType = metadata.plan_type
+    const planName = metadata.plan_name
     const contactEmail = metadata.contact_email
     const contactName = metadata.contact_name
     const stripeCustomerId = session.customer
@@ -168,6 +169,8 @@ export async function POST(req: Request) {
     const adminEmails = adminSettings?.value?.split(',') || []
     
     if (adminEmails.length > 0) {
+        const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : planType)
+
         await resend.emails.send({
             ...getEmailDefaults(),
             to: adminEmails,
@@ -177,7 +180,7 @@ export async function POST(req: Request) {
               body: [
                 detailRow('Customer:', contactName),
                 detailRow('Amount:', `$${session.amount_total / 100}`),
-                detailRow('Plan:', planType),
+                detailRow('Package:', planLabel),
               ].join(''),
               ctaText: 'View Orders',
               ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders`,

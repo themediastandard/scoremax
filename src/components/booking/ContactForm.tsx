@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface ContactFormProps {
   value: {
@@ -30,21 +30,64 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
 
   const memberStatus = internalMemberStatus || externalMemberStatus
 
-  const handleBlur = async () => {
-    if (!value.email || !value.email.includes('@')) return
+  const lastCheckedEmail = useRef<string | null>(null)
 
+  const runCheck = async (emailToCheck: string) => {
+    const normalized = emailToCheck?.trim().toLowerCase()
+    if (!normalized?.includes('@')) return
+    if (lastCheckedEmail.current === normalized) return
+
+    lastCheckedEmail.current = normalized
     setChecking(true)
     try {
-      const res = await fetch(`/api/customer/check?email=${encodeURIComponent(value.email)}`)
+      const res = await fetch(`/api/customer/check?email=${encodeURIComponent(normalized)}`)
       const data = await res.json()
       setInternalMemberStatus(data)
       onMemberCheck(data)
     } catch (err) {
       console.error(err)
+      lastCheckedEmail.current = null
     } finally {
       setChecking(false)
     }
   }
+
+  const handleBlur = () => {
+    runCheck(value.email)
+  }
+
+  // Detect autofill: browser can populate the input without triggering React state. Poll the DOM briefly.
+  useEffect(() => {
+    const input = document.querySelector<HTMLInputElement>('[data-booking-email]')
+    if (!input) return
+
+    let count = 0
+    const maxAttempts = 10
+    const interval = setInterval(() => {
+      const domValue = input.value?.trim()
+      if (domValue?.includes('@') && domValue !== lastCheckedEmail.current) {
+        onChange({ ...value, email: domValue })
+        runCheck(domValue)
+        clearInterval(interval)
+        return
+      }
+      count++
+      if (count >= maxAttempts) clearInterval(interval)
+    }, 200)
+
+    return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // When value.email changes (typing or sync from elsewhere), run check after a short debounce
+  useEffect(() => {
+    const email = value.email?.trim()
+    if (!email?.includes('@')) return
+
+    const t = setTimeout(() => runCheck(email), 400)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.email])
 
   const handleChange = (field: string, val: string) => {
     onChange({ ...value, [field]: val })
@@ -71,6 +114,7 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
             <Input 
               id="email" 
               type="email" 
+              data-booking-email
               value={value.email} 
               onChange={(e) => handleChange('email', e.target.value)} 
               onBlur={handleBlur}
