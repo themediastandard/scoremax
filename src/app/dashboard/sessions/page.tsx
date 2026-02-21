@@ -15,7 +15,7 @@ export default async function SessionsPage() {
   const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
 
   if (profile?.role === 'admin') {
-    const [{ data: activeSessions }, { count: completedCount }, { data: tutors }] = await Promise.all([
+    const [{ data: allSessions }, { data: tutors }] = await Promise.all([
       supabase
         .from('sessions')
         .select(`
@@ -23,71 +23,49 @@ export default async function SessionsPage() {
           customers (full_name, email),
           tutors (id, full_name)
         `)
-        .in('status', ['pending_scheduling', 'scheduled'])
+        .in('status', ['pending_scheduling', 'scheduled', 'completed'])
         .order('created_at', { ascending: false }),
-      supabase
-        .from('sessions')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'completed'),
       supabase
         .from('tutors')
         .select('id, full_name')
         .eq('is_active', true),
     ])
 
-    const sessions = activeSessions ?? []
+    const sessions = allSessions ?? []
     const now = new Date()
     const weekEnd = new Date(now)
     weekEnd.setDate(weekEnd.getDate() + 7)
 
+    const active = sessions.filter((s) => s.status !== 'completed')
     const needsScheduling = sessions.filter((s) => s.status === 'pending_scheduling').length
-    const unassigned = sessions.filter((s) => !s.assigned_tutor_id).length
+    const unassigned = active.filter((s) => !s.assigned_tutor_id).length
     const scheduled = sessions.filter((s) => s.status === 'scheduled').length
+    const totalCompleted = sessions.filter((s) => s.status === 'completed').length
     const upcomingThisWeek = sessions.filter((s) => {
       if (s.status !== 'scheduled' || !s.confirmed_start) return false
       const start = new Date(s.confirmed_start)
       return start >= now && start <= weekEnd
     }).length
 
-    const groupMap = new Map<string, {
-      customerId: string
-      customerName: string
-      customerEmail: string
-      sessions: typeof sessions
-    }>()
-
-    for (const s of sessions) {
-      const cid = s.customer_id || 'unknown'
-      if (!groupMap.has(cid)) {
-        groupMap.set(cid, {
-          customerId: cid,
-          customerName: s.customers?.full_name || 'Unknown Customer',
-          customerEmail: s.customers?.email || '',
-          sessions: [],
-        })
-      }
-      groupMap.get(cid)!.sessions!.push(s)
-    }
-
-    const groups = Array.from(groupMap.values())
+    const subjectMapObj = Object.fromEntries(subjectMap)
 
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
-          <p className="mt-1 text-gray-500">{sessions.length} active</p>
+          <p className="mt-1 text-gray-500">{active.length} active · {totalCompleted} completed</p>
         </div>
         <SessionMetrics
           needsScheduling={needsScheduling}
           unassigned={unassigned}
           upcomingThisWeek={upcomingThisWeek}
-          totalCompleted={completedCount ?? 0}
+          totalCompleted={totalCompleted}
           totalActive={scheduled}
         />
         <AdminSessionList
-          groups={groups as any}
+          sessions={sessions as any}
           tutors={tutors || []}
-          subjectMap={subjectMap}
+          subjectMap={subjectMapObj}
         />
       </div>
     )

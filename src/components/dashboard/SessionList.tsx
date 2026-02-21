@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from 'react'
-import { ChevronDown, ChevronRight, Clock, Calendar, User, Video, MapPin, CheckCircle, BookOpen } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { ChevronDown, ChevronRight, Clock, Calendar, User, Video, MapPin, BookOpen, Search, X } from 'lucide-react'
 import { SessionForm } from './SessionForm'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { JoinClassButton } from './JoinClassButton'
 
 interface Session {
@@ -205,15 +206,73 @@ function SessionDetails({
 }
 
 export function AdminSessionList({
-  groups,
+  sessions,
   tutors,
   subjectMap,
 }: {
-  groups: CustomerGroup[]
+  sessions: Session[]
   tutors: { id: string; full_name: string }[]
-  subjectMap: Map<string, string>
+  subjectMap: Record<string, string>
 }) {
-  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set())
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('active')
+  const [tutorFilter, setTutorFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+
+  const sMap = useMemo(() => new Map(Object.entries(subjectMap)), [subjectMap])
+
+  const { groups, filteredCount } = useMemo(() => {
+    let result = [...sessions]
+
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter((s) => {
+        const name = s.customers?.full_name?.toLowerCase() ?? ''
+        const email = s.customers?.email?.toLowerCase() ?? ''
+        return name.includes(q) || email.includes(q)
+      })
+    }
+
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'active') {
+        result = result.filter((s) => s.status !== 'completed')
+      } else {
+        result = result.filter((s) => s.status === statusFilter)
+      }
+    }
+
+    if (tutorFilter !== 'all') {
+      if (tutorFilter === 'unassigned') {
+        result = result.filter((s) => !s.assigned_tutor_id)
+      } else {
+        result = result.filter((s) => s.assigned_tutor_id === tutorFilter)
+      }
+    }
+
+    if (typeFilter !== 'all') {
+      result = result.filter((s) => s.session_type === typeFilter)
+    }
+
+    const groupMap = new Map<string, CustomerGroup>()
+    for (const s of result) {
+      const cid = s.customer_id || 'unknown'
+      if (!groupMap.has(cid)) {
+        groupMap.set(cid, {
+          customerId: cid,
+          customerName: s.customers?.full_name || 'Unknown Customer',
+          customerEmail: s.customers?.email || '',
+          sessions: [],
+        })
+      }
+      groupMap.get(cid)!.sessions.push(s)
+    }
+
+    return { groups: Array.from(groupMap.values()), filteredCount: result.length }
+  }, [sessions, search, statusFilter, tutorFilter, typeFilter])
+
+  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(
+    () => new Set(sessions.map((s) => s.customer_id))
+  )
 
   const toggleCustomer = (id: string) => {
     setExpandedCustomers((prev) => {
@@ -224,84 +283,198 @@ export function AdminSessionList({
     })
   }
 
-  if (groups.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500">No sessions found.</div>
-    )
-  }
+  const hasFilters = search || statusFilter !== 'active' || tutorFilter !== 'all' || typeFilter !== 'all'
 
   return (
-    <div className="space-y-4">
-      {groups.map((group) => {
-        const isOpen = expandedCustomers.has(group.customerId)
-        const pending = group.sessions.filter((s) => s.status === 'pending_scheduling').length
-        const scheduled = group.sessions.filter((s) => s.status === 'scheduled').length
-        const completed = group.sessions.filter((s) => s.status === 'completed').length
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search customer..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
+        </div>
 
-        return (
-          <Card key={group.customerId} className="border-gray-100 shadow-sm overflow-hidden">
-            <button
-              onClick={() => toggleCustomer(group.customerId)}
-              className="w-full text-left"
-            >
-              <CardHeader className="hover:bg-gray-50/60 transition-colors cursor-pointer py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {isOpen ? (
-                      <ChevronDown className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    )}
-                    <div>
-                      <CardTitle className="text-base">{group.customerName}</CardTitle>
-                      <p className="text-sm text-gray-500 font-normal">{group.customerEmail}</p>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[150px] h-9">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="pending_scheduling">Needs Scheduling</SelectItem>
+            <SelectItem value="scheduled">Scheduled</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={tutorFilter} onValueChange={setTutorFilter}>
+          <SelectTrigger className="w-[150px] h-9">
+            <SelectValue placeholder="Tutor" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tutors</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+            {tutors.map((t) => (
+              <SelectItem key={t.id} value={t.id}>{t.full_name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[130px] h-9">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="online">Online</SelectItem>
+            <SelectItem value="in-person">In Person</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {hasFilters && (
+          <button
+            onClick={() => { setSearch(''); setStatusFilter('active'); setTutorFilter('all'); setTypeFilter('all') }}
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <X className="h-3 w-3" />
+            Clear
+          </button>
+        )}
+      </div>
+
+      {groups.length > 0 ? (
+        <div className="space-y-4">
+          {groups.map((group) => {
+            const isOpen = expandedCustomers.has(group.customerId)
+            const pending = group.sessions.filter((s) => s.status === 'pending_scheduling').length
+            const needsTutor = group.sessions.filter((s) => s.status === 'scheduled' && !s.assigned_tutor_id).length
+            const ready = group.sessions.filter((s) => s.status === 'scheduled' && !!s.assigned_tutor_id).length
+            const completed = group.sessions.filter((s) => s.status === 'completed').length
+            const hasPending = pending > 0 || needsTutor > 0
+
+            const nextSession = group.sessions
+              .filter((s) => s.status === 'scheduled' && s.confirmed_start)
+              .sort((a, b) => new Date(a.confirmed_start!).getTime() - new Date(b.confirmed_start!).getTime())[0]
+
+            const tutorNames = Array.from(new Set(
+              group.sessions.map((s) => s.tutors?.full_name).filter(Boolean)
+            ))
+
+            return (
+              <div
+                key={group.customerId}
+                className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
+                  hasPending ? 'border-l-amber-400 border-l-[3px] border-gray-200' : 'border-gray-200'
+                }`}
+              >
+                <button
+                  onClick={() => toggleCustomer(group.customerId)}
+                  className="w-full text-left hover:bg-gray-50/60 transition-colors cursor-pointer"
+                >
+                  <div className="px-5 py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 min-w-0">
+                        {isOpen ? (
+                          <ChevronDown className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-[#1e293b]">{group.customerName}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{group.customerEmail}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        {nextSession && (
+                          <span className="flex items-center gap-1.5 text-sm font-medium text-[#1e293b]">
+                            <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                            Next: {new Date(nextSession.confirmed_start!).toLocaleDateString(undefined, {
+                              month: 'short', day: 'numeric',
+                            })}, {new Date(nextSession.confirmed_start!).toLocaleTimeString(undefined, {
+                              hour: 'numeric', minute: '2-digit',
+                            })}
+                          </span>
+                        )}
+                        {tutorNames.length > 0 && (
+                          <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                            <User className="h-3 w-3" />
+                            {tutorNames.join(', ')}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600 font-medium">
-                      {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
-                    </span>
-                    <div className="flex gap-1.5">
+
+                    <div className="flex items-center gap-3 mt-2.5 ml-8 text-xs">
                       {pending > 0 && (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {pending}
-                        </Badge>
+                        <span className="flex items-center gap-1.5 font-medium text-amber-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          {pending} need{pending === 1 ? 's' : ''} scheduling
+                        </span>
                       )}
-                      {scheduled > 0 && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {scheduled}
-                        </Badge>
+                      {needsTutor > 0 && (
+                        <span className="flex items-center gap-1.5 font-medium text-red-500">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          {needsTutor} need{needsTutor === 1 ? 's' : ''} tutor
+                        </span>
+                      )}
+                      {ready > 0 && (
+                        <span className="flex items-center gap-1.5 text-gray-500">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          {ready} ready
+                        </span>
                       )}
                       {completed > 0 && (
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          {completed}
-                        </Badge>
+                        <span className="flex items-center gap-1.5 text-gray-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                          {completed} completed
+                        </span>
                       )}
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-            </button>
-            {isOpen && (
-              <CardContent className="pt-0 pb-4 space-y-2">
-                {group.sessions.map((s) => (
-                  <SessionCard
-                    key={s.id}
-                    session={s}
-                    tutors={tutors}
-                    subjectMap={subjectMap}
-                    isAdmin={true}
-                  />
-                ))}
-              </CardContent>
-            )}
-          </Card>
-        )
-      })}
-    </div>
+                </button>
+                {isOpen && (
+                  <div className="border-t border-gray-100 px-5 pb-4 pt-2 space-y-2">
+                    {group.sessions.map((s) => (
+                      <SessionCard
+                        key={s.id}
+                        session={s}
+                        tutors={tutors}
+                        subjectMap={sMap}
+                        isAdmin={true}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg border border-dashed border-gray-200 py-16 text-center">
+          <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          {hasFilters ? (
+            <>
+              <p className="text-gray-500 font-medium">No matching sessions</p>
+              <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-500 font-medium">No sessions yet</p>
+              <p className="text-sm text-gray-400 mt-1">Sessions will appear here after customers book</p>
+            </>
+          )}
+        </div>
+      )}
+
+      <p className="text-xs text-gray-400 text-right">
+        Showing {filteredCount} of {sessions.length} sessions
+      </p>
+    </>
   )
 }
 
