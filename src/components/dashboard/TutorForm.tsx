@@ -30,6 +30,8 @@ interface Tutor {
 export function TutorForm({ tutor }: { tutor?: Tutor }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [isActive, setIsActive] = useState(tutor ? tutor.is_active : true)
   const router = useRouter()
 
@@ -78,8 +80,28 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
     }
   }
 
+  async function handleDelete() {
+    if (!tutor) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/tutors/${tutor.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Failed to delete tutor')
+      }
+      setOpen(false)
+      setConfirmDelete(false)
+      router.refresh()
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmDelete(false) }}>
       <DialogTrigger asChild>
         <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#517cad] hover:text-[#3b5c85]' : ''}>
           {isEditing ? 'Edit' : 'Add Tutor'}
@@ -138,6 +160,43 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
             <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save'}</Button>
           </div>
         </form>
+
+        {isEditing && (
+          <div className="border-t border-gray-100 pt-4 mt-2">
+            {!confirmDelete ? (
+              <Button
+                variant="ghost"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
+                onClick={() => setConfirmDelete(true)}
+              >
+                Delete Tutor
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-red-600 text-center">
+                  This will permanently delete <strong>{tutor!.full_name}</strong> and their account. This cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setConfirmDelete(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    disabled={deleting}
+                    onClick={handleDelete}
+                  >
+                    {deleting ? 'Deleting...' : 'Confirm Delete'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

@@ -18,7 +18,7 @@ export default async function OrdersPage() {
 
   let query = supabase.from('booking_requests').select(`
     *,
-    customers (full_name, email),
+    customers (full_name, email, packages(total_hours), memberships(tier, status)),
     payments (amount_cents)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
@@ -39,6 +39,21 @@ export default async function OrdersPage() {
   const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
   const getSubjectNames = (ids: string[] | null) =>
     (ids ?? []).map((id) => subjectMap.get(id)).filter(Boolean).join(', ') || '—'
+
+  const getResolvedPlanLabel = (order: any) => {
+    const effectiveAmount = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+    const base = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
+    if (effectiveAmount > 0) return base
+    if (order.payment_type === 'package') {
+      const pkg = order.customers?.packages?.[0]
+      if (pkg) return `${pkg.total_hours}-Hr Package (Credit)`
+    }
+    if (order.payment_type === 'membership') {
+      const mem = order.customers?.memberships?.find((m: any) => m.status === 'active')
+      if (mem?.tier) return `${mem.tier.charAt(0).toUpperCase() + mem.tier.slice(1)} Membership (Credit)`
+    }
+    return base
+  }
 
   const getOrderCardBorder = (status: string) => {
     switch (status) {
@@ -84,7 +99,7 @@ export default async function OrdersPage() {
                       })}
                     </span>
                     <Badge variant="secondary" className="font-medium bg-slate-100 text-slate-700">
-                      {formatPlanLabel(order)}
+                      {getResolvedPlanLabel(order)}
                     </Badge>
                     {(() => {
                       const amt = order.amount_cents || order.payments?.[0]?.amount_cents
@@ -121,6 +136,18 @@ export default async function OrdersPage() {
                     profile?.role === 'admin' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'
                   }`}
                 >
+                  {profile?.role === 'admin' && (
+                    <div className="flex gap-4">
+                      <User className="h-5 w-5 text-[#b08a30]/70 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</p>
+                        <p className="text-gray-900 font-medium">{order.customers?.full_name ?? '—'}</p>
+                        {order.customers?.email && (
+                          <p className="text-gray-500 text-xs mt-0.5">{order.customers.email}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-4">
                     <BookOpen className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
                     <div>
@@ -135,18 +162,6 @@ export default async function OrdersPage() {
                       <p className="text-gray-900 font-medium capitalize">{order.session_type || '—'}</p>
                     </div>
                   </div>
-                  {profile?.role === 'admin' && (
-                    <div className="flex gap-4">
-                      <User className="h-5 w-5 text-[#b08a30]/70 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</p>
-                        <p className="text-gray-900 font-medium">{order.customers?.full_name ?? '—'}</p>
-                        {order.customers?.email && (
-                          <p className="text-gray-500 text-xs mt-0.5">{order.customers.email}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
