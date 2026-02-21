@@ -33,7 +33,7 @@ export default function RegisterPage() {
     setError(null)
 
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.toLowerCase().trim(),
       password,
       options: {
         data: {

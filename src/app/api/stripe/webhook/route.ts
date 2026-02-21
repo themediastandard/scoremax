@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const bookingId = metadata.booking_request_id
     const planType = metadata.plan_type
     const planName = metadata.plan_name
-    const contactEmail = metadata.contact_email
+    const contactEmail = metadata.contact_email?.toLowerCase()
     const contactName = metadata.contact_name
     const stripeCustomerId = session.customer
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         const { data: customerByEmail } = await supabaseAdmin
             .from('customers')
             .select('*')
-            .eq('email', contactEmail)
+            .ilike('email', contactEmail)
             .single()
             
         if (customerByEmail) {
@@ -70,14 +70,14 @@ export async function POST(req: Request) {
                 profileId = authUser.user.id
             } else if (authError?.message?.toLowerCase().includes('already')) {
                 const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-                const existingUser = existingUsers?.users?.find((u) => u.email === contactEmail)
+                const existingUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === contactEmail)
                 if (existingUser) profileId = existingUser.id
             }
 
             const { data: triggerCreated } = await supabaseAdmin
                 .from('customers')
                 .select('*')
-                .eq('email', contactEmail)
+                .ilike('email', contactEmail)
                 .single()
 
             if (triggerCreated) {
