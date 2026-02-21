@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -49,29 +49,25 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
   const [status, setStatus] = useState(session.status)
   const [internalNotes, setInternalNotes] = useState(session.internal_notes || '')
 
-  const initial = useMemo(
-    () => ({
-      tutorId: session.assigned_tutor_id || '',
-      date: session.confirmed_start
-        ? new Date(session.confirmed_start).toISOString().split('T')[0]
-        : '',
-      time: session.confirmed_start
-        ? new Date(session.confirmed_start).toTimeString().substring(0, 5)
-        : '',
-      duration:
-        session.confirmed_start && session.confirmed_end
-          ? String(
-              (new Date(session.confirmed_end).getTime() -
-                new Date(session.confirmed_start).getTime()) /
-                60000
-            )
-          : '60',
-      status: session.status,
-      internalNotes: session.internal_notes || '',
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  const [initial, setInitial] = useState(() => ({
+    tutorId: session.assigned_tutor_id || '',
+    date: session.confirmed_start
+      ? new Date(session.confirmed_start).toISOString().split('T')[0]
+      : '',
+    time: session.confirmed_start
+      ? new Date(session.confirmed_start).toTimeString().substring(0, 5)
+      : '',
+    duration:
+      session.confirmed_start && session.confirmed_end
+        ? String(
+            (new Date(session.confirmed_end).getTime() -
+              new Date(session.confirmed_start).getTime()) /
+              60000
+          )
+        : '60',
+    status: session.status,
+    internalNotes: session.internal_notes || '',
+  }))
 
   const hasChanges =
     tutorId !== initial.tutorId ||
@@ -121,6 +117,7 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
         const err = await res.json()
         alert(err.error || 'Failed to update session')
       } else {
+        setInitial({ tutorId, date, time, duration, status, internalNotes })
         router.refresh()
       }
     } catch (err) {

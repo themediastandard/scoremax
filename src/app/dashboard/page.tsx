@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard, Video, MapPin } from 'lucide-react'
 import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { formatPlanLabel, formatAmount } from '@/lib/order-format'
 
 export default async function DashboardHome() {
@@ -284,31 +285,166 @@ export default async function DashboardHome() {
       .eq('profile_id', user.id)
       .single()
 
-    const { count: sessionCount } = await supabase
-      .from('sessions')
-      .select('*', { count: 'exact', head: true })
-      .eq('assigned_tutor_id', tutor?.id)
-      .eq('status', 'scheduled')
-      .gte('confirmed_start', new Date().toISOString())
+    const { data: subjects } = await supabase.from('subjects').select('id, name')
+    const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+
+    const [{ data: upcomingSessions }, { count: totalUpcoming }, { count: totalCompleted }] = await Promise.all([
+      supabaseAdmin
+        .from('sessions')
+        .select('*, customers (full_name, email)')
+        .eq('assigned_tutor_id', tutor?.id)
+        .eq('status', 'scheduled')
+        .gte('confirmed_start', new Date().toISOString())
+        .order('confirmed_start', { ascending: true })
+        .limit(5),
+      supabaseAdmin
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('assigned_tutor_id', tutor?.id)
+        .eq('status', 'scheduled'),
+      supabaseAdmin
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('assigned_tutor_id', tutor?.id)
+        .eq('status', 'completed'),
+    ])
+
+    const sessions = upcomingSessions ?? []
+    const now = new Date()
+    const weekEnd = new Date(now)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+    const thisWeek = sessions.filter((s) => {
+      if (!s.confirmed_start) return false
+      return new Date(s.confirmed_start) <= weekEnd
+    })
+    const nextSession = sessions[0] ?? null
 
     return (
-      <div className="space-y-8">
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
+          <p className="mt-1 text-gray-500">Here&apos;s your schedule overview</p>
+        </div>
 
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Upcoming Sessions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-[#517cad]">{sessionCount || 0}</div>
-            <p className="text-sm text-gray-500 mt-2">Scheduled sessions coming up</p>
-            <div className="mt-4">
-              <Link href="/dashboard/sessions">
-                <Button className="w-full">View Schedule</Button>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">This Week</span>
+              <span className="rounded-md p-1.5 text-[#517cad] bg-[#517cad]/10"><Calendar className="h-4 w-4" /></span>
+            </div>
+            <p className="text-2xl font-bold text-[#1e293b] tracking-tight">{thisWeek.length}</p>
+            <p className="text-xs text-gray-400">sessions coming up</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Upcoming</span>
+              <span className="rounded-md p-1.5 text-amber-600 bg-amber-50"><Clock className="h-4 w-4" /></span>
+            </div>
+            <p className="text-2xl font-bold text-[#1e293b] tracking-tight">{totalUpcoming ?? 0}</p>
+            <p className="text-xs text-gray-400">scheduled sessions</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</span>
+              <span className="rounded-md p-1.5 text-emerald-600 bg-emerald-50"><CheckCircle className="h-4 w-4" /></span>
+            </div>
+            <p className="text-2xl font-bold text-[#1e293b] tracking-tight">{totalCompleted ?? 0}</p>
+            <p className="text-xs text-gray-400">all time</p>
+          </div>
+        </div>
+
+        {nextSession ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/80">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Next Session</p>
+            </div>
+            <div className="px-5 py-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-lg font-bold text-[#1e293b]">
+                    {nextSession.customers?.full_name ?? 'Unknown Student'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {nextSession.subjects?.map((id: string) => subjectMap.get(id) ?? id).join(', ') || 'No subjects'}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-semibold text-[#1e293b]">
+                    {new Date(nextSession.confirmed_start).toLocaleDateString(undefined, {
+                      weekday: 'long', month: 'short', day: 'numeric',
+                    })}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {new Date(nextSession.confirmed_start).toLocaleTimeString(undefined, {
+                      hour: 'numeric', minute: '2-digit',
+                    })}
+                    {nextSession.confirmed_end && (
+                      <span>
+                        {' – '}
+                        {new Date(nextSession.confirmed_end).toLocaleTimeString(undefined, {
+                          hour: 'numeric', minute: '2-digit',
+                        })}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-4">
+                <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                  {nextSession.session_type === 'online' ? (
+                    <><Video className="h-3.5 w-3.5" /> Online</>
+                  ) : (
+                    <><MapPin className="h-3.5 w-3.5" /> In Person</>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-dashed border-gray-200 py-12 text-center">
+            <Calendar className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">No upcoming sessions</p>
+            <p className="text-sm text-gray-400 mt-1">You&apos;ll see your next session here once assigned</p>
+          </div>
+        )}
+
+        {sessions.length > 1 && (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/80 flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Coming Up</p>
+              <Link href="/dashboard/sessions" className="text-xs text-[#517cad] hover:text-[#3b5c85] font-medium transition-colors">
+                View All
               </Link>
             </div>
-          </CardContent>
-        </Card>
+            <div className="divide-y divide-gray-100">
+              {sessions.slice(1).map((s: any) => (
+                <div key={s.id} className="px-5 py-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-center shrink-0 w-12">
+                      <p className="text-xs font-medium text-gray-500 uppercase">
+                        {new Date(s.confirmed_start).toLocaleDateString(undefined, { month: 'short' })}
+                      </p>
+                      <p className="text-lg font-bold text-[#1e293b] -mt-0.5">
+                        {new Date(s.confirmed_start).getDate()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#1e293b]">{s.customers?.full_name ?? 'Unknown'}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {new Date(s.confirmed_start).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                        {' · '}
+                        {s.subjects?.map((id: string) => subjectMap.get(id) ?? id).join(', ') || '—'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                    {s.session_type === 'online' ? <Video className="h-3.5 w-3.5" /> : <MapPin className="h-3.5 w-3.5" />}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
