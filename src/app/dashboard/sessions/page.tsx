@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { AdminSessionList, FlatSessionList } from '@/components/dashboard/SessionList'
+import { SessionMetrics } from '@/components/dashboard/SessionMetrics'
 
 export default async function SessionsPage() {
   const user = await getAuthUser()
@@ -14,20 +15,39 @@ export default async function SessionsPage() {
   const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
 
   if (profile?.role === 'admin') {
-    const { data: sessions } = await supabase
-      .from('sessions')
-      .select(`
-        *,
-        customers (full_name, email),
-        tutors (id, full_name)
-      `)
-      .in('status', ['pending_scheduling', 'scheduled'])
-      .order('created_at', { ascending: false })
+    const [{ data: activeSessions }, { count: completedCount }, { data: tutors }] = await Promise.all([
+      supabase
+        .from('sessions')
+        .select(`
+          *,
+          customers (full_name, email),
+          tutors (id, full_name)
+        `)
+        .in('status', ['pending_scheduling', 'scheduled'])
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('sessions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'completed'),
+      supabase
+        .from('tutors')
+        .select('id, full_name')
+        .eq('is_active', true),
+    ])
 
-    const { data: tutors } = await supabase
-      .from('tutors')
-      .select('id, full_name')
-      .eq('is_active', true)
+    const sessions = activeSessions ?? []
+    const now = new Date()
+    const weekEnd = new Date(now)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+
+    const needsScheduling = sessions.filter((s) => s.status === 'pending_scheduling').length
+    const unassigned = sessions.filter((s) => !s.assigned_tutor_id).length
+    const scheduled = sessions.filter((s) => s.status === 'scheduled').length
+    const upcomingThisWeek = sessions.filter((s) => {
+      if (s.status !== 'scheduled' || !s.confirmed_start) return false
+      const start = new Date(s.confirmed_start)
+      return start >= now && start <= weekEnd
+    }).length
 
     const groupMap = new Map<string, {
       customerId: string
@@ -36,7 +56,7 @@ export default async function SessionsPage() {
       sessions: typeof sessions
     }>()
 
-    for (const s of sessions ?? []) {
+    for (const s of sessions) {
       const cid = s.customer_id || 'unknown'
       if (!groupMap.has(cid)) {
         groupMap.set(cid, {
@@ -53,7 +73,17 @@ export default async function SessionsPage() {
 
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
+          <p className="mt-1 text-gray-500">{sessions.length} active</p>
+        </div>
+        <SessionMetrics
+          needsScheduling={needsScheduling}
+          unassigned={unassigned}
+          upcomingThisWeek={upcomingThisWeek}
+          totalCompleted={completedCount ?? 0}
+          totalActive={scheduled}
+        />
         <AdminSessionList
           groups={groups as any}
           tutors={tutors || []}
