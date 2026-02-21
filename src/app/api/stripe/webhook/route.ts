@@ -102,9 +102,9 @@ export async function POST(req: Request) {
     if (bookingId && customer) {
         await supabaseAdmin.from('booking_requests').update({
             customer_id: customer.id,
-            status: 'processing',
+            status: 'paid',
             stripe_payment_intent_id: session.payment_intent || session.subscription
-        }).eq('id', bookingId).in('status', ['pending_payment', 'processing'])
+        }).eq('id', bookingId).in('status', ['pending_payment', 'paid'])
     }
 
     // 3. Record Payment

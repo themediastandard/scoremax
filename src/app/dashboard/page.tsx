@@ -18,18 +18,13 @@ export default async function DashboardHome() {
 
   if (profile.role === 'admin') {
     const [
-      { count: pendingOrderCount },
       { count: pendingSessionCount },
       { count: scheduledSessionCount },
       { count: memberCount },
       { count: customerCount },
-      { data: pendingOrders },
+      { data: recentOrders },
       { data: upcomingSessions },
     ] = await Promise.all([
-      supabase
-        .from('booking_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'processing'),
       supabase
         .from('sessions')
         .select('*', { count: 'exact', head: true })
@@ -48,7 +43,7 @@ export default async function DashboardHome() {
       supabase
         .from('booking_requests')
         .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, customers(full_name)')
-        .eq('status', 'processing')
+        .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(10),
       supabase
@@ -66,20 +61,10 @@ export default async function DashboardHome() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pending Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-[#b08a30]">{pendingOrderCount || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Requires attention</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pending Sessions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-amber-500">{pendingSessionCount || 0}</div>
+              <div className="text-4xl font-bold text-[#b08a30]">{pendingSessionCount || 0}</div>
               <p className="text-xs text-gray-500 mt-1">Needs scheduling</p>
             </CardContent>
           </Card>
@@ -103,14 +88,24 @@ export default async function DashboardHome() {
               <p className="text-xs text-gray-500 mt-1">Paying subscribers</p>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Customers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-gray-700">{customerCount || 0}</div>
+              <p className="text-xs text-gray-500 mt-1">Registered customers</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-amber-600" />
-                Pending Orders
+                <CreditCard className="h-5 w-5 text-[#b08a30]" />
+                Recent Orders
               </CardTitle>
               <Link href="/dashboard/orders">
                 <Button variant="ghost" size="sm" className="text-[#517cad]">
@@ -119,13 +114,13 @@ export default async function DashboardHome() {
               </Link>
             </CardHeader>
             <CardContent>
-              {pendingOrders && pendingOrders.length > 0 ? (
+              {recentOrders && recentOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {pendingOrders.map((order: any) => (
+                  {recentOrders.map((order: any) => (
                     <Link
                       key={order.id}
                       href={`/dashboard/orders/${order.id}`}
-                      className="block rounded-lg border border-amber-100 p-4 hover:bg-amber-50/40 hover:border-amber-300 transition-colors"
+                      className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/40 hover:border-gray-300 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div>
@@ -141,7 +136,7 @@ export default async function DashboardHome() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-sm py-4 text-center">No pending orders</p>
+                <p className="text-gray-400 text-sm py-4 text-center">No orders yet</p>
               )}
             </CardContent>
           </Card>

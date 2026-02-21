@@ -42,14 +42,12 @@ export default async function OrdersPage() {
 
   const getOrderCardBorder = (status: string) => {
     switch (status) {
-      case 'active':
+      case 'paid':
         return 'border-2 border-emerald-500/60 shadow-sm'
-      case 'processing':
-        return 'border-2 border-amber-500/60 shadow-sm'
-      case 'completed':
-        return 'border-2 border-slate-300 shadow-sm'
-      default:
+      case 'refunded':
         return 'border-2 border-red-500/60 shadow-sm'
+      default:
+        return 'border-2 border-gray-200 shadow-sm'
     }
   }
 
@@ -93,14 +91,12 @@ export default async function OrdersPage() {
                       return amt ? <span className="text-sm font-bold text-[#1e293b]">{formatAmount(amt)}</span> : null
                     })()}
                     <span
-                      className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                        order.status === 'active'
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-full capitalize ${
+                        order.status === 'paid'
                           ? 'bg-emerald-50 text-emerald-700'
-                          : order.status === 'processing'
-                            ? 'bg-amber-50 text-amber-700'
-                            : order.status === 'completed'
-                              ? 'bg-slate-100 text-slate-700'
-                              : 'bg-red-50 text-red-700'
+                          : order.status === 'refunded'
+                            ? 'bg-red-50 text-red-700'
+                            : 'bg-gray-100 text-gray-700'
                       }`}
                     >
                       {order.status}

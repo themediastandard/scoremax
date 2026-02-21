@@ -2,15 +2,15 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET() {
-  const { count: pendingCount } = await supabaseAdmin
+  const { count: paidOrderCount } = await supabaseAdmin
     .from('booking_requests')
     .select('id', { count: 'exact' })
-    .eq('status', 'processing')
+    .eq('status', 'paid')
 
-  const { count: activeCount } = await supabaseAdmin
-    .from('booking_requests')
+  const { count: pendingSessionCount } = await supabaseAdmin
+    .from('sessions')
     .select('id', { count: 'exact' })
-    .eq('status', 'active')
+    .eq('status', 'pending_scheduling')
 
   const { count: memberCount } = await supabaseAdmin
     .from('memberships')
@@ -31,8 +31,8 @@ export async function GET() {
   const revenueCents = revenueData?.reduce((acc, curr) => acc + curr.amount_cents, 0) || 0
 
   return NextResponse.json({
-    pendingBookings: pendingCount || 0,
-    activeSessions: activeCount || 0,
+    paidOrders: paidOrderCount || 0,
+    pendingSessions: pendingSessionCount || 0,
     activeMembers: memberCount || 0,
     monthlyRevenue: revenueCents
   })

@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { formatDateTime, formatAmount } from '@/lib/order-format'
+import { formatDateTime, formatAmount, formatPlanLabel, formatTime24To12 } from '@/lib/order-format'
 import { ArrowLeft, BookOpen, Video, CreditCard, Clock, Calendar, User, MapPin } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
@@ -71,6 +71,31 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     .eq('order_id', order.id)
     .order('created_at', { ascending: true })
 
+  const effectiveAmount = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+  let planLabel = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
+
+  if (effectiveAmount === 0 && order.customer_id) {
+    if (order.payment_type === 'package') {
+      const { data: pkg } = await supabase
+        .from('packages')
+        .select('total_hours')
+        .eq('customer_id', order.customer_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (pkg) planLabel = `${pkg.total_hours}-Hr Package (Credit)`
+    } else if (order.payment_type === 'membership') {
+      const { data: mem } = await supabase
+        .from('memberships')
+        .select('tier')
+        .eq('customer_id', order.customer_id)
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle()
+      if (mem?.tier) planLabel = `${mem.tier.charAt(0).toUpperCase() + mem.tier.slice(1)} Membership (Credit)`
+    }
+  }
+
   const statusConfig: Record<string, { label: string; className: string }> = {
     pending_scheduling: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
     scheduled: { label: 'Scheduled', className: 'bg-blue-100 text-blue-700' },
@@ -80,13 +105,11 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   const orderStatusConfig: Record<string, { label: string; className: string }> = {
     pending_payment: { label: 'Pending Payment', className: 'bg-gray-100 text-gray-700' },
-    processing: { label: 'Processing', className: 'bg-amber-100 text-amber-700' },
-    active: { label: 'Active', className: 'bg-emerald-100 text-emerald-700' },
-    completed: { label: 'Completed', className: 'bg-blue-100 text-blue-700' },
+    paid: { label: 'Paid', className: 'bg-emerald-100 text-emerald-700' },
     refunded: { label: 'Refunded', className: 'bg-red-100 text-red-700' },
   }
 
-  const orderStatus = orderStatusConfig[order.status] || orderStatusConfig.processing
+  const orderStatus = orderStatusConfig[order.status] || orderStatusConfig.paid
 
   return (
     <div className="space-y-8">
@@ -150,7 +173,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 </div>
               </div>
 
-              {profile?.role === 'admin' && (order.available_days || order.available_time_start) && (
+              {(order.available_days || order.available_time_start) && (
                 <div className="pt-4 border-t border-gray-100">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5" />
@@ -169,8 +192,8 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     {(order.available_time_start || order.available_time_end) && (
                       <p className="text-sm text-amber-800">
                         {order.available_time_start && order.available_time_end
-                          ? `${order.available_time_start} – ${order.available_time_end}`
-                          : order.available_time_start || order.available_time_end}
+                          ? `${formatTime24To12(order.available_time_start)} – ${formatTime24To12(order.available_time_end)}`
+                          : formatTime24To12(order.available_time_start) || formatTime24To12(order.available_time_end)}
                         {order.timezone && <span className="text-amber-600 ml-1">({order.timezone})</span>}
                       </p>
                     )}
@@ -288,8 +311,8 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</p>
-                <p className="font-medium capitalize">{order.payment_type}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</p>
+                <p className="font-medium">{planLabel}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</p>

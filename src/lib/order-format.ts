@@ -5,7 +5,11 @@ export function formatPlanLabel(order: {
 }): string {
   const type = order.payment_type ?? ''
   const cents = order.amount_cents ?? 0
-  if (cents === 0 && type) return 'Credit'
+  if (cents === 0 && type) {
+    if (type === 'membership') return 'Membership Credit'
+    if (type === 'package') return 'Package Credit'
+    return 'Credit'
+  }
   if (type === 'membership') {
     if (cents >= 89900) return 'Premier'
     if (cents >= 54900) return 'Core'

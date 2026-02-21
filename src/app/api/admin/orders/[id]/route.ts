@@ -28,6 +28,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const body = await req.json()
   const { status } = body
 
+  if (status !== 'refunded') {
+    return NextResponse.json({ error: 'Only refund status changes are supported' }, { status: 400 })
+  }
+
   const { data: currentBooking, error: fetchError } = await supabaseAdmin
     .from('booking_requests')
     .select(`

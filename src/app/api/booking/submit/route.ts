@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       available_time_end,
       timezone,
       session_type,
-      status: 'processing',
+      status: 'paid',
       payment_type: creditSource,
       course_enrollment_id: courseEnrollmentId,
       notes,
