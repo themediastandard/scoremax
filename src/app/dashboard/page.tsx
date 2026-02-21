@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard, Video, MapPin } from 'lucide-react'
 import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import { formatPlanLabel, formatAmount } from '@/lib/order-format'
 
 export default async function DashboardHome() {
   const user = await getAuthUser()
@@ -24,6 +25,7 @@ export default async function DashboardHome() {
       { count: customerCount },
       { data: recentOrders },
       { data: upcomingSessions },
+      { data: adminSubjects },
     ] = await Promise.all([
       supabase
         .from('sessions')
@@ -42,7 +44,7 @@ export default async function DashboardHome() {
         .select('*', { count: 'exact', head: true }),
       supabase
         .from('booking_requests')
-        .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, customers(full_name)')
+        .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, customers(full_name, packages(total_hours), memberships(tier, status)), payments(amount_cents)')
         .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(10),
@@ -52,7 +54,25 @@ export default async function DashboardHome() {
         .eq('status', 'scheduled')
         .order('confirmed_start', { ascending: true })
         .limit(10),
+      supabase.from('subjects').select('id, name'),
     ])
+
+    const adminSubjectMap = new Map((adminSubjects ?? []).map((s) => [s.id, s.name]))
+    const resolveSubjects = (ids: string[] | null) =>
+      (ids ?? []).map((id) => adminSubjectMap.get(id)).filter(Boolean).join(', ')
+    const resolvePlanLabel = (order: any) => {
+      const amt = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+      if (amt > 0) return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
+      if (order.payment_type === 'package') {
+        const pkg = order.customers?.packages?.[0]
+        if (pkg) return `${pkg.total_hours}-Hr Package (Credit)`
+      }
+      if (order.payment_type === 'membership') {
+        const mem = order.customers?.memberships?.find((m: any) => m.status === 'active')
+        if (mem?.tier) return `${mem.tier.charAt(0).toUpperCase() + mem.tier.slice(1)} Membership (Credit)`
+      }
+      return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
+    }
 
     return (
       <div className="space-y-8">
@@ -116,24 +136,48 @@ export default async function DashboardHome() {
             <CardContent>
               {recentOrders && recentOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {recentOrders.map((order: any) => (
-                    <Link
-                      key={order.id}
-                      href={`/dashboard/orders/${order.id}`}
-                      className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/40 hover:border-gray-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-[#1e293b]">{order.customers?.full_name || 'Unknown'}</p>
-                          <p className="text-xs text-gray-500 mt-0.5 capitalize">{order.session_type} session</p>
+                  {recentOrders.map((order: any) => {
+                    const amt = order.amount_cents || order.payments?.[0]?.amount_cents
+                    return (
+                      <Link
+                        key={order.id}
+                        href={`/dashboard/orders/${order.id}`}
+                        className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/40 hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <p className="font-medium text-[#1e293b]">{order.customers?.full_name || 'Unknown'}</p>
+                              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
+                                {resolvePlanLabel(order)}
+                              </span>
+                              {amt ? (
+                                <span className="text-xs font-bold text-[#1e293b]">{formatAmount(amt)}</span>
+                              ) : null}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                              {resolveSubjects(order.subjects) && (
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="h-3 w-3 shrink-0" />
+                                  {resolveSubjects(order.subjects)}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 capitalize">
+                                {order.session_type === 'online'
+                                  ? <Video className="h-3 w-3 shrink-0" />
+                                  : <MapPin className="h-3 w-3 shrink-0" />}
+                                {order.session_type === 'in-person' ? 'In Person' : order.session_type}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
+                            <span>{new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    )
+                  })}
                 </div>
               ) : (
                 <p className="text-gray-400 text-sm py-4 text-center">No orders yet</p>
@@ -162,19 +206,46 @@ export default async function DashboardHome() {
                       href="/dashboard/sessions"
                       className="block rounded-lg border border-emerald-100 p-4 hover:bg-emerald-50/40 hover:border-emerald-300 transition-colors"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-[#1e293b]">{session.customers?.full_name || 'Unknown'}</p>
-                          {session.tutors?.full_name && (
-                            <p className="text-xs text-gray-500 mt-0.5">Tutor: {session.tutors.full_name}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          {session.confirmed_start ? (
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 shrink-0" />
-                              {new Date(session.confirmed_start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <p className="font-medium text-[#1e293b]">{session.customers?.full_name || 'Unknown'}</p>
+                            {session.tutors?.full_name && (
+                              <span className="flex items-center gap-1 text-xs text-gray-500">
+                                <Users className="h-3 w-3 shrink-0" />
+                                {session.tutors.full_name}
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1 text-xs text-gray-400 capitalize">
+                              {session.session_type === 'online'
+                                ? <Video className="h-3 w-3 shrink-0" />
+                                : <MapPin className="h-3 w-3 shrink-0" />}
+                              {session.session_type === 'in-person' ? 'In Person' : session.session_type}
                             </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                            {resolveSubjects(session.subjects) && (
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="h-3 w-3 shrink-0" />
+                                {resolveSubjects(session.subjects)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
+                          {session.confirmed_start ? (
+                            <div className="text-right">
+                              <span className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                                {new Date(session.confirmed_start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {new Date(session.confirmed_start).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {session.confirmed_end && (
+                                  <> – {new Date(session.confirmed_end).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</>
+                                )}
+                              </span>
+                            </div>
                           ) : (
                             <span className="italic text-xs">Not scheduled</span>
                           )}

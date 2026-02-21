@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { resend, getEmailDefaults } from '@/lib/resend'
+import { emailLayout, detailRow } from '@/lib/email-templates'
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -56,9 +58,30 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (tutorError) {
-    // Rollback auth user if tutor creation fails
     await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
     return NextResponse.json({ error: tutorError.message }, { status: 500 })
+  }
+
+  try {
+    await resend.emails.send({
+      ...getEmailDefaults(),
+      to: email,
+      subject: 'Welcome to ScoreMax',
+      html: emailLayout({
+        title: 'Welcome to the Team',
+        greeting: `Hi ${full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">You\'ve been added as a tutor on ScoreMax. Use the credentials below to sign in to your dashboard:</p>',
+          detailRow('Email:', email),
+          detailRow('Temporary Password:', password),
+          '<p style="margin: 16px 0 0 0; font-size: 14px; color: #6b7280;">You can change your password anytime from your account settings.</p>',
+        ].join(''),
+        ctaText: 'Sign In',
+        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+      }),
+    })
+  } catch (e) {
+    console.error('Failed to send tutor welcome email', e)
   }
 
   return NextResponse.json(tutor)
