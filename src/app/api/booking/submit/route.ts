@@ -92,7 +92,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // 5. Notify Admin
+  // 5. Create Session Record
+  await supabaseAdmin.from('sessions').insert({
+    order_id: booking.id,
+    customer_id: customer.id,
+    session_type,
+    subjects,
+    status: 'pending_scheduling',
+  })
+
+  // 6. Notify Admin
   const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
   const adminEmails = adminSettings?.value?.split(',') || []
 
@@ -114,7 +123,7 @@ export async function POST(req: NextRequest) {
     })
   }
   
-  // Notify Student
+  // 7. Notify Student
   await resend.emails.send({
       ...getEmailDefaults(),
       to: customer.email,

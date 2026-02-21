@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import { AdminSessionList, FlatSessionList } from '@/components/dashboard/SessionList'
 
 export default async function SessionsPage() {
   const user = await getAuthUser()
@@ -8,61 +9,121 @@ export default async function SessionsPage() {
 
   const profile = await getProfile(user.id)
   const supabase = await createClient()
-  
-  if (profile?.role === 'customer') {
-    return <div>Access Denied</div>
-  }
-  
-  // If Admin, show all active sessions? Or just assigned?
-  // Usually admins view sessions via Orders page.
-  // This page is primarily for Tutors to see their schedule.
-  
-  let query = supabase.from('booking_requests')
-    .select(`
-      *,
-      customers (full_name, email, phone)
-    `)
-    .eq('status', 'active')
-    .order('confirmed_start', { ascending: true })
-    
-  if (profile?.role === 'tutor') {
-    // Get tutor ID
-    const { data: tutor } = await supabase.from('tutors').select('id').eq('profile_id', user.id).single()
-    if (tutor) {
-      query = query.eq('assigned_tutor_id', tutor.id)
-    }
-  }
-  
-  const { data: sessions } = await query
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Upcoming Sessions</h1>
-      
-      <div className="grid gap-6">
-        {sessions?.map((session: any) => (
-          <div key={session.id} className="bg-white rounded-lg shadow p-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between">
-            <div>
-              <div className="text-lg font-bold text-gray-900">{session.customers?.full_name}</div>
-              <div className="text-sm text-gray-500">{new Date(session.confirmed_start).toLocaleString()} - {new Date(session.confirmed_end).toLocaleTimeString()}</div>
-              <div className="mt-2 text-sm">
-                <span className="font-medium text-gray-700">Subject:</span> {session.subjects?.length} selected
-              </div>
-              <div className="mt-1 text-sm">
-                <span className="font-medium text-gray-700">Location:</span> {session.session_type === 'in-person' ? 'Sawgrass, FL' : 'Online (Zoom)'}
-              </div>
-            </div>
-            <div className="mt-4 md:mt-0">
-               <button className="bg-[#517cad] text-white px-4 py-2 rounded text-sm hover:bg-[#3b5c85]">
-                 View Details
-               </button>
-            </div>
-          </div>
-        ))}
-        {sessions?.length === 0 && (
-          <div className="text-center py-12 text-gray-500">No upcoming sessions found.</div>
-        )}
+  const { data: subjects } = await supabase.from('subjects').select('id, name')
+  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+
+  if (profile?.role === 'admin') {
+    const { data: sessions } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        customers (full_name, email),
+        tutors (id, full_name)
+      `)
+      .in('status', ['pending_scheduling', 'scheduled'])
+      .order('created_at', { ascending: false })
+
+    const { data: tutors } = await supabase
+      .from('tutors')
+      .select('id, full_name')
+      .eq('is_active', true)
+
+    const groupMap = new Map<string, {
+      customerId: string
+      customerName: string
+      customerEmail: string
+      sessions: typeof sessions
+    }>()
+
+    for (const s of sessions ?? []) {
+      const cid = s.customer_id || 'unknown'
+      if (!groupMap.has(cid)) {
+        groupMap.set(cid, {
+          customerId: cid,
+          customerName: s.customers?.full_name || 'Unknown Customer',
+          customerEmail: s.customers?.email || '',
+          sessions: [],
+        })
+      }
+      groupMap.get(cid)!.sessions!.push(s)
+    }
+
+    const groups = Array.from(groupMap.values())
+
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
+        <AdminSessionList
+          groups={groups as any}
+          tutors={tutors || []}
+          subjectMap={subjectMap}
+        />
       </div>
-    </div>
-  )
+    )
+  }
+
+  if (profile?.role === 'tutor') {
+    const { data: tutor } = await supabase
+      .from('tutors')
+      .select('id')
+      .eq('profile_id', user.id)
+      .single()
+
+    const { data: sessions } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        customers (full_name, email),
+        tutors (id, full_name)
+      `)
+      .eq('assigned_tutor_id', tutor?.id)
+      .in('status', ['scheduled'])
+      .order('confirmed_start', { ascending: true })
+
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Upcoming Sessions</h1>
+        <FlatSessionList
+          sessions={(sessions || []) as any}
+          tutors={[]}
+          subjectMap={subjectMap}
+          isAdmin={false}
+        />
+      </div>
+    )
+  }
+
+  if (profile?.role === 'customer') {
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('profile_id', user.id)
+      .single()
+
+    const { data: sessions } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        customers (full_name, email),
+        tutors (id, full_name)
+      `)
+      .eq('customer_id', customer?.id)
+      .in('status', ['pending_scheduling', 'scheduled'])
+      .order('confirmed_start', { ascending: true, nullsFirst: true })
+
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Your Sessions</h1>
+        <FlatSessionList
+          sessions={(sessions || []) as any}
+          tutors={[]}
+          subjectMap={subjectMap}
+          isAdmin={false}
+        />
+      </div>
+    )
+  }
+
+  return <div>Access Denied</div>
 }

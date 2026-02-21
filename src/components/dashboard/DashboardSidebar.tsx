@@ -79,6 +79,12 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
       roles: ['admin']
     },
     {
+      label: 'My Sessions',
+      href: '/dashboard/sessions',
+      icon: Calendar,
+      roles: ['customer']
+    },
+    {
       label: 'Sessions',
       href: '/dashboard/sessions',
       icon: Calendar,
@@ -121,17 +127,22 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
               {fullName}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              <p className={`text-xs font-medium truncate ${
-                tier === 'Core'
-                  ? 'text-[#b08a30] font-semibold'
-                  : 'text-gray-500'
-              }`}>
-                {tier ? `${tier} Member` : 'No active subscription'}
-              </p>
+              {tier && (
+                <p className={`text-xs font-medium truncate ${
+                  tier === 'Core'
+                    ? 'text-[#b08a30] font-semibold'
+                    : 'text-gray-500'
+                }`}>
+                  {tier} Member
+                </p>
+              )}
               {credits != null && credits >= 0 && (
                 <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#517cad]">
                   {credits} {credits === 1 ? 'credit' : 'credits'}
                 </span>
+              )}
+              {!tier && (credits == null || credits <= 0) && (
+                <p className="text-xs text-gray-500 font-medium">0 credits</p>
               )}
             </div>
           </>

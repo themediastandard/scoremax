@@ -126,7 +126,7 @@ export async function POST(req: Request) {
         await supabaseAdmin.from('packages').insert({
             customer_id: customer.id,
             total_hours: hours,
-            remaining_hours: hours, // We don't deduct for the booking automatically yet to remain safe
+            remaining_hours: hours - 1,
             stripe_payment_intent_id: session.payment_intent
         })
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
@@ -158,7 +158,7 @@ export async function POST(req: Request) {
             stripe_subscription_id: subscription.id,
             status: 'active',
             included_hours: includedHours,
-            used_hours: 0,
+            used_hours: 1,
             rollover_hours: 0,
             current_period_start: subscription.current_period_start
                 ? new Date(subscription.current_period_start * 1000).toISOString()
@@ -169,7 +169,24 @@ export async function POST(req: Request) {
         })
     }
 
-    // 5. Notify Admin
+    // 5. Create Session Records
+    if (bookingId && customer) {
+        const { data: order } = await supabaseAdmin
+            .from('booking_requests')
+            .select('subjects, session_type')
+            .eq('id', bookingId)
+            .single()
+
+        await supabaseAdmin.from('sessions').insert({
+            order_id: bookingId,
+            customer_id: customer.id,
+            session_type: order?.session_type || 'online',
+            subjects: order?.subjects || [],
+            status: 'pending_scheduling',
+        })
+    }
+
+    // 6. Notify Admin
     const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
     const adminEmails = adminSettings?.value?.split(',') || []
     
@@ -193,7 +210,7 @@ export async function POST(req: Request) {
         })
     }
 
-    // 6. Notify Customer (post-payment confirmation)
+    // 7. Notify Customer (post-payment confirmation)
     if (contactEmail) {
       const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
       const purchaseBody = `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`

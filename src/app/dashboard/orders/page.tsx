@@ -5,7 +5,7 @@ import { formatPlanLabel, formatAmount } from '@/lib/order-format'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Calendar, User, BookOpen, Video } from 'lucide-react'
+import { ChevronRight, BookOpen, Video, User } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 
@@ -19,7 +19,6 @@ export default async function OrdersPage() {
   let query = supabase.from('booking_requests').select(`
     *,
     customers (full_name, email),
-    tutors (full_name),
     payments (amount_cents)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
@@ -58,7 +57,7 @@ export default async function OrdersPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Orders</h1>
-        <p className="mt-1 text-gray-500">View and manage your tutoring sessions</p>
+        <p className="mt-1 text-gray-500">View and manage your orders</p>
       </div>
 
       {orders?.length === 0 ? (
@@ -66,7 +65,7 @@ export default async function OrdersPage() {
           <CardContent className="flex flex-col items-center justify-center py-16">
             <BookOpen className="h-12 w-12 text-gray-300 mb-4" />
             <p className="text-gray-500 font-medium">No orders yet</p>
-            <p className="text-sm text-gray-400 mt-1">Your tutoring sessions will appear here</p>
+            <p className="text-sm text-gray-400 mt-1">Your orders will appear here</p>
           </CardContent>
         </Card>
       ) : (
@@ -122,8 +121,8 @@ export default async function OrdersPage() {
               </CardHeader>
               <CardContent className="pt-0 px-6 sm:px-8">
                 <div
-                  className={`grid w-full grid-cols-2 gap-y-6 gap-x-12 sm:grid-cols-4 ${
-                    profile?.role === 'admin' ? 'md:grid-cols-5' : ''
+                  className={`grid w-full grid-cols-2 gap-y-6 gap-x-12 ${
+                    profile?.role === 'admin' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'
                   }`}
                 >
                   <div className="flex gap-4">
@@ -136,52 +135,8 @@ export default async function OrdersPage() {
                   <div className="flex gap-4">
                     <Video className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session Type</p>
                       <p className="text-gray-900 font-medium capitalize">{order.session_type || '—'}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <Calendar
-                      className={`h-5 w-5 shrink-0 mt-0.5 ${order.confirmed_start ? 'text-emerald-600' : 'text-gray-400'}`}
-                    />
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
-                      {order.confirmed_start ? (
-                        <>
-                          <span className="font-medium text-gray-900">
-                            {new Date(order.confirmed_start).toLocaleDateString(undefined, {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </span>
-                          <span className="text-gray-600 text-sm font-medium">
-                            {new Date(order.confirmed_start).toLocaleTimeString(undefined, {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                            })}
-                            {order.confirmed_end && (
-                              <>
-                                {' – '}
-                                {new Date(order.confirmed_end).toLocaleTimeString(undefined, {
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                })}
-                              </>
-                            )}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="font-medium text-gray-500 italic">Not yet scheduled</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <User className="h-5 w-5 text-[#517cad]/70 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
-                      <p className="text-gray-900 font-medium">{order.tutors?.full_name || 'Unassigned'}</p>
                     </div>
                   </div>
                   {profile?.role === 'admin' && (

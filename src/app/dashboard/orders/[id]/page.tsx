@@ -2,12 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { OrderAssignForm } from '@/components/dashboard/OrderAssignForm'
+import { Badge } from '@/components/ui/badge'
 import { formatDateTime, formatAmount } from '@/lib/order-format'
-import { ArrowLeft, Calendar, User, BookOpen, Video, CreditCard, Clock } from 'lucide-react'
+import { ArrowLeft, BookOpen, Video, CreditCard, Clock, Calendar, User, MapPin } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
-import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const user = await getAuthUser()
@@ -15,20 +15,17 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   const profile = await getProfile(user.id)
   const supabase = await createClient()
-  
-  // Fetch order
+
   const { data: order, error } = await supabase
     .from('booking_requests')
     .select(`
       *,
       customers (full_name, email, phone, student_grade, notes),
-      tutors (id, full_name),
-      course_enrollments (course_type),
       payments (amount_cents)
     `)
-    .eq('id', params.id)
+    .eq('id', (await params).id)
     .single()
-    
+
   if (error || !order) {
     return (
       <div className="space-y-6">
@@ -44,8 +41,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       </div>
     )
   }
-  
-  // Check access
+
   if (profile?.role === 'customer') {
     const { data: customer } = await supabase.from('customers').select('id').eq('profile_id', user.id).single()
     if (order.customer_id !== customer?.id) {
@@ -65,16 +61,32 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       )
     }
   }
-  
+
   const { data: subjects } = await supabase.from('subjects').select('id, name')
   const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
 
-  // Fetch tutors for assignment dropdown (if admin)
-  let tutors = []
-  if (profile?.role === 'admin') {
-    const { data } = await supabase.from('tutors').select('id, full_name, specialties').eq('is_active', true)
-    tutors = data || []
+  const { data: sessions } = await supabase
+    .from('sessions')
+    .select('id, status, confirmed_start, confirmed_end, session_type, subjects, assigned_tutor_id, meet_url, tutors (full_name)')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: true })
+
+  const statusConfig: Record<string, { label: string; className: string }> = {
+    pending_scheduling: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
+    scheduled: { label: 'Scheduled', className: 'bg-blue-100 text-blue-700' },
+    completed: { label: 'Completed', className: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-700' },
   }
+
+  const orderStatusConfig: Record<string, { label: string; className: string }> = {
+    pending_payment: { label: 'Pending Payment', className: 'bg-gray-100 text-gray-700' },
+    processing: { label: 'Processing', className: 'bg-amber-100 text-amber-700' },
+    active: { label: 'Active', className: 'bg-emerald-100 text-emerald-700' },
+    completed: { label: 'Completed', className: 'bg-blue-100 text-blue-700' },
+    refunded: { label: 'Refunded', className: 'bg-red-100 text-red-700' },
+  }
+
+  const orderStatus = orderStatusConfig[order.status] || orderStatusConfig.processing
 
   return (
     <div className="space-y-8">
@@ -98,6 +110,9 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           </p>
           <span className="text-gray-300">|</span>
           <p className="text-sm text-gray-400 font-mono">{order.id.slice(0, 8).toUpperCase()}</p>
+          <Badge variant="secondary" className={orderStatus.className}>
+            {orderStatus.label}
+          </Badge>
         </div>
       </div>
 
@@ -105,7 +120,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-gray-100 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">Session</CardTitle>
+              <CardTitle className="text-xl">Order Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
@@ -131,41 +146,6 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session Type</p>
                     <p className="text-lg font-medium text-[#1e293b] capitalize">{order.session_type}</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
-                    <User className="h-5 w-5 text-[#517cad]" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
-                    <p className="text-lg font-medium text-[#1e293b]">{order.tutors?.full_name || 'Unassigned'}</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                    <Calendar className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
-                    <p className={`text-lg font-medium ${order.confirmed_start ? 'text-[#1e293b]' : 'text-gray-500 italic'}`}>
-                      {order.confirmed_start ? (
-                        <>
-                          {formatDateTime(order.confirmed_start)}
-                          {order.confirmed_end && (
-                            <span className="text-gray-600">
-                              {' – '}
-                              {new Date(order.confirmed_end).toLocaleTimeString(undefined, {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        'Not yet scheduled'
-                      )}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -198,17 +178,6 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 </div>
               )}
 
-              {order.meet_url && order.confirmed_start && order.confirmed_end && (
-                <div className="pt-4 border-t border-gray-100">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Google Meet</p>
-                  <JoinClassButton
-                    meetUrl={order.meet_url}
-                    sessionStart={order.confirmed_start}
-                    sessionEnd={order.confirmed_end}
-                  />
-                </div>
-              )}
-
               {order.notes && (
                 <div className="pt-4 border-t border-gray-100">
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Customer Notes</p>
@@ -218,15 +187,67 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             </CardContent>
           </Card>
 
-          {profile?.role === 'admin' && (
+          {sessions && sessions.length > 0 && (
             <Card className="border-gray-100 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl">Assignment & Status</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">Sessions ({sessions.length})</CardTitle>
+                  {profile?.role === 'admin' && (
+                    <Link
+                      href="/dashboard/sessions"
+                      className="text-sm text-[#517cad] hover:text-[#3b5c85] transition-colors"
+                    >
+                      Manage sessions
+                    </Link>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent>
-                <OrderAssignForm order={order} tutors={tutors} />
+              <CardContent className="space-y-2">
+                {sessions.map((s: any) => {
+                  const cfg = statusConfig[s.status] || statusConfig.pending_scheduling
+                  return (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between gap-4 rounded-lg border border-gray-100 p-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Badge variant="secondary" className={cfg.className}>
+                          {cfg.label}
+                        </Badge>
+                        {s.confirmed_start && (
+                          <span className="flex items-center gap-1.5 text-sm text-gray-600">
+                            <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                            {formatDateTime(s.confirmed_start)}
+                          </span>
+                        )}
+                        {!s.confirmed_start && (
+                          <span className="text-sm text-gray-400 italic">Not yet scheduled</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {s.tutors?.full_name && (
+                          <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                            <User className="h-3.5 w-3.5" />
+                            {s.tutors.full_name}
+                          </span>
+                        )}
+                        <span className="text-gray-400">
+                          {s.session_type === 'online' ? (
+                            <Video className="h-3.5 w-3.5" />
+                          ) : (
+                            <MapPin className="h-3.5 w-3.5" />
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
               </CardContent>
             </Card>
+          )}
+
+          {profile?.role === 'admin' && order.status !== 'refunded' && (
+            <OrderRefundForm orderId={order.id} />
           )}
         </div>
 
