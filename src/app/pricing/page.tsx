@@ -139,10 +139,10 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Packages & SAT Course - Two columns */}
+      {/* Packages, SAT & ACT Courses */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-10">
+          <div className="grid md:grid-cols-3 gap-10">
             {/* Prepaid Packages */}
             <div className="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
               <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Short-Term</div>
@@ -169,6 +169,26 @@ export default function PricingPage() {
             <div className="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
               <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
               <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-1">In-Person SAT Course</h2>
+              <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
+              <p className="text-gray-500 text-sm mb-6">5-week program with small groups. Strategy, practice tests, and expert instruction.</p>
+              <ul className="space-y-2 mb-6 text-sm text-gray-600">
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> 2 sessions per week, 2 hours each</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> 20 total contact hours</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Diagnostics + practice tests included</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Bonus: 2 hours of 1:1 tutoring</li>
+              </ul>
+              <div className="mb-6">
+                <span className="font-[family-name:var(--font-playfair)] text-3xl text-gray-900">$895</span>
+              </div>
+              <Link href="/test-prep/in-person-classes" className="block text-center py-3 bg-[#b08a30] text-white text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
+                Learn About Classes
+              </Link>
+            </div>
+
+            {/* In-Person ACT Course */}
+            <div className="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
+              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
+              <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-1">In-Person ACT Course</h2>
               <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
               <p className="text-gray-500 text-sm mb-6">5-week program with small groups. Strategy, practice tests, and expert instruction.</p>
               <ul className="space-y-2 mb-6 text-sm text-gray-600">
