@@ -273,6 +273,9 @@ export async function POST(req: Request) {
         }
       }
 
+      const loginItem = planType === 'act-course-inperson'
+        ? '<li>ACT account login and password</li>'
+        : '<li>College Board login and password</li>'
       const inPersonCourseDetails = isInPersonCourse
         ? [
             cohortScheduleHtml,
@@ -280,7 +283,7 @@ export async function POST(req: Request) {
             '<p style="margin: 0 0 16px 0;">Florida Blue Center · 1970 Sawgrass Mills Cir, Sunrise, FL 33323-2994</p>',
             '<p style="margin: 0 0 12px 0;"><strong style="color: #1e293b;">What to Bring</strong></p>',
             '<ul style="margin: 0 0 16px 0; padding-left: 20px;">',
-            '<li>College Board login and password</li>',
+            loginItem,
             '<li>Charged laptop or tablet and charger</li>',
             '<li>Notebook and pen or pencil</li>',
             '<li>Stylus (if applicable)</li>',

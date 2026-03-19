@@ -45,12 +45,43 @@ export async function GET(req: NextRequest) {
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from('booking_requests')
-      .select('subjects, available_days, available_time_start, available_time_end, session_type')
+      .select('subjects, available_days, available_time_start, available_time_end, session_type, payment_type, cohort_id')
       .eq('id', bookingRequestId)
       .single()
 
     if (bookingError || !booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    }
+
+    const planType =
+      planInfo?.type === 'sat-course-inperson' || planInfo?.type === 'act-course-inperson'
+        ? planInfo.type
+        : booking.payment_type
+    const isCohortBooking =
+      (planType === 'sat-course-inperson' || planType === 'act-course-inperson') && booking.cohort_id
+
+    let cohortSchedule: { startDate: string; endDate: string; timeStart: string; timeEnd: string } | null = null
+    if (isCohortBooking && booking.cohort_id) {
+      const table = planType === 'act-course-inperson' ? 'act_course_cohorts' : 'sat_course_cohorts'
+      const { data: cohort } = await supabaseAdmin
+        .from(table)
+        .select('start_date, end_date, session_time_start, session_time_end')
+        .eq('id', booking.cohort_id)
+        .single()
+      if (cohort?.start_date && cohort?.end_date && cohort?.session_time_start && cohort?.session_time_end) {
+        const fmt = (t: string) => {
+          const [h, m] = String(t).slice(0, 5).split(':').map(Number)
+          const h12 = h % 12 || 12
+          const ampm = h < 12 ? 'AM' : 'PM'
+          return `${h12}:${String(m ?? 0).padStart(2, '0')} ${ampm}`
+        }
+        cohortSchedule = {
+          startDate: new Date(cohort.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          endDate: new Date(cohort.end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          timeStart: fmt(cohort.session_time_start),
+          timeEnd: fmt(cohort.session_time_end),
+        }
+      }
     }
 
     let subjectNames: string[] = []
@@ -76,6 +107,8 @@ export async function GET(req: NextRequest) {
       sessionType: booking.session_type ?? 'online',
       subjects: subjectNames,
       subjectIds: booking.subjects ?? [],
+      isCohortBooking,
+      cohortSchedule,
     })
   } catch (err) {
     console.error('Confirmation fetch error:', err)

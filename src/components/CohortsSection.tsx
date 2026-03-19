@@ -16,21 +16,34 @@ interface Cohort {
   status: string
   session_time_start?: string
   session_time_end?: string
+  testType?: 'sat' | 'act'
 }
 
 export function CohortsSection() {
-  const [cohorts, setCohorts] = useState<Cohort[]>([])
+  const [satCohorts, setSatCohorts] = useState<Cohort[]>([])
+  const [actCohorts, setActCohorts] = useState<Cohort[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/cohorts')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setCohorts(data)
+    Promise.all([
+      fetch('/api/cohorts?test_type=sat').then(res => res.json()),
+      fetch('/api/cohorts?test_type=act').then(res => res.json()),
+    ])
+      .then(([sat, act]) => {
+        setSatCohorts(Array.isArray(sat) ? sat : [])
+        setActCohorts(Array.isArray(act) ? act : [])
       })
-      .catch(() => setCohorts([]))
+      .catch(() => {
+        setSatCohorts([])
+        setActCohorts([])
+      })
       .finally(() => setLoading(false))
   }, [])
+
+  const cohorts = [
+    ...satCohorts.map(c => ({ ...c, testType: 'sat' as const })),
+    ...actCohorts.map(c => ({ ...c, testType: 'act' as const })),
+  ].sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
 
   if (loading) {
     return (
@@ -52,7 +65,7 @@ export function CohortsSection() {
         <div className="text-center mb-12">
           <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Upcoming Sessions</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
-            In-Person SAT Course Cohorts
+            SAT & ACT In-Person Cohorts
           </h2>
           <p className="text-gray-500 text-sm max-w-xl mx-auto">
             Choose a cohort that fits your schedule. Limited spots per session.
@@ -69,10 +82,15 @@ export function CohortsSection() {
                 key={cohort.id}
                 className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="flex items-center gap-2 text-[#b08a30] mb-4">
-                  <Calendar className="w-5 h-5" />
-                  <span className="text-sm font-semibold uppercase tracking-wider">
-                    {format(start, 'MMM d')} – {format(end, 'MMM d, yyyy')}
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-2 text-[#b08a30]">
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-sm font-semibold uppercase tracking-wider">
+                      {format(start, 'MMM d')} – {format(end, 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                  <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-[#b08a30]/10 text-[#b08a30]">
+                    {cohort.testType === 'act' ? 'ACT' : 'SAT'}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 text-sm mb-4">
