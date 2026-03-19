@@ -30,13 +30,16 @@ interface Cohort {
   enrolled_count: number
   status: string
   price_cents: number
+  session_time_start?: string
+  session_time_end?: string
 }
 
 interface CohortFormProps {
   cohort?: Cohort
+  testType?: 'sat' | 'act'
 }
 
-export function CohortForm({ cohort }: CohortFormProps) {
+export function CohortForm({ cohort, testType = 'sat' }: CohortFormProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -50,6 +53,8 @@ export function CohortForm({ cohort }: CohortFormProps) {
   const [startDate, setStartDate] = useState(defaultStart)
   const [endDate, setEndDate] = useState(defaultEnd)
   const [status, setStatus] = useState(cohort?.status || 'upcoming')
+  const [sessionTimeStart, setSessionTimeStart] = useState(cohort?.session_time_start?.slice(0, 5) ?? '16:00')
+  const [sessionTimeEnd, setSessionTimeEnd] = useState(cohort?.session_time_end?.slice(0, 5) ?? '18:00')
 
   // Auto-calculate end date (5 weeks) when start date changes
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,10 +91,13 @@ export function CohortForm({ cohort }: CohortFormProps) {
       max_students: parseInt(formData.get('max_students') as string) || 15,
       price_cents: Math.round(parseFloat(formData.get('price_dollars') as string) * 100) || 89500,
       status: status,
+      session_time_start: sessionTimeStart,
+      session_time_end: sessionTimeEnd,
     }
 
     try {
-      const url = isEditing ? `/api/admin/cohorts/${cohort?.id}` : '/api/admin/cohorts'
+      const base = testType === 'act' ? '/api/admin/cohorts/act' : '/api/admin/cohorts'
+      const url = isEditing ? `${base}/${cohort?.id}` : base
       const method = isEditing ? 'PATCH' : 'POST'
 
       const res = await fetch(url, {
@@ -108,6 +116,8 @@ export function CohortForm({ cohort }: CohortFormProps) {
         setStartDate('')
         setEndDate('')
         setStatus('upcoming')
+        setSessionTimeStart('16:00')
+        setSessionTimeEnd('18:00')
       }
     } catch (error) {
       console.error(error)
@@ -121,14 +131,14 @@ export function CohortForm({ cohort }: CohortFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#517cad] hover:text-[#3b5c85]' : ''}>
-          {isEditing ? 'Manage' : 'Create Cohort'}
+          {isEditing ? 'Manage' : `Create ${testType === 'act' ? 'ACT' : 'SAT'} Cohort`}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Cohort' : 'Create New Cohort'}</DialogTitle>
           <DialogDescription>
-            Manage the In-Person SAT Course cohort details.
+            Manage the In-Person {testType === 'act' ? 'ACT' : 'SAT'} Course cohort details.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -153,6 +163,31 @@ export function CohortForm({ cohort }: CohortFormProps) {
                 value={endDate} 
                 onChange={(e) => setEndDate(e.target.value)} 
                 required 
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="session_time_start">Session Time Start</Label>
+              <Input
+                id="session_time_start"
+                name="session_time_start"
+                type="time"
+                value={sessionTimeStart}
+                onChange={(e) => setSessionTimeStart(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="session_time_end">Session Time End</Label>
+              <Input
+                id="session_time_end"
+                name="session_time_end"
+                type="time"
+                value={sessionTimeEnd}
+                onChange={(e) => setSessionTimeEnd(e.target.value)}
+                required
               />
             </div>
           </div>

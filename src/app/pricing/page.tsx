@@ -39,6 +39,7 @@ export default function PricingPage() {
           <p className="text-gray-500 max-w-2xl mx-auto text-sm leading-relaxed">
             Choose the option that fits your goals. All plans include expert tutors, personalized support, and proven results.
           </p>
+          <p className="text-[#b08a30] text-sm font-medium mt-2">All materials included with all subjects.</p>
         </div>
       </section>
 
@@ -169,15 +170,15 @@ export default function PricingPage() {
               <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
               <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-1">In-Person SAT Course</h2>
               <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
-              <p className="text-gray-500 text-sm mb-6">8-week program with small groups. Strategy, practice tests, and expert instruction.</p>
+              <p className="text-gray-500 text-sm mb-6">5-week program with small groups. Strategy, practice tests, and expert instruction.</p>
               <ul className="space-y-2 mb-6 text-sm text-gray-600">
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> 2 sessions per week, 2 hours each</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> 32 total contact hours</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> 20 total contact hours</li>
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Diagnostics + practice tests included</li>
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Bonus: 2 hours of 1:1 tutoring</li>
               </ul>
               <div className="mb-6">
-                <span className="font-[family-name:var(--font-playfair)] text-3xl text-gray-900">$1,200 – $1,500</span>
+                <span className="font-[family-name:var(--font-playfair)] text-3xl text-gray-900">$895</span>
               </div>
               <Link href="/test-prep/in-person-classes" className="block text-center py-3 bg-[#b08a30] text-white text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
                 Learn About Classes

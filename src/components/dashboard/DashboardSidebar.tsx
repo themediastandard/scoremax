@@ -12,7 +12,8 @@ import {
   LogOut, 
   BookOpen,
   GraduationCap,
-  CreditCard
+  CreditCard,
+  DollarSign
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
@@ -106,6 +107,12 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
       label: 'Cohorts',
       href: '/dashboard/cohorts',
       icon: GraduationCap,
+      roles: ['admin']
+    },
+    {
+      label: 'Pricing',
+      href: '/dashboard/pricing',
+      icon: DollarSign,
       roles: ['admin']
     },
     {

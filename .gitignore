@@ -26,6 +26,9 @@ project_scope.md
 # internal docs
 docs/
 
+# supabase temp (CLI cache)
+supabase/.temp/
+
 # misc
 .DS_Store
 *.pem

@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, Star, Loader2 } from 'lucide-react'
+import { Check, Star, Loader2, Calendar, Users } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 
 interface PlanSelectionProps {
   subjects: string[]
-  sessionType: 'online' | 'in-person'
+  /** Remote flow only; in-person uses CohortContactStep */
+  sessionType?: 'online' | 'in-person'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   memberStatus: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,7 +18,7 @@ interface PlanSelectionProps {
   loading?: boolean
 }
 
-export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, loading: processing }: PlanSelectionProps) {
+export function PlanSelection({ subjects, sessionType = 'online', memberStatus, onSelect, loading: processing }: PlanSelectionProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pricing, setPricing] = useState<any[]>([])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,7 +31,7 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
       fetch('/api/subjects').then(res => res.json())
     ]).then(([pricingData, subjectsData]) => {
       setPricing(pricingData)
-      
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const flat: Record<string, any> = {}
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -217,37 +219,6 @@ export function PlanSelection({ subjects, sessionType, memberStatus, onSelect, l
               </Card>
             )}
           </div>
-        </div>
-      )}
-
-      {/* In-Person SAT Course - when SAT + in-person */}
-      {(isSAT && sessionType === 'in-person') && (
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg text-[#1e293b]">In-Person Program</h3>
-          <Card className="border-[#1e293b] border-2 bg-white max-w-xl">
-            <CardHeader>
-              <CardTitle>In-Person SAT Course (Sawgrass, FL)</CardTitle>
-              <div className="mt-2"><span className="text-3xl font-bold">$895</span></div>
-              <p className="text-sm text-gray-500">5-Week Program</p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Small group (max 15 students)</li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 2 sessions/week (2 hrs each)</li>
-                </ul>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Includes diagnostics + materials</li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> <strong>Bonus:</strong> 2 hours 1:1 included</li>
-                </ul>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" onClick={() => onSelect({ type: 'sat-course-inperson', price: 89500, name: 'In-Person SAT Course' })} disabled={processing}>
-                {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll in In-Person Course'}
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
       )}
 

@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { data, error } = await supabaseAdmin
-    .from('sat_course_cohorts')
+    .from('act_course_cohorts')
     .select('*')
     .eq('id', params.id)
     .single()
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const body = await req.json()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, created_at, enrolled_count, ...updates } = body // Protect enrolled_count
+  const { id, created_at, enrolled_count, ...updates } = body
 
   if (updates.session_time_start !== undefined || updates.session_time_end !== undefined) {
     if (!updates.session_time_start || !updates.session_time_end) {
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const { data, error } = await supabaseAdmin
-    .from('sat_course_cohorts')
+    .from('act_course_cohorts')
     .update(updates)
     .eq('id', params.id)
     .select()
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const { error } = await supabaseAdmin
-    .from('sat_course_cohorts')
+    .from('act_course_cohorts')
     .delete()
     .eq('id', params.id)
 

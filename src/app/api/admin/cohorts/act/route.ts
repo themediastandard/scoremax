@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
-    .from('sat_course_cohorts')
+    .from('act_course_cohorts')
     .select('*')
     .order('start_date', { ascending: false })
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await supabaseAdmin
-    .from('sat_course_cohorts')
+    .from('act_course_cohorts')
     .insert({
       start_date,
       end_date,

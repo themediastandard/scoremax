@@ -165,10 +165,11 @@ export default function Home() {
               <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="In-Person Classes" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Classes</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+              <div className="absolute bottom-4 left-4 flex flex-col gap-1 text-white">
                 <div className="text-xl font-[family-name:var(--font-playfair)]">LSAT Prep</div>
+                <span className="text-xs text-white/80 max-w-[220px]">Step by step practice learning how the test is written. Usually between 6–12 1-hour sessions depending on the student&apos;s needs.</span>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                  </div>
+              </div>
             </Link>
             <Link href="/college-high-school/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="/Images/student-1.png" alt="College Tutoring" fill className="object-cover" />

@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { plan_type, plan_name, price_id, price_cents, booking_details } = body
+    const cohortId = booking_details?.cohort_id ?? null
     // plan_type: 'single', 'membership', 'package', 'course', 'sat-course-inperson'
     
     const supabase = await createClient()
@@ -31,12 +32,33 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    // 2. Create Pending Booking Request
+    // 2. Map synthetic subject IDs (in-person-sat, in-person-act) to real subject UUIDs
+    const rawSubjects: string[] = Array.isArray(booking_details.subjects) ? booking_details.subjects : []
+    const subjectIdsToResolve = rawSubjects.filter((id: string) => id === 'in-person-sat' || id === 'in-person-act')
+    let resolvedSubjects = rawSubjects
+
+    if (subjectIdsToResolve.length > 0) {
+        const { data: subjectRows } = await supabaseAdmin
+            .from('subjects')
+            .select('id, slug')
+            .in('slug', ['sat', 'act'])
+        const slugToId: Record<string, string> = {}
+        ;(subjectRows ?? []).forEach((r: { id: string; slug: string }) => { slugToId[r.slug] = r.id })
+        resolvedSubjects = rawSubjects
+            .map((id: string) => {
+                if (id === 'in-person-sat' && slugToId.sat) return slugToId.sat
+                if (id === 'in-person-act' && slugToId.act) return slugToId.act
+                return id
+            })
+            .filter((id: string) => id !== 'in-person-sat' && id !== 'in-person-act')
+    }
+
+    // 3. Create Pending Booking Request
     const { data: booking, error: bookingError } = await supabaseAdmin
         .from('booking_requests')
         .insert({
             customer_id: dbCustomerId, // Nullable initially
-            subjects: booking_details.subjects,
+            subjects: resolvedSubjects,
             available_days: booking_details.available_days,
             available_time_start: booking_details.available_time_start,
             available_time_end: booking_details.available_time_end,
@@ -45,7 +67,8 @@ export async function POST(req: NextRequest) {
             status: 'pending_payment',
             payment_type: plan_type,
             notes: booking_details.notes,
-            amount_cents: price_cents || 0
+            amount_cents: price_cents || 0,
+            ...(cohortId && { cohort_id: cohortId }),
         })
         .select()
         .single()
@@ -91,7 +114,8 @@ export async function POST(req: NextRequest) {
             plan_name: plan_name || plan_type,
             user_id: user?.id,
             contact_name: booking_details.full_name,
-            contact_email: booking_details.email
+            contact_email: booking_details.email,
+            ...(cohortId && { cohort_id: cohortId }),
         },
         payment_intent_data: mode === 'payment' ? {
             metadata: {
@@ -119,5 +143,6 @@ function getProductName(type: string, cents: number, details: any) {
     }
     if (type === 'course') return 'Course Program'
     if (type === 'sat-course-inperson') return 'In-Person SAT Course'
-    return `Tutoring Session (${details.session_type})`
+    if (type === 'act-course-inperson') return 'In-Person ACT Course'
+    return `Tutoring Session (${details?.session_type ?? 'online'})`
 }

@@ -2,10 +2,10 @@
 
 import { useBookingForm } from '@/hooks/useBookingForm'
 import { SubjectSelect } from '@/components/booking/SubjectSelect'
-import { SessionTypeToggle } from '@/components/booking/SessionTypeToggle'
 import { AvailabilityForm } from '@/components/booking/AvailabilityForm'
 import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
+import { CohortContactStep } from '@/components/booking/CohortContactStep'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -104,7 +104,7 @@ export default function BookPage() {
   } = useBookingForm()
   
   const [processing, setProcessing] = useState(false)
-  const [activeSection, setActiveSection] = useState<'subjects' | 'sessionType' | 'availability' | 'contact' | 'plan'>('subjects')
+  const [activeSection, setActiveSection] = useState<'subjects' | 'cohortContact' | 'availability' | 'contact' | 'plan'>('subjects')
   
   // Subjects Data
   const [subjectsData, setSubjectsData] = useState<Record<string, Subject[]>>({})
@@ -181,46 +181,64 @@ export default function BookPage() {
 
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')
-  const isSAT = state.subjects.some(id => subjectMap[id]?.slug === 'sat')
+  const selectedSlug = state.subjects[0] ? subjectMap[state.subjects[0]]?.slug : null
+  const isInPersonFlow = selectedSlug === 'in-person-sat' || selectedSlug === 'in-person-act'
+  const inPersonTestType = selectedSlug === 'in-person-sat' ? 'sat' : 'act'
+  const inPersonCourseName = selectedSlug === 'in-person-sat' ? 'In-Person SAT Course' : 'In-Person ACT Course'
 
-  // Dynamic Steps
-  // 1. Subjects
-  // 2. Session Type (only if SAT)
-  // 3. Availability
-  // 4. Contact
-  // 5. Plan
-  
-  // We need to map internal sections to visual steps
-  const steps = [
-    { id: 'subjects', title: 'Select Subject(s)' },
-    ...(isSAT ? [{ id: 'sessionType', title: 'Session Preference' }] : []),
-    { id: 'availability', title: 'Availability' },
-    { id: 'contact', title: 'Contact Information' },
-    { id: 'plan', title: 'Choose Package' }
-  ]
-  
-  const currentStepIndex = steps.findIndex(s => s.id === activeSection)
-  
   // Navigation Handler
   const handleNext = (current: string) => {
-    // Determine next section based on SAT logic
     if (current === 'subjects') {
-      if (isSAT) {
-        setRevealed(prev => ({ ...prev, sessionType: true }))
-        setActiveSection('sessionType')
+      if (isInPersonFlow) {
+        setRevealed(prev => ({ ...prev, cohortContact: true }))
+        setActiveSection('cohortContact')
       } else {
         setRevealed(prev => ({ ...prev, availability: true }))
         setActiveSection('availability')
       }
-    } else if (current === 'sessionType') {
-      setRevealed(prev => ({ ...prev, availability: true }))
-      setActiveSection('availability')
     } else if (current === 'availability') {
       setRevealed(prev => ({ ...prev, contact: true }))
       setActiveSection('contact')
     } else if (current === 'contact') {
       setRevealed(prev => ({ ...prev, plan: true }))
       setActiveSection('plan')
+    }
+  }
+
+  const handleCohortEnroll = async (params: { cohortId: string; priceCents: number; courseName: string }) => {
+    setProcessing(true)
+    try {
+      const planType = inPersonTestType === 'sat' ? 'sat-course-inperson' : 'act-course-inperson'
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan_type: planType,
+          plan_name: params.courseName,
+          price_cents: params.priceCents,
+          booking_details: {
+            subjects: state.subjects,
+            session_type: 'in-person',
+            full_name: state.contact.fullName,
+            email: state.contact.email,
+            phone: state.contact.phone,
+            student_grade: state.contact.studentGrade,
+            notes: state.contact.notes,
+            cohort_id: params.cohortId,
+          },
+        }),
+      })
+      const { url, error } = await res.json()
+      if (url) {
+        window.location.href = url
+      } else {
+        alert(error || 'Failed to initiate checkout')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('An error occurred. Please try again.')
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -328,52 +346,46 @@ export default function BookPage() {
         {/* 1. Subjects */}
         <BookingSection 
           step={1} 
-          title="Select Subject(s)" 
+          title="Select Subject" 
           isOpen={activeSection === 'subjects'}
-          isCompleted={revealed.sessionType || revealed.availability} // Depends on path
-          // Actually checking revealed next step is safe heuristic
+          isCompleted={revealed.cohortContact || revealed.availability}
           summary={selectedSubjectNames}
           onEdit={() => setActiveSection('subjects')}
         >
            <SubjectSelect 
              subjects={subjectsData}
              selected={state.subjects} 
-             onChange={(subjects, hasSAT) => {
-               updateSubjects(subjects)
-               // Don't auto-advance on selection change, wait for Continue
-             }} 
+             onChange={(subjects) => updateSubjects(subjects)}
              onComplete={() => handleNext('subjects')}
            />
         </BookingSection>
 
-        {/* 2. Session Type (Conditional) */}
-        {isSAT && (
+        {/* 2. Cohort & Contact (In-Person SAT/ACT only) */}
+        {isInPersonFlow && (
           <BookingSection
             step={2}
-            title="Session Preference"
-            isOpen={activeSection === 'sessionType'}
-            isCompleted={revealed.availability}
-            disabled={!revealed.sessionType}
-            summary={state.sessionType === 'in-person' ? 'In-Person (Sawgrass)' : 'Online (Zoom)'}
-            onEdit={() => setActiveSection('sessionType')}
+            title="Choose Cohort & Your Information"
+            isOpen={activeSection === 'cohortContact'}
+            isCompleted={false}
+            disabled={!revealed.cohortContact}
+            summary={state.contact.email}
+            onEdit={() => setActiveSection('cohortContact')}
           >
-              <SessionTypeToggle 
-                value={state.sessionType} 
-                onChange={(type) => {
-                  updateSessionType(type)
-                  // Auto-advance for radio button? or button?
-                  // Let's add explicit button for consistency
-                }} 
-              />
-              <div className="flex justify-end pt-4">
-                <Button onClick={() => handleNext('sessionType')} className="bg-[#1e293b]">Continue</Button>
-              </div>
+            <CohortContactStep
+              testType={inPersonTestType}
+              courseName={inPersonCourseName}
+              contact={state.contact}
+              onChange={updateContact}
+              onEnroll={handleCohortEnroll}
+              loading={processing}
+            />
           </BookingSection>
         )}
 
-        {/* 3. Availability */}
+        {/* 3. Availability (Remote only) */}
+        {!isInPersonFlow && (
         <BookingSection
-          step={isSAT ? 3 : 2}
+          step={2}
           title="Availability"
           isOpen={activeSection === 'availability'}
           isCompleted={revealed.contact}
@@ -395,10 +407,12 @@ export default function BookPage() {
                 </Button>
               </div>
         </BookingSection>
+        )}
 
-        {/* 4. Contact */}
+        {/* 4. Contact (Remote only) */}
+        {!isInPersonFlow && (
         <BookingSection
-          step={isSAT ? 4 : 3}
+          step={3}
           title="Contact Information"
           isOpen={activeSection === 'contact'}
           isCompleted={revealed.plan}
@@ -422,10 +436,12 @@ export default function BookPage() {
                 </Button>
               </div>
         </BookingSection>
+        )}
 
-        {/* 5. Plan Selection */}
+        {/* 5. Plan Selection (Remote only) */}
+        {!isInPersonFlow && (
         <BookingSection
-          step={isSAT ? 5 : 4}
+          step={4}
           title="Choose Package"
           isOpen={activeSection === 'plan'}
           isCompleted={false} // Final step
@@ -435,12 +451,12 @@ export default function BookPage() {
         >
               <PlanSelection 
                 subjects={state.subjects}
-                sessionType={state.sessionType}
                 memberStatus={memberStatus}
                 onSelect={handlePlanSelect}
                 loading={processing}
               />
         </BookingSection>
+        )}
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { CohortsSection } from '@/components/CohortsSection';
 
 export const metadata: Metadata = {
   title: 'In-Person SAT & ACT Classes | ScoreMax Test Prep',
@@ -54,8 +55,11 @@ export default function InPersonClassesPage() {
                 SAT & ACT In-Person Classes
               </h1>
               <div className="w-10 h-[2px] bg-[#b08a30] mb-5" />
-              <p className="text-gray-500 text-sm leading-relaxed max-w-lg mb-8">
+              <p className="text-gray-500 text-sm leading-relaxed max-w-lg mb-4">
                 Join our comprehensive in-person course designed to maximize your test scores. Learn from expert instructors in a structured classroom with proven strategies and hands-on practice.
+              </p>
+              <p className="text-gray-700 text-sm font-medium mb-8">
+                Florida Blue Center — 1970 Sawgrass Mills Circle, Sunrise, FL 33323
               </p>
               <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
                 Book Free Consultation
@@ -238,6 +242,9 @@ export default function InPersonClassesPage() {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Cohorts - shows admin-created cohorts, auto-hides when expired */}
+      <CohortsSection />
 
       {/* CTA Section */}
       <section className="py-20 bg-gray-50">
