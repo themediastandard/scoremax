@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { ChevronDown, ChevronRight, Users, Loader2, Mail, Phone, Clock } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users, Loader2, Mail, Phone, Clock, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { formatTime24To12 } from '@/lib/order-format'
 import { CohortForm } from './CohortForm'
 
@@ -33,9 +35,31 @@ interface CohortRowProps {
 }
 
 export function CohortRow({ cohort, testType = 'sat' }: CohortRowProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const [enrollees, setEnrollees] = useState<Enrollee[]>([])
   const [loadingEnrollees, setLoadingEnrollees] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      const base = testType === 'act' ? '/api/admin/cohorts/act' : '/api/admin/cohorts'
+      const res = await fetch(`${base}/${cohort.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Failed to delete cohort')
+      }
+      setConfirmDelete(false)
+      router.refresh()
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   useEffect(() => {
     if (!expanded || cohort.enrolled_count === 0) {
@@ -98,10 +122,33 @@ export function CohortRow({ cohort, testType = 'sat' }: CohortRowProps) {
             </span>
           </div>
         </div>
-        <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+        <div onClick={(e) => e.stopPropagation()} className="shrink-0 flex items-center gap-1">
           <CohortForm cohort={cohort} testType={testType} />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-400 hover:text-red-600 hover:bg-red-50"
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </div>
+
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div className="px-6 py-4 bg-red-50 border-t border-red-100 flex items-center justify-between gap-4">
+          <p className="text-sm text-red-700">
+            Delete this cohort? {cohort.enrolled_count > 0 && <strong>It has {cohort.enrolled_count} enrolled student{cohort.enrolled_count > 1 ? 's' : ''}.</strong>} This cannot be undone.
+          </p>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>Cancel</Button>
+            <Button variant="destructive" size="sm" disabled={deleting} onClick={handleDelete}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Expanded content */}
       {expanded && (

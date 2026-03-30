@@ -20,30 +20,16 @@ interface Cohort {
 }
 
 export function CohortsSection() {
-  const [satCohorts, setSatCohorts] = useState<Cohort[]>([])
-  const [actCohorts, setActCohorts] = useState<Cohort[]>([])
+  const [cohorts, setCohorts] = useState<Cohort[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/cohorts?test_type=sat').then(res => res.json()),
-      fetch('/api/cohorts?test_type=act').then(res => res.json()),
-    ])
-      .then(([sat, act]) => {
-        setSatCohorts(Array.isArray(sat) ? sat : [])
-        setActCohorts(Array.isArray(act) ? act : [])
-      })
-      .catch(() => {
-        setSatCohorts([])
-        setActCohorts([])
-      })
+    fetch('/api/cohorts?test_type=sat')
+      .then(res => res.json())
+      .then((data) => setCohorts(Array.isArray(data) ? data : []))
+      .catch(() => setCohorts([]))
       .finally(() => setLoading(false))
   }, [])
-
-  const cohorts = [
-    ...satCohorts.map(c => ({ ...c, testType: 'sat' as const })),
-    ...actCohorts.map(c => ({ ...c, testType: 'act' as const })),
-  ].sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
 
   if (loading) {
     return (
@@ -65,7 +51,7 @@ export function CohortsSection() {
         <div className="text-center mb-12">
           <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Upcoming Sessions</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
-            SAT & ACT In-Person Cohorts
+            SAT In-Person Cohorts
           </h2>
           <p className="text-gray-500 text-sm max-w-xl mx-auto">
             Choose a cohort that fits your schedule. Limited spots per session.
@@ -90,7 +76,7 @@ export function CohortsSection() {
                     </span>
                   </div>
                   <span className="shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full bg-[#b08a30]/10 text-[#b08a30]">
-                    {cohort.testType === 'act' ? 'ACT' : 'SAT'}
+                    SAT
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 text-sm mb-4">

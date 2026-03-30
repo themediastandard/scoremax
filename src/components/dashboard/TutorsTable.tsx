@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, GraduationCap, X } from 'lucide-react'
+import { Search, GraduationCap, X, CalendarCheck, CalendarX } from 'lucide-react'
 import { TutorForm } from '@/components/dashboard/TutorForm'
 
 interface Tutor {
@@ -22,6 +22,7 @@ interface Tutor {
   photo_url: string
   specialties: string[]
   is_active: boolean
+  google_calendar_connected?: boolean
 }
 
 interface SessionStats {
@@ -172,6 +173,7 @@ export function TutorsTable({ tutors, sessionMap, allSubjects }: TutorsTableProp
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Subjects</th>
                 <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Sessions</th>
+                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Calendar</th>
                 <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -224,6 +226,19 @@ export function TutorsTable({ tutors, sessionMap, allSubjects }: TutorsTableProp
                           <span className="text-xs text-gray-400">—</span>
                         )}
                       </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-center">
+                      {tutor.google_calendar_connected ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700" title="Google Calendar connected">
+                          <CalendarCheck className="w-3.5 h-3.5" />
+                          Connected
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-700" title="Google Calendar not connected">
+                          <CalendarX className="w-3.5 h-3.5" />
+                          Not Connected
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       <span

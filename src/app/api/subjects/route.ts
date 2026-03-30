@@ -24,10 +24,8 @@ export async function GET() {
     return acc
   }, {} as Record<string, typeof data>)
 
-  // Inject In-Person SAT and In-Person ACT as synthetic options (distinct from remote SAT/ACT)
   const inPersonOptions = [
     { id: 'in-person-sat', name: 'In-Person SAT', slug: 'in-person-sat', category: 'test-prep' },
-    { id: 'in-person-act', name: 'In-Person ACT', slug: 'in-person-act', category: 'test-prep' }
   ]
   if (grouped['test-prep']) {
     grouped['test-prep'] = [...inPersonOptions, ...grouped['test-prep']]

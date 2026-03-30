@@ -197,17 +197,17 @@ export function PlanSelection({ subjects, sessionType = 'online', memberStatus, 
                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
                 <CardHeader>
                   <CardTitle>Full ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
-                  <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
+                  <div className="mt-2"><span className="text-3xl font-bold">$3,000</span></div>
+                  <p className="text-sm text-gray-500">12 Sessions • Complete Prep</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 12 one-hour sessions</li>
                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 250000, name: 'Full ACT Course' })} disabled={processing}>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 300000, name: 'Full ACT Course' })} disabled={processing}>
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>

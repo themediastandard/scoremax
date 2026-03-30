@@ -15,10 +15,7 @@ export default async function CohortsPage() {
     return <div>Access Denied</div>
   }
 
-  const [{ data: satCohorts }, { data: actCohorts }] = await Promise.all([
-    supabase.from('sat_course_cohorts').select('*').order('start_date'),
-    supabase.from('act_course_cohorts').select('*').order('start_date'),
-  ])
+  const { data: satCohorts } = await supabase.from('sat_course_cohorts').select('*').order('start_date')
 
   const cohortCard = (
     cohorts: { id: string; start_date: string; end_date: string; max_students: number; enrolled_count: number; status: string; price_cents: number }[] | null,
@@ -54,7 +51,6 @@ export default async function CohortsPage() {
       <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Cohorts</h1>
 
       {cohortCard(satCohorts ?? [], 'sat', 'SAT Cohorts')}
-      {cohortCard(actCohorts ?? [], 'act', 'ACT Cohorts')}
     </div>
   )
 }

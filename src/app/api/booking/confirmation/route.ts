@@ -54,17 +54,15 @@ export async function GET(req: NextRequest) {
     }
 
     const planType =
-      planInfo?.type === 'sat-course-inperson' || planInfo?.type === 'act-course-inperson'
+      planInfo?.type === 'sat-course-inperson'
         ? planInfo.type
         : booking.payment_type
-    const isCohortBooking =
-      (planType === 'sat-course-inperson' || planType === 'act-course-inperson') && booking.cohort_id
+    const isCohortBooking = planType === 'sat-course-inperson' && booking.cohort_id
 
     let cohortSchedule: { startDate: string; endDate: string; timeStart: string; timeEnd: string } | null = null
     if (isCohortBooking && booking.cohort_id) {
-      const table = planType === 'act-course-inperson' ? 'act_course_cohorts' : 'sat_course_cohorts'
       const { data: cohort } = await supabaseAdmin
-        .from(table)
+        .from('sat_course_cohorts')
         .select('start_date, end_date, session_time_start, session_time_end')
         .eq('id', booking.cohort_id)
         .single()

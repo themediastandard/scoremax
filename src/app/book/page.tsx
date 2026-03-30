@@ -190,9 +190,7 @@ export default function BookPage() {
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')
   const selectedSlug = state.subjects[0] ? subjectMap[state.subjects[0]]?.slug : null
-  const isInPersonFlow = selectedSlug === 'in-person-sat' || selectedSlug === 'in-person-act'
-  const inPersonTestType = selectedSlug === 'in-person-sat' ? 'sat' : 'act'
-  const inPersonCourseName = selectedSlug === 'in-person-sat' ? 'In-Person SAT Course' : 'In-Person ACT Course'
+  const isInPersonFlow = selectedSlug === 'in-person-sat'
 
   // Navigation Handler
   const handleNext = (current: string) => {
@@ -216,12 +214,11 @@ export default function BookPage() {
   const handleCohortEnroll = async (params: { cohortId: string; priceCents: number; courseName: string }) => {
     setProcessing(true)
     try {
-      const planType = inPersonTestType === 'sat' ? 'sat-course-inperson' : 'act-course-inperson'
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan_type: planType,
+          plan_type: 'sat-course-inperson',
           plan_name: params.courseName,
           booking_details: {
             subjects: state.subjects,
@@ -368,7 +365,7 @@ export default function BookPage() {
            />
         </BookingSection>
 
-        {/* 2. Cohort & Contact (In-Person SAT/ACT only) */}
+        {/* 2. Cohort & Contact (In-Person SAT only) */}
         {isInPersonFlow && (
           <BookingSection
             step={2}
@@ -380,8 +377,8 @@ export default function BookPage() {
             onEdit={() => setActiveSection('cohortContact')}
           >
             <CohortContactStep
-              testType={inPersonTestType}
-              courseName={inPersonCourseName}
+              testType="sat"
+              courseName="In-Person SAT Course"
               contact={state.contact}
               onChange={updateContact}
               onEnroll={handleCohortEnroll}

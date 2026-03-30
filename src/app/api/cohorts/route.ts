@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 /**
- * Public API: returns upcoming/active In-Person SAT/ACT cohorts.
+ * Public API: returns upcoming/active In-Person SAT cohorts.
  * Query param: test_type=sat|act (default: sat)
  */
 export async function GET(req: NextRequest) {

@@ -33,6 +33,8 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [isActive, setIsActive] = useState(tutor ? tutor.is_active : true)
+  const [photoUrl, setPhotoUrl] = useState(tutor?.photo_url || '')
+  const [uploading, setUploading] = useState(false)
   const router = useRouter()
 
   const isEditing = !!tutor
@@ -49,7 +51,7 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
       email: isEditing ? tutor!.email : formData.get('email'),
       phone: formData.get('phone'),
       bio: formData.get('bio'),
-      photo_url: formData.get('photo_url'),
+      photo_url: photoUrl || null,
       specialties,
       password: formData.get('password'),
       is_active: isActive,
@@ -134,8 +136,40 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
             <Input id="phone" name="phone" type="tel" defaultValue={tutor?.phone} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="photo_url">Photo URL (Optional)</Label>
-            <Input id="photo_url" name="photo_url" type="url" defaultValue={tutor?.photo_url} placeholder="https://..." />
+            <Label>Photo (Optional)</Label>
+            {photoUrl && (
+              <div className="flex items-center gap-3 mb-1">
+                <img src={photoUrl} alt="Tutor" className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                <button type="button" onClick={() => setPhotoUrl('')} className="text-xs text-red-500 hover:underline">Remove</button>
+              </div>
+            )}
+            <Input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              disabled={uploading}
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setUploading(true)
+                try {
+                  const form = new FormData()
+                  form.append('file', file)
+                  const res = await fetch('/api/admin/tutors/upload', { method: 'POST', body: form })
+                  const result = await res.json()
+                  if (res.ok && result.url) {
+                    setPhotoUrl(result.url)
+                  } else {
+                    alert(result.error || 'Upload failed')
+                  }
+                } catch {
+                  alert('Upload failed')
+                } finally {
+                  setUploading(false)
+                }
+              }}
+              className="cursor-pointer"
+            />
+            {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="specialties">Specialties (comma separated)</Label>

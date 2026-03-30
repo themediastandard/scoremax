@@ -141,39 +141,19 @@ export async function POST(req: Request) {
             remaining_hours: hours - 1,
             stripe_payment_intent_id: session.payment_intent
         })
-    } else if (planType === 'act-course-inperson' && customer) {
-        const cohortId = metadata.cohort_id ?? null
-        await supabaseAdmin.from('act_course_enrollments').insert({
-            customer_id: customer.id,
-            course_type: 'act-inperson',
-            cohort_id: cohortId,
-            total_sessions: 10,
-            remaining_sessions: 10,
-            amount_cents: session.amount_total,
-            status: 'active'
-        })
-        if (cohortId) {
-            const { data: cohort } = await supabaseAdmin
-                .from('act_course_cohorts')
-                .select('enrolled_count')
-                .eq('id', cohortId)
-                .single()
-            const current = cohort?.enrolled_count ?? 0
-            await supabaseAdmin
-                .from('act_course_cohorts')
-                .update({ enrolled_count: current + 1 })
-                .eq('id', cohortId)
-        }
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
-        const isCombined = session.amount_total > 300000
+        const courseType = metadata.course_type || ''
+        const isCombined = courseType === 'sat-act-combined' || session.amount_total > 300000
+        const isACT = courseType === 'act'
         const cohortId = metadata.cohort_id ?? null
+        const totalSessions = isCombined ? 13 : isACT ? 12 : 10
 
         await supabaseAdmin.from('course_enrollments').insert({
             customer_id: customer.id,
-            course_type: planType === 'sat-course-inperson' ? 'sat-inperson' : (isCombined ? 'sat-act-combined' : 'sat'),
+            course_type: planType === 'sat-course-inperson' ? 'sat-inperson' : (isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat'),
             cohort_id: cohortId,
-            total_sessions: isCombined ? 13 : 10,
-            remaining_sessions: isCombined ? 13 : 10,
+            total_sessions: totalSessions,
+            remaining_sessions: totalSessions,
             amount_cents: session.amount_total,
             status: 'active'
         })
@@ -240,7 +220,7 @@ export async function POST(req: Request) {
     const adminEmails = adminSettings?.value?.split(',') || []
     
     if (adminEmails.length > 0) {
-        const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : planType)
+        const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : String(planType))
 
         await resend.emails.send({
             ...getEmailDefaults(),
@@ -261,16 +241,17 @@ export async function POST(req: Request) {
 
     // 7. Notify Customer (post-payment confirmation)
     if (contactEmail) {
-      const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'act-course-inperson' ? 'In-Person ACT Course' : 'course'
-      const purchaseBody = `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
+      const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : 'course'
+      const isInPersonCourse = planType === 'sat-course-inperson'
+      const purchaseBody = isInPersonCourse
+        ? ''
+        : `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
 
       let cohortScheduleHtml = ''
       const cohortId = metadata?.cohort_id
-      const isInPersonCourse = planType === 'sat-course-inperson' || planType === 'act-course-inperson'
-      const cohortTable = planType === 'act-course-inperson' ? 'act_course_cohorts' : 'sat_course_cohorts'
       if (isInPersonCourse && cohortId) {
         const { data: cohort } = await supabaseAdmin
-          .from(cohortTable)
+          .from('sat_course_cohorts')
           .select('start_date, end_date, session_time_start, session_time_end')
           .eq('id', cohortId)
           .single()
@@ -284,9 +265,6 @@ export async function POST(req: Request) {
         }
       }
 
-      const loginItem = planType === 'act-course-inperson'
-        ? '<li>ACT account login and password</li>'
-        : '<li>College Board login and password</li>'
       const inPersonCourseDetails = isInPersonCourse
         ? [
             cohortScheduleHtml,
@@ -294,7 +272,6 @@ export async function POST(req: Request) {
             '<p style="margin: 0 0 16px 0;">Florida Blue Center · 1970 Sawgrass Mills Cir, Sunrise, FL 33323-2994</p>',
             '<p style="margin: 0 0 12px 0;"><strong style="color: #1e293b;">What to Bring</strong></p>',
             '<ul style="margin: 0 0 16px 0; padding-left: 20px;">',
-            loginItem,
             '<li>Charged laptop or tablet and charger</li>',
             '<li>Notebook and pen or pencil</li>',
             '<li>Stylus (if applicable)</li>',
@@ -303,7 +280,7 @@ export async function POST(req: Request) {
         : ''
 
       const nextSteps = isInPersonCourse
-        ? '<p style="margin: 0 0 16px 0;">We will confirm your cohort and session times shortly. You will receive another email with final details.</p>'
+        ? ''
         : '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
 
       const accountBody = isGuestCheckout && tempPassword
@@ -320,7 +297,7 @@ export async function POST(req: Request) {
         to: contactEmail,
         subject: 'Thank you for your purchase',
         html: emailLayout({
-          title: 'Thank You for Your Purchase',
+          title: isInPersonCourse ? 'Welcome to the SAT Course!' : 'Thank You for Your Purchase',
           greeting: `Hi ${contactName || 'there'},`,
           body: purchaseBody + (isInPersonCourse ? inPersonCourseDetails : '') + nextSteps + accountBody,
           ctaText: 'Sign In to Your Dashboard',

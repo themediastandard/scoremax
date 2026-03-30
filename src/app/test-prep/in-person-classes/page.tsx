@@ -3,9 +3,9 @@ import { Metadata } from 'next';
 import { CohortsSection } from '@/components/CohortsSection';
 
 export const metadata: Metadata = {
-  title: 'In-Person SAT & ACT Classes | ScoreMax Test Prep',
-  description: 'Join our in-person SAT and ACT test prep classes. Small group sessions with expert instructors, comprehensive study materials, and proven strategies for test success.',
-  keywords: 'in-person SAT classes, in-person ACT classes, test prep classes, SAT group tutoring, ACT group tutoring, classroom test prep',
+  title: 'In-Person SAT Classes | ScoreMax Test Prep',
+  description: 'Join our in-person SAT test prep classes. Small group sessions with expert instructors, comprehensive study materials, and proven strategies for test success.',
+  keywords: 'in-person SAT classes, test prep classes, SAT group tutoring, classroom test prep',
   authors: [{ name: 'ScoreMax Tutoring' }],
   creator: 'ScoreMax Tutoring',
   publisher: 'ScoreMax Tutoring',
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://scoremax.com/test-prep/in-person-classes',
     siteName: 'ScoreMax',
-    title: 'In-Person SAT & ACT Classes | ScoreMax Test Prep',
-    description: 'Join our in-person SAT and ACT test prep classes. Small group sessions with expert instructors and proven strategies.',
+    title: 'In-Person SAT Classes | ScoreMax Test Prep',
+    description: 'Join our in-person SAT test prep classes. Small group sessions with expert instructors and proven strategies.',
     images: [
       {
         url: '/logo.avif',
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'In-Person SAT & ACT Classes',
-    description: 'Join our in-person SAT and ACT test prep classes with expert instructors.',
+    title: 'In-Person SAT Classes',
+    description: 'Join our in-person SAT test prep classes with expert instructors.',
     images: ['/logo.avif'],
   },
   alternates: {
@@ -52,7 +52,7 @@ export default function InPersonClassesPage() {
             <div className="text-center lg:text-left">
               <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">In Person</div>
               <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
-                SAT & ACT In-Person Classes
+                SAT In-Person Classes
               </h1>
               <div className="w-10 h-[2px] bg-[#b08a30] mb-5" />
               <p className="text-gray-500 text-sm leading-relaxed max-w-lg mb-4">

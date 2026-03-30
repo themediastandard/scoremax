@@ -31,23 +31,18 @@ export async function POST(req: NextRequest) {
     }
 
     const rawSubjects: string[] = Array.isArray(booking_details.subjects) ? booking_details.subjects : []
-    const subjectIdsToResolve = rawSubjects.filter((id: string) => id === 'in-person-sat' || id === 'in-person-act')
+    const needsInPersonResolve = rawSubjects.includes('in-person-sat')
     let resolvedSubjects = rawSubjects
 
-    if (subjectIdsToResolve.length > 0) {
+    if (needsInPersonResolve) {
         const { data: subjectRows } = await supabaseAdmin
             .from('subjects')
             .select('id, slug')
-            .in('slug', ['sat', 'act'])
-        const slugToId: Record<string, string> = {}
-        ;(subjectRows ?? []).forEach((r: { id: string; slug: string }) => { slugToId[r.slug] = r.id })
+            .eq('slug', 'sat')
+        const satId = subjectRows?.[0]?.id
         resolvedSubjects = rawSubjects
-            .map((id: string) => {
-                if (id === 'in-person-sat' && slugToId.sat) return slugToId.sat
-                if (id === 'in-person-act' && slugToId.act) return slugToId.act
-                return id
-            })
-            .filter((id: string) => id !== 'in-person-sat' && id !== 'in-person-act')
+            .map((id: string) => (id === 'in-person-sat' && satId) ? satId : id)
+            .filter((id: string) => id !== 'in-person-sat')
     }
 
     // Resolve trusted price from server based on plan type
@@ -100,7 +95,7 @@ export async function POST(req: NextRequest) {
             price_data: { currency: 'usd', product_data: { name: 'Tutoring Session' }, unit_amount: maxRate },
             quantity: 1,
         })
-    } else if (plan_type === 'course' || plan_type === 'sat-course-inperson' || plan_type === 'act-course-inperson') {
+    } else if (plan_type === 'course' || plan_type === 'sat-course-inperson') {
         const { data: coursePricing } = await supabaseAdmin
             .from('pricing')
             .select('price_cents, name')
@@ -114,12 +109,6 @@ export async function POST(req: NextRequest) {
             if (cohort) {
                 trustedPriceCents = cohort.price_cents
                 trustedPlanName = 'In-Person SAT Course'
-            }
-        } else if (plan_type === 'act-course-inperson' && cohortId) {
-            const { data: cohort } = await supabaseAdmin.from('act_course_cohorts').select('price_cents').eq('id', cohortId).single()
-            if (cohort) {
-                trustedPriceCents = cohort.price_cents
-                trustedPlanName = 'In-Person ACT Course'
             }
         } else if (matched) {
             trustedPriceCents = matched.price_cents
@@ -165,6 +154,7 @@ export async function POST(req: NextRequest) {
         mode,
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/book/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
+        allow_promotion_codes: true,
         metadata: {
             booking_request_id: booking.id,
             plan_type,
@@ -173,6 +163,7 @@ export async function POST(req: NextRequest) {
             contact_name: booking_details.full_name,
             contact_email: booking_details.email,
             ...(cohortId && { cohort_id: cohortId }),
+            ...(body.courseType && { course_type: body.courseType }),
         },
         payment_intent_data: mode === 'payment' ? {
             metadata: {
