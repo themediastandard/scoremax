@@ -23,6 +23,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
   }
 
+  const { error: idempotencyError } = await supabaseAdmin
+    .from('processed_stripe_events')
+    .insert({ event_id: event.id })
+
+  if (idempotencyError) {
+    if (idempotencyError.code === '23505') {
+      return NextResponse.json({ received: true, skipped: true })
+    }
+    console.error('Idempotency check failed:', idempotencyError.message)
+  }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as any
     const metadata = session.metadata
@@ -331,21 +342,39 @@ export async function POST(req: Request) {
     }
   }
 
-  // Handle subscription updates and cancellation (sync period dates, handle cancel)
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as any
     const membershipStatus = subscription.status === 'active' ? 'active' : 'canceled'
+
+    const updates: Record<string, unknown> = {
+      status: membershipStatus,
+      current_period_start: subscription.current_period_start
+        ? new Date(subscription.current_period_start * 1000).toISOString()
+        : null,
+      current_period_end: subscription.current_period_end
+        ? new Date(subscription.current_period_end * 1000).toISOString()
+        : null,
+    }
+
+    if (event.type === 'customer.subscription.updated') {
+      const priceId = subscription.items?.data?.[0]?.price?.id
+      if (priceId) {
+        const { data: pricing } = await supabaseAdmin
+          .from('pricing')
+          .select('name, included_hours')
+          .eq('stripe_price_id', priceId)
+          .eq('type', 'membership')
+          .single()
+        if (pricing) {
+          updates.tier = pricing.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
+          updates.included_hours = pricing.included_hours
+        }
+      }
+    }
+
     await supabaseAdmin
       .from('memberships')
-      .update({
-        status: membershipStatus,
-        current_period_start: subscription.current_period_start
-          ? new Date(subscription.current_period_start * 1000).toISOString()
-          : null,
-        current_period_end: subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
-          : null,
-      })
+      .update(updates)
       .eq('stripe_subscription_id', subscription.id)
   }
 

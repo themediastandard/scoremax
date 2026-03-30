@@ -13,10 +13,21 @@ export async function GET(req: NextRequest) {
   const bookingId = req.nextUrl.searchParams.get('booking_id')
   if (!bookingId) return NextResponse.json({ error: 'Missing booking_id' }, { status: 400 })
 
+  const { data: customer } = await supabaseAdmin
+    .from('customers')
+    .select('id')
+    .eq('profile_id', user.id)
+    .single()
+
+  if (!customer) {
+    return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+  }
+
   const { data: booking } = await supabaseAdmin
     .from('booking_requests')
     .select('stripe_payment_intent_id, customer_id')
     .eq('id', bookingId)
+    .eq('customer_id', customer.id)
     .single()
 
   if (!booking?.stripe_payment_intent_id) {

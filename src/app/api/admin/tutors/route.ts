@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { data, error } = await supabaseAdmin
     .from('tutors')
     .select('*')
@@ -19,6 +23,9 @@ export async function GET() {
 const emptyToNull = (v: unknown) => (v === '' || v === undefined ? null : v)
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const body = await req.json()
   const { full_name, email, phone, bio, photo_url, specialties, password } = body
 
@@ -27,17 +34,17 @@ export async function POST(req: NextRequest) {
   }
 
   // 1. Create Auth User (Trigger creates Profile)
-  const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+  const { data: authUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     user_metadata: { full_name, role: 'tutor' }
   })
 
-  if (authError) {
-    const msg = authError.message?.toLowerCase().includes('already')
+  if (createUserError) {
+    const msg = createUserError.message?.toLowerCase().includes('already')
       ? 'That email is already registered. Use a different email or invite them to log in as an existing user.'
-      : authError.message
+      : createUserError.message
     return NextResponse.json({ error: msg }, { status: 400 })
   }
 

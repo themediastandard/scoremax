@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-
-async function requireAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Unauthorized', status: 401 }
-  }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') {
-    return { error: 'Forbidden', status: 403 }
-  }
-  return null
-}
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
   const authError = await requireAdmin()
-  if (authError) return NextResponse.json({ error: authError.error }, { status: authError.status })
+  if (authError) return authError
 
   const { data, error } = await supabaseAdmin
     .from('pricing')
@@ -33,7 +20,7 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   const authError = await requireAdmin()
-  if (authError) return NextResponse.json({ error: authError.error }, { status: authError.status })
+  if (authError) return authError
 
   const body = await req.json()
   const { id, price_cents, name, included_hours, is_active } = body

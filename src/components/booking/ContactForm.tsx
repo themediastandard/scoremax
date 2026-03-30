@@ -40,7 +40,11 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
     lastCheckedEmail.current = normalized
     setChecking(true)
     try {
-      const res = await fetch(`/api/customer/check?email=${encodeURIComponent(normalized)}`)
+      const res = await fetch('/api/customer/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalized }),
+      })
       const data = await res.json()
       setInternalMemberStatus(data)
       onMemberCheck(data)

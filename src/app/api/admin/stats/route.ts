@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { count: paidOrderCount } = await supabaseAdmin
     .from('booking_requests')
     .select('id', { count: 'exact' })

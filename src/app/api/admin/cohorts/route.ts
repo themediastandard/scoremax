@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { data, error } = await supabaseAdmin
     .from('sat_course_cohorts')
     .select('*')
@@ -15,6 +19,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const body = await req.json()
   const { start_date, end_date, max_students, price_cents, status, session_time_start, session_time_end } = body
 

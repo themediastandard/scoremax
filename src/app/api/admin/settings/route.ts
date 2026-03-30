@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { data, error } = await supabaseAdmin
     .from('admin_settings')
     .select('value')
@@ -16,6 +20,9 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { emails } = await req.json()
   
   if (!emails) {

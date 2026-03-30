@@ -72,7 +72,7 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
                   <div>
                     <p className="font-medium">Session Time</p>
                     <p className="text-sm text-gray-500">
-                      Tuesdays & Thursdays, {cohort.timeStart} – {cohort.timeEnd}
+                      {cohort.days ? `${cohort.days}, ` : ''}{cohort.timeStart} – {cohort.timeEnd}
                     </p>
                   </div>
                 </div>

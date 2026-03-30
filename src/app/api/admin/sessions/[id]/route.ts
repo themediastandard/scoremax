@@ -4,6 +4,7 @@ import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import { google } from 'googleapis'
+import { requireAdmin } from '@/lib/auth'
 
 const getAuthClient = (refreshToken: string) => {
   const client = new google.auth.OAuth2(
@@ -198,13 +199,16 @@ async function handleReschedule(session: any, newStart: string, newEnd: string) 
 }
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { id } = await params
   const { data, error } = await supabaseAdmin
     .from('sessions')
     .select(`
       *,
-      customers (id, email, full_name, google_refresh_token),
-      tutors (id, email, full_name, google_refresh_token)
+      customers (id, email, full_name),
+      tutors (id, email, full_name)
     `)
     .eq('id', id)
     .single()
@@ -216,6 +220,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { id } = await params
   const body = await req.json()
   const { assigned_tutor_id, confirmed_start, confirmed_end, status, internal_notes } = body

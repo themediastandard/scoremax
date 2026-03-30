@@ -38,11 +38,12 @@ function formatTierName(tier: string): string {
     starter: 'Starter Membership',
     core: 'Core Membership',
     premier: 'Premier Membership',
+    elite: 'Elite Membership',
   }
   return map[tier?.toLowerCase()] ?? tier ?? 'Membership'
 }
 
-const TIER_ORDER: Record<string, number> = { starter: 0, core: 1, premier: 2 }
+const TIER_ORDER: Record<string, number> = { starter: 0, core: 1, premier: 2, elite: 3 }
 
 const TIER_FEATURES: Record<string, string[]> = {
   starter: [
@@ -61,6 +62,14 @@ const TIER_FEATURES: Record<string, string[]> = {
     'Video library access',
     'Weekend access',
     'Rollover (1 hr/mo)',
+    'Cancel anytime',
+  ],
+  elite: [
+    'Priority scheduling',
+    'Video library access',
+    'Weekend access',
+    'Extended sessions',
+    'Rollover (2 hr/mo)',
     'Cancel anytime',
   ],
 }

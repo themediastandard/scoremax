@@ -2,7 +2,6 @@
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 
 interface SessionTypeToggleProps {
   value: 'online' | 'in-person'

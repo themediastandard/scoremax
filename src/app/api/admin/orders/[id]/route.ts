@@ -3,14 +3,18 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
 import { stripe } from '@/lib/stripe'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { id } = await params
   const { data, error } = await supabaseAdmin
     .from('booking_requests')
     .select(`
       *,
-      customers (id, email, full_name, phone, student_grade, notes, google_refresh_token),
+      customers (id, email, full_name, phone, student_grade, notes),
       payments (amount_cents)
     `)
     .eq('id', id)
@@ -24,6 +28,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { id } = await params
   const body = await req.json()
   const { status } = body

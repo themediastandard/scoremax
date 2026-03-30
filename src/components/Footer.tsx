@@ -27,9 +27,9 @@ const serviceLinks = [
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Instagram, href: "https://www.instagram.com/scoremaxtutoring", label: "Instagram" },
+  { icon: Facebook, href: "https://www.facebook.com/scoremaxtutoring", label: "Facebook" },
+  { icon: Youtube, href: "https://www.youtube.com/@scoremaxtutoring", label: "YouTube" },
 ];
 
 export default function Footer() {
@@ -163,16 +163,10 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6">
             <Link
-              href="/privacy"
+              href="/contact"
               className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
             >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
-            >
-              Terms of Service
+              Contact Us
             </Link>
           </div>
         </div>

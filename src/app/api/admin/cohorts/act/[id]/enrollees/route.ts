@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
-/**
- * GET enrollees for an ACT cohort (from act_course_enrollments + customers).
- */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const cohortId = params.id
+  const authError = await requireAdmin()
+  if (authError) return authError
+
+  const { id: cohortId } = await params
 
   const { data, error } = await supabaseAdmin
     .from('act_course_enrollments')

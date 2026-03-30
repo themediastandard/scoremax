@@ -68,7 +68,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} ${dmSans.variable} antialiased`}>
         <MobileOptimizations />
-        {/* WebSite JSON-LD with SearchAction */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -77,14 +76,6 @@ export default function RootLayout({
               '@type': 'WebSite',
               name: 'ScoreMax Tutoring',
               url: 'https://scoremax.com',
-              potentialAction: {
-                '@type': 'SearchAction',
-                target: {
-                  '@type': 'EntryPoint',
-                  urlTemplate: 'https://scoremax.com/search?q={search_term_string}'
-                },
-                'query-input': 'required name=search_term_string'
-              }
             })
           }}
         />

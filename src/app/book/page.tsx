@@ -150,7 +150,11 @@ export default function BookPage() {
         }))
         setPrefilled(true)
 
-        const checkRes = await fetch(`/api/customer/check?email=${encodeURIComponent(data.email)}`)
+        const checkRes = await fetch('/api/customer/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email }),
+        })
         if (checkRes.ok) {
           const memberData = await checkRes.json()
           setMemberStatus(memberData)
@@ -170,7 +174,11 @@ export default function BookPage() {
     if (!email?.includes('@')) return
 
     let cancelled = false
-    fetch(`/api/customer/check?email=${encodeURIComponent(email)}`)
+    fetch('/api/customer/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!cancelled && data) setMemberStatus(data)
@@ -215,7 +223,6 @@ export default function BookPage() {
         body: JSON.stringify({
           plan_type: planType,
           plan_name: params.courseName,
-          price_cents: params.priceCents,
           booking_details: {
             subjects: state.subjects,
             session_type: 'in-person',
@@ -296,8 +303,9 @@ export default function BookPage() {
         body: JSON.stringify({
            plan_type: plan.type,
            plan_name: plan.name,
+           plan_id: plan.id,
            price_id: plan.priceId,
-           price_cents: plan.price,
+           courseType: plan.courseType,
            booking_details: {
              subjects: state.subjects,
              available_days: state.availability.days,

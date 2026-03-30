@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, Star, Loader2, Calendar, Users } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
+import { Check, Star, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 interface PlanSelectionProps {
@@ -91,26 +90,22 @@ export function PlanSelection({ subjects, sessionType = 'online', memberStatus, 
             <Button 
               className="w-full bg-[#1e293b] hover:bg-[#334155] text-white"
               onClick={() => {
-                // Determine which credit to use
-                // Prioritize Course > Membership > Package
-                let type = 'membership'
+                let creditSource = 'membership'
                 let id = memberStatus.membership?.id
                 let courseId = null
                 
                 if (memberStatus.courseEnrollments?.length > 0) {
-                   // Match course type to subject if possible, or just use first valid
-                   // For MVP, use first active course enrollment
-                   type = 'course'
+                   creditSource = 'course'
                    courseId = memberStatus.courseEnrollments[0].id
-                } else if (memberStatus.membership?.remaining_hours > 0) {
-                   type = 'membership'
+                } else if (memberStatus.membership?.included_hours - memberStatus.membership?.used_hours + memberStatus.membership?.rollover_hours > 0) {
+                   creditSource = 'membership'
                    id = memberStatus.membership.id
                 } else if (memberStatus.packages?.length > 0) {
-                   type = 'package'
+                   creditSource = 'package'
                    id = memberStatus.packages[0].id
                 }
                 
-                onSelect({ type, id, courseEnrollmentId: courseId })
+                onSelect({ type: 'credit', creditSource, id, courseEnrollmentId: courseId })
               }}
               disabled={processing}
             >

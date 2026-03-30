@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { ChevronDown, ChevronRight, Clock, Calendar, User, Video, MapPin, BookOpen, Search, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Calendar, User, Video, MapPin, BookOpen, Search, X } from 'lucide-react'
 import { SessionForm } from './SessionForm'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'

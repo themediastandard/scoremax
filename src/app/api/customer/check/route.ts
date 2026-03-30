@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
-export async function GET(req: NextRequest) {
-  const raw = req.nextUrl.searchParams.get('email')
-  const email = raw?.trim().toLowerCase()
+export async function POST(req: NextRequest) {
+  const body = await req.json()
+  const email = body.email?.trim().toLowerCase()
 
   if (!email) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 })
   }
 
-  // Use supabaseAdmin to bypass RLS - match email case-insensitively (emails are case-insensitive)
   const { data: customer, error: customerError } = await supabaseAdmin
     .from('customers')
     .select('id, full_name')
@@ -45,28 +44,35 @@ export async function GET(req: NextRequest) {
     .gt('remaining_hours', 0)
     .gt('expires_at', new Date().toISOString())
     
-  // Check Course Enrollments (active)
-  const { data: courses } = await supabaseAdmin
+  const { data: satCourses } = await supabaseAdmin
     .from('course_enrollments')
     .select('*')
     .eq('customer_id', customer.id)
     .eq('status', 'active')
     .gt('remaining_sessions', 0)
-    
-  // Check if they have ANY credits (membership hours, package hours, or course sessions)
+
+  const { data: actCourses } = await supabaseAdmin
+    .from('act_course_enrollments')
+    .select('*')
+    .eq('customer_id', customer.id)
+    .eq('status', 'active')
+    .gt('remaining_sessions', 0)
+
+  const courses = [...(satCourses || []), ...(actCourses || [])]
+
   const hasMembershipCredits = membership ? (membership.included_hours - membership.used_hours + membership.rollover_hours > 0) : false
   const hasPackageCredits = packages && packages.length > 0
-  const hasCourseCredits = courses && courses.length > 0
+  const hasCourseCredits = courses.length > 0
   
   return NextResponse.json({
-    customer,
-    membership: membership || null,
-    packages: packages || [],
-    courseEnrollments: courses || [],
+    customer: { id: customer.id, full_name: customer.full_name },
+    membership: membership ? { id: membership.id, tier: membership.tier, included_hours: membership.included_hours, used_hours: membership.used_hours, rollover_hours: membership.rollover_hours } : null,
+    packages: (packages || []).map((p: { id: string; remaining_hours: number }) => ({ id: p.id, remaining_hours: p.remaining_hours })),
+    courseEnrollments: (courses || []).map((c: { id: string; remaining_sessions: number }) => ({ id: c.id, remaining_sessions: c.remaining_sessions })),
     isMember: !!membership,
     hasCredits: hasMembershipCredits || hasPackageCredits || hasCourseCredits,
     totalCredits: (membership ? (membership.included_hours - membership.used_hours + membership.rollover_hours) : 0) + 
-                  (packages ? packages.reduce((sum: any, p: any) => sum + p.remaining_hours, 0) : 0),
-    totalCourseSessions: courses ? courses.reduce((sum: any, c: any) => sum + c.remaining_sessions, 0) : 0
+                  (packages ? packages.reduce((sum: number, p: { remaining_hours: number }) => sum + p.remaining_hours, 0) : 0),
+    totalCourseSessions: courses ? courses.reduce((sum: number, c: { remaining_sessions: number }) => sum + c.remaining_sessions, 0) : 0
   })
 }

@@ -1,4 +1,14 @@
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Subjects We Cover | ScoreMax Tutoring',
+  description: 'ScoreMax offers expert tutoring across test prep (SAT, ACT, GMAT, GRE), high school math and science, college-level courses, and elementary subjects. Find the right tutor for your goals.',
+  openGraph: {
+    title: 'Subjects We Cover | ScoreMax Tutoring',
+    description: 'Expert tutoring across test prep, high school, college, and elementary subjects.',
+  },
+};
 
 const categories = [
   {

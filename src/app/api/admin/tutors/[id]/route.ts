@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
+  const { id } = await params
   const { data, error } = await supabaseAdmin
     .from('tutors')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error) {
@@ -15,18 +20,20 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(data)
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
+  const { id } = await params
   const body = await req.json()
 
-  // Remove fields that shouldn't be updated directly via PATCH
-  // password lives in Supabase Auth, not in the tutors table
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, profile_id, created_at, password, ...updates } = body
+  const { id: _id, profile_id, created_at, password, ...updates } = body
 
   const { data, error } = await supabaseAdmin
     .from('tutors')
     .update(updates)
-    .eq('id', params.id)
+    .eq('id', id)
     .select()
     .single()
 
@@ -37,35 +44,34 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json(data)
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  // First get the profile_id (auth user id)
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
+  const { id } = await params
   const { data: tutor } = await supabaseAdmin
     .from('tutors')
     .select('profile_id')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!tutor) {
     return NextResponse.json({ error: 'Tutor not found' }, { status: 404 })
   }
 
-  // 1. Delete Tutor Record
   const { error: tutorError } = await supabaseAdmin
     .from('tutors')
     .delete()
-    .eq('id', params.id)
+    .eq('id', id)
 
   if (tutorError) {
     return NextResponse.json({ error: tutorError.message }, { status: 500 })
   }
 
-  // 2. Delete Auth User (Cascades to Profile)
-  const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(tutor.profile_id)
+  const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(tutor.profile_id)
 
-  if (authError) {
-    // Note: Tutor record is already gone, so this is a partial failure state
-    // But auth user deletion is critical for cleanup
-    console.error('Failed to delete auth user after tutor deletion', authError)
+  if (deleteUserError) {
+    console.error('Failed to delete auth user after tutor deletion', deleteUserError)
     return NextResponse.json({ error: 'Failed to delete user account' }, { status: 500 })
   }
 

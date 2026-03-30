@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const { data, error } = await supabaseAdmin
     .from('booking_requests')
     .select(`

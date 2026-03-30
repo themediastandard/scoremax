@@ -6,10 +6,9 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { plan_type, plan_name, price_id, price_cents, booking_details } = body
+    const { plan_type, plan_name, price_id, booking_details } = body
     const cohortId = booking_details?.cohort_id ?? null
-    // plan_type: 'single', 'membership', 'package', 'course', 'sat-course-inperson'
-    
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -17,7 +16,6 @@ export async function POST(req: NextRequest) {
     let dbCustomerId = null
     let customerEmail = booking_details?.email
 
-    // 1. Resolve Customer if Logged In
     if (user) {
         const { data: profile } = await supabaseAdmin
             .from('customers')
@@ -32,7 +30,6 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    // 2. Map synthetic subject IDs (in-person-sat, in-person-act) to real subject UUIDs
     const rawSubjects: string[] = Array.isArray(booking_details.subjects) ? booking_details.subjects : []
     const subjectIdsToResolve = rawSubjects.filter((id: string) => id === 'in-person-sat' || id === 'in-person-act')
     let resolvedSubjects = rawSubjects
@@ -53,11 +50,95 @@ export async function POST(req: NextRequest) {
             .filter((id: string) => id !== 'in-person-sat' && id !== 'in-person-act')
     }
 
-    // 3. Create Pending Booking Request
+    // Resolve trusted price from server based on plan type
+    let trustedPriceCents = 0
+    let trustedPlanName = plan_name || ''
+    const line_items: Array<{ price?: string; price_data?: { currency: string; product_data: { name: string }; unit_amount: number }; quantity: number }> = []
+    let mode: 'payment' | 'subscription' = 'payment'
+
+    if (plan_type === 'membership') {
+        if (!price_id) throw new Error('Missing price_id for membership')
+        const { data: memberPlan } = await supabaseAdmin
+            .from('pricing')
+            .select('price_cents, name, stripe_price_id')
+            .eq('stripe_price_id', price_id)
+            .eq('type', 'membership')
+            .single()
+        if (!memberPlan) throw new Error('Invalid membership plan')
+        trustedPriceCents = memberPlan.price_cents
+        trustedPlanName = memberPlan.name
+        mode = 'subscription'
+        line_items.push({ price: memberPlan.stripe_price_id, quantity: 1 })
+    } else if (plan_type === 'package') {
+        const pkgId = body.plan_id || body.booking_details?.plan_id
+        if (!pkgId) throw new Error('Missing plan_id for package')
+        const { data: pkg } = await supabaseAdmin
+            .from('pricing')
+            .select('price_cents, name')
+            .eq('id', pkgId)
+            .eq('type', 'package')
+            .single()
+        if (!pkg) throw new Error('Invalid package plan')
+        trustedPriceCents = pkg.price_cents
+        trustedPlanName = pkg.name
+        line_items.push({
+            price_data: { currency: 'usd', product_data: { name: pkg.name }, unit_amount: pkg.price_cents },
+            quantity: 1,
+        })
+    } else if (plan_type === 'single') {
+        const subjectIds: string[] = resolvedSubjects
+        if (subjectIds.length === 0) throw new Error('No subjects selected')
+        const { data: subjects } = await supabaseAdmin
+            .from('subjects')
+            .select('hourly_rate_cents')
+            .in('id', subjectIds)
+        const maxRate = (subjects ?? []).reduce((max: number, s: { hourly_rate_cents: number }) => Math.max(max, s.hourly_rate_cents), 0)
+        if (maxRate <= 0) throw new Error('Could not determine session rate')
+        trustedPriceCents = maxRate
+        trustedPlanName = 'Single Session'
+        line_items.push({
+            price_data: { currency: 'usd', product_data: { name: 'Tutoring Session' }, unit_amount: maxRate },
+            quantity: 1,
+        })
+    } else if (plan_type === 'course' || plan_type === 'sat-course-inperson' || plan_type === 'act-course-inperson') {
+        const { data: coursePricing } = await supabaseAdmin
+            .from('pricing')
+            .select('price_cents, name')
+            .eq('type', 'course')
+        const courseType = body.courseType || plan_type
+        let matched = coursePricing?.find((c: { name: string }) => c.name.toLowerCase().includes(courseType.replace(/-/g, ' ')))
+        if (!matched && coursePricing?.length) matched = coursePricing[0]
+
+        if (plan_type === 'sat-course-inperson' && cohortId) {
+            const { data: cohort } = await supabaseAdmin.from('sat_course_cohorts').select('price_cents').eq('id', cohortId).single()
+            if (cohort) {
+                trustedPriceCents = cohort.price_cents
+                trustedPlanName = 'In-Person SAT Course'
+            }
+        } else if (plan_type === 'act-course-inperson' && cohortId) {
+            const { data: cohort } = await supabaseAdmin.from('act_course_cohorts').select('price_cents').eq('id', cohortId).single()
+            if (cohort) {
+                trustedPriceCents = cohort.price_cents
+                trustedPlanName = 'In-Person ACT Course'
+            }
+        } else if (matched) {
+            trustedPriceCents = matched.price_cents
+            trustedPlanName = matched.name
+        }
+
+        if (trustedPriceCents <= 0) throw new Error('Could not determine course price')
+        line_items.push({
+            price_data: { currency: 'usd', product_data: { name: trustedPlanName }, unit_amount: trustedPriceCents },
+            quantity: 1,
+        })
+    } else {
+        throw new Error(`Unknown plan type: ${plan_type}`)
+    }
+
     const { data: booking, error: bookingError } = await supabaseAdmin
         .from('booking_requests')
         .insert({
-            customer_id: dbCustomerId, // Nullable initially
+            customer_id: dbCustomerId,
             subjects: resolvedSubjects,
             available_days: booking_details.available_days,
             available_time_start: booking_details.available_time_start,
@@ -67,7 +148,7 @@ export async function POST(req: NextRequest) {
             status: 'pending_payment',
             payment_type: plan_type,
             notes: booking_details.notes,
-            amount_cents: price_cents || 0,
+            amount_cents: trustedPriceCents,
             ...(cohortId && { cohort_id: cohortId }),
         })
         .select()
@@ -75,30 +156,6 @@ export async function POST(req: NextRequest) {
 
     if (bookingError) {
         throw new Error(`Failed to create booking: ${bookingError.message}`)
-    }
-
-    // 3. Prepare Stripe Session
-    const line_items = []
-    let mode: 'payment' | 'subscription' = 'payment'
-
-    if (plan_type === 'membership') {
-        mode = 'subscription'
-        line_items.push({
-            price: price_id,
-            quantity: 1,
-        })
-    } else {
-        mode = 'payment'
-        line_items.push({
-            price_data: {
-                currency: 'usd',
-                product_data: {
-                    name: plan_name || getProductName(plan_type, price_cents, booking_details),
-                },
-                unit_amount: price_cents,
-            },
-            quantity: 1,
-        })
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -111,7 +168,7 @@ export async function POST(req: NextRequest) {
         metadata: {
             booking_request_id: booking.id,
             plan_type,
-            plan_name: plan_name || plan_type,
+            plan_name: trustedPlanName || plan_type,
             user_id: user?.id,
             contact_name: booking_details.full_name,
             contact_email: booking_details.email,
@@ -136,13 +193,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function getProductName(type: string, cents: number, details: any) {
-    if (type === 'package') {
-        // Simple heuristic or generic name
-        return 'Tutoring Package'
-    }
-    if (type === 'course') return 'Course Program'
-    if (type === 'sat-course-inperson') return 'In-Person SAT Course'
-    if (type === 'act-course-inperson') return 'In-Person ACT Course'
-    return `Tutoring Session (${details?.session_type ?? 'online'})`
-}
