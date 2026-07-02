@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/guard-next-dev.mjs dev && next dev --port 3000",
+    "dev:clean": "rm -rf .next && node scripts/guard-next-dev.mjs dev && next dev --port 3000",
+    "clean": "rm -rf .next",
+    "build": "node scripts/guard-next-dev.mjs build && rm -rf .next && next build",
     "start": "next start",
     "lint": "next lint"
   },

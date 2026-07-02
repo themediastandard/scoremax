@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+.playwright-cli/
+output/
 
 # next.js
 /.next/
@@ -25,6 +27,7 @@ project_scope.md
 
 # internal docs
 docs/
+.codex/
 
 # supabase temp (CLI cache)
 supabase/.temp/

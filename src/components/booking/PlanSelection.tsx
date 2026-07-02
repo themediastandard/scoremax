@@ -5,11 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button'
 import { Check, Star, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
 
 interface PlanSelectionProps {
   subjects: string[]
-  /** Remote flow only; in-person uses CohortContactStep */
-  sessionType?: 'online' | 'in-person'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   memberStatus: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +16,7 @@ interface PlanSelectionProps {
   loading?: boolean
 }
 
-export function PlanSelection({ subjects, sessionType = 'online', memberStatus, onSelect, loading: processing }: PlanSelectionProps) {
+export function PlanSelection({ subjects, memberStatus, onSelect, loading: processing }: PlanSelectionProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pricing, setPricing] = useState<any[]>([])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,12 +30,15 @@ export function PlanSelection({ subjects, sessionType = 'online', memberStatus, 
     ]).then(([pricingData, subjectsData]) => {
       setPricing(pricingData)
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const flat: Record<string, any> = {}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Object.values(subjectsData).forEach((arr: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        arr.forEach((s: any) => flat[s.id] = s)
+      const flat: Record<string, SubjectCatalogEntry> = {}
+      Object.values(subjectsData as Record<string, SubjectCatalogEntry[]>).forEach((arr) => {
+        arr.forEach((s) => {
+          if (s.children?.length) {
+            s.children.forEach((child) => flat[child.id] = child)
+          } else {
+            flat[s.id] = s
+          }
+        })
       })
       setSubjectMap(flat)
       setLoading(false)
@@ -55,8 +57,8 @@ export function PlanSelection({ subjects, sessionType = 'online', memberStatus, 
 
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
 
-  const isSAT = subjects.some(id => subjectMap[id]?.slug === 'sat')
-  const isACT = subjects.some(id => subjectMap[id]?.slug === 'act')
+  const isSAT = subjects.some(id => subjectMap[id]?.slug?.includes('sat'))
+  const isACT = subjects.some(id => subjectMap[id]?.slug?.includes('act'))
   const singleRate = getSingleRate()
 
   const packageList = pricing.filter(p => p.type === 'package').map(pkg => {

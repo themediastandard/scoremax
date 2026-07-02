@@ -8,6 +8,7 @@ import { ArrowLeft, BookOpen, Video, CreditCard, Clock, Calendar, User, MapPin }
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
+import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const user = await getAuthUser()
@@ -62,8 +63,8 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     }
   }
 
-  const { data: subjects } = await supabase.from('subjects').select('id, name')
-  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+  const { data: subjects } = await supabase.from('subjects').select('*')
+  const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
   const { data: sessions } = await supabase
     .from('sessions')

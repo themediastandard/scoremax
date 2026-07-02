@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import {
+  emptyCustomerCreditSummary,
+  sanitizeCustomerCreditSummary,
+} from '@/lib/customer-credit-summary'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -9,29 +14,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 })
   }
 
-  const { data: customer, error: customerError } = await supabaseAdmin
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json(emptyCustomerCreditSummary())
+  }
+
+  let { data: customer, error: customerError } = await supabaseAdmin
     .from('customers')
-    .select('id, full_name')
-    .ilike('email', email)
+    .select('id, full_name, email')
+    .eq('profile_id', user.id)
     .maybeSingle()
+
+  if (!customer && user.email) {
+    const result = await supabaseAdmin
+      .from('customers')
+      .select('id, full_name, email')
+      .ilike('email', user.email)
+      .maybeSingle()
+    customer = result.data
+    customerError = result.error
+  }
   
   if (customerError && customerError.code !== 'PGRST116') { // PGRST116 = not found
     return NextResponse.json({ error: customerError.message }, { status: 500 })
   }
   
   if (!customer) {
-    return NextResponse.json({ 
-      isMember: false,
-      hasCredits: false,
-      packages: [],
-      courseEnrollments: []
-    })
+    return NextResponse.json(emptyCustomerCreditSummary())
+  }
+
+  const customerEmail = customer.email?.trim().toLowerCase()
+  const authEmail = user.email?.trim().toLowerCase()
+  if (email !== customerEmail && email !== authEmail) {
+    return NextResponse.json(emptyCustomerCreditSummary())
   }
   
   // Check Membership
   const { data: membership } = await supabaseAdmin
     .from('memberships')
-    .select('*')
+    .select('tier, included_hours, used_hours, rollover_hours')
     .eq('customer_id', customer.id)
     .eq('status', 'active')
     .single()
@@ -39,40 +62,31 @@ export async function POST(req: NextRequest) {
   // Check Packages (active, not expired)
   const { data: packages } = await supabaseAdmin
     .from('packages')
-    .select('*')
+    .select('remaining_hours')
     .eq('customer_id', customer.id)
     .gt('remaining_hours', 0)
     .gt('expires_at', new Date().toISOString())
     
   const { data: satCourses } = await supabaseAdmin
     .from('course_enrollments')
-    .select('*')
+    .select('remaining_sessions')
     .eq('customer_id', customer.id)
     .eq('status', 'active')
     .gt('remaining_sessions', 0)
 
   const { data: actCourses } = await supabaseAdmin
     .from('act_course_enrollments')
-    .select('*')
+    .select('remaining_sessions')
     .eq('customer_id', customer.id)
     .eq('status', 'active')
     .gt('remaining_sessions', 0)
 
   const courses = [...(satCourses || []), ...(actCourses || [])]
 
-  const hasMembershipCredits = membership ? (membership.included_hours - membership.used_hours + membership.rollover_hours > 0) : false
-  const hasPackageCredits = packages && packages.length > 0
-  const hasCourseCredits = courses.length > 0
-  
-  return NextResponse.json({
-    customer: { id: customer.id, full_name: customer.full_name },
-    membership: membership ? { id: membership.id, tier: membership.tier, included_hours: membership.included_hours, used_hours: membership.used_hours, rollover_hours: membership.rollover_hours } : null,
-    packages: (packages || []).map((p: { id: string; remaining_hours: number }) => ({ id: p.id, remaining_hours: p.remaining_hours })),
-    courseEnrollments: (courses || []).map((c: { id: string; remaining_sessions: number }) => ({ id: c.id, remaining_sessions: c.remaining_sessions })),
-    isMember: !!membership,
-    hasCredits: hasMembershipCredits || hasPackageCredits || hasCourseCredits,
-    totalCredits: (membership ? (membership.included_hours - membership.used_hours + membership.rollover_hours) : 0) + 
-                  (packages ? packages.reduce((sum: number, p: { remaining_hours: number }) => sum + p.remaining_hours, 0) : 0),
-    totalCourseSessions: courses ? courses.reduce((sum: number, c: { remaining_sessions: number }) => sum + c.remaining_sessions, 0) : 0
-  })
+  return NextResponse.json(sanitizeCustomerCreditSummary({
+    customer,
+    membership,
+    packages: packages ?? [],
+    courseEnrollments: courses,
+  } as any))
 }

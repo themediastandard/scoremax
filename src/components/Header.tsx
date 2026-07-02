@@ -70,15 +70,16 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           <div className="space-y-0.5">
                             <Link href="/test-prep/sat" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
                             <Link href="/test-prep/act" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                           </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
                       <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
                       <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                       <div className="space-y-0.5">
-                        <Link href="/college-high-school/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
-                        <Link href="/college-high-school/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                        <Link href="/college-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                        <Link href="/high-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                        <Link href="/middle-school-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Middle School Tutoring</Link>
+                        <Link href="/elementary-tutoring" onClick={() => setServicesOpen(false)} className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Elementary Tutoring</Link>
                       </div>
                     </div>
                     <div className="px-6 border-l border-gray-100">
@@ -130,15 +131,16 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                           <div className="space-y-0.5">
                             <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
                             <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
-                            <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
                           <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
                           <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                           <div className="space-y-0.5">
-                            <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
-                            <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                            <Link href="/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                            <Link href="/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                            <Link href="/middle-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Middle School Tutoring</Link>
+                            <Link href="/elementary-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Elementary Tutoring</Link>
                           </div>
                         </div>
                         <div className="px-6 border-l border-gray-100">
@@ -217,15 +219,16 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                         <div className="space-y-0.5">
                           <Link href="/test-prep/sat" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">SAT Tutoring</Link>
                           <Link href="/test-prep/act" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">ACT Tutoring</Link>
-                          <Link href="/test-prep/in-person-classes" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">In-Person Classes</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
                         <div className="text-xs font-semibold text-[#b08a30] tracking-wider uppercase">Academic</div>
                         <div className="w-5 h-0.5 bg-[#b08a30]/60 mt-1.5 mb-2 rounded-full" />
                         <div className="space-y-0.5">
-                          <Link href="/college-high-school/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
-                          <Link href="/college-high-school/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                          <Link href="/college-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">College Tutoring</Link>
+                          <Link href="/high-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">High School Tutoring</Link>
+                          <Link href="/middle-school-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Middle School Tutoring</Link>
+                          <Link href="/elementary-tutoring" className="block py-1.5 px-2 -mx-2 rounded-md text-[14px] text-gray-700 hover:text-[#b08a30] hover:bg-[#b08a30]/8 transition-colors">Elementary Tutoring</Link>
                         </div>
                       </div>
                       <div className="px-6 border-l border-gray-100">
@@ -279,5 +282,3 @@ export default function Header({ variant = 'default' }: HeaderProps) {
     </>
   );
 }
-
-

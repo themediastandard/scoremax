@@ -4,6 +4,7 @@ import { formatPlanLabel } from '@/lib/order-format'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrdersTable } from '@/components/dashboard/OrdersTable'
 import { OrderMetrics } from '@/components/dashboard/OrderMetrics'
+import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function OrdersPage() {
   const user = await getAuthUser()
@@ -30,10 +31,10 @@ export default async function OrdersPage() {
 
   const [{ data: orders }, { data: subjects }] = await Promise.all([
     query,
-    supabase.from('subjects').select('id, name'),
+    supabase.from('subjects').select('*'),
   ])
 
-  const subjectMap = Object.fromEntries((subjects ?? []).map((s) => [s.id, s.name]))
+  const subjectMap = getSubjectNameMap(buildSubjectCatalog(subjects ?? []))
 
   const planLabels: Record<string, string> = {}
   for (const order of orders ?? []) {

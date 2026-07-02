@@ -5,7 +5,6 @@ import { SubjectSelect } from '@/components/booking/SubjectSelect'
 import { AvailabilityForm } from '@/components/booking/AvailabilityForm'
 import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
-import { CohortContactStep } from '@/components/booking/CohortContactStep'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -18,6 +17,7 @@ interface Subject {
   name: string
   slug: string
   category: string
+  children?: Subject[]
 }
 
 function BookingSection({ 
@@ -97,14 +97,12 @@ export default function BookPage() {
     memberStatus, 
     setMemberStatus,
     updateSubjects,
-    updateSessionType,
     updateAvailability,
     updateContact,
-    revealNext 
   } = useBookingForm()
   
   const [processing, setProcessing] = useState(false)
-  const [activeSection, setActiveSection] = useState<'subjects' | 'cohortContact' | 'availability' | 'contact' | 'plan'>('subjects')
+  const [activeSection, setActiveSection] = useState<'subjects' | 'availability' | 'contact' | 'plan'>('subjects')
   
   // Subjects Data
   const [subjectsData, setSubjectsData] = useState<Record<string, Subject[]>>({})
@@ -117,7 +115,9 @@ export default function BookPage() {
       .then((data: Record<string, Subject[]>) => {
         setSubjectsData(data)
         const map: Record<string, Subject> = {}
-        Object.values(data).flat().forEach(s => map[s.id] = s)
+        Object.values(data).flatMap(categorySubjects =>
+          categorySubjects.flatMap(s => s.children ? s.children : s)
+        ).forEach(s => map[s.id] = s)
         setSubjectMap(map)
         setLoadingSubjects(false)
       })
@@ -133,6 +133,12 @@ export default function BookPage() {
     if (prefilled) return
     async function prefillContact() {
       try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setPrefilled(true)
+          return
+        }
+
         const res = await fetch('/api/account/profile')
         if (!res.ok) return
         const data = await res.json()
@@ -189,60 +195,18 @@ export default function BookPage() {
 
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')
-  const selectedSlug = state.subjects[0] ? subjectMap[state.subjects[0]]?.slug : null
-  const isInPersonFlow = selectedSlug === 'in-person-sat'
 
   // Navigation Handler
   const handleNext = (current: string) => {
     if (current === 'subjects') {
-      if (isInPersonFlow) {
-        setRevealed(prev => ({ ...prev, cohortContact: true }))
-        setActiveSection('cohortContact')
-      } else {
-        setRevealed(prev => ({ ...prev, availability: true }))
-        setActiveSection('availability')
-      }
+      setRevealed(prev => ({ ...prev, availability: true }))
+      setActiveSection('availability')
     } else if (current === 'availability') {
       setRevealed(prev => ({ ...prev, contact: true }))
       setActiveSection('contact')
     } else if (current === 'contact') {
       setRevealed(prev => ({ ...prev, plan: true }))
       setActiveSection('plan')
-    }
-  }
-
-  const handleCohortEnroll = async (params: { cohortId: string; priceCents: number; courseName: string }) => {
-    setProcessing(true)
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan_type: 'sat-course-inperson',
-          plan_name: params.courseName,
-          booking_details: {
-            subjects: state.subjects,
-            session_type: 'in-person',
-            full_name: state.contact.fullName,
-            email: state.contact.email,
-            phone: state.contact.phone,
-            student_grade: state.contact.studentGrade,
-            notes: state.contact.notes,
-            cohort_id: params.cohortId,
-          },
-        }),
-      })
-      const { url, error } = await res.json()
-      if (url) {
-        window.location.href = url
-      } else {
-        alert(error || 'Failed to initiate checkout')
-      }
-    } catch (err) {
-      console.error(err)
-      alert('An error occurred. Please try again.')
-    } finally {
-      setProcessing(false)
     }
   }
 
@@ -353,7 +317,7 @@ export default function BookPage() {
           step={1} 
           title="Select Subject" 
           isOpen={activeSection === 'subjects'}
-          isCompleted={revealed.cohortContact || revealed.availability}
+          isCompleted={revealed.availability}
           summary={selectedSubjectNames}
           onEdit={() => setActiveSection('subjects')}
         >
@@ -365,30 +329,7 @@ export default function BookPage() {
            />
         </BookingSection>
 
-        {/* 2. Cohort & Contact (In-Person SAT only) */}
-        {isInPersonFlow && (
-          <BookingSection
-            step={2}
-            title="Choose Cohort & Your Information"
-            isOpen={activeSection === 'cohortContact'}
-            isCompleted={false}
-            disabled={!revealed.cohortContact}
-            summary={state.contact.email}
-            onEdit={() => setActiveSection('cohortContact')}
-          >
-            <CohortContactStep
-              testType="sat"
-              courseName="In-Person SAT Course"
-              contact={state.contact}
-              onChange={updateContact}
-              onEnroll={handleCohortEnroll}
-              loading={processing}
-            />
-          </BookingSection>
-        )}
-
-        {/* 3. Availability (Remote only) */}
-        {!isInPersonFlow && (
+        {/* 2. Availability */}
         <BookingSection
           step={2}
           title="Availability"
@@ -412,10 +353,8 @@ export default function BookPage() {
                 </Button>
               </div>
         </BookingSection>
-        )}
 
-        {/* 4. Contact (Remote only) */}
-        {!isInPersonFlow && (
+        {/* 3. Contact */}
         <BookingSection
           step={3}
           title="Contact Information"
@@ -441,10 +380,8 @@ export default function BookPage() {
                 </Button>
               </div>
         </BookingSection>
-        )}
 
-        {/* 5. Plan Selection (Remote only) */}
-        {!isInPersonFlow && (
+        {/* 4. Plan Selection */}
         <BookingSection
           step={4}
           title="Choose Package"
@@ -461,7 +398,6 @@ export default function BookPage() {
                 loading={processing}
               />
         </BookingSection>
-        )}
       </div>
     </div>
   )

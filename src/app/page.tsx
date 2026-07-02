@@ -98,10 +98,10 @@ export default function Home() {
       },
       {
         "@type": "Question",
-        "name": "Do you offer in-person and online tutoring?",
+        "name": "Do you offer online tutoring?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, ScoreMax offers both in-person tutoring sessions and online tutoring options to accommodate different learning preferences and schedules."
+          "text": "Yes, ScoreMax offers online tutoring with flexible scheduling so students can work with expert tutors from home."
         }
       },
       {
@@ -142,9 +142,9 @@ export default function Home() {
             <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Services</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900">Browse by Subject</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -153,7 +153,7 @@ export default function Home() {
                     </div>
             </Link>
             <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -161,18 +161,18 @@ export default function Home() {
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                     </div>
             </Link>
-            <Link href="/test-prep/in-person-classes" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="In-Person Classes" fill className="object-cover" />
+            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="LSAT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
-              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Classes</div>
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 flex flex-col gap-1 text-white">
                 <div className="text-xl font-[family-name:var(--font-playfair)]">LSAT Prep</div>
                 <span className="text-xs text-white/80 max-w-[220px]">Step by step practice learning how the test is written. Usually between 6–12 1-hour sessions depending on the student&apos;s needs.</span>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
               </div>
             </Link>
-            <Link href="/college-high-school/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/student-1.png" alt="College Tutoring" fill className="object-cover" />
+            <Link href="/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="/Images/student-1.png" alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">College</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -180,8 +180,8 @@ export default function Home() {
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                 </div>
             </Link>
-            <Link href="/college-high-school/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop" alt="High School Tutoring" fill className="object-cover" />
+            <Link href="/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop" alt="High School Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">High School</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -189,8 +189,26 @@ export default function Home() {
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                     </div>
             </Link>
+            <Link href="/middle-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200&auto=format&fit=crop" alt="Middle School Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Middle School</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-[family-name:var(--font-playfair)]">Middle School Tutoring</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                    </div>
+            </Link>
+            <Link href="/elementary-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop" alt="Elementary Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Elementary</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-[family-name:var(--font-playfair)]">Elementary Tutoring</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                    </div>
+            </Link>
             <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1200&auto=format&fit=crop" alt="Meet Our Tutors" fill className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1200&auto=format&fit=crop" alt="Meet Our Tutors" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Subjects</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -254,7 +272,7 @@ export default function Home() {
                 <span className="text-lg text-[#b08a30] font-bold">2</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Share Your Availability</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">Tell us when you are free. We match you with an expert tutor who fits your schedule, whether online or in person.</p>
+              <p className="text-gray-700 text-sm leading-relaxed">Tell us when you are free. We match you with an expert tutor who fits your schedule online.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
               <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mb-4">

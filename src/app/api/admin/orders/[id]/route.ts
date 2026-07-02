@@ -4,6 +4,7 @@ import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
 import { stripe } from '@/lib/stripe'
 import { requireAdmin } from '@/lib/auth'
+import { isPaymentIntentId } from '@/lib/stripe-subscription'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const authError = await requireAdmin()
@@ -53,14 +54,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   if (status === 'refunded' && currentBooking.status !== 'refunded') {
-    if (currentBooking.stripe_payment_intent_id) {
-      try {
-        await stripe.refunds.create({
-          payment_intent: currentBooking.stripe_payment_intent_id,
-        })
-      } catch (e) {
-        console.error('Stripe refund failed', e)
-      }
+    if (!isPaymentIntentId(currentBooking.stripe_payment_intent_id)) {
+      return NextResponse.json(
+        { error: 'No refundable Stripe payment intent found for this order' },
+        { status: 400 }
+      )
+    }
+
+    try {
+      await stripe.refunds.create({
+        payment_intent: currentBooking.stripe_payment_intent_id,
+      })
+    } catch (e) {
+      console.error('Stripe refund failed', e)
+      return NextResponse.json({ error: 'Stripe refund failed' }, { status: 502 })
     }
 
     await supabaseAdmin
@@ -69,6 +76,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       .eq('order_id', id)
 
     if (currentBooking.customers?.email) {
+      try {
       await resend.emails.send({
         ...getEmailDefaults(),
         to: currentBooking.customers.email,
@@ -79,6 +87,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           body: '<p style="margin: 0;">Your order has been cancelled and a refund has been initiated.</p>',
         }),
       })
+      } catch (emailError) {
+        console.error('Failed to send refund notification:', emailError)
+      }
     }
   }
 

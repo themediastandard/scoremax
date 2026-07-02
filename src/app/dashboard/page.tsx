@@ -8,6 +8,7 @@ import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { formatPlanLabel, formatAmount } from '@/lib/order-format'
+import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function DashboardHome() {
   const user = await getAuthUser()
@@ -55,10 +56,10 @@ export default async function DashboardHome() {
         .eq('status', 'scheduled')
         .order('confirmed_start', { ascending: true })
         .limit(10),
-      supabase.from('subjects').select('id, name'),
+      supabase.from('subjects').select('*'),
     ])
 
-    const adminSubjectMap = new Map((adminSubjects ?? []).map((s) => [s.id, s.name]))
+    const adminSubjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(adminSubjects ?? []))))
     const resolveSubjects = (ids: string[] | null) =>
       (ids ?? []).map((id) => adminSubjectMap.get(id)).filter(Boolean).join(', ')
     const resolvePlanLabel = (order: any) => {
@@ -285,8 +286,8 @@ export default async function DashboardHome() {
       .eq('profile_id', user.id)
       .single()
 
-    const { data: subjects } = await supabase.from('subjects').select('id, name')
-    const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+    const { data: subjects } = await supabase.from('subjects').select('*')
+    const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
     const [{ data: upcomingSessions }, { count: totalUpcoming }, { count: totalCompleted }] = await Promise.all([
       supabaseAdmin
@@ -466,7 +467,7 @@ export default async function DashboardHome() {
       .in('status', ['pending_scheduling', 'scheduled'])
       .order('confirmed_start', { ascending: true, nullsFirst: true })
       .limit(5),
-    supabase.from('subjects').select('id, name'),
+    supabase.from('subjects').select('*'),
     supabase
       .from('memberships')
       .select('tier, status, included_hours, used_hours, rollover_hours, current_period_end')
@@ -487,7 +488,7 @@ export default async function DashboardHome() {
       .eq('status', 'completed')
   ])
 
-  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+  const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
   const membershipCredits = membership
     ? (membership.included_hours + membership.rollover_hours) - membership.used_hours
@@ -504,6 +505,9 @@ export default async function DashboardHome() {
     .filter((s: any) => s.status === 'scheduled' && s.confirmed_start)
     .sort((a: any, b: any) => new Date(a.confirmed_start).getTime() - new Date(b.confirmed_start).getTime())
     .find((s: any) => new Date(s.confirmed_end || s.confirmed_start).getTime() > now.getTime())
+  const nextSessionTutor = Array.isArray(nextSession?.tutors)
+    ? nextSession.tutors[0]
+    : nextSession?.tutors
 
   const hoursUntilNext = nextSession
     ? (new Date(nextSession.confirmed_start).getTime() - now.getTime()) / 3600000
@@ -533,7 +537,7 @@ export default async function DashboardHome() {
               </p>
               <p className="text-sm opacity-80">
                 {(nextSession.subjects ?? []).map((id: string) => subjectMap.get(id)).filter(Boolean).join(', ')}
-                {nextSession.tutors?.full_name && ` with ${nextSession.tutors.full_name}`}
+                {nextSessionTutor?.full_name && ` with ${nextSessionTutor.full_name}`}
               </p>
             </div>
           </div>

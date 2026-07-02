@@ -46,11 +46,11 @@ export default function ContactPage() {
       <section className="pt-32 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
-            Contact
+            Schedule a Free Consultation
           </h1>
           <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
-            Ready to start your academic journey? Let&apos;s discuss how we can help you achieve your goals.
+            Start with a short call to discuss your student&apos;s goals, current needs, and the best tutoring plan.
           </p>
         </div>
       </section>
@@ -61,10 +61,10 @@ export default function ContactPage() {
           <div className="text-center mb-10">
             <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Tell Us About Yourself</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
-              We&apos;ll Create Your Perfect Plan
+              Tell Us What Your Student Needs
             </h2>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xl mx-auto">
-              Help us understand your academic background and goals so we can create the perfect learning plan for you.
+              Send the basics and we&apos;ll follow up to schedule a free consultation.
             </p>
           </div>
           

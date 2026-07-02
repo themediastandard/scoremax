@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name, role: 'tutor' }
+    user_metadata: { full_name },
+    app_metadata: { role: 'tutor' }
   })
 
   if (createUserError) {

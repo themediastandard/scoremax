@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/client'
+import { buildSubjectCatalog } from '@/lib/subject-catalog'
 
 export async function GET() {
   const supabase = createClient()
@@ -14,24 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
   
-  // Group by category for easier frontend consumption
-  const grouped = data.reduce((acc, subject) => {
-    const category = subject.category
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(subject)
-    return acc
-  }, {} as Record<string, typeof data>)
-
-  const inPersonOptions = [
-    { id: 'in-person-sat', name: 'In-Person SAT', slug: 'in-person-sat', category: 'test-prep' },
-  ]
-  if (grouped['test-prep']) {
-    grouped['test-prep'] = [...inPersonOptions, ...grouped['test-prep']]
-  } else {
-    grouped['test-prep'] = inPersonOptions
-  }
+  const grouped = buildSubjectCatalog(data ?? [])
   
   return NextResponse.json(grouped)
 }

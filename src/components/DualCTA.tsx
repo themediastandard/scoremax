@@ -5,16 +5,16 @@ export default function DualCTA() {
   return (
     <section className="pt-6 pb-4 bg-white">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-4">
-        {/* In-Person SAT Classes */}
+        {/* Free Consultation */}
         <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden group">
-          <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1600&auto=format&fit=crop" alt="In-Person SAT Classes" fill className="object-cover" />
+          <Image src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop" alt="Free tutoring consultation" fill className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10" />
           <div className="absolute inset-0 p-6 flex flex-col justify-end">
-            <div className="uppercase text-xs tracking-widest text-white/90 font-medium mb-1">In Person</div>
-            <h3 className="text-xl sm:text-2xl text-white font-[family-name:var(--font-playfair)]">5 Week SAT Classes</h3>
-            <p className="mt-1 text-white/80 text-sm leading-relaxed max-w-md">Strategy, practice tests, and weekly progress checks.</p>
+            <div className="uppercase text-xs tracking-widest text-white/90 font-medium mb-1">Start Here</div>
+            <h3 className="text-xl sm:text-2xl text-white font-[family-name:var(--font-playfair)]">Free Consultation</h3>
+            <p className="mt-1 text-white/80 text-sm leading-relaxed max-w-md">Start with a short call to discuss your student&apos;s goals and the best next step.</p>
             <div className="mt-4">
-              <Link href="/test-prep/in-person-classes" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Register for SAT Classes</Link>
+              <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2.5 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Schedule Consultation</Link>
             </div>
           </div>
         </div>
@@ -36,5 +36,4 @@ export default function DualCTA() {
     </section>
   );
 }
-
 

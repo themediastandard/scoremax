@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
+import { isPaymentIntentId } from '@/lib/stripe-subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,12 +31,13 @@ export async function GET(req: NextRequest) {
     .eq('customer_id', customer.id)
     .single()
 
-  if (!booking?.stripe_payment_intent_id) {
+  const paymentIntentId = booking?.stripe_payment_intent_id
+  if (!isPaymentIntentId(paymentIntentId)) {
     return NextResponse.json({ error: 'No payment found' }, { status: 404 })
   }
 
   try {
-    const pi = await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
+    const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
     const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id
     if (!chargeId) return NextResponse.json({ error: 'No charge found' }, { status: 404 })
 

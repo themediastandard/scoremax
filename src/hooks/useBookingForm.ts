@@ -74,7 +74,6 @@ export const useBookingForm = () => {
         // For now, assume caller handles 'sessionType' visibility check
         next.availability = true // Default next
       }
-      if (currentSection === 'sessionType') next.availability = true
       if (currentSection === 'availability') next.contact = true
       if (currentSection === 'contact') next.plan = true
       return next

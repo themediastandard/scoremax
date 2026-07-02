@@ -3,10 +3,10 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Subjects We Cover | ScoreMax Tutoring',
-  description: 'ScoreMax offers expert tutoring across test prep (SAT, ACT, GMAT, GRE), high school math and science, college-level courses, and elementary subjects. Find the right tutor for your goals.',
+  description: 'ScoreMax offers expert tutoring across test prep (SAT, ACT, GMAT, GRE), high school math and science, college-level courses, middle school, and elementary subjects. Find the right tutor for your goals.',
   openGraph: {
     title: 'Subjects We Cover | ScoreMax Tutoring',
-    description: 'Expert tutoring across test prep, high school, college, and elementary subjects.',
+    description: 'Expert tutoring across test prep, high school, college, middle school, and elementary subjects.',
   },
 };
 
@@ -18,16 +18,25 @@ const categories = [
   },
   {
     title: 'High School Tutoring',
+    href: '/high-school-tutoring',
     blurb: 'ScoreMax tutors excel in high school math and science. We build strong foundations in algebra and geometry, advance students through calculus and physics, and support competitive mathematics. Our approach emphasizes conceptual understanding so students master material rather than memorize it.',
     items: ['Algebra I', 'Geometry', 'Algebra II', 'Pre‑Calculus', 'Calculus', 'Statistics', 'All ACE Mathematics', 'Chemistry', 'Physics', 'Competition Mathematics']
   },
   {
     title: 'College Tutoring',
+    href: '/college-tutoring',
     blurb: 'We provide expert support for college-level mathematics and sciences. Our tutors hold advanced degrees and experience teaching at the university level. From remedial algebra through multivariable calculus and linear algebra, we help students overcome challenging coursework and develop lasting academic skills.',
-    items: ['Beginning Algebra', 'Intermediate Algebra', 'College Algebra', 'Pre‑Calculus', 'Statistics', 'Calculus I, II, III', 'Linear Algebra', 'Physics', 'Chemistry']
+    items: ['Beginning Algebra', 'Intermediate Algebra', 'College Algebra', 'College Pre‑Calculus', 'Statistics', 'Calculus I, II, III', 'Linear Algebra', 'Physics', 'Chemistry']
+  },
+  {
+    title: 'Middle School Tutoring',
+    href: '/middle-school-tutoring',
+    blurb: 'Middle school students get targeted support in math, English, and science so they can strengthen fundamentals before high school. Sessions are paced to the student and focused on confidence, organization, and skill building.',
+    items: ['Middle School Math', 'Middle School English', 'Middle School Science']
   },
   {
     title: 'Elementary Tutoring',
+    href: '/elementary-tutoring',
     blurb: 'Our elementary tutors foster a love of learning in reading, math, and science. We create a supportive environment where young students build confidence and strong fundamentals that set them up for long-term success. Sessions are engaging and tailored to each child\'s pace and learning style.',
     items: ['Reading', 'Math', 'Science']
   }
@@ -43,7 +52,7 @@ export default function SubjectsPage() {
           </h1>
           <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
-            Our tutors bring deep expertise across test prep, high school, college, and elementary subjects. 
+            Our tutors bring deep expertise across test prep, high school, college, middle school, and elementary subjects. 
             We match each student with instructors who specialize in their area of need, ensuring focused, 
             effective instruction tailored to individual goals.
           </p>
@@ -69,6 +78,11 @@ export default function SubjectsPage() {
                     </span>
                   ))}
                 </div>
+                {cat.href ? (
+                  <Link href={cat.href} className="mt-5 inline-flex text-sm font-medium text-[#b08a30] hover:text-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
+                    Learn More
+                  </Link>
+                ) : null}
               </div>
             ))}
           </div>

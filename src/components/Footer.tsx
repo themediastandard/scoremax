@@ -18,11 +18,18 @@ const quickLinks = [
 const serviceLinks = [
   { label: "SAT Tutoring", href: "/test-prep/sat" },
   { label: "ACT Tutoring", href: "/test-prep/act" },
-  { label: "In Person Classes", href: "/test-prep/in-person-classes" },
-  { label: "College Tutoring", href: "/college-high-school/college-tutoring" },
+  { label: "College Tutoring", href: "/college-tutoring" },
   {
     label: "High School Tutoring",
-    href: "/college-high-school/high-school-tutoring",
+    href: "/high-school-tutoring",
+  },
+  {
+    label: "Middle School Tutoring",
+    href: "/middle-school-tutoring",
+  },
+  {
+    label: "Elementary Tutoring",
+    href: "/elementary-tutoring",
   },
 ];
 

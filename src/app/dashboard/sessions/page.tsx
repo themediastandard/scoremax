@@ -6,6 +6,7 @@ import { AdminSessionList, FlatSessionList } from '@/components/dashboard/Sessio
 import { SessionMetrics } from '@/components/dashboard/SessionMetrics'
 import { TutorSessionsTable } from '@/components/dashboard/TutorSessionsTable'
 import { CalendarCheck, Users, CheckCircle2, CalendarClock } from 'lucide-react'
+import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function SessionsPage() {
   const user = await getAuthUser()
@@ -14,8 +15,8 @@ export default async function SessionsPage() {
   const profile = await getProfile(user.id)
   const supabase = await createClient()
 
-  const { data: subjects } = await supabase.from('subjects').select('id, name')
-  const subjectMap = new Map((subjects ?? []).map((s) => [s.id, s.name]))
+  const { data: subjects } = await supabase.from('subjects').select('*')
+  const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
   if (profile?.role === 'admin') {
     const [{ data: allSessions }, { data: tutors }] = await Promise.all([

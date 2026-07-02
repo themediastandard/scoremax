@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { buildSubjectCatalog, getSubjectMap } from '@/lib/subject-catalog'
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,23 +32,12 @@ export async function POST(req: NextRequest) {
     }
 
     const rawSubjects: string[] = Array.isArray(booking_details.subjects) ? booking_details.subjects : []
-    const needsInPersonResolve = rawSubjects.includes('in-person-sat')
-    let resolvedSubjects = rawSubjects
-
-    if (needsInPersonResolve) {
-        const { data: subjectRows } = await supabaseAdmin
-            .from('subjects')
-            .select('id, slug')
-            .eq('slug', 'sat')
-        const satId = subjectRows?.[0]?.id
-        resolvedSubjects = rawSubjects
-            .map((id: string) => (id === 'in-person-sat' && satId) ? satId : id)
-            .filter((id: string) => id !== 'in-person-sat')
-    }
+    const resolvedSubjects = rawSubjects.filter(id => id !== 'in-person-sat')
 
     // Resolve trusted price from server based on plan type
     let trustedPriceCents = 0
     let trustedPlanName = plan_name || ''
+    let trustedIncludedHours: number | null = null
     const line_items: Array<{ price?: string; price_data?: { currency: string; product_data: { name: string }; unit_amount: number }; quantity: number }> = []
     let mode: 'payment' | 'subscription' = 'payment'
 
@@ -69,13 +59,14 @@ export async function POST(req: NextRequest) {
         if (!pkgId) throw new Error('Missing plan_id for package')
         const { data: pkg } = await supabaseAdmin
             .from('pricing')
-            .select('price_cents, name')
+            .select('price_cents, name, included_hours')
             .eq('id', pkgId)
             .eq('type', 'package')
             .single()
         if (!pkg) throw new Error('Invalid package plan')
         trustedPriceCents = pkg.price_cents
         trustedPlanName = pkg.name
+        trustedIncludedHours = pkg.included_hours
         line_items.push({
             price_data: { currency: 'usd', product_data: { name: pkg.name }, unit_amount: pkg.price_cents },
             quantity: 1,
@@ -83,11 +74,15 @@ export async function POST(req: NextRequest) {
     } else if (plan_type === 'single') {
         const subjectIds: string[] = resolvedSubjects
         if (subjectIds.length === 0) throw new Error('No subjects selected')
-        const { data: subjects } = await supabaseAdmin
+        const { data: subjectRows } = await supabaseAdmin
             .from('subjects')
-            .select('hourly_rate_cents')
-            .in('id', subjectIds)
-        const maxRate = (subjects ?? []).reduce((max: number, s: { hourly_rate_cents: number }) => Math.max(max, s.hourly_rate_cents), 0)
+            .select('*')
+            .eq('is_active', true)
+        const subjectMap = getSubjectMap(buildSubjectCatalog(subjectRows ?? []))
+        const maxRate = subjectIds.reduce((max: number, id: string) => {
+            const rate = subjectMap[id]?.hourly_rate_cents ?? 0
+            return Math.max(max, rate)
+        }, 0)
         if (maxRate <= 0) throw new Error('Could not determine session rate')
         trustedPriceCents = maxRate
         trustedPlanName = 'Single Session'
@@ -96,6 +91,10 @@ export async function POST(req: NextRequest) {
             quantity: 1,
         })
     } else if (plan_type === 'course' || plan_type === 'sat-course-inperson') {
+        if (plan_type === 'sat-course-inperson') {
+            throw new Error('In-person SAT courses are not currently available')
+        }
+
         const { data: coursePricing } = await supabaseAdmin
             .from('pricing')
             .select('price_cents, name')
@@ -104,13 +103,7 @@ export async function POST(req: NextRequest) {
         let matched = coursePricing?.find((c: { name: string }) => c.name.toLowerCase().includes(courseType.replace(/-/g, ' ')))
         if (!matched && coursePricing?.length) matched = coursePricing[0]
 
-        if (plan_type === 'sat-course-inperson' && cohortId) {
-            const { data: cohort } = await supabaseAdmin.from('sat_course_cohorts').select('price_cents').eq('id', cohortId).single()
-            if (cohort) {
-                trustedPriceCents = cohort.price_cents
-                trustedPlanName = 'In-Person SAT Course'
-            }
-        } else if (matched) {
+        if (matched) {
             trustedPriceCents = matched.price_cents
             trustedPlanName = matched.name
         }
@@ -159,9 +152,13 @@ export async function POST(req: NextRequest) {
             booking_request_id: booking.id,
             plan_type,
             plan_name: trustedPlanName || plan_type,
+            ...(body.plan_id && { plan_id: body.plan_id }),
+            ...(trustedIncludedHours && { package_hours: String(trustedIncludedHours) }),
             user_id: user?.id,
             contact_name: booking_details.full_name,
             contact_email: booking_details.email,
+            ...(booking_details.phone && { contact_phone: booking_details.phone }),
+            ...(booking_details.student_grade && { student_grade: booking_details.student_grade }),
             ...(cohortId && { cohort_id: cohortId }),
             ...(body.courseType && { course_type: body.courseType }),
         },
@@ -178,9 +175,9 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ url: session.url })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Stripe Checkout Error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Unable to create checkout session'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
-

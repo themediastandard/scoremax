@@ -3,6 +3,7 @@ import { SubscriptionView } from '@/components/dashboard/SubscriptionView'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import { getSubscriptionPeriod } from '@/lib/stripe-subscription'
 
 export default async function SubscriptionPage() {
   const user = await getAuthUser()
@@ -77,6 +78,7 @@ export default async function SubscriptionPage() {
           .maybeSingle()
         const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
         const includedHours = pricing?.included_hours ?? 2
+        const period = getSubscriptionPeriod(sub)
         const { data: inserted } = await supabaseAdmin
           .from('memberships')
           .insert({
@@ -87,8 +89,8 @@ export default async function SubscriptionPage() {
             included_hours: includedHours,
             used_hours: 0,
             rollover_hours: 0,
-            current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+            current_period_start: period.currentPeriodStart,
+            current_period_end: period.currentPeriodEnd,
           })
           .select()
           .single()

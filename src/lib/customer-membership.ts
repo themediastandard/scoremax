@@ -1,5 +1,6 @@
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSubscriptionPeriod } from '@/lib/stripe-subscription'
 
 export interface MembershipRecord {
   id: string
@@ -91,6 +92,7 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
             .maybeSingle()
           const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
           const includedHours = pricing?.included_hours ?? 2
+          const period = getSubscriptionPeriod(sub)
           await supabaseAdmin.from('memberships').insert({
             customer_id: customer.id,
             tier,
@@ -99,8 +101,8 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
             included_hours: includedHours,
             used_hours: 0,
             rollover_hours: 0,
-            current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+            current_period_start: period.currentPeriodStart,
+            current_period_end: period.currentPeriodEnd,
           })
           membership = { tier }
         }

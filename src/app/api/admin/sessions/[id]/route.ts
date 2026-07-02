@@ -5,6 +5,11 @@ import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import { google } from 'googleapis'
 import { requireAdmin } from '@/lib/auth'
+import {
+  buildSessionCalendarPlan,
+  getMeetConferenceRequest,
+  withMeetLink,
+} from '@/lib/session-calendar'
 
 const getAuthClient = (refreshToken: string) => {
   const client = new google.auth.OAuth2(
@@ -21,59 +26,55 @@ async function handleSchedule(session: any) {
   const startTime = new Date(session.confirmed_start)
   const endTime = new Date(session.confirmed_end)
   const isOnline = session.session_type === 'online'
-
-  const meetConference = isOnline ? {
-    conferenceData: {
-      createRequest: {
-        requestId: `scoremax-session-${session.id}`,
-        conferenceSolutionKey: { type: 'hangoutsMeet' }
-      }
-    }
-  } : {}
-
-  const eventBody = {
-    summary: `ScoreMax: ${isOnline ? 'Online' : 'In-Person'} Session`,
-    description: `Student: ${session.customers.full_name}\nTutor: ${session.tutors.full_name}\nLocation: ${isOnline ? 'Online (Google Meet)' : 'Sawgrass, FL'}`,
-    start: { dateTime: startTime.toISOString() },
-    end: { dateTime: endTime.toISOString() },
+  const plan = buildSessionCalendarPlan(session)
+  const getMeetUrl = (event: any) => {
+    const videoEntry = event?.data?.conferenceData?.entryPoints?.find(
+      (entry: { entryPointType?: string }) => entry.entryPointType === 'video'
+    )
+    return event?.data?.hangoutLink ?? videoEntry?.uri ?? null
   }
 
-  if (session.tutors?.google_refresh_token) {
+  if (plan.tutor && session.tutors?.google_refresh_token) {
     try {
       const tutorAuth = getAuthClient(session.tutors.google_refresh_token)
+      const requestBody = {
+        ...plan.tutor.requestBody,
+        ...(plan.tutor.shouldCreateMeet ? getMeetConferenceRequest(session.id) : {}),
+      }
       const event = await calendar.events.insert({
         auth: tutorAuth,
         calendarId: 'primary',
-        conferenceDataVersion: isOnline ? 1 : 0,
-        requestBody: {
-          ...eventBody,
-          ...meetConference,
-          summary: `ScoreMax Session: ${session.customers.full_name}`
-        }
+        conferenceDataVersion: plan.tutor.shouldCreateMeet ? 1 : 0,
+        requestBody,
       })
       updates.tutor_calendar_event_id = event.data.id ?? null
-      if (event.data.hangoutLink) {
-        updates.meet_url = event.data.hangoutLink
+      const meetUrl = getMeetUrl(event)
+      if (meetUrl) {
+        updates.meet_url = meetUrl
       }
     } catch (error) {
       console.error('Failed to create tutor calendar event', error)
     }
   }
 
-  if (session.customers?.google_refresh_token) {
+  if (plan.student && session.customers?.google_refresh_token) {
     try {
       const studentAuth = getAuthClient(session.customers.google_refresh_token)
-      const studentEventBody = { ...eventBody, summary: `ScoreMax Session: ${session.tutors.full_name}` }
-      if (updates.meet_url) {
-        studentEventBody.description += `\n\nGoogle Meet: ${updates.meet_url}`
+      const requestBody = {
+        ...withMeetLink(plan.student.requestBody, updates.meet_url),
+        ...(plan.student.shouldCreateMeet ? getMeetConferenceRequest(session.id) : {}),
       }
       const event = await calendar.events.insert({
         auth: studentAuth,
         calendarId: 'primary',
-        conferenceDataVersion: isOnline ? 1 : 0,
-        requestBody: { ...studentEventBody, ...meetConference },
+        conferenceDataVersion: plan.student.shouldCreateMeet ? 1 : 0,
+        requestBody,
       })
       updates.student_calendar_event_id = event.data.id ?? null
+      if (!updates.meet_url) {
+        const meetUrl = getMeetUrl(event)
+        if (meetUrl) updates.meet_url = meetUrl
+      }
     } catch (error) {
       console.error('Failed to create student calendar event', error)
     }
@@ -83,37 +84,45 @@ async function handleSchedule(session: any) {
     ? `Online (Google Meet)${updates.meet_url ? ` - <a href="${updates.meet_url}">Join Meeting</a>` : ''}`
     : 'Sawgrass, FL'
 
-  await resend.emails.send({
-    ...getEmailDefaults(),
-    to: session.customers.email,
-    subject: 'Session Confirmed: Your session is scheduled',
-    html: emailLayout({
-      title: 'Session Confirmed',
-      greeting: `Hi ${session.customers.full_name},`,
-      body: [
-        '<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed!</p>',
-        detailRow('Tutor:', session.tutors.full_name),
-        detailRow('Time:', startTime.toLocaleString()),
-        detailRow('Location:', locationText),
-      ].join(''),
-    }),
-  })
+  try {
+    await resend.emails.send({
+      ...getEmailDefaults(),
+      to: session.customers.email,
+      subject: 'Session Confirmed: Your session is scheduled',
+      html: emailLayout({
+        title: 'Session Confirmed',
+        greeting: `Hi ${session.customers.full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed!</p>',
+          detailRow('Tutor:', session.tutors.full_name),
+          detailRow('Time:', startTime.toLocaleString()),
+          detailRow('Location:', locationText),
+        ].join(''),
+      }),
+    })
+  } catch (emailError) {
+    console.error('Failed to send student schedule notification:', emailError)
+  }
 
-  await resend.emails.send({
-    ...getEmailDefaults(),
-    to: session.tutors.email,
-    subject: 'New Session Assigned',
-    html: emailLayout({
-      title: 'New Session Assigned',
-      greeting: `Hi ${session.tutors.full_name},`,
-      body: [
-        '<p style="margin: 0 0 16px 0;">You have been assigned a new session.</p>',
-        detailRow('Student:', session.customers.full_name),
-        detailRow('Time:', startTime.toLocaleString()),
-        detailRow('Location:', locationText),
-      ].join(''),
-    }),
-  })
+  try {
+    await resend.emails.send({
+      ...getEmailDefaults(),
+      to: session.tutors.email,
+      subject: 'New Session Assigned',
+      html: emailLayout({
+        title: 'New Session Assigned',
+        greeting: `Hi ${session.tutors.full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">You have been assigned a new session.</p>',
+          detailRow('Student:', session.customers.full_name),
+          detailRow('Time:', startTime.toLocaleString()),
+          detailRow('Location:', locationText),
+        ].join(''),
+      }),
+    })
+  } catch (emailError) {
+    console.error('Failed to send tutor schedule notification:', emailError)
+  }
 
   return updates
 }
@@ -289,8 +298,28 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const timesChanged =
     (confirmed_start && confirmed_start !== currentSession.confirmed_start) ||
     (confirmed_end && confirmed_end !== currentSession.confirmed_end)
+  const tutorChanged =
+    assigned_tutor_id &&
+    assigned_tutor_id !== currentSession.assigned_tutor_id
 
-  if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
+  if (statusUnchanged && oldStatus === 'scheduled' && tutorChanged) {
+    const cancelUpdates = await handleCancel(currentSession)
+    const merged = {
+      ...currentSession,
+      ...updates,
+      confirmed_start: confirmed_start || currentSession.confirmed_start,
+      confirmed_end: confirmed_end || currentSession.confirmed_end,
+    }
+    const { data: newTutor } = await supabaseAdmin
+      .from('tutors')
+      .select('id, email, full_name, google_refresh_token')
+      .eq('id', assigned_tutor_id)
+      .single()
+    if (newTutor) merged.tutors = newTutor
+
+    const calendarUpdates = await handleSchedule(merged)
+    updates = { ...updates, ...cancelUpdates, ...calendarUpdates }
+  } else if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
     await handleReschedule(
       currentSession,
       confirmed_start || currentSession.confirmed_start,

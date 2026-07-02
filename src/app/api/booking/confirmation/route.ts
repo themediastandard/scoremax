@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { buildSubjectCatalog, resolveSubjectNames } from '@/lib/subject-catalog'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('session_id')
@@ -35,11 +37,38 @@ export async function GET(req: NextRequest) {
         type: session.metadata?.plan_type ?? 'membership',
       }
     } else if (bookingId) {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const { data: customer } = await supabaseAdmin
+        .from('customers')
+        .select('id')
+        .eq('profile_id', user.id)
+        .maybeSingle()
+
+      if (!customer) {
+        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+      }
+
       bookingRequestId = bookingId
       planInfo = {
         name: 'Credit Used',
         amountCents: 0,
         type: 'credit',
+      }
+
+      const { data: ownedBooking } = await supabaseAdmin
+        .from('booking_requests')
+        .select('id')
+        .eq('id', bookingRequestId)
+        .eq('customer_id', customer.id)
+        .maybeSingle()
+
+      if (!ownedBooking) {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
       }
     }
 
@@ -84,11 +113,11 @@ export async function GET(req: NextRequest) {
 
     let subjectNames: string[] = []
     if (booking.subjects?.length) {
-      const { data: subjects } = await supabaseAdmin
+      const { data: subjectRows } = await supabaseAdmin
         .from('subjects')
-        .select('name')
-        .in('id', booking.subjects)
-      subjectNames = (subjects ?? []).map((s) => s.name)
+        .select('*')
+        .eq('is_active', true)
+      subjectNames = resolveSubjectNames(buildSubjectCatalog(subjectRows ?? []), booking.subjects)
     }
 
     // Postgres time type returns "HH:mm:ss" - normalize to "HH:mm" for display

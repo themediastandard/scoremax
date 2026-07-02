@@ -30,8 +30,18 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const enrollees = (data ?? []).map((row: { id: string; created_at: string; customers?: { id: string; full_name: string; email: string; phone: string } | null; customer?: { id: string; full_name: string; email: string; phone: string } | null }) => {
-    const c = row.customers ?? row.customer ?? null
+  type CustomerRef = { id: string; full_name: string; email: string; phone: string } | null
+  type EnrollmentRow = {
+    id: string
+    created_at: string
+    customers?: CustomerRef | CustomerRef[]
+    customer?: CustomerRef | CustomerRef[]
+  }
+  const pickCustomer = (value?: CustomerRef | CustomerRef[]) =>
+    Array.isArray(value) ? value[0] ?? null : value ?? null
+
+  const enrollees = ((data ?? []) as EnrollmentRow[]).map((row) => {
+    const c = pickCustomer(row.customers) ?? pickCustomer(row.customer)
     return {
       id: row.id,
       enrolledAt: row.created_at,

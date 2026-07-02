@@ -5,6 +5,11 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { formatTime24To12 } from '@/lib/order-format'
+import {
+  getCheckoutPaymentIntentId,
+  getInvoicePaymentIntentId,
+  getSubscriptionPeriod,
+} from '@/lib/stripe-subscription'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -32,8 +37,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, skipped: true })
     }
     console.error('Idempotency check failed:', idempotencyError.message)
+    return NextResponse.json({ error: 'Unable to reserve webhook event' }, { status: 500 })
   }
 
+  try {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as any
     const metadata = session.metadata
@@ -42,7 +49,18 @@ export async function POST(req: Request) {
     const planName = metadata.plan_name
     const contactEmail = metadata.contact_email?.toLowerCase()
     const contactName = metadata.contact_name
+    const contactPhone = metadata.contact_phone
+    const studentGrade = metadata.student_grade
     const stripeCustomerId = session.customer
+    let stripePaymentIntentId = getCheckoutPaymentIntentId(session)
+    let membershipSubscription: any = null
+
+    if (planType === 'membership' && session.subscription) {
+      membershipSubscription = await stripe.subscriptions.retrieve(session.subscription as string, {
+        expand: ['latest_invoice.payment_intent'],
+      })
+      stripePaymentIntentId ||= getInvoicePaymentIntentId(membershipSubscription.latest_invoice)
+    }
 
     // 1. Resolve Customer
     let { data: customer } = await supabaseAdmin
@@ -63,7 +81,12 @@ export async function POST(req: Request) {
             
         if (customerByEmail) {
             // Link Stripe ID
-            await supabaseAdmin.from('customers').update({ stripe_customer_id: stripeCustomerId }).eq('id', customerByEmail.id)
+            await supabaseAdmin.from('customers').update({
+                stripe_customer_id: stripeCustomerId,
+                ...(contactName && { full_name: contactName }),
+                ...(contactPhone && { phone: contactPhone }),
+                ...(studentGrade && { student_grade: studentGrade }),
+            }).eq('id', customerByEmail.id)
             customer = customerByEmail
         } else {
             isGuestCheckout = true
@@ -74,7 +97,8 @@ export async function POST(req: Request) {
                 email: contactEmail,
                 password: tempPassword,
                 email_confirm: true,
-                user_metadata: { full_name: contactName, role: 'customer' },
+                user_metadata: { full_name: contactName },
+                app_metadata: { role: 'customer' },
             })
 
             let profileId: string | null = null
@@ -96,6 +120,8 @@ export async function POST(req: Request) {
                 await supabaseAdmin.from('customers').update({
                     stripe_customer_id: stripeCustomerId,
                     full_name: contactName,
+                    ...(contactPhone && { phone: contactPhone }),
+                    ...(studentGrade && { student_grade: studentGrade }),
                 }).eq('id', triggerCreated.id)
                 customer = { ...triggerCreated, stripe_customer_id: stripeCustomerId }
             } else {
@@ -103,6 +129,8 @@ export async function POST(req: Request) {
                     full_name: contactName,
                     email: contactEmail,
                     stripe_customer_id: stripeCustomerId,
+                    ...(contactPhone && { phone: contactPhone }),
+                    ...(studentGrade && { student_grade: studentGrade }),
                     ...(profileId && { profile_id: profileId }),
                 }).select().single()
                 customer = newCustomer
@@ -115,7 +143,7 @@ export async function POST(req: Request) {
         await supabaseAdmin.from('booking_requests').update({
             customer_id: customer.id,
             status: 'paid',
-            stripe_payment_intent_id: session.payment_intent || session.subscription
+            stripe_payment_intent_id: stripePaymentIntentId,
         }).eq('id', bookingId).in('status', ['pending_payment', 'paid'])
     }
 
@@ -124,7 +152,7 @@ export async function POST(req: Request) {
         await supabaseAdmin.from('payments').insert({
             booking_request_id: bookingId,
             customer_id: customer.id,
-            stripe_payment_intent_id: session.payment_intent || session.subscription,
+            stripe_payment_intent_id: stripePaymentIntentId,
             amount_cents: session.amount_total,
             currency: session.currency,
             payment_type: planType,
@@ -134,12 +162,23 @@ export async function POST(req: Request) {
 
     // 4. Create Package/Course/Membership Records
     if (planType === 'package' && customer) {
-        const hours = session.amount_total >= 200000 ? 20 : 10
+        const metadataHours = Number(metadata.package_hours)
+        let hours = Number.isFinite(metadataHours) && metadataHours > 0 ? metadataHours : null
+        if (!hours && metadata.plan_id) {
+          const { data: packagePricing } = await supabaseAdmin
+            .from('pricing')
+            .select('included_hours')
+            .eq('id', metadata.plan_id)
+            .eq('type', 'package')
+            .single()
+          hours = packagePricing?.included_hours ?? null
+        }
+        hours ||= session.amount_total >= 200000 ? 20 : 10
         await supabaseAdmin.from('packages').insert({
             customer_id: customer.id,
             total_hours: hours,
             remaining_hours: hours - 1,
-            stripe_payment_intent_id: session.payment_intent
+            stripe_payment_intent_id: stripePaymentIntentId
         })
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
         const courseType = metadata.course_type || ''
@@ -171,8 +210,11 @@ export async function POST(req: Request) {
                 .eq('id', cohortId)
         }
     } else if (planType === 'membership' && customer && session.subscription) {
-        const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        const subscription = membershipSubscription ?? await stripe.subscriptions.retrieve(session.subscription as string, {
+          expand: ['latest_invoice.payment_intent'],
+        })
         const priceId = subscription.items?.data?.[0]?.price?.id
+        const period = getSubscriptionPeriod(subscription)
         const { data: pricing } = await supabaseAdmin
             .from('pricing')
             .select('name, included_hours')
@@ -189,12 +231,8 @@ export async function POST(req: Request) {
             included_hours: includedHours,
             used_hours: 1,
             rollover_hours: 0,
-            current_period_start: subscription.current_period_start
-                ? new Date(subscription.current_period_start * 1000).toISOString()
-                : null,
-            current_period_end: subscription.current_period_end
-                ? new Date(subscription.current_period_end * 1000).toISOString()
-                : null,
+            current_period_start: period.currentPeriodStart,
+            current_period_end: period.currentPeriodEnd,
         })
     }
 
@@ -222,6 +260,7 @@ export async function POST(req: Request) {
     if (adminEmails.length > 0) {
         const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : String(planType))
 
+        try {
         await resend.emails.send({
             ...getEmailDefaults(),
             to: adminEmails,
@@ -237,6 +276,9 @@ export async function POST(req: Request) {
               ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders`,
             }),
         })
+        } catch (emailError) {
+          console.error('Failed to send admin payment notification:', emailError)
+        }
     }
 
     // 7. Notify Customer (post-payment confirmation)
@@ -292,18 +334,22 @@ export async function POST(req: Request) {
           ].join('')
         : ''
 
-      await resend.emails.send({
-        ...getEmailDefaults(),
-        to: contactEmail,
-        subject: 'Thank you for your purchase',
-        html: emailLayout({
-          title: isInPersonCourse ? 'Welcome to the SAT Course!' : 'Thank You for Your Purchase',
-          greeting: `Hi ${contactName || 'there'},`,
-          body: purchaseBody + (isInPersonCourse ? inPersonCourseDetails : '') + nextSteps + accountBody,
-          ctaText: 'Sign In to Your Dashboard',
-          ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
-        }),
-      })
+      try {
+        await resend.emails.send({
+          ...getEmailDefaults(),
+          to: contactEmail,
+          subject: 'Thank you for your purchase',
+          html: emailLayout({
+            title: isInPersonCourse ? 'Welcome to the SAT Course!' : 'Thank You for Your Purchase',
+            greeting: `Hi ${contactName || 'there'},`,
+            body: purchaseBody + (isInPersonCourse ? inPersonCourseDetails : '') + nextSteps + accountBody,
+            ctaText: 'Sign In to Your Dashboard',
+            ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send customer payment notification:', emailError)
+      }
     }
   }
 
@@ -322,15 +368,12 @@ export async function POST(req: Request) {
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as any
     const membershipStatus = subscription.status === 'active' ? 'active' : 'canceled'
+    const period = getSubscriptionPeriod(subscription)
 
     const updates: Record<string, unknown> = {
       status: membershipStatus,
-      current_period_start: subscription.current_period_start
-        ? new Date(subscription.current_period_start * 1000).toISOString()
-        : null,
-      current_period_end: subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000).toISOString()
-        : null,
+      current_period_start: period.currentPeriodStart,
+      current_period_end: period.currentPeriodEnd,
     }
 
     if (event.type === 'customer.subscription.updated') {
@@ -356,4 +399,12 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error('Stripe webhook processing failed:', error)
+    await supabaseAdmin
+      .from('processed_stripe_events')
+      .delete()
+      .eq('event_id', event.id)
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
+  }
 }
