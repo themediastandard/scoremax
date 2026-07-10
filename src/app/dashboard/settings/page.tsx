@@ -1,32 +1,40 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProfileForm } from '@/components/dashboard/ProfileForm'
+import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getAuthUser, getProfile } from '@/lib/auth'
+import {
+  ADMIN_GOOGLE_CONNECTED_AT_KEY,
+  getAdminSetting,
+  isAdminGoogleConnected,
+} from '@/lib/google-admin'
 
 export default async function SettingsPage() {
   const user = await getAuthUser()
   if (!user) redirect('/login')
 
   const profile = await getProfile(user.id)
-  const supabase = await createClient()
 
   let customerData = null
-  let isGoogleConnected = false
-
   if (profile?.role === 'customer') {
     const { data } = await supabaseAdmin
       .from('customers')
-      .select('full_name, phone, student_grade, google_calendar_connected')
+      .select('full_name, phone, student_grade')
       .eq('profile_id', user.id)
       .maybeSingle()
     customerData = data
-    isGoogleConnected = data?.google_calendar_connected || false
-  } else if (profile?.role === 'tutor') {
-    const { data } = await supabase.from('tutors').select('google_calendar_connected').eq('profile_id', user.id).single()
-    isGoogleConnected = data?.google_calendar_connected || false
+  }
+
+  const isAdmin = profile?.role === 'admin'
+  let googleConnected = false
+  let googleConnectedAt: string | null = null
+  if (isAdmin) {
+    googleConnected = await isAdminGoogleConnected()
+    if (googleConnected) {
+      googleConnectedAt = await getAdminSetting(ADMIN_GOOGLE_CONNECTED_AT_KEY)
+    }
   }
 
   return (
@@ -35,7 +43,7 @@ export default async function SettingsPage() {
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Settings</h1>
         <p className="mt-1 text-gray-500">Manage your account</p>
       </div>
-      
+
       <Card className="border-gray-100 shadow-sm">
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
@@ -50,30 +58,41 @@ export default async function SettingsPage() {
           />
         </CardContent>
       </Card>
-      
-      <Card className="border-gray-100 shadow-sm">
-        <CardHeader>
-          <CardTitle>Integrations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-medium">Google Calendar</div>
-              <p className="text-sm text-gray-500">Sync your sessions automatically.</p>
+
+      {isAdmin && (
+        <Card className="border-gray-100 shadow-sm">
+          <CardHeader>
+            <CardTitle>Integrations</CardTitle>
+            <div className="mt-1">
+              <GoogleConnectionBadge connected={googleConnected} />
             </div>
-            {isGoogleConnected ? (
-              <Button variant="outline" className="text-green-600 border-green-200 bg-green-50" disabled>
-                Connected
-              </Button>
-            ) : (
-              <form action="/api/google/auth">
-                <input type="hidden" name="role" value={profile?.role} />
-                <Button type="submit" variant="outline">Connect</Button>
-              </form>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="font-medium">ScoreMax Google Account</div>
+                <p className="text-sm text-gray-500">
+                  Creates the calendar invites and Google Meet links sent to tutors and students
+                  when a session is scheduled. Online sessions cannot be scheduled while this is
+                  disconnected.
+                </p>
+                {googleConnected && googleConnectedAt && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Connected {new Date(googleConnectedAt).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0">
+                <form action="/api/google/auth">
+                  <Button type="submit" variant="outline" size="sm">
+                    {googleConnected ? 'Reconnect' : 'Connect'}
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-gray-100 shadow-sm">
         <CardHeader>

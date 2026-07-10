@@ -17,14 +17,16 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
 
 interface DashboardSidebarProps {
   role: 'admin' | 'tutor' | 'customer'
   fullName?: string | null
   membershipTier?: string | null
+  googleConnected?: boolean | null
 }
 
-export function DashboardSidebar({ role, fullName, membershipTier: serverTier }: DashboardSidebarProps) {
+export function DashboardSidebar({ role, fullName, membershipTier: serverTier, googleConnected }: DashboardSidebarProps) {
   const pathname = usePathname()
   const supabase = createClient()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
@@ -161,6 +163,16 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier }:
             <div className="mt-2 text-xs font-medium uppercase tracking-wider text-gray-500">
               {role} Portal
             </div>
+            {role === 'admin' && googleConnected != null && (
+              <GoogleConnectionBadge
+                connected={googleConnected}
+                href="/dashboard/settings"
+                title={googleConnected
+                  ? 'ScoreMax Google account is connected — manage in Settings'
+                  : 'ScoreMax Google account is disconnected — online sessions cannot be scheduled. Click to connect.'}
+                className="mt-2"
+              />
+            )}
           </>
         )}
       </div>

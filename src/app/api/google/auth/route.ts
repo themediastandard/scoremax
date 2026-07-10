@@ -1,29 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { oauth2Client } from '@/lib/google-calendar'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth'
 import {
   createGoogleOAuthNonce,
   createGoogleOAuthState,
   GOOGLE_OAUTH_STATE_COOKIE,
 } from '@/lib/google-oauth-state'
 
-export async function GET(req: NextRequest) {
-  const role = req.nextUrl.searchParams.get('role')
-  
-  if (role !== 'customer' && role !== 'tutor') {
-    return NextResponse.json({ error: 'Valid role is required' }, { status: 400 })
-  }
-  
+// Starts the OAuth connect flow for the single ScoreMax business Google
+// account. Admin-only: this account owns every session calendar event.
+export async function GET() {
+  const authError = await requireAdmin()
+  if (authError) return authError
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
   if (!user) {
-     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
-  
+
   const nonce = createGoogleOAuthNonce()
   const state = createGoogleOAuthState({
-    role,
+    role: 'admin',
     userId: user.id,
     nonce,
     iat: Date.now(),
@@ -35,7 +34,7 @@ export async function GET(req: NextRequest) {
     prompt: 'consent',
     state,
   })
-  
+
   const response = NextResponse.redirect(url)
   response.cookies.set(GOOGLE_OAUTH_STATE_COOKIE, nonce, {
     httpOnly: true,

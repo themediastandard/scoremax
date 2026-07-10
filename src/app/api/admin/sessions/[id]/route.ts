@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { type calendar_v3 } from 'googleapis'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
-import { google, type calendar_v3 } from 'googleapis'
+import { getAdminGoogleAuth } from '@/lib/google-admin'
 import { requireAdmin } from '@/lib/auth'
 import {
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
-  withMeetLink,
 } from '@/lib/session-calendar'
 
 type SessionPerson = {
   id: string
   email: string
   full_name: string
-  google_refresh_token?: string | null
 }
 
 type SessionRecord = {
@@ -25,81 +24,95 @@ type SessionRecord = {
   confirmed_end?: string | null
   tutor_calendar_event_id?: string | null
   student_calendar_event_id?: string | null
+  meet_url?: string | null
   customers: SessionPerson
   tutors: SessionPerson
   [key: string]: unknown
 }
 
-const getAuthClient = (refreshToken: string) => {
-  const client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/google/callback`
+// Thrown when a session cannot be scheduled (e.g. online session with no
+// ScoreMax Google connection). Surfaces to the admin UI as a 400.
+class SchedulingError extends Error {}
+
+function getMeetUrl(event: { data?: calendar_v3.Schema$Event }) {
+  const videoEntry = event?.data?.conferenceData?.entryPoints?.find(
+    (entry) => entry.entryPointType === 'video'
   )
-  client.setCredentials({ refresh_token: refreshToken })
-  return client
+  return event?.data?.hangoutLink ?? videoEntry?.uri ?? null
 }
 
-async function handleSchedule(session: SessionRecord) {
+// Creates the single ScoreMax-owned calendar event (tutor + student invited).
+// Google delivers invites to both attendees, so neither needs their own
+// Google connection. Returns session-record updates.
+async function createSessionEvent(session: SessionRecord): Promise<Record<string, string | null>> {
   const updates: Record<string, string | null> = {}
+  const plan = buildSessionCalendarPlan(session)
+  const adminAuth = await getAdminGoogleAuth()
+
+  if (!adminAuth) {
+    if (plan.isOnline) {
+      throw new SchedulingError(
+        'The ScoreMax Google account is not connected, so a Google Meet cannot be created. Connect it in Settings → Integrations, then schedule this session.'
+      )
+    }
+    console.error('ScoreMax Google account not connected; scheduling in-person session without a calendar invite')
+    return updates
+  }
+
+  try {
+    const requestBody = {
+      ...plan.requestBody,
+      ...(plan.shouldCreateMeet ? getMeetConferenceRequest(session.id) : {}),
+    }
+    const event = await calendar.events.insert({
+      auth: adminAuth,
+      calendarId: 'primary',
+      conferenceDataVersion: plan.shouldCreateMeet ? 1 : 0,
+      sendUpdates: 'all',
+      requestBody,
+    })
+    // Single ScoreMax-owned event; stored in tutor_calendar_event_id
+    // (schema predates the single-event model).
+    updates.tutor_calendar_event_id = event.data.id ?? null
+    updates.student_calendar_event_id = null
+    const meetUrl = getMeetUrl(event)
+    if (meetUrl) {
+      updates.meet_url = meetUrl
+    } else if (plan.shouldCreateMeet) {
+      if (event.data.id) {
+        try {
+          await calendar.events.delete({
+            auth: adminAuth,
+            calendarId: 'primary',
+            eventId: event.data.id,
+            sendUpdates: 'none',
+          })
+        } catch (cleanupError) {
+          console.error('Failed to clean up event without Meet link', cleanupError)
+        }
+      }
+      throw new SchedulingError(
+        'Google did not return a Meet link for this session. Try again, or reconnect the ScoreMax Google account in Settings → Integrations.'
+      )
+    }
+  } catch (error) {
+    if (error instanceof SchedulingError) throw error
+    console.error('Failed to create session calendar event', error)
+    if (plan.isOnline) {
+      throw new SchedulingError(
+        'Could not create the Google Meet for this session. Check the ScoreMax Google connection in Settings → Integrations and try again.'
+      )
+    }
+  }
+
+  return updates
+}
+
+async function sendScheduleEmails(session: SessionRecord, meetUrl: string | null) {
   const startTime = new Date(session.confirmed_start ?? '')
   const isOnline = session.session_type === 'online'
-  const plan = buildSessionCalendarPlan(session)
-  const getMeetUrl = (event: { data?: calendar_v3.Schema$Event }) => {
-    const videoEntry = event?.data?.conferenceData?.entryPoints?.find(
-      (entry) => entry.entryPointType === 'video'
-    )
-    return event?.data?.hangoutLink ?? videoEntry?.uri ?? null
-  }
-
-  if (plan.tutor && session.tutors?.google_refresh_token) {
-    try {
-      const tutorAuth = getAuthClient(session.tutors.google_refresh_token)
-      const requestBody = {
-        ...plan.tutor.requestBody,
-        ...(plan.tutor.shouldCreateMeet ? getMeetConferenceRequest(session.id) : {}),
-      }
-      const event = await calendar.events.insert({
-        auth: tutorAuth,
-        calendarId: 'primary',
-        conferenceDataVersion: plan.tutor.shouldCreateMeet ? 1 : 0,
-        requestBody,
-      })
-      updates.tutor_calendar_event_id = event.data.id ?? null
-      const meetUrl = getMeetUrl(event)
-      if (meetUrl) {
-        updates.meet_url = meetUrl
-      }
-    } catch (error) {
-      console.error('Failed to create tutor calendar event', error)
-    }
-  }
-
-  if (plan.student && session.customers?.google_refresh_token) {
-    try {
-      const studentAuth = getAuthClient(session.customers.google_refresh_token)
-      const requestBody = {
-        ...withMeetLink(plan.student.requestBody, updates.meet_url),
-        ...(plan.student.shouldCreateMeet ? getMeetConferenceRequest(session.id) : {}),
-      }
-      const event = await calendar.events.insert({
-        auth: studentAuth,
-        calendarId: 'primary',
-        conferenceDataVersion: plan.student.shouldCreateMeet ? 1 : 0,
-        requestBody,
-      })
-      updates.student_calendar_event_id = event.data.id ?? null
-      if (!updates.meet_url) {
-        const meetUrl = getMeetUrl(event)
-        if (meetUrl) updates.meet_url = meetUrl
-      }
-    } catch (error) {
-      console.error('Failed to create student calendar event', error)
-    }
-  }
-
   const locationText = isOnline
-    ? `Online (Google Meet)${updates.meet_url ? ` - <a href="${updates.meet_url}">Join Meeting</a>` : ''}`
+    ? `Online (Google Meet)${meetUrl ? ` - <a href="${meetUrl}">Join Meeting</a>` : ''}`
     : 'Sawgrass, FL'
 
   try {
@@ -111,7 +124,7 @@ async function handleSchedule(session: SessionRecord) {
         title: 'Session Confirmed',
         greeting: `Hi ${session.customers.full_name},`,
         body: [
-          '<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed!</p>',
+          '<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed! A calendar invite is on its way to your inbox.</p>',
           detailRow('Tutor:', session.tutors.full_name),
           detailRow('Time:', startTime.toLocaleString()),
           detailRow('Location:', locationText),
@@ -131,7 +144,7 @@ async function handleSchedule(session: SessionRecord) {
         title: 'New Session Assigned',
         greeting: `Hi ${session.tutors.full_name},`,
         body: [
-          '<p style="margin: 0 0 16px 0;">You have been assigned a new session.</p>',
+          '<p style="margin: 0 0 16px 0;">You have been assigned a new session. A calendar invite is on its way to your inbox.</p>',
           detailRow('Student:', session.customers.full_name),
           detailRow('Time:', startTime.toLocaleString()),
           detailRow('Location:', locationText),
@@ -141,8 +154,39 @@ async function handleSchedule(session: SessionRecord) {
   } catch (emailError) {
     console.error('Failed to send tutor schedule notification:', emailError)
   }
+}
 
+async function handleSchedule(session: SessionRecord) {
+  const updates = await createSessionEvent(session)
+  await sendScheduleEmails(session, updates.meet_url ?? null)
   return updates
+}
+
+// Tutor changed on an already-scheduled session: patch the existing event's
+// attendees (Google notifies the removed tutor, invites the new one) and keep
+// the same Meet link. Falls back to creating a fresh event if none exists.
+async function handleReassign(session: SessionRecord) {
+  const adminAuth = await getAdminGoogleAuth()
+  const eventId = session.tutor_calendar_event_id
+
+  if (!adminAuth || !eventId) {
+    return handleSchedule(session)
+  }
+
+  const plan = buildSessionCalendarPlan(session)
+  try {
+    await calendar.events.patch({
+      auth: adminAuth,
+      calendarId: 'primary',
+      eventId,
+      sendUpdates: 'all',
+      requestBody: plan.requestBody,
+    })
+  } catch (error) {
+    console.error('Failed to update calendar event for tutor change', error)
+  }
+  await sendScheduleEmails(session, session.meet_url ?? null)
+  return {}
 }
 
 async function handleComplete(session: SessionRecord) {
@@ -161,26 +205,20 @@ async function handleComplete(session: SessionRecord) {
 }
 
 async function handleCancel(session: SessionRecord) {
-  if (session.tutor_calendar_event_id && session.tutors?.google_refresh_token) {
-    try {
-      const tutorAuth = getAuthClient(session.tutors.google_refresh_token)
-      await calendar.events.delete({
-        auth: tutorAuth,
-        calendarId: 'primary',
-        eventId: session.tutor_calendar_event_id
-      })
-    } catch (e) { console.error('Error deleting tutor calendar event:', e) }
-  }
+  const adminAuth = await getAdminGoogleAuth()
+  const eventId = session.tutor_calendar_event_id
 
-  if (session.student_calendar_event_id && session.customers?.google_refresh_token) {
+  if (adminAuth && eventId) {
     try {
-      const studentAuth = getAuthClient(session.customers.google_refresh_token)
       await calendar.events.delete({
-        auth: studentAuth,
+        auth: adminAuth,
         calendarId: 'primary',
-        eventId: session.student_calendar_event_id
+        eventId,
+        sendUpdates: 'all',
       })
-    } catch (e) { console.error('Error deleting student calendar event:', e) }
+    } catch (e) {
+      console.error('Error deleting session calendar event:', e)
+    }
   }
 
   return {
@@ -191,37 +229,23 @@ async function handleCancel(session: SessionRecord) {
 }
 
 async function handleReschedule(session: SessionRecord, newStart: string, newEnd: string) {
-  const startTime = new Date(newStart)
-  const endTime = new Date(newEnd)
+  const adminAuth = await getAdminGoogleAuth()
+  const eventId = session.tutor_calendar_event_id
+  if (!adminAuth || !eventId) return
 
-  if (session.tutor_calendar_event_id && session.tutors?.google_refresh_token) {
-    try {
-      const tutorAuth = getAuthClient(session.tutors.google_refresh_token)
-      await calendar.events.patch({
-        auth: tutorAuth,
-        calendarId: 'primary',
-        eventId: session.tutor_calendar_event_id,
-        requestBody: {
-          start: { dateTime: startTime.toISOString() },
-          end: { dateTime: endTime.toISOString() },
-        }
-      })
-    } catch (e) { console.error('Failed to update tutor calendar event', e) }
-  }
-
-  if (session.student_calendar_event_id && session.customers?.google_refresh_token) {
-    try {
-      const studentAuth = getAuthClient(session.customers.google_refresh_token)
-      await calendar.events.patch({
-        auth: studentAuth,
-        calendarId: 'primary',
-        eventId: session.student_calendar_event_id,
-        requestBody: {
-          start: { dateTime: startTime.toISOString() },
-          end: { dateTime: endTime.toISOString() },
-        }
-      })
-    } catch (e) { console.error('Failed to update student calendar event', e) }
+  try {
+    await calendar.events.patch({
+      auth: adminAuth,
+      calendarId: 'primary',
+      eventId,
+      sendUpdates: 'all',
+      requestBody: {
+        start: { dateTime: new Date(newStart).toISOString() },
+        end: { dateTime: new Date(newEnd).toISOString() },
+      },
+    })
+  } catch (e) {
+    console.error('Failed to update session calendar event', e)
   }
 }
 
@@ -258,8 +282,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .from('sessions')
     .select(`
       *,
-      customers (id, email, full_name, google_refresh_token),
-      tutors (id, email, full_name, google_refresh_token)
+      customers (id, email, full_name),
+      tutors (id, email, full_name)
     `)
     .eq('id', id)
     .single()
@@ -279,70 +303,78 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const newStatus = status
   const oldStatus = currentSession.status
 
-  if (newStatus && newStatus !== oldStatus) {
-    if (newStatus === 'scheduled' && oldStatus === 'pending_scheduling') {
-      if (!updates.assigned_tutor_id || !updates.confirmed_start || !updates.confirmed_end) {
-        return NextResponse.json(
-          { error: 'Cannot schedule without tutor and confirmed time' },
-          { status: 400 }
-        )
+  try {
+    if (newStatus && newStatus !== oldStatus) {
+      if (newStatus === 'scheduled' && oldStatus === 'pending_scheduling') {
+        if (!updates.assigned_tutor_id || !updates.confirmed_start || !updates.confirmed_end) {
+          return NextResponse.json(
+            { error: 'Cannot schedule without tutor and confirmed time' },
+            { status: 400 }
+          )
+        }
+
+        const merged = { ...currentSession, ...updates }
+        if (updates.assigned_tutor_id !== currentSession.assigned_tutor_id) {
+          const { data: newTutor } = await supabaseAdmin
+            .from('tutors')
+            .select('id, email, full_name')
+            .eq('id', updates.assigned_tutor_id)
+            .single()
+          if (newTutor) merged.tutors = newTutor
+        }
+
+        const calendarUpdates = await handleSchedule(merged)
+        updates = { ...updates, ...calendarUpdates }
       }
 
-      const merged = { ...currentSession, ...updates }
-      if (updates.assigned_tutor_id !== currentSession.assigned_tutor_id) {
-        const { data: newTutor } = await supabaseAdmin
-          .from('tutors')
-          .select('id, email, full_name, google_refresh_token')
-          .eq('id', updates.assigned_tutor_id)
-          .single()
-        if (newTutor) merged.tutors = newTutor
+      if (newStatus === 'completed') {
+        await handleComplete({ ...currentSession, ...updates })
       }
 
-      const calendarUpdates = await handleSchedule(merged)
-      updates = { ...updates, ...calendarUpdates }
+      if (newStatus === 'cancelled') {
+        const cancelUpdates = await handleCancel(currentSession)
+        updates = { ...updates, ...cancelUpdates }
+      }
     }
 
-    if (newStatus === 'completed') {
-      await handleComplete({ ...currentSession, ...updates })
+    const statusUnchanged = !newStatus || newStatus === oldStatus
+    const timesChanged =
+      (confirmed_start && confirmed_start !== currentSession.confirmed_start) ||
+      (confirmed_end && confirmed_end !== currentSession.confirmed_end)
+    const tutorChanged =
+      assigned_tutor_id &&
+      assigned_tutor_id !== currentSession.assigned_tutor_id
+
+    if (statusUnchanged && oldStatus === 'scheduled' && tutorChanged) {
+      const merged = {
+        ...currentSession,
+        ...updates,
+        confirmed_start: confirmed_start || currentSession.confirmed_start,
+        confirmed_end: confirmed_end || currentSession.confirmed_end,
+      }
+      const { data: newTutor } = await supabaseAdmin
+        .from('tutors')
+        .select('id, email, full_name')
+        .eq('id', assigned_tutor_id)
+        .single()
+      if (newTutor) merged.tutors = newTutor
+
+      // The reassign patch carries the merged start/end too, so a separate
+      // reschedule call is unnecessary even when times changed together.
+      const reassignUpdates = await handleReassign(merged)
+      updates = { ...updates, ...reassignUpdates }
+    } else if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
+      await handleReschedule(
+        currentSession,
+        confirmed_start || currentSession.confirmed_start,
+        confirmed_end || currentSession.confirmed_end
+      )
     }
-
-    if (newStatus === 'cancelled') {
-      const cancelUpdates = await handleCancel(currentSession)
-      updates = { ...updates, ...cancelUpdates }
+  } catch (error) {
+    if (error instanceof SchedulingError) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
-  }
-
-  const statusUnchanged = !newStatus || newStatus === oldStatus
-  const timesChanged =
-    (confirmed_start && confirmed_start !== currentSession.confirmed_start) ||
-    (confirmed_end && confirmed_end !== currentSession.confirmed_end)
-  const tutorChanged =
-    assigned_tutor_id &&
-    assigned_tutor_id !== currentSession.assigned_tutor_id
-
-  if (statusUnchanged && oldStatus === 'scheduled' && tutorChanged) {
-    const cancelUpdates = await handleCancel(currentSession)
-    const merged = {
-      ...currentSession,
-      ...updates,
-      confirmed_start: confirmed_start || currentSession.confirmed_start,
-      confirmed_end: confirmed_end || currentSession.confirmed_end,
-    }
-    const { data: newTutor } = await supabaseAdmin
-      .from('tutors')
-      .select('id, email, full_name, google_refresh_token')
-      .eq('id', assigned_tutor_id)
-      .single()
-    if (newTutor) merged.tutors = newTutor
-
-    const calendarUpdates = await handleSchedule(merged)
-    updates = { ...updates, ...cancelUpdates, ...calendarUpdates }
-  } else if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
-    await handleReschedule(
-      currentSession,
-      confirmed_start || currentSession.confirmed_start,
-      confirmed_end || currentSession.confirmed_end
-    )
+    throw error
   }
 
   const { data, error } = await supabaseAdmin

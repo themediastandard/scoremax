@@ -64,42 +64,39 @@ test('customer credit summary does not expose internal record ids', () => {
   assert.equal(summary.totalCourseSessions, 2)
 })
 
-test('calendar plan creates exactly one canonical Meet request', () => {
+test('online calendar plan builds one ScoreMax-owned event inviting tutor and student with a Meet', () => {
   const plan = buildSessionCalendarPlan({
     id: 'session-1',
     session_type: 'online',
     confirmed_start: '2026-03-01T15:00:00.000Z',
     confirmed_end: '2026-03-01T16:00:00.000Z',
-    customers: {
-      full_name: 'Ada Student',
-      google_refresh_token: 'student-refresh',
-    },
-    tutors: {
-      full_name: 'Grace Tutor',
-      google_refresh_token: 'tutor-refresh',
-    },
+    customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
   })
 
-  assert.equal(plan.tutor?.shouldCreateMeet, true)
-  assert.equal(plan.student?.shouldCreateMeet, false)
+  assert.equal(plan.isOnline, true)
+  assert.equal(plan.shouldCreateMeet, true)
+  assert.deepEqual(
+    plan.requestBody.attendees.map((a) => a.email),
+    ['grace@example.com', 'ada@example.com']
+  )
+  assert.equal(plan.requestBody.location, undefined)
+  assert.equal(plan.requestBody.start.dateTime, '2026-03-01T15:00:00.000Z')
+  assert.equal(plan.requestBody.end.dateTime, '2026-03-01T16:00:00.000Z')
 })
 
-test('calendar plan lets the student event create Meet only when the tutor cannot', () => {
+test('in-person calendar plan sets the location and skips the Meet request', () => {
   const plan = buildSessionCalendarPlan({
     id: 'session-2',
-    session_type: 'online',
+    session_type: 'in-person',
     confirmed_start: '2026-03-01T15:00:00.000Z',
     confirmed_end: '2026-03-01T16:00:00.000Z',
-    customers: {
-      full_name: 'Ada Student',
-      google_refresh_token: 'student-refresh',
-    },
-    tutors: {
-      full_name: 'Grace Tutor',
-      google_refresh_token: null,
-    },
+    customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
   })
 
-  assert.equal(plan.tutor, null)
-  assert.equal(plan.student?.shouldCreateMeet, true)
+  assert.equal(plan.isOnline, false)
+  assert.equal(plan.shouldCreateMeet, false)
+  assert.match(plan.requestBody.location, /Sunrise, FL/)
+  assert.equal(plan.requestBody.attendees.length, 2)
 })

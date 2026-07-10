@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
@@ -73,7 +72,7 @@ export async function POST(req: Request) {
         .single()
 
     let isGuestCheckout = false
-    let tempPassword: string | null = null
+    let setPasswordUrl: string | null = null
     if (!customer) {
         // Check by Email
         const { data: customerByEmail } = await supabaseAdmin
@@ -81,7 +80,7 @@ export async function POST(req: Request) {
             .select('*')
             .ilike('email', contactEmail)
             .single()
-            
+
         if (customerByEmail) {
             // Link Stripe ID
             await supabaseAdmin.from('customers').update({
@@ -93,11 +92,11 @@ export async function POST(req: Request) {
             customer = customerByEmail
         } else {
             isGuestCheckout = true
-            tempPassword = randomBytes(9).toString('base64url')
 
+            // Create the account without a password; the guest sets their own
+            // via the "set your password" link generated below.
             const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
                 email: contactEmail,
-                password: tempPassword,
                 email_confirm: true,
                 user_metadata: { full_name: contactName },
                 app_metadata: { role: 'customer' },
@@ -110,6 +109,22 @@ export async function POST(req: Request) {
                 const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
                 const existingUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === contactEmail)
                 if (existingUser) profileId = existingUser.id
+            }
+
+            // Generate a one-time link the guest uses to set their password and
+            // sign in. generateLink only returns the link — it sends no email —
+            // so this goes into the single confirmation email below. Works
+            // whether the account was just created or already existed.
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
+            const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+                type: 'recovery',
+                email: contactEmail,
+            })
+            const tokenHash = linkData?.properties?.hashed_token
+            if (tokenHash) {
+                setPasswordUrl = `${appUrl}/auth/callback?token_hash=${tokenHash}&type=recovery`
+            } else if (linkError) {
+                console.error('Failed to generate set-password link for guest checkout:', linkError.message)
             }
 
             const { data: triggerCreated } = await supabaseAdmin
@@ -344,12 +359,10 @@ export async function POST(req: Request) {
         ? ''
         : '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
 
-      const accountBody = isGuestCheckout && tempPassword
+      const accountBody = isGuestCheckout && setPasswordUrl
         ? [
-            '<p style="margin: 0 0 16px 0;">We\'ve created an account for you. Use the credentials below to sign in and view your dashboard:</p>',
-            `<p style="margin: 0 0 4px 0;"><strong style="color: #1e293b;">Email:</strong> ${contactEmail}</p>`,
-            `<p style="margin: 0 0 16px 0;"><strong style="color: #1e293b;">Temporary Password:</strong> ${tempPassword}</p>`,
-            '<p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">You can change your password anytime from your account settings.</p>',
+            '<p style="margin: 0 0 16px 0;">We\'ve created an account for you. Set your password using the button below to sign in and view your dashboard.</p>',
+            `<p style="margin: 0 0 16px 0;"><strong style="color: #1e293b;">Email:</strong> ${contactEmail}</p>`,
           ].join('')
         : ''
 
@@ -362,8 +375,8 @@ export async function POST(req: Request) {
             title: isInPersonCourse ? 'Welcome to the SAT Course!' : 'Thank You for Your Purchase',
             greeting: `Hi ${contactName || 'there'},`,
             body: purchaseBody + (isInPersonCourse ? inPersonCourseDetails : '') + nextSteps + accountBody,
-            ctaText: 'Sign In to Your Dashboard',
-            ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+            ctaText: isGuestCheckout && setPasswordUrl ? 'Set Your Password & Sign In' : 'Sign In to Your Dashboard',
+            ctaUrl: isGuestCheckout && setPasswordUrl ? setPasswordUrl : `${process.env.NEXT_PUBLIC_APP_URL}/login`,
           }),
         })
       } catch (emailError) {

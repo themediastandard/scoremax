@@ -2,7 +2,9 @@ import { createHmac, randomBytes, timingSafeEqual } from 'crypto'
 
 export const GOOGLE_OAUTH_STATE_COOKIE = 'scoremax_google_oauth_state'
 
-type GoogleCalendarRole = 'customer' | 'tutor'
+// Only admins connect Google now — the single ScoreMax business account owns
+// every session calendar event and Meet link.
+type GoogleCalendarRole = 'admin'
 
 export interface GoogleOAuthStatePayload {
   role: GoogleCalendarRole
@@ -54,7 +56,7 @@ export function verifyGoogleOAuthState(state: string, maxAgeMs = 10 * 60 * 1000)
   }
 
   const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString()) as GoogleOAuthStatePayload
-  if (payload.role !== 'customer' && payload.role !== 'tutor') {
+  if (payload.role !== 'admin') {
     throw new Error('Invalid OAuth state role')
   }
   if (!payload.userId || !payload.nonce || !payload.iat) {
