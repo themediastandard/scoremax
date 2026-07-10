@@ -1,0 +1,8 @@
+# Netlify build configuration.
+#
+# `next build` runs a full-project TypeScript type-check + ESLint pass (we
+# deliberately enable these — see next.config.ts). That pass exceeds Node's
+# default ~2GB heap on Netlify's build image and OOMs ("Ineffective
+# mark-compacts near heap limit"). Raise the heap so the checks can run.
+[build.environment]
+  NODE_OPTIONS = "--max-old-space-size=4096"
