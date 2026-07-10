@@ -3,13 +3,32 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
-import { google } from 'googleapis'
+import { google, type calendar_v3 } from 'googleapis'
 import { requireAdmin } from '@/lib/auth'
 import {
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
   withMeetLink,
 } from '@/lib/session-calendar'
+
+type SessionPerson = {
+  id: string
+  email: string
+  full_name: string
+  google_refresh_token?: string | null
+}
+
+type SessionRecord = {
+  id: string
+  session_type?: string | null
+  confirmed_start?: string | null
+  confirmed_end?: string | null
+  tutor_calendar_event_id?: string | null
+  student_calendar_event_id?: string | null
+  customers: SessionPerson
+  tutors: SessionPerson
+  [key: string]: unknown
+}
 
 const getAuthClient = (refreshToken: string) => {
   const client = new google.auth.OAuth2(
@@ -21,15 +40,14 @@ const getAuthClient = (refreshToken: string) => {
   return client
 }
 
-async function handleSchedule(session: any) {
+async function handleSchedule(session: SessionRecord) {
   const updates: Record<string, string | null> = {}
-  const startTime = new Date(session.confirmed_start)
-  const endTime = new Date(session.confirmed_end)
+  const startTime = new Date(session.confirmed_start ?? '')
   const isOnline = session.session_type === 'online'
   const plan = buildSessionCalendarPlan(session)
-  const getMeetUrl = (event: any) => {
+  const getMeetUrl = (event: { data?: calendar_v3.Schema$Event }) => {
     const videoEntry = event?.data?.conferenceData?.entryPoints?.find(
-      (entry: { entryPointType?: string }) => entry.entryPointType === 'video'
+      (entry) => entry.entryPointType === 'video'
     )
     return event?.data?.hangoutLink ?? videoEntry?.uri ?? null
   }
@@ -127,7 +145,7 @@ async function handleSchedule(session: any) {
   return updates
 }
 
-async function handleComplete(session: any) {
+async function handleComplete(session: SessionRecord) {
   await resend.emails.send({
     ...getEmailDefaults(),
     to: session.customers.email,
@@ -142,7 +160,7 @@ async function handleComplete(session: any) {
   })
 }
 
-async function handleCancel(session: any) {
+async function handleCancel(session: SessionRecord) {
   if (session.tutor_calendar_event_id && session.tutors?.google_refresh_token) {
     try {
       const tutorAuth = getAuthClient(session.tutors.google_refresh_token)
@@ -172,7 +190,7 @@ async function handleCancel(session: any) {
   }
 }
 
-async function handleReschedule(session: any, newStart: string, newEnd: string) {
+async function handleReschedule(session: SessionRecord, newStart: string, newEnd: string) {
   const startTime = new Date(newStart)
   const endTime = new Date(newEnd)
 
@@ -207,7 +225,7 @@ async function handleReschedule(session: any, newStart: string, newEnd: string) 
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
   if (authError) return authError
 
@@ -228,7 +246,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(data)
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
   if (authError) return authError
 
@@ -250,7 +268,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Session not found' }, { status: 404 })
   }
 
-  let updates: Record<string, any> = {
+  let updates: Record<string, unknown> = {
     assigned_tutor_id,
     confirmed_start,
     confirmed_end,

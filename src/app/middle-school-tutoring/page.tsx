@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/middle-school-tutoring',
+    url: 'https://www.scoremaxtutoring.com/middle-school-tutoring',
     siteName: 'ScoreMax',
     title: 'Middle School Tutoring Services | Math, English & Science',
     description: 'Expert middle school tutoring in math, English, science, organization, and study skills.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/middle-school-tutoring',
+    canonical: 'https://www.scoremaxtutoring.com/middle-school-tutoring',
   },
 };
 

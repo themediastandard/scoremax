@@ -12,9 +12,18 @@ function formatTime24To12(time24: string) {
   return `${h12}:${m?.toString().padStart(2, '0') ?? '00'} ${ampm}`
 }
 
+export interface BookingDetails {
+  plan?: { name: string; amountCents: number; type: string } | null
+  availability?: { days?: string[]; startTime?: string | null; endTime?: string | null } | null
+  sessionType?: string | null
+  subjects?: string[] | null
+  subjectIds?: string[] | null
+  isCohortBooking?: boolean
+  cohortSchedule?: { startDate: string; endDate: string; timeStart: string; timeEnd: string; days?: string | null } | null
+}
+
 interface ConfirmationViewProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  bookingDetails?: any
+  bookingDetails?: BookingDetails | null
   onBookAnother: () => void
 }
 

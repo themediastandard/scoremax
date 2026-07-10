@@ -45,7 +45,9 @@ export default async function OrdersPage() {
         const pkg = order.customers?.packages?.[0]
         if (pkg) label = `${pkg.total_hours}-Hr Package (Credit)`
       } else if (order.payment_type === 'membership') {
-        const mem = order.customers?.memberships?.find((m: any) => m.status === 'active')
+        const mem = order.customers?.memberships?.find(
+          (m: { status?: string | null; tier?: string | null }) => m.status === 'active'
+        )
         if (mem?.tier) label = `${mem.tier.charAt(0).toUpperCase() + mem.tier.slice(1)} Membership (Credit)`
       }
     }

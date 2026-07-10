@@ -3,7 +3,7 @@ import { Webhook } from 'standardwebhooks'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://scoremaxtutor.netlify.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
 
 function buildVerifyUrl(tokenHash: string, type: string): string {
   const params = new URLSearchParams({ token_hash: tokenHash, type })

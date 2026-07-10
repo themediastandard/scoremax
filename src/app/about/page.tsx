@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/about',
+    url: 'https://www.scoremaxtutoring.com/about',
     siteName: 'ScoreMax',
     title: 'About ScoreMax - Expert Tutoring Team & Company Mission',
     description: 'Learn about ScoreMax\'s expert tutoring team led by Avi and Taimir. Discover our mission to help students achieve academic success through personalized SAT, ACT, and subject tutoring.',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/about',
+    canonical: 'https://www.scoremaxtutoring.com/about',
   },
 };
 

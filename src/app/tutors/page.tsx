@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/tutors',
+    url: 'https://www.scoremaxtutoring.com/tutors',
     siteName: 'ScoreMax',
     title: 'Expert Tutors | Professional SAT, ACT & Subject Tutoring | ScoreMax',
     description: 'Meet our team of expert tutors with advanced degrees from top universities. Professional SAT, ACT, math, science, and test prep tutoring with proven track records.',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/tutors',
+    canonical: 'https://www.scoremaxtutoring.com/tutors',
   },
 };
 
@@ -46,7 +46,7 @@ export default function TutorsPage() {
     "@type": "ItemList",
     "name": "ScoreMax Expert Tutors",
     "description": "Meet our team of expert tutors with advanced degrees from top universities",
-    "url": "https://scoremax.com/tutors",
+    "url": "https://www.scoremaxtutoring.com/tutors",
     "itemListElement": [
       {
         "@type": "Person",

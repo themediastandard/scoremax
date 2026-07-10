@@ -26,7 +26,7 @@ export async function GET() {
       .select('remaining_hours')
       .eq('customer_id', result.customerId)
       .gt('remaining_hours', 0)
-    packageCredits = (packages ?? []).reduce((sum: number, p: any) => sum + p.remaining_hours, 0)
+    packageCredits = (packages ?? []).reduce((sum: number, p: { remaining_hours: number | null }) => sum + (p.remaining_hours ?? 0), 0)
   }
 
   const totalCredits = membershipCredits + packageCredits

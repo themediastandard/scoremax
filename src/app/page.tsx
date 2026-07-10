@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com',
+    url: 'https://www.scoremaxtutoring.com',
     siteName: 'ScoreMax',
     title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
     description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points. Flexible scheduling, proven results, and personalized learning plans.',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com',
+    canonical: 'https://www.scoremaxtutoring.com',
   },
 };
 
@@ -56,12 +56,12 @@ export default function Home() {
     "@type": "EducationalOrganization",
     "name": "ScoreMax",
     "description": "Professional SAT and ACT tutoring services with expert tutors. Help students improve test scores by 280+ points.",
-    "url": "https://scoremax.com",
-    "logo": "https://scoremax.com/logo.avif",
+    "url": "https://www.scoremaxtutoring.com",
+    "logo": "https://www.scoremaxtutoring.com/logo.avif",
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "customer service",
-      "url": "https://scoremax.com/contact"
+      "url": "https://www.scoremaxtutoring.com/contact"
     },
     "address": {
       "@type": "PostalAddress",

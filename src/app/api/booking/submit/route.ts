@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
   const courseEnrollmentId = null // Not implementing complex course matching yet
 
   // Check Membership
-  const activeMembership = customer.memberships?.find((m: any) => m.status === 'active')
+  const activeMembership = customer.memberships?.find(
+    (m: { status: string }) => m.status === 'active'
+  )
   if (activeMembership) {
     const available = activeMembership.included_hours + activeMembership.rollover_hours - activeMembership.used_hours
     if (available > 0) {
@@ -49,7 +51,10 @@ export async function POST(req: NextRequest) {
 
   // Check Packages (if no membership credit used)
   if (!creditSource) {
-    const activePackage = customer.packages?.find((p: any) => p.remaining_hours > 0 && new Date(p.expires_at) > new Date())
+    const activePackage = customer.packages?.find(
+      (p: { remaining_hours: number; expires_at: string }) =>
+        p.remaining_hours > 0 && new Date(p.expires_at) > new Date()
+    )
     if (activePackage) {
       creditSource = 'package'
       sourceId = activePackage.id

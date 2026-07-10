@@ -28,13 +28,13 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .single()
     
-  const { data: packages, error: pError } = await supabaseAdmin
+  const { data: packages } = await supabaseAdmin
     .from('packages')
     .select('*')
     .eq('customer_id', customer.id)
     .gt('remaining_hours', 0)
     
-  const { data: courses, error: cError } = await supabaseAdmin
+  const { data: courses } = await supabaseAdmin
     .from('course_enrollments')
     .select('*')
     .eq('customer_id', customer.id)

@@ -88,5 +88,5 @@ export async function POST(req: NextRequest) {
     membership,
     packages: packages ?? [],
     courseEnrollments: courses,
-  } as any))
+  }))
 }

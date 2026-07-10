@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const authError = await requireAdmin()
   if (authError) return authError
 

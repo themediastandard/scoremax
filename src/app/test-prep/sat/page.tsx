@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/test-prep/sat',
+    url: 'https://www.scoremaxtutoring.com/test-prep/sat',
     siteName: 'ScoreMax',
     title: 'SAT Tutoring Services | Expert SAT Test Prep | ScoreMax',
     description: 'Professional SAT tutoring services with expert tutors. Improve your SAT scores with personalized test preparation, proven strategies, and comprehensive study plans.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/test-prep/sat',
+    canonical: 'https://www.scoremaxtutoring.com/test-prep/sat',
   },
 };
 

@@ -1,12 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
 
-# Sitemap
-Sitemap: https://scoremax.com/sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 1
-
-# Disallow admin or private areas (if any exist in the future)
-# Disallow: /admin/
-# Disallow: /private/
+Sitemap: https://www.scoremaxtutoring.com/sitemap.xml

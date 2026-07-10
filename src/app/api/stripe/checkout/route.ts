@@ -99,14 +99,20 @@ export async function POST(req: NextRequest) {
             .from('pricing')
             .select('price_cents, name')
             .eq('type', 'course')
-        const courseType = body.courseType || plan_type
-        let matched = coursePricing?.find((c: { name: string }) => c.name.toLowerCase().includes(courseType.replace(/-/g, ' ')))
-        if (!matched && coursePricing?.length) matched = coursePricing[0]
-
-        if (matched) {
-            trustedPriceCents = matched.price_cents
-            trustedPlanName = matched.name
+        const courseType = String(body.courseType || 'sat')
+        const matchesCourseType = (name: string) => {
+            const n = name.toLowerCase()
+            const hasSat = n.includes('sat')
+            const hasAct = n.includes('act')
+            if (courseType === 'sat-act-combined') return hasSat && hasAct
+            if (courseType === 'act') return hasAct && !hasSat
+            return hasSat && !hasAct
         }
+        const matched = coursePricing?.find((c: { name: string }) => matchesCourseType(c.name))
+        if (!matched) throw new Error(`No course pricing found for course type: ${courseType}`)
+
+        trustedPriceCents = matched.price_cents
+        trustedPlanName = matched.name
 
         if (trustedPriceCents <= 0) throw new Error('Could not determine course price')
         line_items.push({

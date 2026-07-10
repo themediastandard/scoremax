@@ -1,6 +1,6 @@
 "use client"
 
-import { ConfirmationView } from '@/components/booking/ConfirmationView'
+import { ConfirmationView, type BookingDetails } from '@/components/booking/ConfirmationView'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 
@@ -10,7 +10,7 @@ function ConfirmationContent() {
   const sessionId = searchParams.get('session_id')
   const bookingId = searchParams.get('booking_id')
   
-  const [bookingDetails, setBookingDetails] = useState<any>(null)
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null)
   
   useEffect(() => {
     const param = sessionId

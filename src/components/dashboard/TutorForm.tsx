@@ -74,9 +74,9 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
 
       setOpen(false)
       router.refresh()
-    } catch (error: any) {
+    } catch (error) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to save tutor')
     } finally {
       setLoading(false)
     }
@@ -94,9 +94,9 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
       setOpen(false)
       setConfirmDelete(false)
       router.refresh()
-    } catch (error: any) {
+    } catch (error) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to delete tutor')
     } finally {
       setDeleting(false)
     }
@@ -139,6 +139,7 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
             <Label>Photo (Optional)</Label>
             {photoUrl && (
               <div className="flex items-center gap-3 mb-1">
+                {/* eslint-disable-next-line @next/next/no-img-element -- preview of a freshly uploaded storage URL; next/image needs configured remote hosts */}
                 <img src={photoUrl} alt="Tutor" className="w-12 h-12 rounded-full object-cover border border-gray-200" />
                 <button type="button" onClick={() => setPhotoUrl('')} className="text-xs text-red-500 hover:underline">Remove</button>
               </div>

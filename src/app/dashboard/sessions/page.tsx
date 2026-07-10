@@ -67,7 +67,7 @@ export default async function SessionsPage() {
           totalActive={scheduled}
         />
         <AdminSessionList
-          sessions={sessions as any}
+          sessions={sessions ?? []}
           tutors={tutors || []}
           subjectMap={subjectMapObj}
         />
@@ -162,7 +162,7 @@ export default async function SessionsPage() {
         </div>
 
         <TutorSessionsTable
-          sessions={allSessions as any}
+          sessions={allSessions}
           subjectMap={Object.fromEntries(subjectMap)}
         />
       </div>
@@ -191,7 +191,7 @@ export default async function SessionsPage() {
       <div className="space-y-6">
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Your Sessions</h1>
         <FlatSessionList
-          sessions={(sessions || []) as any}
+          sessions={sessions || []}
           tutors={[]}
           subjectMap={subjectMap}
           isAdmin={false}

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description: "Expert 1-on-1 test prep tutoring for SAT, ACT, GMAT, GRE & academic subjects. Get matched with certified tutors and boost your scores with personalized study plans.",
   openGraph: {
     type: 'website',
-    url: 'https://scoremax.com',
+    url: 'https://www.scoremaxtutoring.com',
     siteName: 'ScoreMax',
     title: 'ScoreMax Tutoring | Unlock Your Test Score Potential',
     description: 'Expert 1-on-1 test prep tutoring for SAT, ACT, GMAT, GRE & academic subjects.',
@@ -75,7 +75,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'ScoreMax Tutoring',
-              url: 'https://scoremax.com',
+              url: 'https://www.scoremaxtutoring.com',
             })
           }}
         />

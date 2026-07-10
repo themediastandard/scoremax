@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/step-up-for-students',
+    url: 'https://www.scoremaxtutoring.com/step-up-for-students',
     siteName: 'ScoreMax',
     title: 'Step Up For Students Partnership | ScoreMax Tutoring',
     description: 'ScoreMax partners with Step Up For Students to provide quality tutoring services and support student success.',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/step-up-for-students',
+    canonical: 'https://www.scoremaxtutoring.com/step-up-for-students',
   },
 };
 

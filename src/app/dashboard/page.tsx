@@ -10,6 +10,59 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { formatPlanLabel, formatAmount } from '@/lib/order-format'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
+// supabase-js without generated DB types infers to-one joins as arrays,
+// but FK joins return single objects at runtime — cast results to the runtime shape.
+function toRows<T>(data: unknown): T[] {
+  return (data ?? []) as T[]
+}
+
+type AdminOrderRow = {
+  id: string
+  created_at: string
+  status: string | null
+  payment_type: string | null
+  amount_cents: number | null
+  subjects: string[] | null
+  session_type: string | null
+  customers: {
+    full_name: string | null
+    packages: Array<{ total_hours: number | null }> | null
+    memberships: Array<{ tier: string | null; status: string | null }> | null
+  } | null
+  payments: Array<{ amount_cents: number | null }> | null
+}
+
+type AdminSessionRow = {
+  id: string
+  status: string | null
+  confirmed_start: string
+  confirmed_end: string | null
+  session_type: string | null
+  subjects: string[] | null
+  customers: { full_name: string | null } | null
+  tutors: { full_name: string | null } | null
+}
+
+type TutorSessionRow = {
+  id: string
+  confirmed_start: string
+  confirmed_end: string | null
+  session_type: string | null
+  subjects: string[] | null
+  customers: { full_name: string | null; email: string | null } | null
+}
+
+type CustomerSessionRow = {
+  id: string
+  status: string | null
+  confirmed_start: string | null
+  confirmed_end: string | null
+  session_type: string | null
+  subjects: string[] | null
+  meet_url: string | null
+  tutors: { full_name: string | null } | null
+}
+
 export default async function DashboardHome() {
   const user = await getAuthUser()
   if (!user) redirect('/login')
@@ -25,8 +78,8 @@ export default async function DashboardHome() {
       { count: scheduledSessionCount },
       { count: memberCount },
       { count: customerCount },
-      { data: recentOrders },
-      { data: upcomingSessions },
+      { data: recentOrdersData },
+      { data: upcomingSessionsData },
       { data: adminSubjects },
     ] = await Promise.all([
       supabase
@@ -59,10 +112,21 @@ export default async function DashboardHome() {
       supabase.from('subjects').select('*'),
     ])
 
+    const recentOrders = toRows<AdminOrderRow>(recentOrdersData)
+    const upcomingSessions = toRows<AdminSessionRow>(upcomingSessionsData)
+
     const adminSubjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(adminSubjects ?? []))))
     const resolveSubjects = (ids: string[] | null) =>
       (ids ?? []).map((id) => adminSubjectMap.get(id)).filter(Boolean).join(', ')
-    const resolvePlanLabel = (order: any) => {
+    const resolvePlanLabel = (order: {
+      amount_cents?: number | null
+      payment_type?: string | null
+      payments?: Array<{ amount_cents?: number | null }> | null
+      customers?: {
+        packages?: Array<{ total_hours?: number | null }> | null
+        memberships?: Array<{ status?: string | null; tier?: string | null }> | null
+      } | null
+    }) => {
       const amt = order.amount_cents || order.payments?.[0]?.amount_cents || 0
       if (amt > 0) return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
       if (order.payment_type === 'package') {
@@ -70,7 +134,7 @@ export default async function DashboardHome() {
         if (pkg) return `${pkg.total_hours}-Hr Package (Credit)`
       }
       if (order.payment_type === 'membership') {
-        const mem = order.customers?.memberships?.find((m: any) => m.status === 'active')
+        const mem = order.customers?.memberships?.find((m) => m.status === 'active')
         if (mem?.tier) return `${mem.tier.charAt(0).toUpperCase() + mem.tier.slice(1)} Membership (Credit)`
       }
       return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
@@ -138,7 +202,7 @@ export default async function DashboardHome() {
             <CardContent>
               {recentOrders && recentOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {recentOrders.map((order: any) => {
+                  {recentOrders.map((order) => {
                     const amt = order.amount_cents || order.payments?.[0]?.amount_cents
                     return (
                       <Link
@@ -202,7 +266,7 @@ export default async function DashboardHome() {
             <CardContent>
               {upcomingSessions && upcomingSessions.length > 0 ? (
                 <div className="space-y-3">
-                  {upcomingSessions.map((session: any) => (
+                  {upcomingSessions.map((session) => (
                     <Link
                       key={session.id}
                       href="/dashboard/sessions"
@@ -310,7 +374,7 @@ export default async function DashboardHome() {
         .eq('status', 'completed'),
     ])
 
-    const sessions = upcomingSessions ?? []
+    const sessions = toRows<TutorSessionRow>(upcomingSessions)
     const now = new Date()
     const weekEnd = new Date(now)
     weekEnd.setDate(weekEnd.getDate() + 7)
@@ -418,7 +482,7 @@ export default async function DashboardHome() {
               </Link>
             </div>
             <div className="divide-y divide-gray-100">
-              {sessions.slice(1).map((s: any) => (
+              {sessions.slice(1).map((s) => (
                 <div key={s.id} className="px-5 py-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="text-center shrink-0 w-12">
@@ -459,7 +523,7 @@ export default async function DashboardHome() {
 
   const customerId = customer?.id ?? '00000000-0000-0000-0000-000000000000'
 
-  const [{ data: sessions }, { data: subjects }, { data: membership }, { data: packages }, { count: completedCount }] = await Promise.all([
+  const [{ data: sessionsData }, { data: subjects }, { data: membership }, { data: packages }, { count: completedCount }] = await Promise.all([
     supabase
       .from('sessions')
       .select('id, status, confirmed_start, confirmed_end, session_type, subjects, meet_url, tutors(full_name)')
@@ -488,29 +552,31 @@ export default async function DashboardHome() {
       .eq('status', 'completed')
   ])
 
+  const sessions = toRows<CustomerSessionRow>(sessionsData)
+
   const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
   const membershipCredits = membership
     ? (membership.included_hours + membership.rollover_hours) - membership.used_hours
     : 0
-  const packageCredits = (packages ?? []).reduce((sum: number, p: any) => sum + p.remaining_hours, 0)
-  const packageTotal = (packages ?? []).reduce((sum: number, p: any) => sum + p.total_hours, 0)
+  const packageCredits = (packages ?? []).reduce((sum: number, p) => sum + p.remaining_hours, 0)
+  const packageTotal = (packages ?? []).reduce((sum: number, p) => sum + p.total_hours, 0)
   const totalCredits = membershipCredits + packageCredits
   const totalUsed = (membership?.used_hours ?? 0) + (packageTotal - packageCredits)
   const totalIncluded = (membership?.included_hours ?? 0) + packageTotal
   const hasCredits = totalCredits > 0 || membership || (packages && packages.length > 0)
 
   const now = new Date()
-  const nextSession = (sessions ?? [])
-    .filter((s: any) => s.status === 'scheduled' && s.confirmed_start)
-    .sort((a: any, b: any) => new Date(a.confirmed_start).getTime() - new Date(b.confirmed_start).getTime())
-    .find((s: any) => new Date(s.confirmed_end || s.confirmed_start).getTime() > now.getTime())
+  const nextSession = sessions
+    .filter((s) => s.status === 'scheduled' && s.confirmed_start)
+    .sort((a, b) => new Date(a.confirmed_start ?? 0).getTime() - new Date(b.confirmed_start ?? 0).getTime())
+    .find((s) => new Date(s.confirmed_end || s.confirmed_start || 0).getTime() > now.getTime())
   const nextSessionTutor = Array.isArray(nextSession?.tutors)
     ? nextSession.tutors[0]
     : nextSession?.tutors
 
   const hoursUntilNext = nextSession
-    ? (new Date(nextSession.confirmed_start).getTime() - now.getTime()) / 3600000
+    ? (new Date(nextSession.confirmed_start ?? 0).getTime() - now.getTime()) / 3600000
     : null
 
   return (
@@ -541,7 +607,7 @@ export default async function DashboardHome() {
               </p>
             </div>
           </div>
-          {nextSession.meet_url && nextSession.session_type === 'online' && (
+          {nextSession.meet_url && nextSession.session_type === 'online' && nextSession.confirmed_start && nextSession.confirmed_end && (
             <JoinClassButton
               meetUrl={nextSession.meet_url}
               sessionStart={nextSession.confirmed_start}
@@ -636,7 +702,7 @@ export default async function DashboardHome() {
 
         {sessions && sessions.length > 0 ? (
           <div className="space-y-4">
-            {sessions.map((session: any) => {
+            {sessions.map((session) => {
               const subjectNames = (session.subjects ?? [])
                 .map((id: string) => subjectMap.get(id))
                 .filter(Boolean)

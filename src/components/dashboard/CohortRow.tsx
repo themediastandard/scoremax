@@ -53,9 +53,9 @@ export function CohortRow({ cohort, testType = 'sat' }: CohortRowProps) {
       }
       setConfirmDelete(false)
       router.refresh()
-    } catch (error: any) {
+    } catch (error) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to delete cohort')
     } finally {
       setDeleting(false)
     }

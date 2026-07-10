@@ -191,7 +191,7 @@ export default function BookPage() {
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [activeSection, state.contact.email])
+  }, [activeSection, state.contact.email, setMemberStatus])
 
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')

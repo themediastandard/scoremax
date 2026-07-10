@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/test-prep/act',
+    url: 'https://www.scoremaxtutoring.com/test-prep/act',
     siteName: 'ScoreMax',
     title: 'ACT Tutoring Services | Expert ACT Test Prep | ScoreMax',
     description: 'Professional ACT tutoring services with expert tutors. Improve your ACT scores with personalized test preparation, proven strategies, and comprehensive study plans.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/test-prep/act',
+    canonical: 'https://www.scoremaxtutoring.com/test-prep/act',
   },
 };
 

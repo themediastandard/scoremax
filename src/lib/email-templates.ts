@@ -5,7 +5,7 @@ const GRAY_500 = '#6b7280'
 const WHITE = '#ffffff'
 
 function getBaseUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL || 'https://scoremaxtutoring.com'
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
 }
 
 export function emailLayout(options: {

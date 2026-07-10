@@ -1,5 +1,7 @@
+import { randomBytes } from 'crypto'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
@@ -23,9 +25,10 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
-  } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`)
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error(`Webhook Error: ${message}`)
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
   const { error: idempotencyError } = await supabaseAdmin
@@ -42,8 +45,8 @@ export async function POST(req: Request) {
 
   try {
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as any
-    const metadata = session.metadata
+    const session = event.data.object as Stripe.Checkout.Session
+    const metadata = session.metadata ?? {}
     const bookingId = metadata.booking_request_id
     const planType = metadata.plan_type
     const planName = metadata.plan_name
@@ -51,9 +54,9 @@ export async function POST(req: Request) {
     const contactName = metadata.contact_name
     const contactPhone = metadata.contact_phone
     const studentGrade = metadata.student_grade
-    const stripeCustomerId = session.customer
+    const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null
     let stripePaymentIntentId = getCheckoutPaymentIntentId(session)
-    let membershipSubscription: any = null
+    let membershipSubscription: Stripe.Subscription | null = null
 
     if (planType === 'membership' && session.subscription) {
       membershipSubscription = await stripe.subscriptions.retrieve(session.subscription as string, {
@@ -90,8 +93,7 @@ export async function POST(req: Request) {
             customer = customerByEmail
         } else {
             isGuestCheckout = true
-            tempPassword = Math.random().toString(36).slice(2, 6).toUpperCase()
-              + Math.random().toString(36).slice(2, 6)
+            tempPassword = randomBytes(9).toString('base64url')
 
             const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
                 email: contactEmail,
@@ -173,7 +175,10 @@ export async function POST(req: Request) {
             .single()
           hours = packagePricing?.included_hours ?? null
         }
-        hours ||= session.amount_total >= 200000 ? 20 : 10
+        if (!hours) {
+          hours = (session.amount_total ?? 0) >= 200000 ? 20 : 10
+          console.error(`Package hours could not be resolved from metadata or pricing for booking ${bookingId}; falling back to amount heuristic (${hours}h). Verify the package record.`)
+        }
         await supabaseAdmin.from('packages').insert({
             customer_id: customer.id,
             total_hours: hours,
@@ -182,7 +187,7 @@ export async function POST(req: Request) {
         })
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
         const courseType = metadata.course_type || ''
-        const isCombined = courseType === 'sat-act-combined' || session.amount_total > 300000
+        const isCombined = courseType === 'sat-act-combined' || (session.amount_total ?? 0) > 300000
         const isACT = courseType === 'act'
         const cohortId = metadata.cohort_id ?? null
         const totalSessions = isCombined ? 13 : isACT ? 12 : 10
@@ -198,16 +203,30 @@ export async function POST(req: Request) {
         })
 
         if (cohortId && planType === 'sat-course-inperson') {
-            const { data: cohort } = await supabaseAdmin
-                .from('sat_course_cohorts')
-                .select('enrolled_count')
-                .eq('id', cohortId)
-                .single()
-            const current = cohort?.enrolled_count ?? 0
-            await supabaseAdmin
-                .from('sat_course_cohorts')
-                .update({ enrolled_count: current + 1 })
-                .eq('id', cohortId)
+            // Compare-and-swap so concurrent checkouts can't both read the same
+            // count and write the same incremented value.
+            let incremented = false
+            for (let attempt = 0; attempt < 5 && !incremented; attempt++) {
+                const { data: cohort } = await supabaseAdmin
+                    .from('sat_course_cohorts')
+                    .select('enrolled_count')
+                    .eq('id', cohortId)
+                    .single()
+                if (!cohort) break
+                const current = cohort.enrolled_count ?? 0
+                let query = supabaseAdmin
+                    .from('sat_course_cohorts')
+                    .update({ enrolled_count: current + 1 })
+                    .eq('id', cohortId)
+                query = cohort.enrolled_count === null
+                    ? query.is('enrolled_count', null)
+                    : query.eq('enrolled_count', current)
+                const { data: updated } = await query.select('id')
+                incremented = Boolean(updated?.length)
+            }
+            if (!incremented) {
+                console.error(`Failed to increment enrolled_count for cohort ${cohortId}`)
+            }
         }
     } else if (planType === 'membership' && customer && session.subscription) {
         const subscription = membershipSubscription ?? await stripe.subscriptions.retrieve(session.subscription as string, {
@@ -269,7 +288,7 @@ export async function POST(req: Request) {
               title: 'New Payment Received',
               body: [
                 detailRow('Customer:', contactName),
-                detailRow('Amount:', `$${session.amount_total / 100}`),
+                detailRow('Amount:', `$${(session.amount_total ?? 0) / 100}`),
                 detailRow('Package:', planLabel),
               ].join(''),
               ctaText: 'View Orders',
@@ -354,7 +373,7 @@ export async function POST(req: Request) {
   }
 
   if (event.type === 'checkout.session.expired') {
-    const session = event.data.object as any
+    const session = event.data.object as Stripe.Checkout.Session
     const bookingId = session.metadata?.booking_request_id
     if (bookingId) {
       await supabaseAdmin
@@ -366,7 +385,7 @@ export async function POST(req: Request) {
   }
 
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
-    const subscription = event.data.object as any
+    const subscription = event.data.object as Stripe.Subscription
     const membershipStatus = subscription.status === 'active' ? 'active' : 'canceled'
     const period = getSubscriptionPeriod(subscription)
 

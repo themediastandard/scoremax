@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/contact',
+    url: 'https://www.scoremaxtutoring.com/contact',
     siteName: 'ScoreMax',
     title: 'Contact ScoreMax | Book Free Tutoring Consultation',
     description: 'Contact ScoreMax for expert SAT, ACT, and subject tutoring. Book your free consultation today and start improving your test scores.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/contact',
+    canonical: 'https://www.scoremaxtutoring.com/contact',
   },
 };
 

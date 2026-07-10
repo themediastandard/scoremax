@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://scoremax.com/college-tutoring',
+    url: 'https://www.scoremaxtutoring.com/college-tutoring',
     siteName: 'ScoreMax',
     title: 'College Tutoring Services | Advanced Math & Science',
     description: 'Expert college tutoring services for advanced mathematics, science, and academic subjects. Personalized learning plans for college students.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ['/logo.avif'],
   },
   alternates: {
-    canonical: 'https://scoremax.com/college-tutoring',
+    canonical: 'https://www.scoremaxtutoring.com/college-tutoring',
   },
 };
 

@@ -10,7 +10,7 @@ import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
   if (!user) redirect('/login')
 
@@ -66,11 +66,24 @@ export default async function OrderDetailPage({ params }: { params: { id: string
   const { data: subjects } = await supabase.from('subjects').select('*')
   const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
-  const { data: sessions } = await supabase
+  const { data: sessionsData } = await supabase
     .from('sessions')
     .select('id, status, confirmed_start, confirmed_end, session_type, subjects, assigned_tutor_id, meet_url, tutors (full_name)')
     .eq('order_id', order.id)
     .order('created_at', { ascending: true })
+
+  // supabase-js infers the to-one tutors join as an array; at runtime it is a single object.
+  const sessions = (sessionsData ?? []) as unknown as Array<{
+    id: string
+    status: string | null
+    confirmed_start: string | null
+    confirmed_end: string | null
+    session_type: string | null
+    subjects: string[] | null
+    assigned_tutor_id: string | null
+    meet_url: string | null
+    tutors: { full_name: string | null } | null
+  }>
 
   const effectiveAmount = order.amount_cents || order.payments?.[0]?.amount_cents || 0
   let planLabel = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
@@ -295,8 +308,8 @@ export default async function OrderDetailPage({ params }: { params: { id: string
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {sessions.map((s: any) => {
-                const cfg = statusConfig[s.status] || statusConfig.pending_scheduling
+              {sessions.map((s) => {
+                const cfg = statusConfig[s.status ?? 'pending_scheduling'] || statusConfig.pending_scheduling
                 return (
                   <div
                     key={s.id}

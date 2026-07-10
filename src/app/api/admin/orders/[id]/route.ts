@@ -6,7 +6,7 @@ import { stripe } from '@/lib/stripe'
 import { requireAdmin } from '@/lib/auth'
 import { isPaymentIntentId } from '@/lib/stripe-subscription'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
   if (authError) return authError
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(data)
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
   if (authError) return authError
 

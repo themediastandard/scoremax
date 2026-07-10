@@ -1,3 +1,11 @@
+/**
+ * @param {{
+ *   customer?: { full_name?: string | null } | null,
+ *   membership?: { tier?: string | null, included_hours?: number | null, used_hours?: number | null, rollover_hours?: number | null } | null,
+ *   packages?: Array<{ remaining_hours?: number | null }> | null,
+ *   courseEnrollments?: Array<{ remaining_sessions?: number | null }> | null,
+ * }} [input]
+ */
 function sanitizeCustomerCreditSummary({
   customer = null,
   membership = null,

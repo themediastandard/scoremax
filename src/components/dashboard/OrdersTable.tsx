@@ -9,8 +9,21 @@ import { BookOpen, Search, X } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { formatAmount } from '@/lib/order-format'
 
+export interface OrderRow {
+  id: string
+  created_at: string
+  status?: string | null
+  payment_type?: string | null
+  session_type?: string | null
+  amount_cents?: number | null
+  stripe_payment_intent_id?: string | null
+  subjects?: string[] | null
+  payments?: Array<{ amount_cents?: number | null }> | null
+  customers?: { full_name?: string | null; email?: string | null } | null
+}
+
 interface OrdersTableProps {
-  orders: any[]
+  orders: OrderRow[]
   isAdmin: boolean
   subjectMap: Record<string, string>
   planLabels: Record<string, string>
@@ -24,7 +37,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
 
   const sMap = new Map(Object.entries(subjectMap))
-  const getSubjectNames = (ids: string[] | null) =>
+  const getSubjectNames = (ids: string[] | null | undefined) =>
     (ids ?? []).map((id) => sMap.get(id)).filter(Boolean).join(', ') || '—'
 
   const filtered = useMemo(() => {
@@ -146,7 +159,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((order: any) => {
+              {filtered.map((order) => {
                 const amt = order.amount_cents || order.payments?.[0]?.amount_cents
 
                 return (
