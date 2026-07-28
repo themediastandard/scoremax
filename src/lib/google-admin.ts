@@ -36,6 +36,34 @@ export async function isAdminGoogleConnected(): Promise<boolean> {
   return Boolean(await getAdminSetting(ADMIN_GOOGLE_REFRESH_TOKEN_KEY))
 }
 
+// Google returns `invalid_grant` when a refresh token has been revoked, expired,
+// or had its access withdrawn from the Google Account permissions page.
+export function isRevokedGoogleTokenError(error: unknown): boolean {
+  const e = error as {
+    message?: string
+    response?: { data?: { error?: string } }
+  }
+  return (
+    e?.response?.data?.error === 'invalid_grant' ||
+    /invalid_grant/i.test(e?.message ?? '')
+  )
+}
+
+// Drop the stored refresh token so the connection reads as disconnected.
+//
+// isAdminGoogleConnected() only tests whether a token is *present*, never
+// whether it still works — so a revoked token left the dashboard showing
+// "Google Connected" indefinitely while every online booking failed. Clearing it
+// on an invalid_grant makes the badge tell the truth and points the admin at
+// Settings → Integrations to reconnect.
+export async function clearAdminGoogleConnection(): Promise<void> {
+  try {
+    await setAdminSetting(ADMIN_GOOGLE_REFRESH_TOKEN_KEY, '')
+  } catch (error) {
+    console.error('Failed to clear the revoked Google connection:', error)
+  }
+}
+
 export async function getAdminGoogleAuth() {
   const refreshToken = await getAdminSetting(ADMIN_GOOGLE_REFRESH_TOKEN_KEY)
   if (!refreshToken) return null

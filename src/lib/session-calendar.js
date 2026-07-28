@@ -17,6 +17,22 @@ const IN_PERSON_LOCATION =
  * }} session
  */
 function buildSessionCalendarPlan(session) {
+  // Guard the times before they reach `new Date(...)`. A null confirmed_start
+  // becomes the 1970 epoch rather than an error, so clearing a scheduled
+  // session's date and then reassigning its tutor used to silently move the
+  // live Google event — and its invitations — to 1 January 1970.
+  const start = new Date(session.confirmed_start)
+  const end = new Date(session.confirmed_end)
+  if (!session.confirmed_start || Number.isNaN(start.getTime())) {
+    throw new Error('session_missing_confirmed_start')
+  }
+  if (!session.confirmed_end || Number.isNaN(end.getTime())) {
+    throw new Error('session_missing_confirmed_end')
+  }
+  if (end <= start) {
+    throw new Error('session_end_not_after_start')
+  }
+
   const isOnline = session.session_type === 'online'
   /** @type {Array<{ email: string, displayName?: string }>} */
   const attendees = []
@@ -37,8 +53,8 @@ function buildSessionCalendarPlan(session) {
         `Tutor: ${session.tutors.full_name}`,
         `Location: ${isOnline ? 'Online (Google Meet)' : IN_PERSON_LOCATION}`,
       ].join('\n'),
-      start: { dateTime: new Date(session.confirmed_start).toISOString() },
-      end: { dateTime: new Date(session.confirmed_end).toISOString() },
+      start: { dateTime: start.toISOString() },
+      end: { dateTime: end.toISOString() },
       attendees,
       ...(isOnline ? {} : { location: IN_PERSON_LOCATION }),
     },

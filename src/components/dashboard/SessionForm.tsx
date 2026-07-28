@@ -8,6 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
+import {
+  toLocalDateValue,
+  toLocalTimeValue,
+  fromLocalDateTimeValues,
+} from '@/lib/local-datetime'
 
 interface SessionFormProps {
   session: {
@@ -27,14 +32,10 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
 
   const [tutorId, setTutorId] = useState(session.assigned_tutor_id || '')
   const [date, setDate] = useState(
-    session.confirmed_start
-      ? new Date(session.confirmed_start).toISOString().split('T')[0]
-      : ''
+    session.confirmed_start ? toLocalDateValue(session.confirmed_start) : ''
   )
   const [time, setTime] = useState(
-    session.confirmed_start
-      ? new Date(session.confirmed_start).toTimeString().substring(0, 5)
-      : ''
+    session.confirmed_start ? toLocalTimeValue(session.confirmed_start) : ''
   )
   const [duration, setDuration] = useState(() => {
     if (session.confirmed_start && session.confirmed_end) {
@@ -51,12 +52,8 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
 
   const [initial, setInitial] = useState(() => ({
     tutorId: session.assigned_tutor_id || '',
-    date: session.confirmed_start
-      ? new Date(session.confirmed_start).toISOString().split('T')[0]
-      : '',
-    time: session.confirmed_start
-      ? new Date(session.confirmed_start).toTimeString().substring(0, 5)
-      : '',
+    date: session.confirmed_start ? toLocalDateValue(session.confirmed_start) : '',
+    time: session.confirmed_start ? toLocalTimeValue(session.confirmed_start) : '',
     duration:
       session.confirmed_start && session.confirmed_end
         ? String(
@@ -92,8 +89,8 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
     let confirmedStart = null
     let confirmedEnd = null
 
-    if (date && time) {
-      const start = new Date(`${date}T${time}:00`)
+    const start = fromLocalDateTimeValues(date, time)
+    if (start) {
       confirmedStart = start.toISOString()
       confirmedEnd = new Date(
         start.getTime() + Number(duration) * 60 * 1000
