@@ -17,6 +17,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Set when the failed address last signed in with Google. A Google user has
+  // no password to get right, so "Invalid login credentials" sends them in
+  // circles — which is exactly how a real account got stuck.
+  const [lastUsedGoogle, setLastUsedGoogle] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -24,6 +28,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setLastUsedGoogle(false)
 
     const { error } = await supabase.auth.signInWithPassword({
       email: email.toLowerCase().trim(),
@@ -31,9 +36,30 @@ export default function LoginPage() {
     })
 
     if (error) {
+      // Before showing a generic failure, check whether this address last got
+      // in with Google. Never let this lookup change the outcome.
+      try {
+        const res = await fetch('/api/auth/last-provider', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase().trim() }),
+        })
+        const { provider } = await res.json()
+        setLastUsedGoogle(provider === 'google')
+      } catch {
+        setLastUsedGoogle(false)
+      }
       setError(error.message)
       setLoading(false)
     } else {
+      // Keep last_auth_provider current so the hint stays accurate. Fire and
+      // forget — a failed write must never hold up a successful sign-in.
+      fetch('/api/auth/record-login-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'email' }),
+      }).catch(() => {})
+
       router.push('/dashboard')
       router.refresh()
     }
@@ -169,7 +195,23 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && !lastUsedGoogle && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
+
+            {lastUsedGoogle && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-2">
+                <p className="text-sm text-amber-900">
+                  You used <strong>Sign in with Google</strong> the last time you
+                  logged in. Use the Google button above — your password won&rsquo;t
+                  work for that account.
+                </p>
+                <p className="text-xs text-amber-800">
+                  Want a password as well? Sign in with Google first, then set one
+                  from your account settings.
+                </p>
+              </div>
+            )}
 
             <Button type="submit" className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign In'}
