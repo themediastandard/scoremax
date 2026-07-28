@@ -7,8 +7,9 @@ import { ChevronRight, Calendar, BookOpen, Clock, CheckCircle, Users, CreditCard
 import { JoinClassButton } from '@/components/dashboard/JoinClassButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { formatPlanLabel, formatAmount } from '@/lib/order-format'
+import { formatPlanLabel } from '@/lib/order-format'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
+import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
 
 // supabase-js without generated DB types infers to-one joins as arrays,
 // but FK joins return single objects at runtime — cast results to the runtime shape.
@@ -127,7 +128,7 @@ export default async function DashboardHome() {
         memberships?: Array<{ status?: string | null; tier?: string | null }> | null
       } | null
     }) => {
-      const amt = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+      const amt = getChargedCents(order) ?? 0
       if (amt > 0) return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
       if (order.payment_type === 'package') {
         const pkg = order.customers?.packages?.[0]
@@ -203,7 +204,7 @@ export default async function DashboardHome() {
               {recentOrders && recentOrders.length > 0 ? (
                 <div className="space-y-3">
                   {recentOrders.map((order) => {
-                    const amt = order.amount_cents || order.payments?.[0]?.amount_cents
+                    const amountLabel = formatOrderAmount(order)
                     return (
                       <Link
                         key={order.id}
@@ -217,9 +218,7 @@ export default async function DashboardHome() {
                               <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
                                 {resolvePlanLabel(order)}
                               </span>
-                              {amt ? (
-                                <span className="text-xs font-bold text-[#1e293b]">{formatAmount(amt)}</span>
-                              ) : null}
+                              <span className="text-xs font-bold text-[#1e293b]">{amountLabel}</span>
                             </div>
                             <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                               {resolveSubjects(order.subjects) && (

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BookOpen, Search, X } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
-import { formatAmount } from '@/lib/order-format'
+import { formatOrderAmount } from '@/lib/order-amount'
 
 export interface OrderRow {
   id: string
@@ -160,7 +160,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.map((order) => {
-                const amt = order.amount_cents || order.payments?.[0]?.amount_cents
+                const amountLabel = formatOrderAmount(order)
 
                 return (
                   <tr key={order.id} className="hover:bg-gray-50/60 transition-colors">
@@ -196,7 +196,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <span className="text-sm font-semibold text-[#1e293b]">
-                        {amt ? formatAmount(amt) : '—'}
+                        {amountLabel}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-center">

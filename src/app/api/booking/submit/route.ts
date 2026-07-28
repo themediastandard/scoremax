@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { subjects, available_days, available_time_start, available_time_end, timezone, session_type, notes, use_credit } = body
+  const { subjects, available_days, available_time_start, available_time_end, timezone, session_type, notes, use_credit, full_name, phone, student_grade } = body
 
   if (!use_credit) {
     return NextResponse.json({ error: 'This endpoint is for credit usage only' }, { status: 400 })
@@ -51,7 +51,30 @@ export async function POST(req: NextRequest) {
 
   const creditSource = booking.payment_type
 
-  // 2. Look up the customer for the notification emails. Nothing below this
+  // 2. Persist the contact details from the booking form.
+  //    These were collected on the contact step but never sent on the credit
+  //    path, so an admin opening a credit order saw "—" for phone and grade.
+  //    Only non-empty values are written, matching how the Stripe webhook
+  //    treats the same fields — a blank box must not wipe what we already have.
+  const contactUpdates: Record<string, string> = {}
+  if (typeof full_name === 'string' && full_name.trim()) contactUpdates.full_name = full_name.trim()
+  if (typeof phone === 'string' && phone.trim()) contactUpdates.phone = phone.trim()
+  if (typeof student_grade === 'string' && student_grade.trim()) {
+    contactUpdates.student_grade = student_grade.trim()
+  }
+
+  if (Object.keys(contactUpdates).length > 0) {
+    const { error: contactError } = await supabaseAdmin
+      .from('customers')
+      .update(contactUpdates)
+      .eq('profile_id', user.id)
+    // The booking is already committed; never fail it over contact details.
+    if (contactError) {
+      console.error('Failed to save booking contact details:', contactError.message)
+    }
+  }
+
+  // 3. Look up the customer for the notification emails. Nothing below this
   //    point may consume credit, so a failure here cannot cost the customer.
   const { data: customer } = await supabaseAdmin
     .from('customers')

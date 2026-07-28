@@ -81,6 +81,27 @@ export async function POST(req: Request) {
         .eq('stripe_customer_id', stripeCustomerId)
         .single()
 
+    // A returning customer matched on stripe_customer_id skipped every branch
+    // below, so anything they typed into the booking form this time — a new
+    // phone number, an updated grade — was silently discarded. Only the
+    // by-email and guest paths refreshed it.
+    if (customer && (contactPhone || studentGrade || contactName)) {
+      const refreshed = {
+        ...(contactName && { full_name: contactName }),
+        ...(contactPhone && { phone: contactPhone }),
+        ...(studentGrade && { student_grade: studentGrade }),
+      }
+      const { error: refreshError } = await supabaseAdmin
+        .from('customers')
+        .update(refreshed)
+        .eq('id', customer.id)
+      if (refreshError) {
+        console.error('Failed to refresh customer contact details:', refreshError.message)
+      } else {
+        customer = { ...customer, ...refreshed }
+      }
+    }
+
     let isGuestCheckout = false
     let setPasswordUrl: string | null = null
     if (!customer) {

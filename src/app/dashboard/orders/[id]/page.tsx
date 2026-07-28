@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { formatDateTime, formatAmount, formatPlanLabel, formatTime24To12 } from '@/lib/order-format'
+import { formatDateTime, formatPlanLabel, formatTime24To12 } from '@/lib/order-format'
+import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
 import { ArrowLeft, BookOpen, Video, CreditCard, Clock, Calendar, User, MapPin } from 'lucide-react'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
@@ -85,7 +86,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     tutors: { full_name: string | null } | null
   }>
 
-  const effectiveAmount = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+  const effectiveAmount = getChargedCents(order) ?? 0
   let planLabel = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
 
   if (effectiveAmount === 0 && order.customer_id) {
@@ -267,7 +268,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</p>
-                <p className="font-bold text-lg mt-1">{formatAmount(order.amount_cents || order.payments?.[0]?.amount_cents)}</p>
+                <p className="font-bold text-lg mt-1">{formatOrderAmount(order)}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
