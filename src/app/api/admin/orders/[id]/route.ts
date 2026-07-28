@@ -53,7 +53,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  if (status === 'refunded' && currentBooking.status !== 'refunded') {
+  if (currentBooking.status === 'refunded') {
+    return NextResponse.json(currentBooking)
+  }
+
+  // A credit-funded booking has no Stripe payment to reverse — the customer paid
+  // with hours, so the refund is purely a matter of giving those hours back.
+  // Previously these could not be refunded at all: the route demanded a payment
+  // intent that credit bookings never have.
+  const isCreditFunded =
+    (currentBooking.amount_cents ?? 0) === 0 && !currentBooking.stripe_payment_intent_id
+
+  if (!isCreditFunded) {
     if (!isPaymentIntentId(currentBooking.stripe_payment_intent_id)) {
       return NextResponse.json(
         { error: 'No refundable Stripe payment intent found for this order' },
@@ -69,40 +80,61 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       console.error('Stripe refund failed', e)
       return NextResponse.json({ error: 'Stripe refund failed' }, { status: 502 })
     }
+  }
 
-    await supabaseAdmin
-      .from('sessions')
-      .update({ status: 'cancelled' })
-      .eq('order_id', id)
+  // Settle the credit, cancel the sessions and mark the booking refunded in one
+  // transaction. For a purchase this revokes the credit the payment bought; for
+  // a credit booking it restores the debited hour. Idempotent — a repeat call
+  // reports already_refunded and changes nothing.
+  //
+  // Deliberately after the Stripe call: money moves first, so a failed refund
+  // leaves the booking untouched rather than marked refunded with no refund.
+  const { data: refundResult, error: refundError } = await supabaseAdmin
+    .rpc('refund_booking', { p_booking_id: id })
 
-    if (currentBooking.customers?.email) {
-      try {
+  if (refundError) {
+    console.error('Refund bookkeeping failed after Stripe refund:', refundError.message)
+    return NextResponse.json(
+      { error: 'Refund was issued but could not be recorded. Check this order manually.' },
+      { status: 500 }
+    )
+  }
+
+  const creditAction = (refundResult as { credit_action?: string } | null)?.credit_action
+  if (creditAction === 'unknown_source_not_restored' || creditAction === 'source_row_missing') {
+    console.error(
+      `Refunded booking ${id} but could not restore credit (${creditAction}). Adjust the customer's balance manually.`
+    )
+  }
+
+  if (currentBooking.customers?.email) {
+    try {
       await resend.emails.send({
         ...getEmailDefaults(),
         to: currentBooking.customers.email,
-        subject: 'Refund Processed',
+        subject: isCreditFunded ? 'Booking Cancelled' : 'Refund Processed',
         html: emailLayout({
-          title: 'Refund Processed',
+          title: isCreditFunded ? 'Booking Cancelled' : 'Refund Processed',
           greeting: `Hi ${currentBooking.customers.full_name},`,
-          body: '<p style="margin: 0;">Your order has been cancelled and a refund has been initiated.</p>',
+          body: isCreditFunded
+            ? '<p style="margin: 0;">Your booking has been cancelled and the session credit has been returned to your account.</p>'
+            : '<p style="margin: 0;">Your order has been cancelled and a refund has been initiated.</p>',
         }),
       })
-      } catch (emailError) {
-        console.error('Failed to send refund notification:', emailError)
-      }
+    } catch (emailError) {
+      console.error('Failed to send refund notification:', emailError)
     }
   }
 
   const { data, error } = await supabaseAdmin
     .from('booking_requests')
-    .update({ status })
-    .eq('id', id)
     .select()
+    .eq('id', id)
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Could not load the refunded order' }, { status: 500 })
   }
 
-  return NextResponse.json(data)
+  return NextResponse.json({ ...data, credit_action: creditAction })
 }

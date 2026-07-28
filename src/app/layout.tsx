@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
@@ -20,6 +20,17 @@ const dmSans = DM_Sans({
 });
 
 
+// Next 15 requires viewport and themeColor in their own export; declaring them
+// inside `metadata` makes it silently drop them, which it warns about on every
+// build. Splitting them out restores the tags and clears the warning.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#b08a30',
+};
+
 export const metadata: Metadata = {
   title: "ScoreMax Tutoring | Unlock Your Test Score Potential",
   description: "Expert 1-on-1 test prep tutoring for SAT, ACT, GMAT, GRE & academic subjects. Get matched with certified tutors and boost your scores with personalized study plans.",
@@ -37,13 +48,6 @@ export const metadata: Metadata = {
     description: 'Expert 1-on-1 test prep tutoring for SAT, ACT, GMAT, GRE & academic subjects.',
     images: ['/logo.avif']
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: '#b08a30',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

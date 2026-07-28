@@ -12,7 +12,8 @@
     "clean": "rm -rf .next",
     "build": "node scripts/guard-next-dev.mjs build && rm -rf .next && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
