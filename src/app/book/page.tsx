@@ -236,7 +236,13 @@ export default function BookPage() {
              available_time_end: state.availability.endTime,
              timezone: state.availability.timezone,
              session_type: state.sessionType,
-             notes: state.contact.notes
+             notes: state.contact.notes,
+             // The contact step collects these, but the credit path never sent
+             // them, so an admin looking at a credit order saw "—" for both.
+             // The paid path has always passed them through Stripe metadata.
+             full_name: state.contact.fullName,
+             phone: state.contact.phone,
+             student_grade: state.contact.studentGrade
           })
         })
         

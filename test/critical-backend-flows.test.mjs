@@ -210,3 +210,53 @@ test('calendar plan refuses a session with no usable start or end', () => {
     /session_end_not_after_start/
   )
 })
+
+const {
+  getChargedCents,
+  isCreditFundedOrder,
+  formatOrderAmount,
+} = require('../src/lib/order-amount.js')
+
+test('a credit-funded order reports credit, not an em dash', () => {
+  // The regression: `amount_cents || payments?.[0]?.amount_cents` skipped the
+  // valid zero because zero is falsy, fell through to a payments row that does
+  // not exist for credit bookings, and rendered "—".
+  const creditBooking = {
+    amount_cents: 0,
+    payments: [],
+    stripe_payment_intent_id: null,
+  }
+  assert.equal(getChargedCents(creditBooking), 0)
+  assert.equal(isCreditFundedOrder(creditBooking), true)
+  assert.equal(formatOrderAmount(creditBooking), '1 credit used')
+
+  // Same when the relation comes back null rather than an empty array.
+  assert.equal(
+    formatOrderAmount({ amount_cents: 0, payments: null, stripe_payment_intent_id: null }),
+    '1 credit used'
+  )
+})
+
+test('a paid order reports what Stripe actually captured, not the list price', () => {
+  // booking_requests.amount_cents is the list price at checkout; the payments
+  // row is the real capture. A promotion code makes them disagree.
+  const discounted = {
+    amount_cents: 200000,
+    payments: [{ amount_cents: 150000 }],
+    stripe_payment_intent_id: 'pi_123',
+  }
+  assert.equal(getChargedCents(discounted), 150000)
+  assert.equal(isCreditFundedOrder(discounted), false)
+  assert.equal(formatOrderAmount(discounted), '$1,500')
+
+  // No payments row yet (webhook still in flight): fall back to the booking.
+  assert.equal(formatOrderAmount({ amount_cents: 89500, payments: [], stripe_payment_intent_id: 'pi_9' }), '$895')
+})
+
+test('a genuinely unknown amount stays an em dash', () => {
+  assert.equal(getChargedCents({}), null)
+  assert.equal(formatOrderAmount({}), '—')
+  assert.equal(formatOrderAmount(null), '—')
+  // A zero charge WITH a payment intent is a real £0 capture, not credit.
+  assert.equal(isCreditFundedOrder({ amount_cents: 0, stripe_payment_intent_id: 'pi_free' }), false)
+})

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getChargedCents } from '@/lib/order-amount'
 import { formatPlanLabel } from '@/lib/order-format'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrdersTable } from '@/components/dashboard/OrdersTable'
@@ -38,7 +39,7 @@ export default async function OrdersPage() {
 
   const planLabels: Record<string, string> = {}
   for (const order of orders ?? []) {
-    const effectiveAmount = order.amount_cents || order.payments?.[0]?.amount_cents || 0
+    const effectiveAmount = getChargedCents(order) ?? 0
     let label = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
     if (effectiveAmount === 0) {
       if (order.payment_type === 'package') {
@@ -67,7 +68,7 @@ export default async function OrdersPage() {
     let paidCount = 0
 
     for (const o of orders) {
-      const amt = o.amount_cents || o.payments?.[0]?.amount_cents || 0
+      const amt = getChargedCents(o) ?? 0
       if (o.status === 'refunded') {
         refundTotal += amt
         refundCount++
