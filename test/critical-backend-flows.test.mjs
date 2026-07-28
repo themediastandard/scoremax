@@ -133,3 +133,80 @@ test('only subscription_cycle invoices replenish membership hours', () => {
   assert.equal(isRenewalInvoice({}), false)
   assert.equal(isRenewalInvoice(null), false)
 })
+
+const {
+  toLocalDateValue,
+  toLocalTimeValue,
+  fromLocalDateTimeValues,
+} = require('../src/lib/local-datetime.js')
+
+test('session date/time inputs round-trip without shifting the day', () => {
+  // The regression: the form read the date in UTC but the time in local, then
+  // recombined them as local. Every evening session in a negative-offset zone
+  // moved forward a day on each save.
+  //
+  // Deliberately timezone-independent: whatever zone the test host is in, a
+  // timestamp split into date+time and recombined must equal what we started
+  // with. That invariant is exactly what the old code violated.
+  const samples = [
+    '2026-08-01T23:30:00.000Z',
+    '2026-08-02T00:15:00.000Z',
+    '2026-01-15T04:45:00.000Z',
+    '2026-07-04T16:00:00.000Z',
+    '2026-12-31T23:59:00.000Z',
+  ]
+
+  for (const iso of samples) {
+    const original = new Date(iso)
+    const rebuilt = fromLocalDateTimeValues(
+      toLocalDateValue(iso),
+      toLocalTimeValue(iso)
+    )
+    assert.ok(rebuilt, `expected a Date back for ${iso}`)
+    // Equal to the minute (seconds are not part of the form inputs).
+    assert.equal(
+      Math.floor(rebuilt.getTime() / 60000),
+      Math.floor(original.getTime() / 60000),
+      `round-trip shifted ${iso} to ${rebuilt.toISOString()}`
+    )
+  }
+})
+
+test('invalid or empty date/time values do not become the 1970 epoch', () => {
+  assert.equal(toLocalDateValue('not-a-date'), '')
+  assert.equal(toLocalTimeValue('not-a-date'), '')
+  assert.equal(fromLocalDateTimeValues('', '16:00'), null)
+  assert.equal(fromLocalDateTimeValues('2026-08-01', ''), null)
+})
+
+test('calendar plan refuses a session with no usable start or end', () => {
+  const base = {
+    id: 's1',
+    session_type: 'online',
+    customers: { full_name: 'Sam Student', email: 's@example.com' },
+    tutors: { full_name: 'Tara Tutor', email: 't@example.com' },
+  }
+
+  // A null confirmed_start used to become new Date(null) -> the 1970 epoch,
+  // which moved the live Google event and its invitations to 1 January 1970.
+  assert.throws(
+    () => buildSessionCalendarPlan({ ...base, confirmed_start: null, confirmed_end: null }),
+    /session_missing_confirmed_start/
+  )
+  assert.throws(
+    () => buildSessionCalendarPlan({
+      ...base,
+      confirmed_start: '2026-08-01T20:00:00.000Z',
+      confirmed_end: null,
+    }),
+    /session_missing_confirmed_end/
+  )
+  assert.throws(
+    () => buildSessionCalendarPlan({
+      ...base,
+      confirmed_start: '2026-08-01T20:00:00.000Z',
+      confirmed_end: '2026-08-01T19:00:00.000Z',
+    }),
+    /session_end_not_after_start/
+  )
+})
