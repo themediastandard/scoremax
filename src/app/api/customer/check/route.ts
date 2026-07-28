@@ -59,13 +59,16 @@ export async function POST(req: NextRequest) {
     .eq('status', 'active')
     .single()
     
-  // Check Packages (active, not expired)
+  // Check Packages (active, not expired).
+  // A NULL expires_at means "never expires". The previous `.gt('expires_at', now)`
+  // silently excluded those rows, because NULL fails every comparison — and the
+  // purchase path never sets expires_at, so that was every package ever sold.
   const { data: packages } = await supabaseAdmin
     .from('packages')
     .select('remaining_hours')
     .eq('customer_id', customer.id)
     .gt('remaining_hours', 0)
-    .gt('expires_at', new Date().toISOString())
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     
   const { data: satCourses } = await supabaseAdmin
     .from('course_enrollments')

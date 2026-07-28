@@ -9,7 +9,10 @@ import { formatTime24To12 } from '@/lib/order-format'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
+  getInvoiceSubscriptionId,
+  getStripeId,
   getSubscriptionPeriod,
+  isRenewalInvoice,
 } from '@/lib/stripe-subscription'
 
 export async function POST(req: Request) {
@@ -30,16 +33,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
-  const { error: idempotencyError } = await supabaseAdmin
+  // Skip events already processed to completion. The marker is written only
+  // after every side effect below has committed, so a failed or timed-out
+  // delivery leaves no marker and Stripe's retry is allowed to re-run the
+  // handler. Re-running is safe because each credit grant is guarded by a unique
+  // index on stripe_payment_intent_id and inserted with ON CONFLICT DO NOTHING.
+  //
+  // Previously the marker was reserved up front and deleted in the catch block,
+  // which lost grants on timeout (marker survived, retry rejected as duplicate)
+  // and double-granted on mid-handler failure (marker deleted, retry re-ran).
+  const { data: alreadyProcessed } = await supabaseAdmin
     .from('processed_stripe_events')
-    .insert({ event_id: event.id })
+    .select('event_id')
+    .eq('event_id', event.id)
+    .maybeSingle()
 
-  if (idempotencyError) {
-    if (idempotencyError.code === '23505') {
-      return NextResponse.json({ received: true, skipped: true })
-    }
-    console.error('Idempotency check failed:', idempotencyError.message)
-    return NextResponse.json({ error: 'Unable to reserve webhook event' }, { status: 500 })
+  if (alreadyProcessed) {
+    return NextResponse.json({ received: true, skipped: true })
   }
 
   try {
@@ -166,7 +176,9 @@ export async function POST(req: Request) {
 
     // 3. Record Payment
     if (customer) {
-        await supabaseAdmin.from('payments').insert({
+        // ON CONFLICT DO NOTHING: a Stripe retry re-runs this handler, and the
+        // unique index on stripe_payment_intent_id must not turn that into a 500.
+        await supabaseAdmin.from('payments').upsert({
             booking_request_id: bookingId,
             customer_id: customer.id,
             stripe_payment_intent_id: stripePaymentIntentId,
@@ -174,7 +186,7 @@ export async function POST(req: Request) {
             currency: session.currency,
             payment_type: planType,
             status: 'succeeded'
-        })
+        }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
     }
 
     // 4. Create Package/Course/Membership Records
@@ -194,12 +206,12 @@ export async function POST(req: Request) {
           hours = (session.amount_total ?? 0) >= 200000 ? 20 : 10
           console.error(`Package hours could not be resolved from metadata or pricing for booking ${bookingId}; falling back to amount heuristic (${hours}h). Verify the package record.`)
         }
-        await supabaseAdmin.from('packages').insert({
+        await supabaseAdmin.from('packages').upsert({
             customer_id: customer.id,
             total_hours: hours,
             remaining_hours: hours - 1,
             stripe_payment_intent_id: stripePaymentIntentId
-        })
+        }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
         const courseType = metadata.course_type || ''
         const isCombined = courseType === 'sat-act-combined' || (session.amount_total ?? 0) > 300000
@@ -207,15 +219,18 @@ export async function POST(req: Request) {
         const cohortId = metadata.cohort_id ?? null
         const totalSessions = isCombined ? 13 : isACT ? 12 : 10
 
-        await supabaseAdmin.from('course_enrollments').insert({
+        await supabaseAdmin.from('course_enrollments').upsert({
             customer_id: customer.id,
             course_type: planType === 'sat-course-inperson' ? 'sat-inperson' : (isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat'),
             cohort_id: cohortId,
             total_sessions: totalSessions,
             remaining_sessions: totalSessions,
             amount_cents: session.amount_total,
+            // Was never recorded, which left course enrollments with no
+            // idempotency key and made them untraceable from a refund.
+            stripe_payment_intent_id: stripePaymentIntentId,
             status: 'active'
-        })
+        }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
 
         if (cohortId && planType === 'sat-course-inperson') {
             // Compare-and-swap so concurrent checkouts can't both read the same
@@ -397,6 +412,64 @@ export async function POST(req: Request) {
     }
   }
 
+  // Refunds issued outside the app — from the Stripe dashboard, or a customer
+  // chargeback — previously did nothing here, so the money went back while the
+  // credit stayed. charge.refunded covers dashboard refunds and the app's own
+  // (already-settled, so refund_booking reports already_refunded and no-ops);
+  // charge.dispute.created covers chargebacks.
+  if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
+    const paymentIntentId =
+      event.type === 'charge.refunded'
+        ? getStripeId((event.data.object as Stripe.Charge).payment_intent)
+        : getStripeId((event.data.object as Stripe.Dispute).payment_intent)
+
+    if (paymentIntentId) {
+      const { data: affected } = await supabaseAdmin
+        .from('booking_requests')
+        .select('id')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .eq('status', 'paid')
+
+      for (const row of affected ?? []) {
+        const { error: refundError } = await supabaseAdmin
+          .rpc('refund_booking', { p_booking_id: row.id })
+        if (refundError) {
+          throw new Error(
+            `Failed to settle external refund for booking ${row.id}: ${refundError.message}`
+          )
+        }
+      }
+    }
+  }
+
+  // Membership renewal. Without this, used_hours was never reset: a recurring
+  // member received their included_hours once and was then permanently out of
+  // credit while Stripe kept billing them. renew_membership_period computes the
+  // carry-over and resets the counter in a single atomic statement.
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice
+    const subscriptionId = getInvoiceSubscriptionId(invoice)
+
+    if (isRenewalInvoice(invoice) && subscriptionId) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const period = getSubscriptionPeriod(subscription)
+
+      const { error: renewError } = await supabaseAdmin.rpc('renew_membership_period', {
+        p_stripe_subscription_id: subscriptionId,
+        p_period_start: period.currentPeriodStart,
+        p_period_end: period.currentPeriodEnd,
+      })
+
+      // Throw rather than swallow: the catch below returns 500 so Stripe retries.
+      // A silently dropped renewal leaves a paying customer with zero hours.
+      if (renewError) {
+        throw new Error(
+          `Failed to renew membership for subscription ${subscriptionId}: ${renewError.message}`
+        )
+      }
+    }
+  }
+
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
     const membershipStatus = subscription.status === 'active' ? 'active' : 'canceled'
@@ -430,13 +503,16 @@ export async function POST(req: Request) {
       .eq('stripe_subscription_id', subscription.id)
   }
 
+  // Every side effect for this event has now committed, so record it. Anything
+  // that failed above threw and skipped this line, leaving the event unmarked so
+  // Stripe retries it.
+  await supabaseAdmin
+    .from('processed_stripe_events')
+    .upsert({ event_id: event.id }, { onConflict: 'event_id', ignoreDuplicates: true })
+
   return NextResponse.json({ received: true })
   } catch (error) {
     console.error('Stripe webhook processing failed:', error)
-    await supabaseAdmin
-      .from('processed_stripe_events')
-      .delete()
-      .eq('event_id', event.id)
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
   }
 }

@@ -7,8 +7,10 @@ const require = createRequire(import.meta.url)
 const {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
+  getInvoiceSubscriptionId,
   getSubscriptionPeriod,
   isPaymentIntentId,
+  isRenewalInvoice,
 } = require('../src/lib/stripe-subscription.js')
 const { sanitizeCustomerCreditSummary } = require('../src/lib/customer-credit-summary.js')
 const { buildSessionCalendarPlan } = require('../src/lib/session-calendar.js')
@@ -99,4 +101,35 @@ test('in-person calendar plan sets the location and skips the Meet request', () 
   assert.equal(plan.shouldCreateMeet, false)
   assert.match(plan.requestBody.location, /Sunrise, FL/)
   assert.equal(plan.requestBody.attendees.length, 2)
+})
+
+test('reads the subscription id from both old and new Stripe invoice shapes', () => {
+  // Older API versions: invoice.subscription
+  assert.equal(getInvoiceSubscriptionId({ subscription: 'sub_123' }), 'sub_123')
+  assert.equal(getInvoiceSubscriptionId({ subscription: { id: 'sub_456' } }), 'sub_456')
+
+  // Newer API versions moved it under parent.subscription_details
+  assert.equal(
+    getInvoiceSubscriptionId({
+      parent: { subscription_details: { subscription: 'sub_789' } },
+    }),
+    'sub_789'
+  )
+
+  // Absent on one-off invoices
+  assert.equal(getInvoiceSubscriptionId({}), null)
+  assert.equal(getInvoiceSubscriptionId(null), null)
+})
+
+test('only subscription_cycle invoices replenish membership hours', () => {
+  // A renewal replenishes.
+  assert.equal(isRenewalInvoice({ billing_reason: 'subscription_cycle' }), true)
+
+  // The first invoice must NOT: checkout.session.completed already set the
+  // opening balance, so treating it as a renewal would hand out a free hour.
+  assert.equal(isRenewalInvoice({ billing_reason: 'subscription_create' }), false)
+  assert.equal(isRenewalInvoice({ billing_reason: 'subscription_update' }), false)
+  assert.equal(isRenewalInvoice({ billing_reason: 'manual' }), false)
+  assert.equal(isRenewalInvoice({}), false)
+  assert.equal(isRenewalInvoice(null), false)
 })

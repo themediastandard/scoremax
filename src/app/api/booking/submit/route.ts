@@ -19,94 +19,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'This endpoint is for credit usage only' }, { status: 400 })
   }
 
-  // 1. Fetch Customer & Membership/Package Status
+  // 1. Redeem credit and create the booking + session atomically.
+  //    Credit selection, deduction, booking insert and session insert all happen
+  //    inside one Postgres transaction (see the redeem_credit_and_create_booking
+  //    migration). This is what prevents the credit from being double-spent by
+  //    concurrent requests, and what guarantees a failed insert can no longer
+  //    consume a customer's hour.
+  const { data: booking, error } = await supabaseAdmin
+    .rpc('redeem_credit_and_create_booking', {
+      p_profile_id: user.id,
+      p_subjects: subjects,
+      p_available_days: available_days,
+      p_available_time_start: available_time_start,
+      p_available_time_end: available_time_end,
+      p_timezone: timezone,
+      p_session_type: session_type,
+      p_notes: notes,
+    })
+    .single<{ id: string; payment_type: string }>()
+
+  if (error || !booking) {
+    if (error?.message?.includes('customer_not_found')) {
+      return NextResponse.json({ error: 'Customer profile not found' }, { status: 404 })
+    }
+    if (error?.message?.includes('no_available_credits')) {
+      return NextResponse.json({ error: 'No available credits' }, { status: 400 })
+    }
+    console.error('Credit redemption failed:', error?.message)
+    return NextResponse.json({ error: 'Could not create booking' }, { status: 500 })
+  }
+
+  const creditSource = booking.payment_type
+
+  // 2. Look up the customer for the notification emails. Nothing below this
+  //    point may consume credit, so a failure here cannot cost the customer.
   const { data: customer } = await supabaseAdmin
     .from('customers')
-    .select('*, memberships(*), packages(*), course_enrollments(*)')
+    .select('id, full_name, email')
     .eq('profile_id', user.id)
     .single()
 
   if (!customer) {
-    return NextResponse.json({ error: 'Customer profile not found' }, { status: 404 })
+    return NextResponse.json(booking)
   }
 
-  // 2. Determine Credit Source
-  let creditSource: 'membership' | 'package' | 'course' | null = null
-  let sourceId = null
-  let updates = {}
-  const courseEnrollmentId = null // Not implementing complex course matching yet
-
-  // Check Membership
-  const activeMembership = customer.memberships?.find(
-    (m: { status: string }) => m.status === 'active'
-  )
-  if (activeMembership) {
-    const available = activeMembership.included_hours + activeMembership.rollover_hours - activeMembership.used_hours
-    if (available > 0) {
-        creditSource = 'membership'
-        sourceId = activeMembership.id
-        updates = { used_hours: activeMembership.used_hours + 1 }
-    }
-  }
-
-  // Check Packages (if no membership credit used)
-  if (!creditSource) {
-    const activePackage = customer.packages?.find(
-      (p: { remaining_hours: number; expires_at: string }) =>
-        p.remaining_hours > 0 && new Date(p.expires_at) > new Date()
-    )
-    if (activePackage) {
-      creditSource = 'package'
-      sourceId = activePackage.id
-      updates = { remaining_hours: activePackage.remaining_hours - 1 }
-    }
-  }
-
-  if (!creditSource) {
-     return NextResponse.json({ error: 'No available credits' }, { status: 400 })
-  }
-
-  // 3. Deduct Credit
-  if (creditSource === 'membership') {
-    await supabaseAdmin.from('memberships').update(updates).eq('id', sourceId)
-  } else if (creditSource === 'package') {
-    await supabaseAdmin.from('packages').update(updates).eq('id', sourceId)
-  }
-
-  // 4. Create Booking Request
-  const { data: booking, error } = await supabaseAdmin
-    .from('booking_requests')
-    .insert({
-      customer_id: customer.id,
-      subjects, 
-      available_days,
-      available_time_start,
-      available_time_end,
-      timezone,
-      session_type,
-      status: 'paid',
-      payment_type: creditSource,
-      course_enrollment_id: courseEnrollmentId,
-      notes,
-      amount_cents: 0
-    })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  // 5. Create Session Record
-  await supabaseAdmin.from('sessions').insert({
-    order_id: booking.id,
-    customer_id: customer.id,
-    session_type,
-    subjects,
-    status: 'pending_scheduling',
-  })
-
-  // 6. Notify Admin
+  // 3. Notify Admin
   const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
   const adminEmails = adminSettings?.value?.split(',') || []
 
