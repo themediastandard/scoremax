@@ -168,12 +168,30 @@ export default function Footer() {
           <p className="text-xs text-white/50">
             &copy; {currentYear} ScoreMax Tutoring. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <Link
               href="/contact"
               className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
             >
               Contact Us
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
+            >
+              Terms of Service
+            </Link>
+            <Link
+              href="/refund-policy"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
+            >
+              Refund Policy
             </Link>
           </div>
         </div>
