@@ -128,7 +128,7 @@ export default function Home() {
       {/* Header now rendered globally in RootLayout */}
 
       {/* Video Hero */}
-      <VideoHero mp4Src="/video/video1.mp4" />
+      <VideoHero mp4Src="/video/hero-home.mp4" />
 
       {/* IntroBanner removed */}
 
