@@ -55,3 +55,6 @@ next-env.d.ts
 # security audit reports — contain working reproduction steps for unpatched
 # vulnerabilities. Do not commit while findings are open.
 AUDIT-*.md
+
+# Local Netlify folder
+.netlify
