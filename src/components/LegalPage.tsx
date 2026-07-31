@@ -7,6 +7,14 @@ import type { ReactNode } from 'react'
  * processors it calls, the fields it stores, the refund rule implemented in
  * `refund_booking()` — but they have NOT been reviewed by a lawyer. The draft
  * banner is deliberate and should be removed only once they have been.
+ *
+ * As of 2026-07-31 every factual gap is filled from the client's answers (see
+ * src/lib/legal-entity.ts). What remains is two sections a lawyer has to write
+ * or approve, both still wrapped in <Fill>: the limitation of liability and
+ * dispute-resolution clauses in the terms, and confirmation of COPPA and state
+ * student-privacy obligations in the privacy policy. The client has said they
+ * do not currently have a lawyer, so this is a business decision, not a
+ * remaining piece of work here.
  */
 export function LegalPage({
   title,
@@ -22,9 +30,9 @@ export function LegalPage({
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-8 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
           <p className="text-sm text-amber-900">
-            <strong>Draft — pending legal review.</strong> This page is a working
-            draft. Placeholders in brackets must be completed and the text reviewed
-            by a qualified lawyer before launch.
+            <strong>Draft — pending legal review.</strong> The business details on
+            this page are complete. Any remaining highlighted section needs a
+            qualified lawyer before publication.
           </p>
         </div>
 

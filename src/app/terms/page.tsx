@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalPage, Fill } from '@/components/LegalPage'
+import {
+  LEGAL_ENTITY_NAME,
+  BUSINESS_ADDRESS,
+  CONTACT_EMAIL,
+  GOVERNING_LAW,
+  JURISDICTION,
+  CANCELLATION_NOTICE_HOURS,
+} from '@/lib/legal-entity'
 
 export const metadata: Metadata = {
   title: 'Terms of Service | ScoreMax',
@@ -16,7 +24,7 @@ export default function TermsPage() {
       <section>
         <p>
           These terms govern your use of the ScoreMax website and tutoring services,
-          provided by <Fill>LEGAL ENTITY NAME</Fill>. By creating an account or booking a
+          provided by {LEGAL_ENTITY_NAME}. By creating an account or booking a
           session you agree to them.
         </p>
       </section>
@@ -80,7 +88,7 @@ export default function TermsPage() {
           within 14 days of purchase, and delivered sessions are not refundable.
         </p>
         <p>
-          We ask for at least <Fill>NUMBER</Fill> hours&rsquo; notice to cancel or
+          We ask for at least {CANCELLATION_NOTICE_HOURS} hours&rsquo; notice to cancel or
           reschedule. Sessions missed without notice may be treated as delivered.
         </p>
       </section>
@@ -153,8 +161,8 @@ export default function TermsPage() {
       <section>
         <h2>Governing law</h2>
         <p>
-          These terms are governed by the laws of <Fill>STATE / COUNTRY</Fill>, and the
-          courts of <Fill>JURISDICTION</Fill> have exclusive jurisdiction over any
+          These terms are governed by the laws of {GOVERNING_LAW}, and the
+          courts of {JURISDICTION} have exclusive jurisdiction over any
           dispute.
         </p>
       </section>
@@ -162,11 +170,11 @@ export default function TermsPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          <Fill>LEGAL ENTITY NAME</Fill>
+          {LEGAL_ENTITY_NAME}
           <br />
-          <Fill>BUSINESS ADDRESS</Fill>
+          {BUSINESS_ADDRESS}
           <br />
-          <Fill>CONTACT EMAIL ADDRESS</Fill>
+          {CONTACT_EMAIL}
         </p>
       </section>
     </LegalPage>

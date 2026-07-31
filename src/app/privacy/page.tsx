@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalPage, Fill } from '@/components/LegalPage'
+import {
+  LEGAL_ENTITY_NAME,
+  BUSINESS_ADDRESS,
+  PRIVACY_EMAIL,
+  RECORD_RETENTION_YEARS,
+  PRIVACY_RESPONSE_DAYS,
+} from '@/lib/legal-entity'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | ScoreMax',
@@ -15,7 +22,7 @@ export default function PrivacyPage() {
     <LegalPage title="Privacy Policy" lastUpdated="28 July 2026">
       <section>
         <p>
-          This policy explains what <Fill>LEGAL ENTITY NAME</Fill> (&ldquo;ScoreMax&rdquo;,
+          This policy explains what {LEGAL_ENTITY_NAME} (&ldquo;ScoreMax&rdquo;,
           &ldquo;we&rdquo;, &ldquo;us&rdquo;) does with personal information when you use{' '}
           <Link href="/">scoremaxtutoring.com</Link> and our tutoring services.
         </p>
@@ -60,7 +67,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           A parent or guardian may review, correct or delete their child&rsquo;s
-          information at any time by contacting <Fill>PRIVACY EMAIL ADDRESS</Fill>.
+          information at any time by contacting {PRIVACY_EMAIL}.
         </p>
         <p className="text-amber-900">
           <Fill>
@@ -124,7 +131,7 @@ export default function PrivacyPage() {
         <p>
           We keep account and booking records for as long as your account is open, and
           afterwards for as long as we need them for tax, accounting and legal purposes —
-          ordinarily <Fill>NUMBER</Fill> years. You can ask us to delete your account
+          ordinarily {RECORD_RETENTION_YEARS} years. You can ask us to delete your account
           sooner; see below.
         </p>
       </section>
@@ -138,8 +145,8 @@ export default function PrivacyPage() {
           is open.
         </p>
         <p>
-          Email <Fill>PRIVACY EMAIL ADDRESS</Fill> and we will respond within{' '}
-          <Fill>NUMBER</Fill> days. Depending on where you live you may have further
+          Email {PRIVACY_EMAIL} and we will respond within{' '}
+          {PRIVACY_RESPONSE_DAYS} days. Depending on where you live you may have further
           rights under laws such as the CCPA or GDPR.
         </p>
       </section>
@@ -174,11 +181,11 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          <Fill>LEGAL ENTITY NAME</Fill>
+          {LEGAL_ENTITY_NAME}
           <br />
-          <Fill>BUSINESS ADDRESS</Fill>
+          {BUSINESS_ADDRESS}
           <br />
-          <Fill>PRIVACY EMAIL ADDRESS</Fill>
+          {PRIVACY_EMAIL}
         </p>
       </section>
     </LegalPage>

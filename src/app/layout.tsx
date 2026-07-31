@@ -32,6 +32,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // Without this, Next resolves the relative image paths below against
+  // http://localhost:3000 at build time, so every link shared to Facebook,
+  // LinkedIn, iMessage or WhatsApp carried a preview image nobody could load.
+  metadataBase: new URL('https://www.scoremaxtutoring.com'),
   title: "ScoreMax Tutoring | Unlock Your Test Score Potential",
   description: "Expert 1-on-1 test prep tutoring for SAT, ACT, GMAT, GRE & academic subjects. Get matched with certified tutors and boost your scores with personalized study plans.",
   openGraph: {
