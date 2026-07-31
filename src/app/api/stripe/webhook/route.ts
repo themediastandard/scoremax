@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { formatTime24To12 } from '@/lib/order-format'
+import { packageExpiresAt } from '@/lib/package-expiry'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -231,6 +232,7 @@ export async function POST(req: Request) {
             customer_id: customer.id,
             total_hours: hours,
             remaining_hours: hours - 1,
+            expires_at: packageExpiresAt(),
             stripe_payment_intent_id: stripePaymentIntentId
         }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
     } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {

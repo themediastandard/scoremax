@@ -34,6 +34,12 @@ export default function RefundPolicyPage() {
             still be booked, but are no longer refundable.
           </li>
           <li>
+            <strong>Prepaid hours expire one year after purchase.</strong> Your account
+            shows the expiry date for each package. Hours that expire unused are not
+            refundable, so book them before then — if you are close to the deadline and
+            need more time, contact us.
+          </li>
+          <li>
             <strong>Sessions already delivered</strong> are not refundable. If you cancel
             a booked session before it takes place, the credit returns to your account
             rather than being lost.
