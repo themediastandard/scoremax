@@ -7,7 +7,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
-  description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points. Flexible scheduling, proven results, and personalized learning plans.',
+  description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
   keywords: 'SAT tutoring, ACT tutoring, test prep, college prep, tutoring services, SAT scores, ACT scores, test preparation, academic tutoring',
   authors: [{ name: 'ScoreMax Tutoring' }],
   creator: 'ScoreMax Tutoring',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     url: 'https://www.scoremaxtutoring.com',
     siteName: 'ScoreMax',
     title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
-    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points. Flexible scheduling, proven results, and personalized learning plans.',
+    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
     images: [
       {
         url: '/logo.avif',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'ScoreMax - Expert SAT & ACT Tutoring',
-    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 280+ points.',
+    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points.',
     images: ['/logo.avif'],
   },
   alternates: {
@@ -55,7 +55,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     "name": "ScoreMax",
-    "description": "Professional SAT and ACT tutoring services with expert tutors. Help students improve test scores by 280+ points.",
+    "description": "Professional SAT and ACT tutoring services with expert tutors. Help students improve test scores by 260+ points.",
     "url": "https://www.scoremaxtutoring.com",
     "logo": "https://www.scoremaxtutoring.com/logo.avif",
     "contactPoint": {
@@ -85,7 +85,7 @@ export default function Home() {
         "name": "How much can I improve my SAT score with ScoreMax tutoring?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Students typically improve their SAT scores by 280+ points with our expert tutoring services. Our personalized approach and proven strategies help students achieve significant score improvements."
+          "text": "Students typically improve their SAT scores by 260+ points with our expert tutoring services. Our personalized approach and proven strategies help students achieve significant score improvements."
         }
       },
       {
