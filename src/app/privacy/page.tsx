@@ -35,7 +35,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Scheduling information</strong> — the days and times you are
-            available, your timezone, and whether you want online or in-person sessions.
+            available and your timezone.
           </li>
           <li>
             <strong>Purchase records</strong> — what you bought, the amount, and the

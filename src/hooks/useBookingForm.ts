@@ -2,7 +2,11 @@ import { useState } from 'react'
 
 export interface BookingState {
   subjects: string[]
-  sessionType: 'online' | 'in-person'
+  // Every session is delivered online. In-person tutoring was withdrawn as a
+  // service before launch, so this is a constant rather than a choice — it is
+  // kept as a field because `session_type` is still a column on
+  // `booking_requests` and `sessions`.
+  sessionType: 'online'
   availability: {
     days: string[]
     startTime: string
@@ -52,10 +56,6 @@ export const useBookingForm = () => {
     setState(prev => ({ ...prev, subjects }))
   }
   
-  const updateSessionType = (sessionType: 'online' | 'in-person') => {
-    setState(prev => ({ ...prev, sessionType }))
-  }
-  
   const updateAvailability = (availability: BookingState['availability']) => {
     setState(prev => ({ ...prev, availability }))
   }
@@ -68,12 +68,7 @@ export const useBookingForm = () => {
   const revealNext = (currentSection: keyof typeof revealed) => {
     setRevealed(prev => {
       const next = { ...prev }
-      if (currentSection === 'subjects') {
-        // Check if SAT is selected to reveal sessionType
-        // Need to pass SAT ID or slug logic here
-        // For now, assume caller handles 'sessionType' visibility check
-        next.availability = true // Default next
-      }
+      if (currentSection === 'subjects') next.availability = true
       if (currentSection === 'availability') next.contact = true
       if (currentSection === 'contact') next.plan = true
       return next
@@ -88,7 +83,6 @@ export const useBookingForm = () => {
     memberStatus,
     setMemberStatus,
     updateSubjects,
-    updateSessionType,
     updateAvailability,
     updateContact,
     revealNext

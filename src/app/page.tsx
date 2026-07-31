@@ -130,7 +130,6 @@ export default function Home() {
       {/* Video Hero */}
       <VideoHero mp4Src="/video/hero-home.mp4" />
 
-      {/* IntroBanner removed */}
 
       {/* Highlight two primary offerings */}
       <DualCTA />
