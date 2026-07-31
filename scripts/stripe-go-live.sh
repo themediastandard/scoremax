@@ -23,7 +23,23 @@
 #
 set -euo pipefail
 
-: "${STRIPE_API_KEY:?Set STRIPE_API_KEY to your live secret key}"
+# Prefer an explicit STRIPE_API_KEY, otherwise read STRIPE_LIVE_SECRET_KEY out
+# of .env.local. That file is gitignored, and the value is never echoed — this
+# is only so the key does not have to be retyped on a command line, where it
+# would land in shell history.
+if [[ -z "${STRIPE_API_KEY:-}" ]]; then
+  env_file="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.env.local"
+  if [[ -f "$env_file" ]]; then
+    STRIPE_API_KEY="$(grep -m1 '^STRIPE_LIVE_SECRET_KEY=' "$env_file" 2>/dev/null | cut -d= -f2- | tr -d '"'"'"' \r' || true)"
+  fi
+fi
+
+if [[ -z "${STRIPE_API_KEY:-}" ]]; then
+  echo "No live key found." >&2
+  echo "Either set STRIPE_LIVE_SECRET_KEY in .env.local, or run with" >&2
+  echo "  STRIPE_API_KEY='sk_live_...' $0" >&2
+  exit 1
+fi
 
 case "$STRIPE_API_KEY" in
   sk_live_*) ;;
