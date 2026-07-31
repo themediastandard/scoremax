@@ -2,16 +2,44 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
+import { cleanEmail, cleanString, isHoneypotTripped } from '@/lib/form-validation'
+import { getClientIp, withinRateLimit, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit'
+
+/**
+ * Step Up For Students registration. Same threat model as /api/contact — public,
+ * unauthenticated, and it sends mail from the verified sending domain — so it
+ * gets the same honeypot, rate limits and validation.
+ */
+
+const MAX_PER_IP = 5
+const MAX_PER_EMAIL = 3
+const WINDOW = '1 hour'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { firstName, lastName, email, phone } = body
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+    if (isHoneypotTripped(body.company)) {
+      return NextResponse.json({ success: true })
     }
 
+    const email = cleanEmail(body.email)
+    if (!email) {
+      return NextResponse.json({ error: 'A valid email address is required' }, { status: 400 })
+    }
+
+    const ip = getClientIp(req)
+    const [ipOk, emailOk] = await Promise.all([
+      withinRateLimit('step-up:ip', ip, MAX_PER_IP, WINDOW),
+      withinRateLimit('step-up:email', email, MAX_PER_EMAIL, WINDOW),
+    ])
+    if (!ipOk || !emailOk) {
+      return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 })
+    }
+
+    const firstName = cleanString(body.firstName)
+    const lastName = cleanString(body.lastName)
+    const phone = cleanString(body.phone)
     const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Not provided'
 
     const { data: adminSettings } = await supabaseAdmin
@@ -31,6 +59,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         ...getEmailDefaults(),
         to: adminEmails,
+        replyTo: email,
         subject: 'New Step Up For Students Registration',
         html: emailLayout({
           title: 'New Step Up For Students Registration',

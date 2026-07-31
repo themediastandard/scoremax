@@ -31,6 +31,7 @@ export function ContactForm() {
           strengths: data.strengths,
           weaknesses: data.weaknesses,
           helpNeeded: data.helpNeeded,
+          company: data.company,
         }),
       })
 
@@ -50,6 +51,16 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/*
+        Honeypot. Positioned off-screen rather than display:none, because some
+        bots skip hidden inputs but fill anything they can parse. aria-hidden
+        and tabIndex keep it away from screen readers and keyboard users, and
+        autoComplete="off" stops a browser helpfully filling it in.
+      */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-auto w-px h-px overflow-hidden">
+        <label htmlFor="company">Company (leave this field empty)</label>
+        <input type="text" id="company" name="company" tabIndex={-1} autoComplete="off" />
+      </div>
       <div>
         <label htmlFor="studentName" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2 flex items-center gap-3">
           <div className="w-10 h-10 bg-[#b08a30]/10 flex items-center justify-center flex-shrink-0">
