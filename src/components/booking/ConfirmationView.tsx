@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Calendar, Clock, MapPin, Video, CreditCard } from 'lucide-react'
+import { CheckCircle2, Calendar, Clock, Video, CreditCard } from 'lucide-react'
 
 function formatTime24To12(time24: string) {
   const [h, m] = (time24 || '').split(':').map(Number)
@@ -114,16 +114,10 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
             )}
             
             <div className="flex items-start space-x-3">
-              {bookingDetails?.sessionType === 'in-person' ? (
-                <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
-              ) : (
-                <Video className="w-5 h-5 text-gray-400 mt-0.5" />
-              )}
+              <Video className="w-5 h-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="font-medium">Location</p>
-                <p className="text-sm text-gray-500">
-                  {bookingDetails?.sessionType === 'in-person' ? 'Sawgrass, FL Location' : 'Online (Zoom)'}
-                </p>
+                <p className="text-sm text-gray-500">Online (Google Meet)</p>
               </div>
             </div>
             

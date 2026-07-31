@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { unexpiredPackagesClause } from '@/lib/package-expiry'
 
 export async function GET() {
   const supabase = await createClient()
@@ -33,6 +34,7 @@ export async function GET() {
     .select('*')
     .eq('customer_id', customer.id)
     .gt('remaining_hours', 0)
+    .or(unexpiredPackagesClause())
     
   const { data: courses } = await supabaseAdmin
     .from('course_enrollments')

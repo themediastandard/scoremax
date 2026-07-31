@@ -10,7 +10,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: 'Our Tutors | SAT, ACT & Subject Tutoring | ScoreMax',
   description:
-    'Meet the ScoreMax tutoring team. One-to-one SAT, ACT, math, science and subject tutoring, online and in person.',
+    'Meet the ScoreMax tutoring team. One-to-one online SAT, ACT, math, science and subject tutoring.',
   keywords:
     'SAT tutors, ACT tutors, math tutors, science tutors, test prep tutors, tutoring',
   authors: [{ name: 'ScoreMax Tutoring' }],
@@ -133,7 +133,7 @@ export default async function TutorsPage() {
           <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-8">
             Our tutors work one-to-one with students across test prep, maths, sciences
-            and the core high-school subjects — online or in person.
+            and the core high-school subjects.
           </p>
           <Link
             href="/contact"
@@ -285,11 +285,10 @@ export default async function TutorsPage() {
               </div>
               <div>
                 <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">
-                  Online or In Person
+                  Online, Wherever You Are
                 </h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Sessions run over Google Meet with a shared calendar invite, or in
-                  person locally.
+                  Sessions run over Google Meet with a shared calendar invite.
                 </p>
               </div>
             </div>

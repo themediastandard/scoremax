@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { CustomersTable } from '@/components/dashboard/CustomersTable'
 import { CustomerMetrics } from '@/components/dashboard/CustomerMetrics'
+import { unexpiredPackagesClause } from '@/lib/package-expiry'
 
 export default async function CustomersPage() {
   const user = await getAuthUser()
@@ -29,7 +30,8 @@ export default async function CustomersPage() {
     supabaseAdmin
       .from('packages')
       .select('customer_id, total_hours, remaining_hours')
-      .gt('remaining_hours', 0),
+      .gt('remaining_hours', 0)
+      .or(unexpiredPackagesClause()),
     supabaseAdmin
       .from('booking_requests')
       .select('customer_id')

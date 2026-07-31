@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { unexpiredPackagesClause } from '@/lib/package-expiry'
 import {
   emptyCustomerCreditSummary,
   sanitizeCustomerCreditSummary,
@@ -59,16 +60,15 @@ export async function POST(req: NextRequest) {
     .eq('status', 'active')
     .single()
     
-  // Check Packages (active, not expired).
-  // A NULL expires_at means "never expires". The previous `.gt('expires_at', now)`
-  // silently excluded those rows, because NULL fails every comparison — and the
-  // purchase path never sets expires_at, so that was every package ever sold.
+  // Packages that are active and not expired. A NULL expires_at means "never
+  // expires" and must be admitted explicitly — `.gt('expires_at', now)` alone
+  // silently drops those rows, because NULL fails every comparison.
   const { data: packages } = await supabaseAdmin
     .from('packages')
     .select('remaining_hours')
     .eq('customer_id', customer.id)
     .gt('remaining_hours', 0)
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    .or(unexpiredPackagesClause())
     
   const { data: satCourses } = await supabaseAdmin
     .from('course_enrollments')

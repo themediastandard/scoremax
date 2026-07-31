@@ -1,3 +1,5 @@
+import { escapeHtml } from '@/lib/html-escape'
+
 const GOLD = '#b08a30'
 const DARK = '#1e293b'
 const GRAY_600 = '#4b5563'
@@ -8,14 +10,27 @@ function getBaseUrl() {
   return process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
 }
 
+/**
+ * Wraps pre-rendered `body` HTML in the ScoreMax email chrome.
+ *
+ * `body` is deliberately NOT escaped — it is assembled HTML, typically from
+ * detailRow(), which escapes its own inputs. Everything else here is escaped,
+ * because callers do interpolate user input into them: /api/step-up builds its
+ * greeting from a submitted first name.
+ */
 export function emailLayout(options: {
   title: string
+  /** Trusted HTML. Escape anything user-supplied before it gets here. */
   body: string
   ctaText?: string
   ctaUrl?: string
   greeting?: string
 }): string {
-  const { title, body, ctaText, ctaUrl, greeting } = options
+  const { body } = options
+  const title = escapeHtml(options.title)
+  const ctaText = options.ctaText ? escapeHtml(options.ctaText) : options.ctaText
+  const ctaUrl = options.ctaUrl ? escapeHtml(options.ctaUrl) : options.ctaUrl
+  const greeting = options.greeting ? escapeHtml(options.greeting) : options.greeting
   const baseUrl = getBaseUrl()
 
   const ctaButton = ctaText && ctaUrl
@@ -83,7 +98,14 @@ export function emailLayout(options: {
 `
 }
 
-/** Renders a detail row (label: value) for use inside email body */
+/**
+ * Renders a detail row (label: value) for use inside an email body.
+ *
+ * Both arguments are HTML-escaped. Every one of the ~26 call sites passes plain
+ * text, and several pass values straight from a public form or from checkout,
+ * so escaping here rather than at each call site means a new caller is safe by
+ * default instead of safe only if the author remembered.
+ */
 export function detailRow(label: string, value: string): string {
-  return `<p style="margin: 0 0 8px 0;"><strong style="color: ${DARK};">${label}</strong> ${value}</p>`
+  return `<p style="margin: 0 0 8px 0;"><strong style="color: ${DARK};">${escapeHtml(label)}</strong> ${escapeHtml(value)}</p>`
 }

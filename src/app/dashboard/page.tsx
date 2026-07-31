@@ -10,6 +10,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { formatPlanLabel } from '@/lib/order-format'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
+import { unexpiredPackagesClause } from '@/lib/package-expiry'
 
 // supabase-js without generated DB types infers to-one joins as arrays,
 // but FK joins return single objects at runtime — cast results to the runtime shape.
@@ -541,9 +542,10 @@ export default async function DashboardHome() {
       .then(r => r),
     supabase
       .from('packages')
-      .select('total_hours, remaining_hours')
+      .select('total_hours, remaining_hours, expires_at')
       .eq('customer_id', customerId)
-      .gt('remaining_hours', 0),
+      .gt('remaining_hours', 0)
+      .or(unexpiredPackagesClause()),
     supabase
       .from('sessions')
       .select('*', { count: 'exact', head: true })
@@ -561,6 +563,13 @@ export default async function DashboardHome() {
   const packageCredits = (packages ?? []).reduce((sum: number, p) => sum + p.remaining_hours, 0)
   const packageTotal = (packages ?? []).reduce((sum: number, p) => sum + p.total_hours, 0)
   const totalCredits = membershipCredits + packageCredits
+  // Soonest expiry across packages that still have hours on them. NULL means a
+  // package bought before expiry existed, which never expires and so should not
+  // put a deadline on the page.
+  const nextPackageExpiry = (packages ?? [])
+    .map((p) => p.expires_at)
+    .filter((d): d is string => !!d)
+    .sort()[0]
   const totalUsed = (membership?.used_hours ?? 0) + (packageTotal - packageCredits)
   const totalIncluded = (membership?.included_hours ?? 0) + packageTotal
   const hasCredits = totalCredits > 0 || membership || (packages && packages.length > 0)
@@ -629,6 +638,11 @@ export default async function DashboardHome() {
                   {membership?.current_period_end && (
                     <p className="text-xs text-gray-500 mt-0.5">
                       Membership renews {new Date(membership.current_period_end).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                  {nextPackageExpiry && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Package hours expire {new Date(nextPackageExpiry).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </p>
                   )}
                 </div>

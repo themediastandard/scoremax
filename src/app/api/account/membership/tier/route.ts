@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getCustomerMembership } from '@/lib/customer-membership'
+import { unexpiredPackagesClause } from '@/lib/package-expiry'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +27,7 @@ export async function GET() {
       .select('remaining_hours')
       .eq('customer_id', result.customerId)
       .gt('remaining_hours', 0)
+      .or(unexpiredPackagesClause())
     packageCredits = (packages ?? []).reduce((sum: number, p: { remaining_hours: number | null }) => sum + (p.remaining_hours ?? 0), 0)
   }
 

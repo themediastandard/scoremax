@@ -24,6 +24,7 @@ export function StepUpForm() {
           lastName: data.lastName,
           email: data.email,
           phone: data.phone,
+          company: data.company,
         }),
       })
 
@@ -43,6 +44,11 @@ export function StepUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Honeypot — see the note in ContactForm.tsx. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-auto w-px h-px overflow-hidden">
+        <label htmlFor="su-company">Company (leave this field empty)</label>
+        <input type="text" id="su-company" name="company" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="firstName" className="block font-[family-name:var(--font-playfair)] text-sm text-gray-900 mb-2">First Name</label>

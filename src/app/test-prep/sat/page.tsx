@@ -150,7 +150,7 @@ export default function SATPage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div>
-                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">+280</div>
+                <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#b08a30] mb-1">+260</div>
                 <div className="text-sm text-gray-500">Average Score Improvement</div>
               </div>
               <div>

@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { LegalPage, Fill } from '@/components/LegalPage'
+import { LegalPage } from '@/components/LegalPage'
+import {
+  REFUNDS_EMAIL,
+  GOVERNING_LAW,
+  REFUND_RESPONSE_BUSINESS_DAYS,
+} from '@/lib/legal-entity'
 
 export const metadata: Metadata = {
   title: 'Refund Policy | ScoreMax',
@@ -32,6 +37,12 @@ export default function RefundPolicyPage() {
           <li>
             <strong>After 14 days:</strong> unused hours remain on your account and can
             still be booked, but are no longer refundable.
+          </li>
+          <li>
+            <strong>Prepaid hours expire one year after purchase.</strong> Your account
+            shows the expiry date for each package. Hours that expire unused are not
+            refundable, so book them before then — if you are close to the deadline and
+            need more time, contact us.
           </li>
           <li>
             <strong>Sessions already delivered</strong> are not refundable. If you cancel
@@ -67,10 +78,10 @@ export default function RefundPolicyPage() {
       <section>
         <h2>How to request a refund</h2>
         <p>
-          Email <Fill>REFUNDS EMAIL ADDRESS</Fill> from the address on your account, or
+          Email {REFUNDS_EMAIL} from the address on your account, or
           use our <Link href="/contact">contact form</Link>, telling us which purchase
           you would like refunded. We aim to respond within{' '}
-          <Fill>NUMBER</Fill> business days.
+          {REFUND_RESPONSE_BUSINESS_DAYS} business days.
         </p>
         <p>
           Approved refunds are returned to the original payment method through Stripe.
@@ -82,7 +93,7 @@ export default function RefundPolicyPage() {
         <h2>Statutory rights</h2>
         <p>
           Nothing in this policy limits any rights you have under applicable consumer
-          protection law in <Fill>STATE / COUNTRY</Fill>.
+          protection law in {GOVERNING_LAW}.
         </p>
       </section>
     </LegalPage>
