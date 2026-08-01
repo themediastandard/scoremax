@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import VideoHero from '../components/VideoHero';
-import DualCTA from '../components/DualCTA';
 import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
 
@@ -131,8 +130,6 @@ export default function Home() {
       <VideoHero mp4Src="/video/hero-home.mp4" />
 
 
-      {/* Highlight two primary offerings */}
-      <DualCTA />
 
       {/* Browse Services */}
       <section className="pt-4 pb-16 bg-white">
@@ -211,7 +208,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Subjects</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">Browse Subjects</div>
+                <div className="text-xl font-[family-name:var(--font-playfair)]">Subjects We Tutor</div>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                   </div>
             </Link>
@@ -227,6 +224,13 @@ export default function Home() {
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Results Without Compromise</h2>
             <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-5" />
             <p className="text-gray-700 text-sm leading-relaxed">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
+            <p className="mt-4 text-gray-700 text-sm leading-relaxed">
+              ScoreMax creates a nurturing, interactive, and engaging virtual environment
+              where students can learn and grow at their own pace. Our handpicked, certified
+              tutors are experts in their fields, committed to the academic success of each
+              student. We&rsquo;re more than a tutoring platform &mdash; we are a community of
+              lifelong learners dedicated to academic excellence.
+            </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">Book Free Consultation</Link>
             </div>
@@ -255,6 +259,14 @@ export default function Home() {
             <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
             <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto">
               Our simple booking process makes it easy to schedule tutoring that fits your goals and schedule. Choose your subject, share your availability, and we match you with an expert tutor.
+            </p>
+            <p className="mt-4 text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto">
+              We understand the importance of convenience in a student&rsquo;s busy schedule and
+              aim to provide accessible options. We understand that each student has unique
+              strengths, weaknesses, and learning styles. That&rsquo;s why our sessions are
+              designed to cater to individual needs. Our tutors provide personalized attention,
+              identify areas for improvement, and create customized study plans to optimize each
+              student&rsquo;s progress.
             </p>
           </div>
 
