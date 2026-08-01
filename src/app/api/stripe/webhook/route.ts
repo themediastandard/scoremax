@@ -7,6 +7,7 @@ import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { formatTime24To12 } from '@/lib/order-format'
 import { packageExpiresAt } from '@/lib/package-expiry'
+import { escapeLikePattern } from '@/lib/postgrest-escape'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
         const { data: customerByEmail } = await supabaseAdmin
             .from('customers')
             .select('*')
-            .ilike('email', contactEmail)
+            .ilike('email', escapeLikePattern(contactEmail))
             .single()
 
         if (customerByEmail) {
@@ -162,7 +163,7 @@ export async function POST(req: Request) {
             const { data: triggerCreated } = await supabaseAdmin
                 .from('customers')
                 .select('*')
-                .ilike('email', contactEmail)
+                .ilike('email', escapeLikePattern(contactEmail))
                 .single()
 
             if (triggerCreated) {
@@ -174,14 +175,37 @@ export async function POST(req: Request) {
                 }).eq('id', triggerCreated.id)
                 customer = { ...triggerCreated, stripe_customer_id: stripeCustomerId }
             } else {
-                const { data: newCustomer } = await supabaseAdmin.from('customers').insert({
-                    full_name: contactName,
-                    email: contactEmail,
-                    stripe_customer_id: stripeCustomerId,
-                    ...(contactPhone && { phone: contactPhone }),
-                    ...(studentGrade && { student_grade: studentGrade }),
-                    ...(profileId && { profile_id: profileId }),
-                }).select().single()
+                if (!profileId) {
+                    // The purchase still goes through, but with no profile_id the
+                    // buyer cannot see it from their account. Worth knowing about.
+                    console.error(
+                        `Guest checkout for ${contactEmail} could not resolve an auth user; ` +
+                        `creating an unlinked customer record. Link it by hand.`
+                    )
+                }
+                const { data: newCustomer, error: insertError } = await supabaseAdmin
+                    .from('customers')
+                    .insert({
+                        full_name: contactName,
+                        email: contactEmail,
+                        stripe_customer_id: stripeCustomerId,
+                        ...(contactPhone && { phone: contactPhone }),
+                        ...(studentGrade && { student_grade: studentGrade }),
+                        ...(profileId && { profile_id: profileId }),
+                    })
+                    .select()
+                    .single()
+                // Throwing matters here. Every grant below is guarded by
+                // `if (customer)`, so swallowing this error let a paid checkout
+                // fall straight through to the processed_stripe_events marker:
+                // the customer was charged, received nothing, and Stripe never
+                // retried because the handler answered 200.
+                if (insertError || !newCustomer) {
+                    throw new Error(
+                        `Guest checkout could not create a customer for ${contactEmail}: ` +
+                        `${insertError?.message ?? 'insert returned no row'}`
+                    )
+                }
                 customer = newCustomer
             }
         }
