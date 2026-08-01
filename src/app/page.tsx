@@ -162,50 +162,68 @@ export default function Home() {
             <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Test Prep</h3>
             <div className="w-10 h-[2px] bg-[#b08a30] mt-3" />
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Five across on desktop so the row fills evenly — a 3-column grid
+              left an orphaned row of two. The school-level grid below is four
+              across for the same reason. */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">SAT Prep</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">SAT Prep</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Digital and adaptive, scored 400–1600.</p>
+              </div>
             </Link>
             <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">ACT Prep</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">ACT Prep</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">English, math and reading. Science optional.</p>
+              </div>
             </Link>
             <Link href="/test-prep/lsat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-lsat-tutoring.jpg" alt="LSAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <Image src="/Images/hero-lsat-tutoring.jpg" alt="LSAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">LSAT Prep</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">LSAT Prep</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Logical reasoning and reading, scored 120–180.</p>
               </div>
             </Link>
             <Link href="/test-prep/gre" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-gre-tutoring.jpg" alt="GRE Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <Image src="/Images/hero-gre-tutoring.jpg" alt="GRE Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">GRE Prep</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">GRE Prep</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Under two hours. Verbal, quant and writing.</p>
               </div>
             </Link>
-            <Link href="/test-prep/gmat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-gmat-tutoring.jpg" alt="GMAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+            <Link href="/test-prep/gmat" className="group relative h-56 sm:col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="/Images/hero-gmat-tutoring.jpg" alt="GMAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">GMAT Prep</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">GMAT Prep</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Quant, verbal and data insights, 205–805.</p>
               </div>
             </Link>
           </div>
@@ -217,39 +235,51 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="/Images/student-1.png" alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">College</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">College Tutoring</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">College Tutoring</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                 </div>
+                <p className="text-xs leading-snug text-white/85">Calculus, physics, chemistry and organic chem.</p>
+              </div>
             </Link>
             <Link href="/high-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop" alt="High School Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">High School</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">High School Tutoring</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">High School Tutoring</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Algebra through calculus, physics and chemistry.</p>
+              </div>
             </Link>
             <Link href="/middle-school-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200&auto=format&fit=crop" alt="Middle School Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Middle School</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">Middle School Tutoring</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">Middle School Tutoring</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Math, English and science for grades 6–8.</p>
+              </div>
             </Link>
             <Link href="/elementary-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop" alt="Elementary Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Elementary</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">Elementary Tutoring</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                    </div>
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
+                <div className="flex items-center gap-2">
+                  <div className="text-lg font-[family-name:var(--font-playfair)]">Elementary Tutoring</div>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+                </div>
+                <p className="text-xs leading-snug text-white/85">Reading and math foundations, one-on-one.</p>
+              </div>
             </Link>
                     </div>
                     </div>
@@ -282,7 +312,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-4 aspect-video rounded-2xl overflow-hidden bg-white [&>div]:rounded-lg">
             <div className="relative">
-              <Image src="/Images/student-2.png" alt="Students studying" fill className="object-cover" />
+              <Image src="/Images/student-2.jpg" alt="A student in an online tutoring session with her tutor on the laptop screen" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
             </div>
             <div className="relative">
               <Image src="/Images/student-1.png" alt="College student" fill className="object-cover" />
