@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
 import { StepUpForm } from '@/components/StepUpForm';
+import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'Step Up For Students Partnership | ScoreMax Tutoring',
@@ -46,28 +48,16 @@ export default function StepUpForStudentsPage() {
     <div className="min-h-screen bg-white overflow-hidden">
       {/* Header removed; global in layout */}
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-6">
-            <Image 
-              src="/step-up.avif" 
-              alt="Step Up For Students Logo" 
-              width={200}
-              height={128}
-              className="w-40 mx-auto"
-            />
-          </div>
-          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship</div>
-          <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
-            Step Up For Students
-          </h1>
-          <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
-          <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
-            Step Up For Students supports families through scholarships for tuition, transportation, and educational resources. As a provider, ScoreMax delivers expert tutoring at no cost to scholarship recipients.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Florida Scholarship"
+        title="Step Up For Students"
+        intro="Step Up For Students supports families through scholarships for tuition, transportation, and educational resources. As a provider, ScoreMax delivers expert tutoring at no cost to scholarship recipients."
+        image={heroImages.stepUp}
+        imageAlt="A parent walks hand in hand with their child on the way to school."
+        logo="/step-up.avif"
+        logoAlt="Step Up For Students"
+        showCta={false}
+      />
 
       {/* Partnership Section */}
       <section className="py-20 bg-gray-50">

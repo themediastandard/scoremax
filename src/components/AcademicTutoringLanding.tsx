@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { StaticImageData } from 'next/image';
 import { Check } from 'lucide-react';
 import { PageHero } from './PageHero';
 
@@ -20,8 +21,12 @@ type AcademicTutoringLandingProps = {
   reasons: DetailCard[];
   ctaTitle: string;
   ctaIntro: string;
-  /** See PageHero — omit and the hero falls back to centred copy on white. */
-  heroImage?: string;
+  /**
+   * See PageHero — omit and the hero falls back to centred copy on white.
+   * Pass a static import from `@/lib/hero-images` — see PageHero's `image` for
+   * why a path string is deliberately not accepted.
+   */
+  heroImage?: StaticImageData;
   /** Required alongside heroImage: the photo carries meaning, so it needs alt text. */
   heroImageAlt?: string;
 };

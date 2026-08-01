@@ -4,8 +4,9 @@
     {
       "name": "scoremax-dev",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["next", "dev", "--port", "3100"],
-      "port": 3100
+      "runtimeArgs": ["next", "dev"],
+      "port": 3100,
+      "autoPort": true
     }
   ]
 }

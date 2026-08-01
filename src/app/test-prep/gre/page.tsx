@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'GRE Tutoring Services | Expert GRE Test Prep | ScoreMax',
@@ -47,7 +48,7 @@ export default function GREPage() {
         eyebrow="Test Prep"
         title="Expert GRE Tutoring"
         intro="The GRE is now under two hours, which leaves very little room for a slow start. Our tutors work with you one-on-one on the reasoning, vocabulary in context, and quantitative fundamentals that graduate programs weigh most, and on the pacing the shorter test demands."
-        image="/Images/hero-gre-tutoring.jpg"
+        image={heroImages.gre}
         imageAlt="A graduate seminar room with a glass writing wall of worked equations beside a table stacked with academic journals."
       />
 

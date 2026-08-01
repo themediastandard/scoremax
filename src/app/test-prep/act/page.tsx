@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'ACT Tutoring Services | Expert ACT Test Prep | ScoreMax',
@@ -47,7 +48,7 @@ export default function ACTPage() {
         eyebrow="Test Prep"
         title="Expert ACT Tutoring"
         intro="We understand the significance of achieving exceptional ACT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you conquer the test."
-        image="/Images/hero-act-tutoring.jpg"
+        image={heroImages.act}
         imageAlt="A high school student reviews charts and graphs during an online one-on-one ACT tutoring session."
       />
 

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { AcademicTutoringLanding } from '@/components/AcademicTutoringLanding';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'Middle School Tutoring Services | Math, English & Science | ScoreMax',
@@ -82,7 +83,7 @@ export default function MiddleSchoolTutoringPage() {
       ]}
       ctaTitle="Ready to Build Stronger Foundations?"
       ctaIntro="Start with a free consultation and we will match your student with the right tutor for their needs."
-      heroImage="/Images/hero-middle-school-tutoring.jpg"
+      heroImage={heroImages.middleSchool}
       heroImageAlt="A middle school student listens attentively during an online one-on-one tutoring session at the dining table."
     />
   );
