@@ -247,7 +247,12 @@ export async function POST(req: Request) {
             course_type: planType === 'sat-course-inperson' ? 'sat-inperson' : (isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat'),
             cohort_id: cohortId,
             total_sessions: totalSessions,
-            remaining_sessions: totalSessions,
+            // Minus the session this same checkout books below (step 5 inserts a
+            // sessions row unconditionally). Packages and memberships already net
+            // that out — `remaining_hours: hours - 1` and `used_hours: 1` — and
+            // without it here every course buyer received one session more than
+            // the count they were sold.
+            remaining_sessions: totalSessions - 1,
             amount_cents: session.amount_total,
             // Was never recorded, which left course enrollments with no
             // idempotency key and made them untraceable from a refund.
@@ -293,6 +298,19 @@ export async function POST(req: Request) {
             .eq('stripe_price_id', priceId)
             .eq('type', 'membership')
             .single()
+        // If the lookup misses, the fallback silently grants a Starter allocation
+        // — so a customer who paid $899 for Premier would receive 2 hours and
+        // nobody would find out. The fallback stays, because refusing to grant
+        // anything after a successful payment is worse, but it must be loud: this
+        // is a paid subscription whose price ID is not in the pricing table.
+        if (!pricing) {
+            console.error(
+                `Membership pricing lookup failed for Stripe price ${priceId} ` +
+                `(subscription ${subscription.id}, customer ${customer.id}). ` +
+                `Granting the 2-hour Starter fallback — verify pricing.stripe_price_id ` +
+                `matches the live Stripe prices and correct this membership by hand.`
+            )
+        }
         const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
         const includedHours = pricing?.included_hours ?? 2
         await supabaseAdmin.from('memberships').insert({

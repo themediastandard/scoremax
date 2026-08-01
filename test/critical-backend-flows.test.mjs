@@ -62,8 +62,30 @@ test('customer credit summary does not expose internal record ids', () => {
   assert.equal(summary.packages[0].id, undefined)
   assert.equal(summary.courseEnrollments[0].id, undefined)
   assert.equal(summary.hasCredits, true)
-  assert.equal(summary.totalCredits, 9)
+  // 4 membership (4 included - 1 used + 1 rollover) + 5 package + 2 course.
+  // Course sessions are included because they are spendable the same way —
+  // redeem_credit_and_create_booking() treats course_enrollments as a credit
+  // source alongside memberships and packages.
+  assert.equal(summary.totalCredits, 11)
   assert.equal(summary.totalCourseSessions, 2)
+})
+
+test('a course-only customer is not told they have zero credits', () => {
+  // The booking flow renders "You have {totalCredits} credits remaining" and,
+  // directly beneath, "Including {totalCourseSessions} course sessions". While
+  // totalCredits excluded course sessions, someone who had bought only a course
+  // read "You have 0 credits remaining. Including 10 course sessions."
+  const summary = sanitizeCustomerCreditSummary({
+    customer: { full_name: 'Ada Student' },
+    membership: null,
+    packages: [],
+    courseEnrollments: [{ remaining_sessions: 10 }],
+  })
+
+  assert.equal(summary.totalCourseSessions, 10)
+  assert.equal(summary.totalCredits, 10)
+  assert.equal(summary.hasCredits, true)
+  assert.ok(summary.totalCredits >= summary.totalCourseSessions)
 })
 
 test('online calendar plan builds one ScoreMax-owned event inviting tutor and student with a Meet', () => {

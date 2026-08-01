@@ -53,7 +53,12 @@ function sanitizeCustomerCreditSummary({
       availableMembershipCredits > 0 ||
       totalPackageCredits > 0 ||
       totalCourseSessions > 0,
-    totalCredits: availableMembershipCredits + totalPackageCredits,
+    // Course sessions are spendable exactly like membership and package hours —
+    // redeem_credit_and_create_booking() treats course_enrollments as its third
+    // credit source. Excluding them here told a course-only customer "You have 0
+    // credits remaining" directly above "Including 10 course sessions."
+    totalCredits:
+      availableMembershipCredits + totalPackageCredits + totalCourseSessions,
     totalCourseSessions,
   }
 }

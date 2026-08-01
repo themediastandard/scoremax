@@ -64,8 +64,9 @@ export default function TermsPage() {
             that is not carried over.
           </li>
           <li>
-            Package hours do not currently expire. If that changes we will tell you
-            before it affects credit you have already bought.
+            Prepaid package hours expire one year after purchase. Your account shows
+            the expiry date for each package, and unused hours are not refundable
+            once they expire.
           </li>
         </ul>
       </section>
