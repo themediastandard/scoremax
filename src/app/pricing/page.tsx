@@ -21,9 +21,12 @@ const memberships = [
   { name: 'Premier', price: 899, hours: 8, perks: ['Priority + weekend access', 'Monthly expert chat', 'SAT diagnostics', '1 rollover session/month'], featured: false },
 ];
 
+// Mirrors the `pricing` table, where type = 'package'. Checkout resolves the
+// real amount from that table, never from here — this is display only. Change
+// both together or the page will quote a price the checkout does not charge.
 const packages = [
-  { hours: 10, price: 1200, perHour: 120 },
-  { hours: 20, price: 2300, perHour: 115 },
+  { hours: 10, price: 1200, perHour: 120, saving: null },
+  { hours: 20, price: 2160, perHour: 108, saving: '10% off' },
 ];
 
 export default function PricingPage() {
@@ -155,6 +158,11 @@ export default function PricingPage() {
                     <div>
                       <span className="font-medium text-gray-900">{pkg.hours} hours</span>
                       <span className="text-gray-400 text-sm ml-2">${pkg.perHour}/hr effective</span>
+                      {pkg.saving && (
+                        <span className="ml-2 rounded bg-[#b08a30]/10 px-1.5 py-0.5 text-xs font-medium text-[#b08a30]">
+                          {pkg.saving}
+                        </span>
+                      )}
                     </div>
                     <span className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">${pkg.price.toLocaleString()}</span>
                   </div>
