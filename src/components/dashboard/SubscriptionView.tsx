@@ -48,20 +48,20 @@ const TIER_ORDER: Record<string, number> = { starter: 0, core: 1, premier: 2, el
 const TIER_FEATURES: Record<string, string[]> = {
   starter: [
     'Priority scheduling',
-    'Rollover (1 hr/mo)',
+    'Unused hours roll over',
     'Cancel anytime',
   ],
   core: [
     'Priority scheduling',
     'Video library access',
-    'Rollover (1 hr/mo)',
+    'Unused hours roll over',
     'Cancel anytime',
   ],
   premier: [
     'Priority scheduling',
     'Video library access',
     'Weekend access',
-    'Rollover (1 hr/mo)',
+    'Unused hours roll over',
     'Cancel anytime',
   ],
   elite: [
@@ -69,7 +69,7 @@ const TIER_FEATURES: Record<string, string[]> = {
     'Video library access',
     'Weekend access',
     'Extended sessions',
-    'Rollover (2 hr/mo)',
+    'Unused hours roll over',
     'Cancel anytime',
   ],
 }

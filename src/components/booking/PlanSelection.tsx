@@ -199,7 +199,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
                 <CardHeader>
                   <CardTitle>Full ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">$3,000</span></div>
+                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
                   <p className="text-sm text-gray-500">12 Sessions • Complete Prep</p>
                 </CardHeader>
                 <CardContent>
@@ -251,7 +251,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Priority Scheduling</li>
                   {plan.tier !== 'starter' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Video Library Access</li>}
                   {plan.tier === 'premier' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Weekend Access</li>}
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Rollover (1 hr/mo)</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Unused hours roll over</li>
                 </ul>
               </CardContent>
               <CardFooter>
