@@ -19,11 +19,13 @@ interface ContactFormProps {
   onChange: (value: any) => void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onMemberCheck: (status: any) => void
+  /** Set when the server confirms a signed-in user; suppresses the email input. */
+  signedInEmail?: string | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   externalMemberStatus?: any
 }
 
-export function ContactForm({ value, onChange, onMemberCheck, externalMemberStatus }: ContactFormProps) {
+export function ContactForm({ value, onChange, onMemberCheck, externalMemberStatus, signedInEmail }: ContactFormProps) {
   const [checking, setChecking] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [internalMemberStatus, setInternalMemberStatus] = useState<any>(null)
@@ -62,6 +64,9 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
 
   // Detect autofill: browser can populate the input without triggering React state. Poll the DOM briefly.
   useEffect(() => {
+    // Nothing to autofill when signed in — the address is rendered as text, so
+    // the element this looks for is a div with no .value to read.
+    if (signedInEmail) return
     const input = document.querySelector<HTMLInputElement>('[data-booking-email]')
     if (!input) return
 
@@ -114,18 +119,33 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
         
         <div className="space-y-2 relative">
           <Label htmlFor="email">Email Address</Label>
-          <div className="relative">
-            <Input 
-              id="email" 
-              type="email" 
+          {signedInEmail ? (
+            // Signed in: state the address rather than ask for it again. It stays
+            // in form state and is still submitted, but editing it here could not
+            // move the booking to another account anyway — both the credit lookup
+            // and the Stripe webhook resolve the customer from the session, never
+            // from this field.
+            <div
               data-booking-email
-              value={value.email} 
-              onChange={(e) => handleChange('email', e.target.value)} 
-              onBlur={handleBlur}
-              placeholder="you@example.com"
-            />
-            {checking && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
-          </div>
+              className="flex flex-wrap items-center gap-x-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
+            >
+              <span className="font-medium break-all">{signedInEmail}</span>
+              <span className="text-xs text-gray-400">Signed in</span>
+            </div>
+          ) : (
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                data-booking-email
+                value={value.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                onBlur={handleBlur}
+                placeholder="you@example.com"
+              />
+              {checking && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
+            </div>
+          )}
           {memberStatus?.isMember && (
             <div className="mt-2 flex items-center space-x-2 text-green-600 bg-green-50 p-2 rounded text-sm">
               <Badge variant="outline" className="border-green-600 text-green-600">Member</Badge>
