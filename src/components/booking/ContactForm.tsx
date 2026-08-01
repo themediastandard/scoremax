@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 
 interface ContactFormProps {
@@ -27,6 +28,7 @@ interface ContactFormProps {
 
 export function ContactForm({ value, onChange, onMemberCheck, externalMemberStatus, signedInEmail }: ContactFormProps) {
   const [checking, setChecking] = useState(false)
+  const [hasExistingAccount, setHasExistingAccount] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [internalMemberStatus, setInternalMemberStatus] = useState<any>(null)
 
@@ -98,6 +100,41 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value.email])
 
+  // A signed-out visitor typing an address that already has an account is about
+  // to pay for credit they may already own. /api/customer/check cannot help
+  // here — it resolves the customer from the session and returns an empty
+  // summary to anyone signed out, precisely so it cannot be used to read a
+  // stranger's balance. This asks the one question that is safe to answer.
+  useEffect(() => {
+    if (signedInEmail) return
+    const email = value.email?.trim()
+    if (!email?.includes('@')) {
+      setHasExistingAccount(false)
+      return
+    }
+
+    let cancelled = false
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/customer/account-exists', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled) setHasExistingAccount(!!data.hasAccount)
+      } catch {
+        // Silent: the prompt is a courtesy, not a requirement.
+      }
+    }, 600)
+
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+  }, [value.email, signedInEmail])
+
   const handleChange = (field: string, val: string) => {
     onChange({ ...value, [field]: val })
   }
@@ -150,6 +187,20 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
             <div className="mt-2 flex items-center space-x-2 text-green-600 bg-green-50 p-2 rounded text-sm">
               <Badge variant="outline" className="border-green-600 text-green-600">Member</Badge>
               <span>Welcome back! You have {memberStatus.totalCredits} session credits available.</span>
+            </div>
+          )}
+          {!signedInEmail && hasExistingAccount && (
+            // Says only that an account exists. Any credit balance stays behind
+            // the sign-in, which is the whole reason this is a separate check.
+            <div className="mt-2 rounded border border-[#b08a30]/30 bg-amber-50 p-2 text-sm text-[#8a6a25]">
+              You already have a ScoreMax account.{' '}
+              <Link
+                href={`/login?next=${encodeURIComponent('/book')}`}
+                className="font-semibold underline underline-offset-2 hover:text-[#6d5320]"
+              >
+                Sign in
+              </Link>{' '}
+              to use any credits you have before paying again.
             </div>
           )}
         </div>
