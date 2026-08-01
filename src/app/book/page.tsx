@@ -128,21 +128,31 @@ export default function BookPage() {
   }, [])
 
   const [prefilled, setPrefilled] = useState(false)
+  // Set once the server confirms who is signed in. Drives the contact step,
+  // which shows the address rather than asking for it again.
+  const [signedInEmail, setSignedInEmail] = useState<string | null>(null)
 
   useEffect(() => {
     if (prefilled) return
     async function prefillContact() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
+        // Ask the server rather than checking the session on the client first.
+        // supabase.auth.getUser() can resolve to null on the very first render
+        // if the browser session has not hydrated yet, and this effect runs
+        // once — so a signed-in visitor could be left with an empty contact
+        // form for the whole page load. /api/account/profile reads the auth
+        // cookie server-side and answers 401 when genuinely signed out.
+        const res = await fetch('/api/account/profile')
+        if (!res.ok) {
           setPrefilled(true)
           return
         }
-
-        const res = await fetch('/api/account/profile')
-        if (!res.ok) return
         const data = await res.json()
-        if (!data.email) return
+        if (!data.email) {
+          setPrefilled(true)
+          return
+        }
+        setSignedInEmail(data.email)
 
         setState(prev => ({
           ...prev,
@@ -370,11 +380,12 @@ export default function BookPage() {
           summary={state.contact.email}
           onEdit={() => setActiveSection('contact')}
         >
-              <ContactForm 
-                value={state.contact} 
-                onChange={(contact) => updateContact(contact)} 
+              <ContactForm
+                value={state.contact}
+                onChange={(contact) => updateContact(contact)}
                 onMemberCheck={(status) => setMemberStatus(status)}
                 externalMemberStatus={memberStatus}
+                signedInEmail={signedInEmail}
               />
               <div className="flex justify-end pt-4">
                 <Button 
