@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { AcademicTutoringLanding } from '@/components/AcademicTutoringLanding';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'Elementary Tutoring Services | Reading, Math & Science | ScoreMax',
@@ -82,7 +83,7 @@ export default function ElementaryTutoringPage() {
       ]}
       ctaTitle="Ready to Help Your Student Grow?"
       ctaIntro="Book a free consultation and we will recommend the right tutoring path for your elementary student."
-      heroImage="/Images/hero-elementary-tutoring.jpg"
+      heroImage={heroImages.elementary}
       heroImageAlt="A young elementary student raises a hand excitedly during an online one-on-one tutoring session at the kitchen table."
     />
   );

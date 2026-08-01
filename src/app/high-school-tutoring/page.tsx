@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { AcademicTutoringLanding } from '@/components/AcademicTutoringLanding';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'High School Tutoring Services | Math, Science & Test Prep | ScoreMax',
@@ -81,7 +82,7 @@ export default function HighSchoolTutoringPage() {
       ]}
       ctaTitle="Ready to Excel in High School?"
       ctaIntro="Start with a free consultation and we will match your student with the right tutor."
-      heroImage="/Images/hero-high-school-tutoring.jpg"
+      heroImage={heroImages.highSchool}
       heroImageAlt="A high school student takes notes on graph paper during an online one-on-one tutoring session on a laptop."
     />
   );

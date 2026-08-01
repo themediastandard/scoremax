@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'GMAT Tutoring Services | Expert GMAT Test Prep | ScoreMax',
@@ -47,7 +48,7 @@ export default function GMATPage() {
         eyebrow="Test Prep"
         title="Expert GMAT Tutoring"
         intro="Data Insights now counts for a full third of your GMAT score, and it is the section most applicants underestimate. Our tutors prepare you across all three sections one-on-one, with the pacing and the review discipline a competitive business school score requires."
-        image="/Images/hero-gmat-tutoring.jpg"
+        image={heroImages.gmat}
         imageAlt="A business school case-study classroom with tiered wooden desks facing a lit screen showing a rising chart."
       />
 

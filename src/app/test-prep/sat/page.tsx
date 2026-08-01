@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'SAT Tutoring Services | Expert SAT Test Prep | ScoreMax',
@@ -49,7 +50,7 @@ export default function SATPage() {
         eyebrow="Test Prep"
         title="Expert SAT Tutoring"
         intro="We understand the importance of achieving high SAT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you reach your desired score."
-        image="/Images/hero-sat-tutoring.jpg"
+        image={heroImages.sat}
         imageAlt="A high school student works through an SAT practice test during an online one-on-one tutoring session."
       />
 

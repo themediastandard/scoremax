@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { heroImages } from '@/lib/hero-images';
 
 export const metadata: Metadata = {
   title: 'LSAT Tutoring Services | Expert LSAT Test Prep | ScoreMax',
@@ -47,7 +48,7 @@ export default function LSATPage() {
         eyebrow="Test Prep"
         title="Expert LSAT Tutoring"
         intro="The LSAT rewards a small set of reasoning skills practiced deliberately. Our tutors work through real argument structures and dense passages with you one-on-one, building both the accuracy and the pacing that a competitive law school score demands."
-        image="/Images/hero-lsat-tutoring.jpg"
+        image={heroImages.lsat}
         imageAlt="A law library reading room lined with bound case reporters, with an open casebook and legal pad on a study table."
       />
 
