@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Check, Star, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
+import { PACKAGE_VALIDITY_MONTHS } from '@/lib/package-expiry'
 
 interface PlanSelectionProps {
   subjects: string[]
@@ -242,15 +243,25 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   <span className="text-3xl font-bold">${plan.price_cents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
-                <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included</p>
+                <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included per month</p>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-2 text-sm">
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null ? `Save ${savingsPercent}% vs Single Rate` : 'Save vs Single Rate'}</strong></li>
+                  {/*
+                    Only claim a saving when there is one. The rate compared
+                    against is the highest of the subjects the customer picked,
+                    so on a $150 subject Starter works out at $149.50/hr and this
+                    rendered the words "Save 0% vs Single Rate". Matches the
+                    guard the package cards already had.
+                  */}
+                  {savingsPercent != null && savingsPercent > 0 && (
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>Save {savingsPercent}% vs Single Rate</strong></li>
+                  )}
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>Locked-in hourly rate</strong></li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>Cancel anytime</strong></li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Priority Scheduling</li>
                   {plan.tier === 'premier' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Weekend Access</li>}
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Unused hours roll over</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Unused hours roll over (up to {plan.included_hours} carried forward)</li>
                 </ul>
               </CardContent>
               <CardFooter>
@@ -271,7 +282,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       <OptionSection
         optionNum={2}
         title="Prepaid Packages"
-        description="Pay upfront for a block of sessions. Valid 6 months, ideal for short-term goals."
+        description={`Pay upfront for a block of sessions. Valid ${PACKAGE_VALIDITY_MONTHS} months, ideal for short-term goals.`}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {packageList.map(({ pkg, savingsPercent }) => (
@@ -295,7 +306,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 <ul className="space-y-2.5 text-sm">
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null && savingsPercent > 0 ? `Save ${savingsPercent}% vs single session` : 'Discounted rate vs single session'}</strong></li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> {pkg.included_hours} one-hour sessions included</li>
-                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Valid for 6 months</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Valid for {PACKAGE_VALIDITY_MONTHS} months from purchase</li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Ideal for short-term goals</li>
                 </ul>
               </CardContent>
