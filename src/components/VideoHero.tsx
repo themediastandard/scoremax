@@ -47,7 +47,7 @@ export default function VideoHero({
   subtitle = "Expert tutoring for SAT, ACT, and academics. Personalized plans, proven results, nationwide reach.",
   ctaText = "Book Free Consultation",
   ctaHref = "/contact",
-  secondaryText = "Browse Subjects",
+  secondaryText = "Subjects We Tutor",
   secondaryHref = "/subjects",
 }: VideoHeroProps) {
   return (
