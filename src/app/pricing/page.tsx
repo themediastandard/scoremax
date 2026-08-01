@@ -16,7 +16,7 @@ const oneOnOneRates = [
 ];
 
 const memberships = [
-  { name: 'Starter', price: 299, hours: 2, perks: ['$10 off additional hours', 'Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
+  { name: 'Starter', price: 299, hours: 2, perks: ['Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
   { name: 'Core', price: 549, hours: 4, perks: ['Priority scheduling', 'Access to Avi\'s video library', 'Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: true },
   { name: 'Premier', price: 899, hours: 8, perks: ['Priority + weekend access', 'Monthly expert chat', 'SAT diagnostics', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
 ];
