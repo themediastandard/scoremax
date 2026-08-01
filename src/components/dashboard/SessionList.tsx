@@ -132,7 +132,7 @@ function SessionDetails({
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex gap-3">
-          <BookOpen className="h-4 w-4 text-[#517cad] mt-0.5 shrink-0" />
+          <BookOpen className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</p>
             <p className="text-sm font-medium text-[#1e293b] mt-0.5">{subjectNames || 'None'}</p>
@@ -140,9 +140,9 @@ function SessionDetails({
         </div>
         <div className="flex gap-3">
           {session.session_type === 'online' ? (
-            <Video className="h-4 w-4 text-[#517cad] mt-0.5 shrink-0" />
+            <Video className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           ) : (
-            <MapPin className="h-4 w-4 text-[#517cad] mt-0.5 shrink-0" />
+            <MapPin className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           )}
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Location</p>
@@ -152,7 +152,7 @@ function SessionDetails({
           </div>
         </div>
         <div className="flex gap-3">
-          <User className="h-4 w-4 text-[#517cad] mt-0.5 shrink-0" />
+          <User className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tutor</p>
             <p className="text-sm font-medium text-[#1e293b] mt-0.5">
@@ -161,7 +161,7 @@ function SessionDetails({
           </div>
         </div>
         <div className="flex gap-3">
-          <Calendar className="h-4 w-4 text-[#517cad] mt-0.5 shrink-0" />
+          <Calendar className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
             {session.confirmed_start ? (

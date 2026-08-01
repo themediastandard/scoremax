@@ -8,7 +8,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { plan_type, plan_name, price_id, booking_details } = body
-    const cohortId = booking_details?.cohort_id ?? null
+
+    // Cohort-based in-person SAT courses are no longer offered. Reject the plan
+    // type outright and ignore any cohort_id an old client still sends.
+    if (plan_type === 'sat-course-inperson') {
+      throw new Error('In-person SAT courses are no longer offered')
+    }
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -90,11 +95,7 @@ export async function POST(req: NextRequest) {
             price_data: { currency: 'usd', product_data: { name: 'Tutoring Session' }, unit_amount: maxRate },
             quantity: 1,
         })
-    } else if (plan_type === 'course' || plan_type === 'sat-course-inperson') {
-        if (plan_type === 'sat-course-inperson') {
-            throw new Error('In-person SAT courses are not currently available')
-        }
-
+    } else if (plan_type === 'course') {
         const { data: coursePricing } = await supabaseAdmin
             .from('pricing')
             .select('price_cents, name')
@@ -137,7 +138,6 @@ export async function POST(req: NextRequest) {
             payment_type: plan_type,
             notes: booking_details.notes,
             amount_cents: trustedPriceCents,
-            ...(cohortId && { cohort_id: cohortId }),
         })
         .select()
         .single()
@@ -165,7 +165,6 @@ export async function POST(req: NextRequest) {
             contact_email: booking_details.email,
             ...(booking_details.phone && { contact_phone: booking_details.phone }),
             ...(booking_details.student_grade && { student_grade: booking_details.student_grade }),
-            ...(cohortId && { cohort_id: cohortId }),
             ...(body.courseType && { course_type: body.courseType }),
         },
         payment_intent_data: mode === 'payment' ? {

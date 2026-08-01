@@ -223,7 +223,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       <OptionSection
         optionNum={1}
         title="Monthly Membership"
-        description="Best for ongoing support. Cancel anytime—no commitment."
+        description="Best for ongoing support. Cancel anytime, no commitment."
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {pricing.filter(p => p.type === 'membership').map(plan => {
@@ -242,14 +242,13 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   <span className="text-3xl font-bold">${plan.price_cents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
-                <p className="text-sm text-[#517cad] font-medium">{plan.included_hours} hours included</p>
+                <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included</p>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>{savingsPercent != null ? `Save ${savingsPercent}% vs Single Rate` : 'Save vs Single Rate'}</strong></li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> <strong>Cancel anytime</strong></li>
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Priority Scheduling</li>
-                  {plan.tier !== 'starter' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Video Library Access</li>}
                   {plan.tier === 'premier' && <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Weekend Access</li>}
                   <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5 shrink-0" /> Unused hours roll over</li>
                 </ul>
@@ -272,7 +271,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       <OptionSection
         optionNum={2}
         title="Prepaid Packages"
-        description="Pay upfront for a block of sessions. Valid 6 months—ideal for short-term goals."
+        description="Pay upfront for a block of sessions. Valid 6 months, ideal for short-term goals."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {packageList.map(({ pkg, savingsPercent }) => (
@@ -284,7 +283,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   <span className="text-gray-500 text-sm">for {pkg.included_hours} hours</span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#517cad]">${(pkg.price_cents / pkg.included_hours / 100).toFixed(0)}/hr</span>
+                  <span className="text-sm font-medium text-[#4a729f]">${(pkg.price_cents / pkg.included_hours / 100).toFixed(0)}/hr</span>
                   {savingsPercent != null && savingsPercent > 0 && (
                     <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs font-semibold">
                       Save {savingsPercent}%
@@ -314,7 +313,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       <OptionSection
         optionNum={3}
         title="Single Session"
-        description="Pay as you go. No commitment—perfect to try before committing."
+        description="Pay as you go. No commitment, perfect to try before committing."
       >
         <Card className="border-gray-200 bg-slate-50/50 hover:border-gray-300 transition-colors max-w-md">
           <CardHeader>

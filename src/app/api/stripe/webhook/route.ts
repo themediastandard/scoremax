@@ -5,7 +5,6 @@ import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
-import { formatTime24To12 } from '@/lib/order-format'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
 import {
@@ -259,17 +258,15 @@ export async function POST(req: Request) {
             expires_at: packageExpiresAt(),
             stripe_payment_intent_id: stripePaymentIntentId
         }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
-    } else if ((planType === 'course' || planType === 'sat-course-inperson') && customer) {
+    } else if (planType === 'course' && customer) {
         const courseType = metadata.course_type || ''
         const isCombined = courseType === 'sat-act-combined' || (session.amount_total ?? 0) > 300000
         const isACT = courseType === 'act'
-        const cohortId = metadata.cohort_id ?? null
         const totalSessions = isCombined ? 13 : isACT ? 12 : 10
 
         await supabaseAdmin.from('course_enrollments').upsert({
             customer_id: customer.id,
-            course_type: planType === 'sat-course-inperson' ? 'sat-inperson' : (isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat'),
-            cohort_id: cohortId,
+            course_type: isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat',
             total_sessions: totalSessions,
             // Minus the session this same checkout books below (step 5 inserts a
             // sessions row unconditionally). Packages and memberships already net
@@ -283,33 +280,6 @@ export async function POST(req: Request) {
             stripe_payment_intent_id: stripePaymentIntentId,
             status: 'active'
         }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
-
-        if (cohortId && planType === 'sat-course-inperson') {
-            // Compare-and-swap so concurrent checkouts can't both read the same
-            // count and write the same incremented value.
-            let incremented = false
-            for (let attempt = 0; attempt < 5 && !incremented; attempt++) {
-                const { data: cohort } = await supabaseAdmin
-                    .from('sat_course_cohorts')
-                    .select('enrolled_count')
-                    .eq('id', cohortId)
-                    .single()
-                if (!cohort) break
-                const current = cohort.enrolled_count ?? 0
-                let query = supabaseAdmin
-                    .from('sat_course_cohorts')
-                    .update({ enrolled_count: current + 1 })
-                    .eq('id', cohortId)
-                query = cohort.enrolled_count === null
-                    ? query.is('enrolled_count', null)
-                    : query.eq('enrolled_count', current)
-                const { data: updated } = await query.select('id')
-                incremented = Boolean(updated?.length)
-            }
-            if (!incremented) {
-                console.error(`Failed to increment enrolled_count for cohort ${cohortId}`)
-            }
-        }
     } else if (planType === 'membership' && customer && session.subscription) {
         const subscription = membershipSubscription ?? await stripe.subscriptions.retrieve(session.subscription as string, {
           expand: ['latest_invoice.payment_intent'],
@@ -372,7 +342,7 @@ export async function POST(req: Request) {
     const adminEmails = adminSettings?.value?.split(',') || []
     
     if (adminEmails.length > 0) {
-        const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : planType === 'course' ? 'Course Program' : String(planType))
+        const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'course' ? 'Course Program' : String(planType))
 
         try {
         await resend.emails.send({
@@ -397,47 +367,10 @@ export async function POST(req: Request) {
 
     // 7. Notify Customer (post-payment confirmation)
     if (contactEmail) {
-      const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : planType === 'sat-course-inperson' ? 'In-Person SAT Course' : 'course'
-      const isInPersonCourse = planType === 'sat-course-inperson'
-      const purchaseBody = isInPersonCourse
-        ? ''
-        : `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
+      const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
+      const purchaseBody = `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
 
-      let cohortScheduleHtml = ''
-      const cohortId = metadata?.cohort_id
-      if (isInPersonCourse && cohortId) {
-        const { data: cohort } = await supabaseAdmin
-          .from('sat_course_cohorts')
-          .select('start_date, end_date, session_time_start, session_time_end')
-          .eq('id', cohortId)
-          .single()
-        if (cohort?.start_date && cohort?.end_date) {
-          const start = new Date(cohort.start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-          const end = new Date(cohort.end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-          const timeStart = formatTime24To12(cohort.session_time_start)
-          const timeEnd = formatTime24To12(cohort.session_time_end)
-          const timeRange = (timeStart !== '—' && timeEnd !== '—') ? ` ${timeStart}–${timeEnd}.` : '.'
-          cohortScheduleHtml = `<p style="margin: 0 0 12px 0;"><strong style="color: #1e293b;">Schedule</strong></p><p style="margin: 0 0 16px 0;">${start} – ${end}. Sessions are Tuesdays and Thursdays${timeRange}</p>`
-        }
-      }
-
-      const inPersonCourseDetails = isInPersonCourse
-        ? [
-            cohortScheduleHtml,
-            '<p style="margin: 0 0 12px 0;"><strong style="color: #1e293b;">Location</strong></p>',
-            '<p style="margin: 0 0 16px 0;">Florida Blue Center · 1970 Sawgrass Mills Cir, Sunrise, FL 33323-2994</p>',
-            '<p style="margin: 0 0 12px 0;"><strong style="color: #1e293b;">What to Bring</strong></p>',
-            '<ul style="margin: 0 0 16px 0; padding-left: 20px;">',
-            '<li>Charged laptop or tablet and charger</li>',
-            '<li>Notebook and pen or pencil</li>',
-            '<li>Stylus (if applicable)</li>',
-            '</ul>',
-          ].filter(Boolean).join('')
-        : ''
-
-      const nextSteps = isInPersonCourse
-        ? ''
-        : '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
+      const nextSteps = '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
 
       const accountBody = isGuestCheckout && setPasswordUrl
         ? [
@@ -452,9 +385,9 @@ export async function POST(req: Request) {
           to: contactEmail,
           subject: 'Thank you for your purchase',
           html: emailLayout({
-            title: isInPersonCourse ? 'Welcome to the SAT Course!' : 'Thank You for Your Purchase',
+            title: 'Thank You for Your Purchase',
             greeting: `Hi ${contactName || 'there'},`,
-            body: purchaseBody + (isInPersonCourse ? inPersonCourseDetails : '') + nextSteps + accountBody,
+            body: purchaseBody + nextSteps + accountBody,
             ctaText: isGuestCheckout && setPasswordUrl ? 'Set Your Password & Sign In' : 'Sign In to Your Dashboard',
             ctaUrl: isGuestCheckout && setPasswordUrl ? setPasswordUrl : `${process.env.NEXT_PUBLIC_APP_URL}/login`,
           }),

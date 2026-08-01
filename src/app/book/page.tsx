@@ -72,7 +72,7 @@ function BookingSection({
         {isCompleted && !isOpen && (
            <div className="flex items-center text-sm text-gray-500">
              <span className="mr-4 hidden sm:inline-block max-w-[200px] truncate font-medium">{summary}</span>
-             <Button variant="ghost" size="sm" className="h-8 text-[#517cad] hover:text-[#3b5c85]" onClick={(e) => { e.stopPropagation(); onEdit() }}>Edit</Button>
+             <Button variant="ghost" size="sm" className="h-8 text-[#4a729f] hover:text-[#3b5c85]" onClick={(e) => { e.stopPropagation(); onEdit() }}>Edit</Button>
            </div>
         )}
       </div>
@@ -297,8 +297,7 @@ export default function BookPage() {
              phone: state.contact.phone,
              student_grade: state.contact.studentGrade,
              notes: state.contact.notes,
-             course_type: plan.courseType,
-             cohort_id: plan.cohortId
+             course_type: plan.courseType
            }
         })
       })
@@ -341,7 +340,7 @@ export default function BookPage() {
             Already have a ScoreMax account?{' '}
             <Link
               href={`/login?next=${encodeURIComponent('/book')}`}
-              className="font-semibold text-[#517cad] underline underline-offset-2 hover:text-[#3b5c85]"
+              className="font-semibold text-[#4a729f] underline underline-offset-2 hover:text-[#3b5c85]"
             >
               Sign in
             </Link>{' '}

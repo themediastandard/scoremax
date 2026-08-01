@@ -11,7 +11,6 @@ import {
   Settings, 
   LogOut, 
   BookOpen,
-  GraduationCap,
   CreditCard,
   DollarSign
 } from 'lucide-react'
@@ -105,12 +104,13 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
       icon: Users,
       roles: ['admin']
     },
-    {
-      label: 'Cohorts',
-      href: '/dashboard/cohorts',
-      icon: GraduationCap,
-      roles: ['admin']
-    },
+    // Cohorts hidden — SAT/ACT course cohorts are no longer offered.
+    // {
+    //   label: 'Cohorts',
+    //   href: '/dashboard/cohorts',
+    //   icon: GraduationCap,
+    //   roles: ['admin']
+    // },
     {
       label: 'Pricing',
       href: '/dashboard/pricing',
@@ -146,7 +146,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
                 </p>
               )}
               {credits != null && credits >= 0 && (
-                <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#517cad]">
+                <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#4a729f]">
                   {credits} {credits === 1 ? 'credit' : 'credits'}
                 </span>
               )}
@@ -168,8 +168,8 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
                 connected={googleConnected}
                 href="/dashboard/settings"
                 title={googleConnected
-                  ? 'ScoreMax Google account is connected — manage in Settings'
-                  : 'ScoreMax Google account is disconnected — online sessions cannot be scheduled. Click to connect.'}
+                  ? 'ScoreMax Google account is connected. Manage in Settings'
+                  : 'ScoreMax Google account is disconnected. Online sessions cannot be scheduled. Click to connect.'}
                 className="mt-2"
               />
             )}
@@ -189,11 +189,11 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
               className={cn(
                 "flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors",
                 isActive 
-                  ? "bg-slate-50 text-[#517cad]" 
+                  ? "bg-slate-50 text-[#4a729f]" 
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               )}
             >
-              <Icon className={cn("mr-3 h-5 w-5", isActive ? "text-[#517cad]" : "text-gray-400")} />
+              <Icon className={cn("mr-3 h-5 w-5", isActive ? "text-[#4a729f]" : "text-gray-400")} />
               {link.label}
             </Link>
           )

@@ -219,7 +219,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
                         )}
                         <Link
                           href={`/dashboard/orders/${order.id}`}
-                          className="text-sm text-[#517cad] hover:text-[#3b5c85] font-medium transition-colors"
+                          className="text-sm text-[#4a729f] hover:text-[#3b5c85] font-medium transition-colors"
                         >
                           View
                         </Link>

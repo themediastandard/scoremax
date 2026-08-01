@@ -9,7 +9,7 @@ export default function StepUpSection() {
           <Image src="/step-up.avif" alt="Step Up for Students" width={800} height={600} className="w-auto h-[148px] sm:h-[175px] md:h-[200px] lg:h-[235px]" />
         </div>
         <div className="md:order-2 order-1">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship Provider</div>
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship Provider</div>
           <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Scholarship</h3>
           <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-5" />
           <p className="text-gray-700 text-sm leading-relaxed">

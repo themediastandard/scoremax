@@ -31,8 +31,8 @@ export function ReceiptButton({ bookingId, compact }: { bookingId: string; compa
       onClick={handleClick}
       disabled={loading}
       className={compact
-        ? "gap-1.5 text-[#517cad] border-[#517cad]/40 hover:bg-[#517cad]/5"
-        : "w-full mt-3 gap-1.5 text-[#517cad]"
+        ? "gap-1.5 text-[#4a729f] border-[#517cad]/40 hover:bg-[#517cad]/5"
+        : "w-full mt-3 gap-1.5 text-[#4a729f]"
       }
     >
       {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExternalLink className="h-3.5 w-3.5" />}

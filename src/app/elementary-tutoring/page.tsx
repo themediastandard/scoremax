@@ -82,6 +82,8 @@ export default function ElementaryTutoringPage() {
       ]}
       ctaTitle="Ready to Help Your Student Grow?"
       ctaIntro="Book a free consultation and we will recommend the right tutoring path for your elementary student."
+      heroImage="/Images/hero-elementary-tutoring.jpg"
+      heroImageAlt="A young elementary student raises a hand excitedly during an online one-on-one tutoring session at the kitchen table."
     />
   );
 }

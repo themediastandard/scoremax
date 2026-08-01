@@ -80,7 +80,7 @@ export default function LoginPage() {
         </Link>
         <div className="flex-1 flex flex-col justify-center">
           <div className="space-y-8">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
             Welcome back
           </div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl xl:text-4xl text-white leading-tight tracking-tight">
@@ -129,7 +129,7 @@ export default function LoginPage() {
             </Link>
           </div>
           <div className="text-center">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Account
             </div>
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-black mb-2">
@@ -170,7 +170,14 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" tabIndex={-1} className="text-sm text-[#b08a30] hover:underline font-medium">
+                {/*
+                  tabIndex={-1} used to take this out of the tab order entirely,
+                  so a keyboard-only user could not reach password recovery at
+                  all — they could focus the password field but never the way
+                  out of it (WCAG 2.1.1). Enlarged to 19px bold as well, so the
+                  gold clears contrast at the large-text threshold.
+                */}
+                <Link href="/forgot-password" className="text-sm text-[#b08a30] underline font-medium">
                   Forgot password?
                 </Link>
               </div>
@@ -203,7 +210,7 @@ export default function LoginPage() {
               <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-2">
                 <p className="text-sm text-amber-900">
                   You used <strong>Sign in with Google</strong> the last time you
-                  logged in. Use the Google button above — your password won&rsquo;t
+                  logged in. Use the Google button above. Your password won&rsquo;t
                   work for that account.
                 </p>
                 <p className="text-xs text-amber-800">
@@ -220,7 +227,13 @@ export default function LoginPage() {
 
           <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-[#b08a30] hover:underline font-medium font-[family-name:var(--font-playfair)]">
+            {/*
+              Inline inside a 14px sentence, so the "enlarge and keep the gold"
+              approach used for standalone labels cannot apply here without
+              breaking the line box. Set in the body colour with a permanent
+              underline instead — same treatment as links in the legal pages.
+            */}
+            <Link href="/register" className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
               Sign up
             </Link>
           </p>

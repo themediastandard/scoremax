@@ -17,7 +17,7 @@ const oneOnOneRates = [
 
 const memberships = [
   { name: 'Starter', price: 299, hours: 2, perks: ['Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
-  { name: 'Core', price: 549, hours: 4, perks: ['Priority scheduling', 'Access to Avi\'s video library', 'Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: true },
+  { name: 'Core', price: 549, hours: 4, perks: ['Priority scheduling', 'Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: true },
   { name: 'Premier', price: 899, hours: 8, perks: ['Priority + weekend access', 'Monthly expert chat', 'SAT diagnostics', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
 ];
 
@@ -35,7 +35,7 @@ export default function PricingPage() {
       {/* Header */}
       <section className="pt-32 pb-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Pricing</div>
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Pricing</div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
             Invest in Your Student&apos;s Success
           </h1>
@@ -50,7 +50,7 @@ export default function PricingPage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Pay As You Go</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Pay As You Go</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">1:1 Tutoring</h2>
             <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mt-4 mb-5" />
             <p className="text-gray-500 text-sm max-w-xl mx-auto">Single sessions for flexibility. Materials included for SAT & ACT.</p>
@@ -88,7 +88,7 @@ export default function PricingPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Recommended</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Recommended</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Monthly Memberships</h2>
             <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mt-4 mb-5" />
             <p className="text-gray-500 text-sm max-w-xl mx-auto">Lock in your rate, guarantee a weekly slot, and get consistent support. Month-to-month with no long-term commitment.</p>
@@ -148,7 +148,7 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-2 gap-10">
             {/* Prepaid Packages */}
             <div className="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
-              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Short-Term</div>
+              <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Short-Term</div>
               <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-1">Prepaid Packages</h2>
               <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
               <p className="text-gray-500 text-sm mb-6">Best for short-term goals or families who prefer to prepay without a subscription.</p>
@@ -175,7 +175,7 @@ export default function PricingPage() {
 
             {/* SAT & ACT Course Programs */}
             <div className="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
-              <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
+              <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Test Prep</div>
               <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-1">SAT & ACT Course Programs</h2>
               <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
               <p className="text-gray-500 text-sm mb-6">Structured online test prep with strategy, targeted practice, and expert support.</p>

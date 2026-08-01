@@ -113,7 +113,7 @@ export default async function SessionsPage() {
         value: thisWeek.length.toString(),
         sub: 'upcoming sessions',
         icon: <CalendarClock className="h-4 w-4" />,
-        accent: thisWeek.length > 0 ? 'text-[#517cad] bg-[#517cad]/10' : 'text-gray-400 bg-gray-50',
+        accent: thisWeek.length > 0 ? 'text-[#4a729f] bg-[#517cad]/10' : 'text-gray-400 bg-gray-50',
       },
       {
         label: 'Total Upcoming',

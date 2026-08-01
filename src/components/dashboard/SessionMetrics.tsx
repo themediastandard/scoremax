@@ -46,7 +46,7 @@ export function SessionMetrics({
       value: upcomingThisWeek.toLocaleString(),
       sub: `of ${totalActive} scheduled`,
       icon: <CalendarClock className="h-4 w-4" />,
-      accent: 'text-[#517cad] bg-[#517cad]/10',
+      accent: 'text-[#4a729f] bg-[#517cad]/10',
     },
     {
       label: 'Completed',

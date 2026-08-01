@@ -53,20 +53,17 @@ const TIER_FEATURES: Record<string, string[]> = {
   ],
   core: [
     'Priority scheduling',
-    'Video library access',
     'Unused hours roll over',
     'Cancel anytime',
   ],
   premier: [
     'Priority scheduling',
-    'Video library access',
     'Weekend access',
     'Unused hours roll over',
     'Cancel anytime',
   ],
   elite: [
     'Priority scheduling',
-    'Video library access',
     'Weekend access',
     'Extended sessions',
     'Unused hours roll over',
@@ -179,7 +176,7 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
-                  <Clock className="h-5 w-5 text-[#517cad]" />
+                  <Clock className="h-5 w-5 text-[#4a729f]" />
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -221,7 +218,7 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
                   onClick={handleManageSubscription}
                   disabled={loading}
                   variant="outline"
-                  className="border-[#517cad]/40 text-[#517cad] hover:bg-[#517cad]/5"
+                  className="border-[#517cad]/40 text-[#4a729f] hover:bg-[#517cad]/5"
                 >
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -251,7 +248,7 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
               onClick={handleManageSubscription}
               disabled={loading}
               variant="outline"
-              className="border-[#517cad]/40 text-[#517cad] hover:bg-[#517cad]/5"
+              className="border-[#517cad]/40 text-[#4a729f] hover:bg-[#517cad]/5"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Manage subscription'}
             </Button>
@@ -336,7 +333,7 @@ function PlansGrid({
                   <span className="text-3xl font-bold text-[#1e293b]">${plan.price_cents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
-                <p className="text-sm text-[#517cad] font-medium">{plan.included_hours} hours included</p>
+                <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included</p>
                 <p className="text-xs text-gray-400">${Math.round(plan.price_cents / plan.included_hours / 100)}/hr effective rate</p>
               </CardHeader>
               <CardContent className="flex-1">

@@ -18,6 +18,9 @@ const quickLinks = [
 const serviceLinks = [
   { label: "SAT Tutoring", href: "/test-prep/sat" },
   { label: "ACT Tutoring", href: "/test-prep/act" },
+  { label: "LSAT Tutoring", href: "/test-prep/lsat" },
+  { label: "GRE Tutoring", href: "/test-prep/gre" },
+  { label: "GMAT Tutoring", href: "/test-prep/gmat" },
   { label: "College Tutoring", href: "/college-tutoring" },
   {
     label: "High School Tutoring",
@@ -192,6 +195,12 @@ export default function Footer() {
               className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
             >
               Refund Policy
+            </Link>
+            <Link
+              href="/accessibility"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors duration-200"
+            >
+              Accessibility
             </Link>
           </div>
         </div>

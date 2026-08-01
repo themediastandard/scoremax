@@ -139,4 +139,50 @@
   body {
     @apply bg-background text-foreground;
   }
+
+}
+
+/*
+ * Baseline visible focus for every interactive element (WCAG 2.4.7).
+ *
+ * Deliberately NOT inside @layer base. Tailwind's own base layer carries
+ * `* { outline-color: var(--ring) }`, which resolves to a mid-grey at 50%
+ * opacity — too faint to meet the 3:1 that 1.4.11 requires of a focus
+ * indicator. Unlayered rules outrank every layered rule regardless of
+ * specificity, so keeping this outside the layer is what makes it win; moving
+ * it back into @layer base silently restores the faint grey ring.
+ *
+ * :focus-visible rather than :focus, so a mouse click does not leave a ring
+ * behind while keyboard navigation always shows one.
+ */
+:focus-visible {
+  outline: 2px solid #7a5f1f;
+  outline-offset: 2px;
+}
+
+/*
+ * Note: do NOT add `position: relative` here to lift focus rings above
+ * neighbouring elements. Because this block is unlayered it outranks every
+ * Tailwind utility, so a blanket position rule overrides `focus:fixed` on the
+ * skip link — which silently drops it back into normal flow behind the fixed
+ * header, exactly where it is no use to anyone. An outline is clipped only by
+ * an ancestor's overflow, which z-index would not have fixed anyway.
+ */
+
+/*
+ * Honour the OS "reduce motion" setting (WCAG 2.3.3, and 2.2.2 for the looping
+ * hero video, which pauses itself when this is set — see VideoHero).
+ *
+ * Durations go to 0.01ms rather than 0 so transitionend/animationend still
+ * fire; several components rely on those events to clean up.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -287,7 +287,7 @@ export function CustomersTable({
                               ? 'border-[#b08a30] text-[#b08a30]'
                               : membership.tier === 'premier'
                                 ? 'border-purple-500 text-purple-600'
-                                : 'border-[#517cad] text-[#517cad]'
+                                : 'border-[#517cad] text-[#4a729f]'
                           }
                         >
                           {membership.tier.charAt(0).toUpperCase() + membership.tier.slice(1)}
@@ -302,7 +302,7 @@ export function CustomersTable({
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       {credits > 0 ? (
-                        <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#517cad]">
+                        <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]">
                           {credits}
                         </span>
                       ) : (

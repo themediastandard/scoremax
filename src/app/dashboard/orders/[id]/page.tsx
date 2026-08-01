@@ -31,7 +31,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   if (error || !order) {
     return (
       <div className="space-y-6">
-        <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#517cad] hover:text-[#3b5c85]">
+        <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#4a729f] hover:text-[#3b5c85]">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to orders
         </Link>
@@ -49,7 +49,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     if (order.customer_id !== customer?.id) {
       return (
         <div className="space-y-6">
-          <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#517cad] hover:text-[#3b5c85]">
+          <Link href="/dashboard/orders" className="inline-flex items-center text-sm text-[#4a729f] hover:text-[#3b5c85]">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to orders
           </Link>
@@ -131,7 +131,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div>
         <Link
           href="/dashboard/orders"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-[#517cad] transition-colors"
+          className="inline-flex items-center text-sm text-gray-500 hover:text-[#4a729f] transition-colors"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to orders
@@ -170,7 +170,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
-                <p className="text-[#517cad] mt-1">{order.customers?.email}</p>
+                <p className="text-[#4a729f] mt-1">{order.customers?.email}</p>
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</p>
@@ -192,7 +192,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
-                  <BookOpen className="h-5 w-5 text-[#517cad]" />
+                  <BookOpen className="h-5 w-5 text-[#4a729f]" />
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</p>
@@ -207,7 +207,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#517cad]/10">
-                  <Video className="h-5 w-5 text-[#517cad]" />
+                  <Video className="h-5 w-5 text-[#4a729f]" />
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Session Type</p>
@@ -301,7 +301,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 {profile?.role === 'admin' && (
                   <Link
                     href="/dashboard/sessions"
-                    className="text-sm text-[#517cad] hover:text-[#3b5c85] transition-colors"
+                    className="text-sm text-[#4a729f] hover:text-[#3b5c85] transition-colors"
                   >
                     Manage sessions
                   </Link>

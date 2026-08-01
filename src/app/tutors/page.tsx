@@ -124,7 +124,7 @@ export default async function TutorsPage() {
       {/* Hero */}
       <section className="bg-white pt-16 pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
             Our Team
           </div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
@@ -148,7 +148,7 @@ export default async function TutorsPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Our Tutors
             </div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
@@ -236,7 +236,7 @@ export default async function TutorsPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Why Choose Us
             </div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
@@ -315,7 +315,7 @@ export default async function TutorsPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Our Process
             </div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">

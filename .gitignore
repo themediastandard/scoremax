@@ -61,3 +61,6 @@ CLIENT-QUESTIONS.md
 # Local Netlify folder
 .netlify
 REAL-WORLD-TEST.md
+
+# Claude Code per-developer local settings
+.claude/settings.local.json
