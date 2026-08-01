@@ -165,19 +165,20 @@ export default function ACTPage() {
               Master All ACT Sections
             </h2>
             <p className="text-gray-500 text-sm max-w-xl mx-auto">
-              Our comprehensive approach covers every aspect of the ACT to ensure you&apos;re fully prepared for test day.
+              Three required sections make up your Composite score. Science and Writing are now optional and sit
+              outside it.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
               <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">English</h3>
-              <p className="text-gray-500 text-sm mb-3">75 questions, 45 minutes</p>
+              <p className="text-gray-500 text-sm mb-3">50 questions, 35 minutes</p>
               <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Grammar & Usage</li>
+                <li>• Grammar &amp; Usage</li>
                 <li>• Sentence Structure</li>
                 <li>• Rhetorical Skills</li>
                 <li>• Writing Strategy</li>
@@ -189,13 +190,11 @@ export default function ACTPage() {
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Math</h3>
-              <p className="text-gray-500 text-sm mb-3">60 questions, 60 minutes</p>
+              <p className="text-gray-500 text-sm mb-3">45 questions, 50 minutes</p>
               <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Pre-Algebra</li>
-                <li>• Elementary Algebra</li>
+                <li>• Pre-Algebra &amp; Elementary Algebra</li>
                 <li>• Intermediate Algebra</li>
-                <li>• Coordinate Geometry</li>
-                <li>• Plane Geometry</li>
+                <li>• Coordinate &amp; Plane Geometry</li>
                 <li>• Trigonometry</li>
               </ul>
             </div>
@@ -205,29 +204,59 @@ export default function ACTPage() {
                 <span className="text-lg">✓</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Reading</h3>
-              <p className="text-gray-500 text-sm mb-3">40 questions, 35 minutes</p>
+              <p className="text-gray-500 text-sm mb-3">36 questions, 40 minutes</p>
               <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Prose Fiction</li>
+                <li>• Literary Narrative</li>
                 <li>• Social Studies</li>
                 <li>• Humanities</li>
                 <li>• Natural Sciences</li>
               </ul>
+            </div>
+          </div>
+
+          <div className="mt-10 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
+              </div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Science (Optional)</h3>
+              <p className="text-gray-500 text-sm mb-3">40 questions, 40 minutes</p>
+              <p className="text-gray-500 text-sm">
+                No longer part of the Composite. Still worth taking for STEM-leaning applications, and some programs
+                ask for it &mdash; we help you decide based on your target schools.
+              </p>
             </div>
 
             <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
               <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-lg">✓</span>
               </div>
-              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Science</h3>
-              <p className="text-gray-500 text-sm mb-3">40 questions, 35 minutes</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Data Representation</li>
-                <li>• Research Summaries</li>
-                <li>• Conflicting Viewpoints</li>
-                <li>• Scientific Reasoning</li>
-              </ul>
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Writing (Optional)</h3>
+              <p className="text-gray-500 text-sm mb-3">1 essay, 40 minutes</p>
+              <p className="text-gray-500 text-sm">
+                Also outside the Composite. Some colleges require or accept an ACT writing score, so check each
+                school before you decide to skip it.
+              </p>
             </div>
           </div>
+
+          <div className="mt-10 max-w-2xl mx-auto">
+            <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
+              <div className="w-10 h-10 bg-[#b08a30]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <span className="text-lg">✓</span>
+              </div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Scoring</h3>
+              <p className="text-gray-500 text-sm">
+                Your Composite is the average of English, Math and Reading, each scored 1&ndash;36. The three
+                required sections run 2 hours 5 minutes in total. Each section also includes a small number of
+                unscored field-test questions, which is why the question counts run slightly above what is scored.
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-8 text-xs text-gray-400 text-center max-w-2xl mx-auto">
+            Test format and scoring per ACT. Confirm current details at act.org before you register.
+          </p>
         </div>
       </section>
 
