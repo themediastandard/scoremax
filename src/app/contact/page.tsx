@@ -59,7 +59,7 @@ export default function ContactPage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Tell Us About Yourself</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Tell Us About Yourself</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
               Tell Us What Your Student Needs
             </h2>

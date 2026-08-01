@@ -79,6 +79,8 @@ export default function CollegeTutoringPage() {
       ]}
       ctaTitle="Ready to Excel in College?"
       ctaIntro="Start with a free consultation and we will match you with the right tutor for your course and schedule."
+      heroImage="/Images/hero-college-tutoring.jpg"
+      heroImageAlt="A college student works through calculus notes during an online one-on-one tutoring session on a laptop."
     />
   );
 }

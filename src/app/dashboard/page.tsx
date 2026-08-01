@@ -162,7 +162,7 @@ export default async function DashboardHome() {
               <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Upcoming Sessions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#517cad]">{scheduledSessionCount || 0}</div>
+              <div className="text-4xl font-bold text-[#4a729f]">{scheduledSessionCount || 0}</div>
               <p className="text-xs text-gray-500 mt-1">Scheduled & confirmed</p>
             </CardContent>
           </Card>
@@ -196,7 +196,7 @@ export default async function DashboardHome() {
                 Recent Orders
               </CardTitle>
               <Link href="/dashboard/orders">
-                <Button variant="ghost" size="sm" className="text-[#517cad]">
+                <Button variant="ghost" size="sm" className="text-[#4a729f]">
                   View all <ChevronRight className="h-4 w-4 ml-0.5" />
                 </Button>
               </Link>
@@ -258,7 +258,7 @@ export default async function DashboardHome() {
                 Upcoming Sessions
               </CardTitle>
               <Link href="/dashboard/sessions">
-                <Button variant="ghost" size="sm" className="text-[#517cad]">
+                <Button variant="ghost" size="sm" className="text-[#4a729f]">
                   View all <ChevronRight className="h-4 w-4 ml-0.5" />
                 </Button>
               </Link>
@@ -395,7 +395,7 @@ export default async function DashboardHome() {
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">This Week</span>
-              <span className="rounded-md p-1.5 text-[#517cad] bg-[#517cad]/10"><Calendar className="h-4 w-4" /></span>
+              <span className="rounded-md p-1.5 text-[#4a729f] bg-[#517cad]/10"><Calendar className="h-4 w-4" /></span>
             </div>
             <p className="text-2xl font-bold text-[#1e293b] tracking-tight">{thisWeek.length}</p>
             <p className="text-xs text-gray-400">sessions coming up</p>
@@ -477,7 +477,7 @@ export default async function DashboardHome() {
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/80 flex items-center justify-between">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Coming Up</p>
-              <Link href="/dashboard/sessions" className="text-xs text-[#517cad] hover:text-[#3b5c85] font-medium transition-colors">
+              <Link href="/dashboard/sessions" className="text-xs text-[#4a729f] hover:text-[#3b5c85] font-medium transition-colors">
                 View All
               </Link>
             </div>
@@ -631,7 +631,7 @@ export default async function DashboardHome() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#517cad]/10">
-                  <CreditCard className="h-6 w-6 text-[#517cad]" />
+                  <CreditCard className="h-6 w-6 text-[#4a729f]" />
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#1e293b]">Session Credits</p>
@@ -666,7 +666,7 @@ export default async function DashboardHome() {
                   <>
                     <div className="h-8 w-px bg-gray-200" />
                     <div className="text-center">
-                      <p className="text-2xl sm:text-3xl font-bold text-[#517cad]">{completedCount}</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-[#4a729f]">{completedCount}</p>
                       <p className="text-xs text-gray-500">Completed</p>
                     </div>
                   </>
@@ -707,7 +707,7 @@ export default async function DashboardHome() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-serif font-bold text-[#1e293b]">Your Upcoming Sessions</h2>
           <Link href="/dashboard/sessions">
-            <Button variant="ghost" size="sm" className="text-[#517cad]">
+            <Button variant="ghost" size="sm" className="text-[#4a729f]">
               View all <ChevronRight className="h-4 w-4 ml-0.5" />
             </Button>
           </Link>
@@ -794,7 +794,7 @@ export default async function DashboardHome() {
                       {session.tutors?.full_name && (
                         <div className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#517cad]/10">
-                            <Users className="h-4 w-4 text-[#517cad]" />
+                            <Users className="h-4 w-4 text-[#4a729f]" />
                           </div>
                           <div className="text-right">
                             <p className="text-xs text-gray-400">Your Tutor</p>

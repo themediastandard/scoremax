@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { Video } from 'lucide-react';
 import VideoHero from '../components/VideoHero';
 import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
-  description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
+  description: '100% online SAT and ACT tutoring, held live over video conferencing. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
   keywords: 'SAT tutoring, ACT tutoring, test prep, college prep, tutoring services, SAT scores, ACT scores, test preparation, academic tutoring',
   authors: [{ name: 'ScoreMax Tutoring' }],
   creator: 'ScoreMax Tutoring',
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     url: 'https://www.scoremaxtutoring.com',
     siteName: 'ScoreMax',
     title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
-    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
+    description: '100% online SAT and ACT tutoring, held live over video conferencing. Expert tutors help students improve test scores by 260+ points. Flexible scheduling, proven results, and personalized learning plans.',
     images: [
       {
         url: '/logo.avif',
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'ScoreMax - Expert SAT & ACT Tutoring',
-    description: 'Professional SAT and ACT tutoring services. Expert tutors help students improve test scores by 260+ points.',
+    description: '100% online SAT and ACT tutoring over video conferencing. Expert tutors help students improve test scores by 260+ points.',
     images: ['/logo.avif'],
   },
   alternates: {
@@ -54,7 +55,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     "name": "ScoreMax",
-    "description": "Professional SAT and ACT tutoring services with expert tutors. Help students improve test scores by 260+ points.",
+    "description": "Fully remote SAT and ACT tutoring delivered online over video conferencing, with expert tutors. Help students improve test scores by 260+ points.",
     "url": "https://www.scoremaxtutoring.com",
     "logo": "https://www.scoremaxtutoring.com/logo.avif",
     "contactPoint": {
@@ -97,10 +98,10 @@ export default function Home() {
       },
       {
         "@type": "Question",
-        "name": "Do you offer online tutoring?",
+        "name": "Are ScoreMax sessions online or in person?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, ScoreMax offers online tutoring with flexible scheduling so students can work with expert tutors from home."
+          "text": "All ScoreMax tutoring is 100% online. Every session is held live over video conferencing, and you receive a private video link for each booking. We do not offer in-person or in-home tutoring, so students can work with expert tutors from anywhere with an internet connection."
         }
       },
       {
@@ -127,20 +128,43 @@ export default function Home() {
       {/* Header now rendered globally in RootLayout */}
 
       {/* Video Hero */}
-      <VideoHero mp4Src="/video/hero-home.mp4" />
-
+      <VideoHero
+        mp4Src="/video/hero-home.mp4"
+        subtitle="Expert tutoring for SAT, ACT, and academics, 100% online over live video. Personalized plans, proven results, nationwide reach."
+      >
+        {/* Fully remote notice, flush under the video frame */}
+        <div className="bg-[#b08a30]">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
+            {/*
+              White on the brand gold is a fixed part of the visual identity and
+              is intentional here. The second line was previously text-white/90;
+              it is solid white now, which reads better against the gold.
+            */}
+            <Video className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
+            <span className="text-sm text-white font-semibold">100% online tutoring.</span>
+            <span className="text-sm text-white">
+              Every session is held live over video conferencing. No in-person or in-home visits.
+            </span>
+          </div>
+        </div>
+      </VideoHero>
 
 
       {/* Browse Services */}
       <section className="pt-4 pb-16 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-8">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Services</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Our Services</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900">Browse by Subject</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div className="mb-6">
+            <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Test Prep</h3>
+            <div className="w-10 h-[2px] bg-[#b08a30] mt-3" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -149,7 +173,7 @@ export default function Home() {
                     </div>
             </Link>
             <Link href="/test-prep/act" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop" alt="ACT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
@@ -157,16 +181,40 @@ export default function Home() {
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                     </div>
             </Link>
-            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" alt="LSAT Prep" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+            <Link href="/test-prep/lsat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="/Images/hero-lsat-tutoring.jpg" alt="LSAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
-              <div className="absolute bottom-4 left-4 flex flex-col gap-1 text-white">
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
                 <div className="text-xl font-[family-name:var(--font-playfair)]">LSAT Prep</div>
-                <span className="text-xs text-white/80 max-w-[220px]">Step by step practice learning how the test is written. Usually between 6–12 1-hour sessions depending on the student&apos;s needs.</span>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
               </div>
             </Link>
+            <Link href="/test-prep/gre" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="/Images/hero-gre-tutoring.jpg" alt="GRE Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-[family-name:var(--font-playfair)]">GRE Prep</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+            </Link>
+            <Link href="/test-prep/gmat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+              <Image src="/Images/hero-gmat-tutoring.jpg" alt="GMAT Prep" fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
+              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
+              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
+                <div className="text-xl font-[family-name:var(--font-playfair)]">GMAT Prep</div>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
+              </div>
+            </Link>
+          </div>
+
+          <div className="mt-12 mb-6">
+            <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Tutoring by School Level</h3>
+            <div className="w-10 h-[2px] bg-[#b08a30] mt-3" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="/Images/student-1.png" alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
@@ -203,15 +251,6 @@ export default function Home() {
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
                     </div>
             </Link>
-            <Link href="/subjects" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1200&auto=format&fit=crop" alt="Meet Our Tutors" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
-              <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Subjects</div>
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                <div className="text-xl font-[family-name:var(--font-playfair)]">Subjects We Tutor</div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">→</span>
-                  </div>
-            </Link>
                     </div>
                     </div>
       </section>
@@ -220,7 +259,7 @@ export default function Home() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why ScoreMax</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Why ScoreMax</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Results Without Compromise</h2>
             <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-5" />
             <p className="text-gray-700 text-sm leading-relaxed">We combine certified tutors, adaptive plans, and ongoing support to help students master content and perform with confidence.</p>
@@ -228,7 +267,9 @@ export default function Home() {
               ScoreMax creates a nurturing, interactive, and engaging virtual environment
               where students can learn and grow at their own pace. Our handpicked, certified
               tutors are experts in their fields, committed to the academic success of each
-              student. We&rsquo;re more than a tutoring platform &mdash; we are a community of
+              student. Every session takes place online over video conferencing. We are a
+              fully remote practice, so students meet their tutor from home, anywhere in the
+              country. We&rsquo;re more than a tutoring platform. We are a community of
               lifelong learners dedicated to academic excellence.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -254,7 +295,7 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">Book Your Session in Minutes</h2>
             <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
             <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mx-auto">
@@ -290,7 +331,7 @@ export default function Home() {
                 <span className="text-lg text-[#b08a30] font-bold">3</span>
               </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg text-gray-900 mb-2">Start Learning</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">Once confirmed, you will meet your tutor and begin your personalized sessions. Track progress and adjust as needed.</p>
+              <p className="text-gray-700 text-sm leading-relaxed">Once confirmed, you get a video conferencing link for your session. Sessions are held online, so you meet your tutor from home. Track progress and adjust as needed.</p>
             </div>
           </div>
 
@@ -313,7 +354,7 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Testimonials</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Testimonials</div>
             <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900">Students Love ScoreMax</h3>
             <a href="https://www.google.com/search?q=ScoreMax+tutoring" target="_blank" rel="noopener noreferrer" className="text-[#b08a30] text-sm mt-2 inline-block hover:underline font-medium">
               View all reviews on Google →

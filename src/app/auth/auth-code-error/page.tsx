@@ -41,7 +41,7 @@ export default function AuthCodeErrorPage() {
           </div>
           <p className="text-xs text-gray-400 text-center">
             If you keep seeing this, request a new link and open it straight
-            away — some email apps follow links automatically, which uses them up.
+            away. Some email apps follow links automatically, which uses them up.
           </p>
         </CardContent>
       </Card>

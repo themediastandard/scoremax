@@ -21,6 +21,8 @@ export const BUSINESS_ADDRESS = '490 SW 63rd Avenue, Plantation, FL 33317'
 export const PRIVACY_EMAIL = 'taimir.scoremax@gmail.com'
 export const REFUNDS_EMAIL = 'taimir.scoremax@gmail.com'
 export const CONTACT_EMAIL = 'taimir.scoremax@gmail.com'
+/** Where accessibility barrier reports and accommodation requests go. */
+export const ACCESSIBILITY_EMAIL = 'taimir.scoremax@gmail.com'
 
 /**
  * Asked which state governs the terms and which court hears disputes, the

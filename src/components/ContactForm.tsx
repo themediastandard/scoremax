@@ -222,12 +222,32 @@ export function ContactForm() {
         />
       </div>
 
-      {status === 'success' && (
-        <p className="text-green-600 text-sm">Thank you! We have received your message and will be in touch soon.</p>
-      )}
-      {status === 'error' && (
-        <p className="text-red-600 text-sm">{errorMessage}</p>
-      )}
+      {/*
+        Always mounted, so assistive tech has the live region under observation
+        before the text arrives. A region that appears at the same moment as its
+        content is frequently not announced at all.
+
+        role="status" (polite) rather than "alert": the message follows a
+        deliberate submit, so it does not need to interrupt.
+
+        Colours are darkened from the Tailwind 600 steps, which fall just under
+        4.5:1 on white for this text size (WCAG 1.4.3), and each message carries
+        a word — "Error"/"Sent" — so the meaning does not rest on colour alone
+        (1.4.1).
+      */}
+      <div role="status" aria-live="polite" className="min-h-[1.25rem]">
+        {status === 'success' && (
+          <p className="text-green-800 text-sm">
+            <strong>Sent.</strong> Thank you! We have received your message and will be
+            in touch soon.
+          </p>
+        )}
+        {status === 'error' && (
+          <p className="text-red-800 text-sm">
+            <strong>Error:</strong> {errorMessage}
+          </p>
+        )}
+      </div>
 
       <div className="pt-8">
         <button

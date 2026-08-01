@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { LegalPage, Fill } from '@/components/LegalPage'
+import { LegalPage } from '@/components/LegalPage'
 import {
   LEGAL_ENTITY_NAME,
   BUSINESS_ADDRESS,
@@ -32,25 +32,25 @@ export default function PrivacyPage() {
         <h2>Information we collect</h2>
         <ul>
           <li>
-            <strong>Account and contact details</strong> — name, email address, phone
+            <strong>Account and contact details.</strong> Name, email address, phone
             number, and the password you set (stored only as a cryptographic hash; we
             never see it).
           </li>
           <li>
-            <strong>Student details</strong> — the student&rsquo;s name, grade level, the
+            <strong>Student details.</strong> The student&rsquo;s name, grade level, the
             subjects they need help with, and any notes you choose to give us.
           </li>
           <li>
-            <strong>Scheduling information</strong> — the days and times you are
+            <strong>Scheduling information.</strong> The days and times you are
             available and your timezone.
           </li>
           <li>
-            <strong>Purchase records</strong> — what you bought, the amount, and the
+            <strong>Purchase records.</strong> What you bought, the amount, and the
             resulting credit balance. <strong>We never receive or store your card
             number</strong>; card details are entered directly with Stripe.
           </li>
           <li>
-            <strong>Messages</strong> — anything you send us through the contact form or
+            <strong>Messages.</strong> Anything you send us through the contact form or
             by email.
           </li>
         </ul>
@@ -61,19 +61,42 @@ export default function PrivacyPage() {
         <p>
           Our services are bought by parents and guardians, and the student is often a
           minor. We ask that an adult creates the account and provides the student&rsquo;s
-          details. We collect only what we need to deliver tutoring — name, grade,
-          subjects and availability — and we do not use a student&rsquo;s information for
+          details. We collect only what we need to deliver tutoring: name, grade,
+          subjects and availability. We do not use a student&rsquo;s information for
           advertising or sell it to anyone.
         </p>
         <p>
           A parent or guardian may review, correct or delete their child&rsquo;s
           information at any time by contacting {PRIVACY_EMAIL}.
         </p>
-        <p className="text-amber-900">
-          <Fill>
-            LEGAL REVIEW: confirm obligations under COPPA and any applicable state
-            student-privacy law before publishing
-          </Fill>
+        <p>
+          <strong>Children under 13.</strong> Our website and accounts are
+          intended for adults. We do not knowingly allow a child under 13 to
+          create an account or provide us with personal information directly. When
+          a student under 13 receives tutoring, it is the parent or guardian who
+          creates the account and provides the limited details we need, and that
+          adult&rsquo;s consent covers our collection and use of them. If we learn
+          that we have collected personal information directly from a child under
+          13 without that consent, we will delete it promptly. A parent or
+          guardian who believes we hold such information can email{' '}
+          {PRIVACY_EMAIL} and we will confirm what we have, delete it on request,
+          and stop any further collection.
+        </p>
+        <p>
+          <strong>Student records.</strong> We are a private tutoring business
+          engaged directly by families. We are not a school, and we do not receive
+          education records from a school district, so we do not act as a
+          &ldquo;school official&rdquo; under FERPA. If we are ever engaged by a
+          school or district, we will enter into a written agreement covering
+          student data before any records are shared.
+        </p>
+        <p>
+          <strong>We never sell or advertise to students.</strong> We do not sell
+          or rent student information, use it for targeted advertising, or build
+          advertising profiles from it. We do not use it to train third-party
+          advertising or recommendation systems. We use it to deliver tutoring, to
+          communicate with the family about it, and to keep the records the law
+          requires — nothing else.
         </p>
       </section>
 
@@ -83,7 +106,7 @@ export default function PrivacyPage() {
           <li>To match a student with a tutor and schedule sessions.</li>
           <li>To take payment and keep track of the credit on your account.</li>
           <li>
-            To send you service email — booking confirmations, session times, receipts,
+            To send you service email such as booking confirmations, session times, receipts,
             password resets.
           </li>
           <li>To respond when you contact us.</li>
@@ -99,25 +122,25 @@ export default function PrivacyPage() {
         </p>
         <ul>
           <li>
-            <strong>Supabase</strong> — hosts our database and handles sign-in. Your
+            <strong>Supabase</strong> hosts our database and handles sign-in. Your
             account and booking records are stored here, on servers in the United States.
           </li>
           <li>
-            <strong>Stripe</strong> — processes payments. Stripe receives your name,
+            <strong>Stripe</strong> processes payments. Stripe receives your name,
             email and payment details directly.
           </li>
           <li>
-            <strong>Resend</strong> — delivers our transactional email, and therefore
+            <strong>Resend</strong> delivers our transactional email, and therefore
             receives your email address and the message content.
           </li>
           <li>
-            <strong>Google</strong> — we create Google Calendar events for booked
+            <strong>Google.</strong> We create Google Calendar events for booked
             sessions and, for online sessions, a Google Meet link. The tutor and the
             student are invited to that event, so each can see the other&rsquo;s name and
             the email address on the invitation.
           </li>
           <li>
-            <strong>Netlify</strong> — hosts the website.
+            <strong>Netlify</strong> hosts the website.
           </li>
         </ul>
         <p>
@@ -130,7 +153,7 @@ export default function PrivacyPage() {
         <h2>How long we keep it</h2>
         <p>
           We keep account and booking records for as long as your account is open, and
-          afterwards for as long as we need them for tax, accounting and legal purposes —
+          afterwards for as long as we need them for tax, accounting and legal purposes,
           ordinarily {RECORD_RETENTION_YEARS} years. You can ask us to delete your account
           sooner; see below.
         </p>
@@ -140,7 +163,7 @@ export default function PrivacyPage() {
         <h2>Your choices</h2>
         <p>
           You can ask us to give you a copy of your information, correct it, or delete
-          it. You can also ask us to stop sending non-essential email — though we still
+          it. You can also ask us to stop sending non-essential email, though we still
           need to send service messages such as booking confirmations while your account
           is open.
         </p>

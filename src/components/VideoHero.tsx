@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface VideoHeroProps {
+  /** Rendered flush under the video frame, above the headline copy. */
+  children?: React.ReactNode;
   mp4Src?: string;
   webmSrc?: string;
   headline?: string;
@@ -41,6 +44,7 @@ interface VideoHeroProps {
  * fold, and any bars that results in fall against the dark backdrop.
  */
 export default function VideoHero({
+  children,
   mp4Src = "/video/hero-home.mp4",
   webmSrc,
   headline = "Unlock Your Full Academic Potential",
@@ -50,25 +54,64 @@ export default function VideoHero({
   secondaryText = "Subjects We Tutor",
   secondaryHref = "/subjects",
 }: VideoHeroProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  /*
+   * Freeze the loop for anyone whose OS asks for reduced motion. Auto-playing
+   * background video is a common trigger for vestibular disorders, and this is
+   * the one mitigation that costs nothing visually — for everyone else the hero
+   * plays exactly as designed.
+   *
+   * There is deliberately no on-screen pause control: it was removed at the
+   * client's request. That means users who have not set the OS preference have
+   * no way to stop the loop, which is the gap WCAG 2.2.2 exists to close. If it
+   * is ever reinstated, the least intrusive form is a control that stays hidden
+   * until hover or keyboard focus rather than a persistently visible button.
+   *
+   * autoPlay stays on the element so the default case still plays; this effect
+   * overrides it on mount when the preference is set.
+   */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      video.pause();
+    }
+  }, []);
+
   return (
     <section className="relative w-full bg-white">
       {/* Video: complete frame, nothing cropped, nothing on top of it */}
       <div className="w-full bg-neutral-950">
         <div className="relative mx-auto w-full aspect-[137/56]">
           <video
+            ref={videoRef}
             className="absolute inset-0 h-full w-full object-contain"
             autoPlay
             muted
             loop
             playsInline
             preload="auto"
-            aria-label="ScoreMax tutoring overview"
+            /*
+             * The clip carries its own baked-in headline and the page repeats
+             * that message in the <h1> and subtitle immediately below, so the
+             * video conveys nothing that is not already available as text.
+             * Marking it decorative is honest and stops screen readers
+             * announcing an empty media element. If a future clip carries
+             * information of its own, this needs a real accessible name, a
+             * caption track and an audio description instead.
+             */
+            aria-hidden="true"
+            tabIndex={-1}
           >
             {webmSrc && <source src={webmSrc} type="video/webm" />}
             <source src={mp4Src} type="video/mp4" />
           </video>
         </div>
       </div>
+
+      {children}
 
       {/* Copy: sits below the frame, so it can never cover the video's own text */}
       <div className="max-w-6xl mx-auto px-4">

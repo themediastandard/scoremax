@@ -40,7 +40,7 @@ export function CustomerMetrics({
       value: totalCustomers.toLocaleString(),
       sub: `${newThisMonth} new in ${monthLabel}`,
       icon: <Users className="h-4 w-4" />,
-      accent: 'text-[#517cad] bg-[#517cad]/10',
+      accent: 'text-[#4a729f] bg-[#517cad]/10',
     },
     {
       label: 'Active Members',

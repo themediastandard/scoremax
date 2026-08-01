@@ -48,7 +48,7 @@ export function OrderMetrics({
       label: 'All-Time Revenue',
       value: fmt(allTimeRevenue),
       icon: <DollarSign className="h-4 w-4" />,
-      accent: 'text-[#517cad] bg-[#517cad]/10',
+      accent: 'text-[#4a729f] bg-[#517cad]/10',
     },
     {
       label: 'Avg. Order Value',

@@ -66,7 +66,7 @@ export default function RegisterPage() {
         </Link>
         <div className="flex-1 flex flex-col justify-center">
           <div className="space-y-8">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
             Get started
           </div>
           <h2 className="font-[family-name:var(--font-playfair)] text-3xl xl:text-4xl text-white leading-tight tracking-tight">
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             </Link>
           </div>
           <div className="text-center">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Account
             </div>
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-black mb-2">
@@ -218,7 +218,8 @@ export default function RegisterPage() {
 
           <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
             Already have an account?{' '}
-            <Link href="/login" className="text-[#b08a30] hover:underline font-medium font-[family-name:var(--font-playfair)]">
+            {/* Inline link in 14px copy — see the matching note on /login. */}
+            <Link href="/login" className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
               Sign in
             </Link>
           </p>

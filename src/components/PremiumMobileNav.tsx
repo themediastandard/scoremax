@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface PremiumMobileNavProps {
   isOpen: boolean;
@@ -37,7 +37,10 @@ const navItems: (NavItem | TutoringNavItem)[] = [
         title: 'Test Prep',
         links: [
           { label: 'SAT Tutoring', href: '/test-prep/sat' },
-          { label: 'ACT Tutoring', href: '/test-prep/act' }
+          { label: 'ACT Tutoring', href: '/test-prep/act' },
+          { label: 'LSAT Tutoring', href: '/test-prep/lsat' },
+          { label: 'GRE Tutoring', href: '/test-prep/gre' },
+          { label: 'GMAT Tutoring', href: '/test-prep/gmat' }
         ]
       },
       {
@@ -80,6 +83,59 @@ const navItems: (NavItem | TutoringNavItem)[] = [
 
 export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  /** The element focused before the drawer opened, so focus can go back to it. */
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  /*
+   * The drawer covers the page, so it has to behave like a modal dialog:
+   * Escape closes it, Tab cycles inside it rather than wandering into the
+   * page behind, and focus returns to the trigger on close (WCAG 2.1.2 and
+   * 2.4.3). Without the trap, tabbing from the last link moved focus to
+   * offscreen page content with no visible indicator anywhere.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    closeButtonRef.current?.focus();
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = overflow;
+      restoreFocusRef.current?.focus();
+    };
+  }, [isOpen, onClose]);
 
   const toggleExpanded = (label: string) => {
     const newExpanded = new Set(expandedItems);
@@ -101,14 +157,19 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
+        aria-hidden="true"
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden premium-backdrop"
         onClick={onClose}
       />
-      
+
       {/* Navigation Panel */}
-      <div 
-        className="fixed top-0 right-0 h-full w-full max-w-sm shadow-2xl z-50 lg:hidden premium-mobile-nav" 
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        className="fixed top-0 right-0 h-full w-full max-w-sm shadow-2xl z-50 lg:hidden premium-mobile-nav"
         style={{ 
           backgroundColor: '#ffffff',
           background: '#ffffff',
@@ -125,11 +186,12 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         {/* Header (brand removed per request) */}
         <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-[#b08a30]">
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors duration-200 touch-manipulation"
             aria-label="Close menu"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" focusable="false" className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -144,24 +206,31 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                   <div>
                     <button
                       onClick={() => toggleExpanded(item.label)}
+                      aria-expanded={expandedItems.has(item.label)}
+                      aria-controls={`mobile-nav-panel-${item.label}`}
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-out ${
-                      expandedItems.has(item.label) ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    {/*
+                      Rendered only when expanded. The previous version kept the
+                      panel mounted and collapsed it with max-h-0 + opacity-0,
+                      which hides it visually but leaves every link focusable —
+                      so Tab walked into seven invisible destinations.
+                    */}
+                    {expandedItems.has(item.label) && (
+                    <div id={`mobile-nav-panel-${item.label}`}>
                       <div className="pl-6 pr-4 py-2 space-y-4">
                         {item.sections.map((section) => (
                           <div key={section.title}>
-                            <div className="text-sm font-semibold text-[#b08a30] tracking-wider uppercase mb-1.5">{section.title}</div>
+                            <div className="font-[family-name:var(--font-playfair)] text-xs font-semibold text-[#b08a30] tracking-wider uppercase mb-1.5">{section.title}</div>
                             <div className="space-y-1">
                               {section.links.map((link) => (
                                 <Link
@@ -180,25 +249,27 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                         ))}
                       </div>
                     </div>
+                    )}
                   </div>
                 ) : 'children' in item && item.children ? (
                   <div>
                     <button
                       onClick={() => toggleExpanded(item.label)}
+                      aria-expanded={expandedItems.has(item.label)}
+                      aria-controls={`mobile-nav-panel-${item.label}`}
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-out ${
-                      expandedItems.has(item.label) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                    }`}>
+                    {expandedItems.has(item.label) && (
+                    <div id={`mobile-nav-panel-${item.label}`}>
                       <div className="pl-6 pr-4 py-2 space-y-1">
                         {item.children.map((child) => (
                           <Link
@@ -214,6 +285,7 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                         ))}
                       </div>
                     </div>
+                    )}
                   </div>
                 ) : 'href' in item && item.href ? (
                   <Link

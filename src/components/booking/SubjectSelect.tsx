@@ -50,7 +50,15 @@ export function SubjectSelect({ subjects, selected, onChange, onComplete }: Subj
         `}
         onClick={() => handleSelect(subject.id)}
       >
+        {/*
+          The Label alongside already pointed at `subject.id` via htmlFor, but
+          the Checkbox never carried that id — so the association resolved to
+          nothing and every subject checkbox reached screen readers as an
+          unnamed control ("checkbox, unchecked", with no indication of which
+          subject). Setting the id is what makes htmlFor land (WCAG 4.1.2).
+        */}
         <Checkbox
+          id={subject.id}
           checked={isSelected}
           onCheckedChange={() => handleSelect(subject.id)}
           className="rounded-full data-[state=checked]:bg-[#517cad] data-[state=checked]:border-[#517cad]"
@@ -88,7 +96,7 @@ export function SubjectSelect({ subjects, selected, onChange, onComplete }: Subj
                 if (subject.children?.length) {
                   return (
                     <div key={subject.id} className="md:col-span-2 rounded-md border border-gray-200 bg-gray-50/60 p-3">
-                      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#517cad]">{subject.name}</div>
+                      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#4a729f]">{subject.name}</div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {subject.children.map(renderSubjectOption)}
                       </div>

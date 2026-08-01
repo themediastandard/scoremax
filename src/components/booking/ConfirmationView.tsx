@@ -18,8 +18,6 @@ export interface BookingDetails {
   sessionType?: string | null
   subjects?: string[] | null
   subjectIds?: string[] | null
-  isCohortBooking?: boolean
-  cohortSchedule?: { startDate: string; endDate: string; timeStart: string; timeEnd: string; days?: string | null } | null
 }
 
 interface ConfirmationViewProps {
@@ -28,18 +26,13 @@ interface ConfirmationViewProps {
 }
 
 export function ConfirmationView({ bookingDetails, onBookAnother }: ConfirmationViewProps) {
-  const isCohort = bookingDetails?.isCohortBooking && bookingDetails?.cohortSchedule
-  const cohort = bookingDetails?.cohortSchedule
-
   return (
     <div className="max-w-2xl mx-auto space-y-8 py-12">
       <div className="text-center space-y-4">
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
         <h1 className="text-3xl font-serif text-[#1e293b]">Request Received!</h1>
         <p className="text-gray-600 text-lg">
-          {isCohort
-            ? "We've received your booking. Check your email for your cohort schedule and next steps."
-            : "We've received your booking request. A ScoreMax team member will assign your tutor and confirm your exact session time within 24 hours."}
+          We&apos;ve received your booking request. A ScoreMax team member will assign your tutor and confirm your exact session time within 24 hours.
         </p>
       </div>
       
@@ -56,7 +49,7 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
                 <p className="text-lg font-semibold text-[#1e293b]">
                   {bookingDetails.plan.name}
                   {bookingDetails.plan.amountCents > 0 && (
-                    <span className="text-[#517cad] ml-1">
+                    <span className="text-[#4a729f] ml-1">
                       ${(bookingDetails.plan.amountCents / 100).toLocaleString()}
                     </span>
                   )}
@@ -65,54 +58,29 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isCohort && cohort ? (
-              <>
-                <div className="flex items-start space-x-3">
-                  <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium">Cohort Schedule</p>
-                    <p className="text-sm text-gray-500">
-                      {cohort.startDate} – {cohort.endDate}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium">Session Time</p>
-                    <p className="text-sm text-gray-500">
-                      {cohort.days ? `${cohort.days}, ` : ''}{cohort.timeStart} – {cohort.timeEnd}
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-start space-x-3">
-                  <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium">Requested Days</p>
-                    <p className="text-sm text-gray-500">
-                      {bookingDetails?.availability?.days?.length
-                        ? bookingDetails.availability.days.join(', ')
-                        : 'Flexible'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium">Time Preference</p>
-                    <p className="text-sm text-gray-500">
-                      {bookingDetails?.availability?.startTime && bookingDetails?.availability?.endTime
-                        ? `${formatTime24To12(bookingDetails.availability.startTime)} – ${formatTime24To12(bookingDetails.availability.endTime)}`
-                        : 'Flexible'}
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-            
+            <div className="flex items-start space-x-3">
+              <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Requested Days</p>
+                <p className="text-sm text-gray-500">
+                  {bookingDetails?.availability?.days?.length
+                    ? bookingDetails.availability.days.join(', ')
+                    : 'Flexible'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Time Preference</p>
+                <p className="text-sm text-gray-500">
+                  {bookingDetails?.availability?.startTime && bookingDetails?.availability?.endTime
+                    ? `${formatTime24To12(bookingDetails.availability.startTime)} – ${formatTime24To12(bookingDetails.availability.endTime)}`
+                    : 'Flexible'}
+                </p>
+              </div>
+            </div>
+
             <div className="flex items-start space-x-3">
               <Video className="w-5 h-5 text-gray-400 mt-0.5" />
               <div>

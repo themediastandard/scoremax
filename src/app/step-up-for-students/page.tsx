@@ -58,7 +58,7 @@ export default function StepUpForStudentsPage() {
               className="w-40 mx-auto"
             />
           </div>
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship</div>
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship</div>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
             Step Up For Students
           </h1>
@@ -73,7 +73,7 @@ export default function StepUpForStudentsPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Partnership</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Partnership</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Two Organizations, One Mission
             </h2>
@@ -138,7 +138,7 @@ export default function StepUpForStudentsPage() {
       <section id="steps" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">How to Get Started</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">How to Get Started</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-4">
               Use Your Step Up Scholarship
             </h2>
@@ -225,7 +225,7 @@ export default function StepUpForStudentsPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="uppercase text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
+          <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Get Started</div>
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
             Ready to Start Your Journey?
           </h2>

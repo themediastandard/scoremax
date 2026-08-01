@@ -178,14 +178,14 @@ export function CohortRow({ cohort, testType = 'sat' }: CohortRowProps) {
                       <tr key={e.id} className="hover:bg-gray-50/50">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{e.name}</td>
                         <td className="px-4 py-3 text-sm">
-                          <a href={`mailto:${e.email}`} className="text-[#517cad] hover:underline inline-flex items-center gap-1">
+                          <a href={`mailto:${e.email}`} className="text-[#4a729f] hover:underline inline-flex items-center gap-1">
                             <Mail className="w-3.5 h-3.5" />
                             {e.email}
                           </a>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
                           {e.phone ? (
-                            <a href={`tel:${e.phone}`} className="inline-flex items-center gap-1 hover:text-[#517cad]">
+                            <a href={`tel:${e.phone}`} className="inline-flex items-center gap-1 hover:text-[#4a729f]">
                               <Phone className="w-3.5 h-3.5" />
                               {e.phone}
                             </a>

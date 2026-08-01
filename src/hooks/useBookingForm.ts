@@ -43,7 +43,6 @@ export const useBookingForm = () => {
 
   const [revealed, setRevealed] = useState({
     subjects: true,
-    cohortContact: false,
     availability: false,
     contact: false,
     plan: false

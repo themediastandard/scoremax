@@ -105,7 +105,7 @@ export function TutorForm({ tutor }: { tutor?: Tutor }) {
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmDelete(false) }}>
       <DialogTrigger asChild>
-        <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#517cad] hover:text-[#3b5c85]' : ''}>
+        <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#4a729f] hover:text-[#3b5c85]' : ''}>
           {isEditing ? 'Edit' : 'Add Tutor'}
         </Button>
       </DialogTrigger>

@@ -82,6 +82,8 @@ export default function MiddleSchoolTutoringPage() {
       ]}
       ctaTitle="Ready to Build Stronger Foundations?"
       ctaIntro="Start with a free consultation and we will match your student with the right tutor for their needs."
+      heroImage="/Images/hero-middle-school-tutoring.jpg"
+      heroImageAlt="A middle school student listens attentively during an online one-on-one tutoring session at the dining table."
     />
   );
 }

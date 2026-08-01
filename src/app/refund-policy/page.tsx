@@ -41,7 +41,7 @@ export default function RefundPolicyPage() {
           <li>
             <strong>Prepaid hours expire one year after purchase.</strong> Your account
             shows the expiry date for each package. Hours that expire unused are not
-            refundable, so book them before then — if you are close to the deadline and
+            refundable, so book them before then. If you are close to the deadline and
             need more time, contact us.
           </li>
           <li>
@@ -70,7 +70,7 @@ export default function RefundPolicyPage() {
         <h2>Sessions we cancel</h2>
         <p>
           If we cancel a session and cannot offer a reasonable alternative time, the
-          credit returns to your account, or we refund it on request — regardless of the
+          credit returns to your account, or we refund it on request, regardless of the
           14-day window.
         </p>
       </section>
@@ -85,7 +85,7 @@ export default function RefundPolicyPage() {
         </p>
         <p>
           Approved refunds are returned to the original payment method through Stripe.
-          Your bank typically takes a further 5–10 business days to post the funds.
+          Your bank typically takes a further 5 to 10 business days to post the funds.
         </p>
       </section>
 

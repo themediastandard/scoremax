@@ -130,7 +130,7 @@ export function CohortForm({ cohort, testType = 'sat' }: CohortFormProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#517cad] hover:text-[#3b5c85]' : ''}>
+        <Button variant={isEditing ? 'ghost' : 'default'} className={isEditing ? 'text-[#4a729f] hover:text-[#3b5c85]' : ''}>
           {isEditing ? 'Manage' : `Create ${testType === 'act' ? 'ACT' : 'SAT'} Cohort`}
         </Button>
       </DialogTrigger>
