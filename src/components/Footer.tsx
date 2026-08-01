@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, Instagram, Facebook, Youtube } from "lucide-react";
+import { siteImages } from "@/lib/site-images";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -54,7 +55,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block mb-5">
               <Image
-                src="/Images/score-max-logo-white.png"
+                src={siteImages.logoWhite}
                 alt="ScoreMax Tutoring"
                 width={360}
                 height={108}

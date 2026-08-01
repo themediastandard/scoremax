@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import PremiumMobileNav from './PremiumMobileNav';
 import { HeaderUserMenu } from './HeaderUserMenu';
 import { TutoringMenu } from './TutoringMenu';
+import { siteImages } from '@/lib/site-images';
 
 type HeaderVariant = 'default' | 'minimal' | 'ogee';
 
@@ -50,7 +51,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </div>
 
             <Link href="/" className="flex items-center">
-              <Image src="/Images/score-max-logo-wide.png" alt="ScoreMax Logo" width={140} height={32} priority className="h-6 w-auto" />
+              <Image src={siteImages.logoWide} alt="ScoreMax Logo" width={140} height={32} priority className="h-6 w-auto" />
             </Link>
 
             <div className="flex items-center gap-2">
@@ -113,7 +114,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             {/* Logo far left */}
             <div className="justify-self-start">
               <Link href="/" className="flex items-center">
-                <Image src="/Images/score-max-logo-wide.png" alt="ScoreMax Logo" width={140} height={32} className="h-6 w-auto" />
+                <Image src={siteImages.logoWide} alt="ScoreMax Logo" width={140} height={32} className="h-6 w-auto" />
               </Link>
             </div>
 
@@ -167,7 +168,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
         <div className="flex items-center justify-between h-24">
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <Image src="/Images/score-max-logo-wide.png" alt="ScoreMax Logo" width={140} height={32} priority className="h-6 w-auto" />
+              <Image src={siteImages.logoWide} alt="ScoreMax Logo" width={140} height={32} priority className="h-6 w-auto" />
             </Link>
           </div>
           <div className="hidden lg:flex items-center justify-center flex-1 uppercase font-[family-name:var(--font-playfair)]">

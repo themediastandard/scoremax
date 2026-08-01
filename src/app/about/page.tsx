@@ -1,6 +1,7 @@
 // import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { siteImages } from '@/lib/site-images';
 
 export const metadata: Metadata = {
   title: 'About ScoreMax - Expert Tutoring Team & Company Mission',
@@ -84,7 +85,7 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0 bg-gray-50 rounded-2xl overflow-hidden">
             <div className="relative min-h-[280px] md:min-h-[auto]">
-              <Image src="/Images/avi-new.png" alt="Avi Spiller" fill className="object-cover object-top" />
+              <Image src={siteImages.avi} alt="Avi Spiller" fill className="object-cover object-top" />
             </div>
             <div className="p-8 md:p-12 flex flex-col justify-center">
               <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-2">President</div>
@@ -145,7 +146,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative min-h-[280px] md:min-h-[auto] md:order-2 order-1">
-              <Image src="/Images/tai-new.png" alt="Taimir Terrell" fill className="object-cover object-top" />
+              <Image src={siteImages.tai} alt="Taimir Terrell" fill className="object-cover object-top" />
             </div>
           </div>
         </div>

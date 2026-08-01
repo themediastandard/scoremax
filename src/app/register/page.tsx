@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { siteImages } from '@/lib/site-images'
 import { Label } from '@/components/ui/label'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import Link from 'next/link'
@@ -57,7 +58,7 @@ export default function RegisterPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-[#1e293b] flex-col p-12 xl:p-16">
         <Link href="/" className="inline-block w-fit shrink-0">
           <Image
-            src="/Images/score-max-logo-wide.png"
+            src={siteImages.logoWide}
             alt="ScoreMax"
             width={200}
             height={50}
@@ -106,7 +107,7 @@ export default function RegisterPage() {
           <div className="lg:hidden mb-8 flex justify-center">
             <Link href="/">
               <Image
-                src="/Images/score-max-logo-wide.png"
+                src={siteImages.logoWide}
                 alt="ScoreMax"
                 width={140}
                 height={36}

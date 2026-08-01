@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { StepUpForm } from '@/components/StepUpForm';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { siteImages } from '@/lib/site-images';
 
 export const metadata: Metadata = {
   title: 'Step Up For Students Partnership | ScoreMax Tutoring',
@@ -54,7 +55,7 @@ export default function StepUpForStudentsPage() {
         intro="Step Up For Students supports families through scholarships for tuition, transportation, and educational resources. As a provider, ScoreMax delivers expert tutoring at no cost to scholarship recipients."
         image={heroImages.stepUp}
         imageAlt="A parent walks hand in hand with their child on the way to school."
-        logo="/step-up.avif"
+        logo={siteImages.stepUpLogo}
         logoAlt="Step Up For Students"
         showCta={false}
       />
@@ -78,7 +79,7 @@ export default function StepUpForStudentsPage() {
             <div className="flex justify-center items-center gap-16 mb-12">
               <div className="text-center">
                 <Image 
-                  src="/Images/score-max-logo-black.png" 
+                  src={siteImages.logoBlack} 
                   alt="ScoreMax Tutoring Logo" 
                   width={280}
                   height={180}
@@ -97,7 +98,7 @@ export default function StepUpForStudentsPage() {
               
               <div className="text-center">
                 <Image 
-                  src="/step-up.avif" 
+                  src={siteImages.stepUpLogo} 
                   alt="Step Up For Students Logo" 
                   width={240}
                   height={240}
