@@ -7,6 +7,7 @@ import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, ReactNode } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -229,7 +230,8 @@ export default function BookPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-            alert("Please log in to use your credits.")
+            // Send them straight to sign-in rather than interrupting with a
+            // browser alert. They come back to /book with their credits visible.
             router.push('/login?next=/book')
             setProcessing(false)
             return
@@ -328,9 +330,28 @@ export default function BookPage() {
           <p className="text-gray-600">Tell us what you need, and we&apos;ll match you with the perfect tutor.</p>
         </div>
 
+        {/*
+          Returning customers arriving signed out would otherwise reach the
+          payment step with no sign of the credit already on their account, and
+          pay for it twice. The contact step catches this too, once an email is
+          entered; this catches it before they have typed anything.
+        */}
+        {!signedInEmail && (
+          <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+            Already have a ScoreMax account?{' '}
+            <Link
+              href={`/login?next=${encodeURIComponent('/book')}`}
+              className="font-semibold text-[#517cad] underline underline-offset-2 hover:text-[#3b5c85]"
+            >
+              Sign in
+            </Link>{' '}
+            to book with your existing credits.
+          </div>
+        )}
+
         {/* 1. Subjects */}
-        <BookingSection 
-          step={1} 
+        <BookingSection
+          step={1}
           title="Select Subject" 
           isOpen={activeSection === 'subjects'}
           isCompleted={revealed.availability}
