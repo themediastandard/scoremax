@@ -28,7 +28,7 @@ type PageHeroProps = {
    * white chip: the Step Up mark is red *and black*, and the black wordmark
    * disappears against the scrim without one.
    */
-  logo?: string;
+  logo?: StaticImageData;
   logoAlt?: string;
   ctaText?: string;
   ctaHref?: string;

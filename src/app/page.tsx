@@ -4,6 +4,8 @@ import { Video } from 'lucide-react';
 import VideoHero from '../components/VideoHero';
 import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
+import { heroImages } from '@/lib/hero-images';
+import { siteImages } from '@/lib/site-images';
 
 export const metadata: Metadata = {
   title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
@@ -191,7 +193,7 @@ export default function Home() {
               </div>
             </Link>
             <Link href="/test-prep/lsat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-lsat-tutoring.jpg" alt="LSAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src={heroImages.lsat} alt="LSAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
@@ -203,7 +205,7 @@ export default function Home() {
               </div>
             </Link>
             <Link href="/test-prep/gre" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-gre-tutoring.jpg" alt="GRE Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src={heroImages.gre} alt="GRE Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
@@ -215,7 +217,7 @@ export default function Home() {
               </div>
             </Link>
             <Link href="/test-prep/gmat" className="group relative h-56 sm:col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/hero-gmat-tutoring.jpg" alt="GMAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src={heroImages.gmat} alt="GMAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
               <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
@@ -234,7 +236,7 @@ export default function Home() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
-              <Image src="/Images/student-1.png" alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+              <Image src={siteImages.student1} alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">College</div>
               <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1 text-white">
@@ -312,10 +314,10 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-4 aspect-video rounded-2xl overflow-hidden bg-white [&>div]:rounded-lg">
             <div className="relative">
-              <Image src="/Images/student-2.jpg" alt="A student in an online tutoring session with her tutor on the laptop screen" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+              <Image src={siteImages.student2} alt="A student in an online tutoring session with her tutor on the laptop screen" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
             </div>
             <div className="relative">
-              <Image src="/Images/student-1.png" alt="College student" fill className="object-cover" />
+              <Image src={siteImages.student1} alt="College student" fill className="object-cover" />
             </div>
           </div>
         </div>
