@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { GRADE_OPTIONS } from '@/lib/student-grades'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
@@ -218,12 +220,26 @@ export function ContactForm({ value, onChange, onMemberCheck, externalMemberStat
         
         <div className="space-y-2">
           <Label htmlFor="grade">Student Grade (Optional)</Label>
-          <Input 
-            id="grade" 
-            value={value.studentGrade} 
-            onChange={(e) => handleChange('studentGrade', e.target.value)} 
-            placeholder="e.g. 11th Grade"
-          />
+          {/* Same list the account settings form uses — this writes to the same
+              customers.student_grade column, so the two must agree. */}
+          <Select
+            value={value.studentGrade || undefined}
+            onValueChange={(val) => handleChange('studentGrade', val)}
+          >
+            <SelectTrigger id="grade" className="w-full">
+              <SelectValue placeholder="Select grade" />
+            </SelectTrigger>
+            <SelectContent>
+              {/* A grade saved before this was a dropdown still shows until the
+                  customer picks a canonical one. */}
+              {value.studentGrade && !GRADE_OPTIONS.includes(value.studentGrade) && (
+                <SelectItem value={value.studentGrade}>{value.studentGrade}</SelectItem>
+              )}
+              {GRADE_OPTIONS.map((g) => (
+                <SelectItem key={g} value={g}>{g}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       

@@ -7,12 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Check } from 'lucide-react'
-
-const GRADE_OPTIONS = Array.from({ length: 12 }, (_, i) => {
-  const n = i + 1
-  const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'
-  return `${n}${suffix} Grade`
-})
+import { GRADE_OPTIONS } from '@/lib/student-grades'
 
 interface ProfileFormProps {
   fullName: string

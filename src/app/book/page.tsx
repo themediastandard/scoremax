@@ -216,6 +216,27 @@ export default function BookPage() {
       setRevealed(prev => ({ ...prev, contact: true }))
       setActiveSection('contact')
     } else if (current === 'contact') {
+      // Push the contact details back to the signed-in customer's account so
+      // Settings reflects what they just entered. The booking submit route and
+      // the Stripe webhook write these too, but only once a purchase lands —
+      // this makes the sync immediate, and survives an abandoned booking.
+      // Fire-and-forget: a failure here must never block the booking.
+      // Name is deliberately not synced: the booking form asks for the student
+      // OR parent name, so a booking made for someone else would rename the
+      // account. Only non-empty values are sent, so leaving a box blank here
+      // cannot clear what Settings already holds.
+      if (signedInEmail) {
+        const sync: Record<string, string> = {}
+        if (state.contact.phone?.trim()) sync.phone = state.contact.phone.trim()
+        if (state.contact.studentGrade?.trim()) sync.studentGrade = state.contact.studentGrade.trim()
+        if (Object.keys(sync).length > 0) {
+          fetch('/api/account/profile', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sync),
+          }).catch(() => {})
+        }
+      }
       setRevealed(prev => ({ ...prev, plan: true }))
       setActiveSection('plan')
     }

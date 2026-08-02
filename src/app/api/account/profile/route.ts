@@ -42,10 +42,22 @@ export async function PATCH(req: NextRequest) {
 
   const { fullName, phone, studentGrade } = await req.json()
 
-  await supabaseAdmin
-    .from('profiles')
-    .update({ full_name: fullName })
-    .eq('id', user.id)
+  // Partial update: a field the caller omits is left alone, a field sent as ''
+  // is cleared. The booking form syncs only the fields it collects, so treating
+  // "absent" as "clear this" would let a booking wipe a saved setting.
+  const customerUpdates: Record<string, string | null> = {}
+  if (typeof fullName === 'string' && fullName.trim()) {
+    customerUpdates.full_name = fullName.trim()
+  }
+  if (typeof phone === 'string') customerUpdates.phone = phone.trim() || null
+  if (typeof studentGrade === 'string') customerUpdates.student_grade = studentGrade.trim() || null
+
+  if (customerUpdates.full_name) {
+    await supabaseAdmin
+      .from('profiles')
+      .update({ full_name: customerUpdates.full_name })
+      .eq('id', user.id)
+  }
 
   // The signup trigger is supposed to create the customers row, but accounts
   // exist without one — updating only-if-present silently discarded phone and
@@ -71,24 +83,22 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (customer) {
-    const { error } = await supabaseAdmin
-      .from('customers')
-      .update({
-        full_name: fullName,
-        phone: phone || null,
-        student_grade: studentGrade || null,
-      })
-      .eq('id', customer.id)
-    if (error) {
-      return NextResponse.json({ error: 'Could not save profile' }, { status: 500 })
+    if (Object.keys(customerUpdates).length > 0) {
+      const { error } = await supabaseAdmin
+        .from('customers')
+        .update(customerUpdates)
+        .eq('id', customer.id)
+      if (error) {
+        return NextResponse.json({ error: 'Could not save profile' }, { status: 500 })
+      }
     }
   } else {
     const { error } = await supabaseAdmin.from('customers').insert({
       profile_id: user.id,
-      full_name: fullName,
       email: user.email,
-      phone: phone || null,
-      student_grade: studentGrade || null,
+      full_name: customerUpdates.full_name ?? 'New User',
+      phone: customerUpdates.phone ?? null,
+      student_grade: customerUpdates.student_grade ?? null,
     })
     if (error) {
       return NextResponse.json({ error: 'Could not save profile' }, { status: 500 })
