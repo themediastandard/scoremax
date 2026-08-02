@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { 
@@ -15,6 +16,7 @@ import {
   DollarSign
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { siteImages } from '@/lib/site-images'
 import { useEffect, useState } from 'react'
 import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
 
@@ -145,20 +147,17 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
                   {tier} Member
                 </p>
               )}
-              {credits != null && credits >= 0 && (
-                <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#4a729f]">
-                  {credits} {credits === 1 ? 'credit' : 'credits'}
-                </span>
-              )}
-              {!tier && (credits == null || credits <= 0) && (
-                <p className="text-xs text-gray-500 font-medium">0 credits</p>
-              )}
+              {/* One pill, always — two branches used to both fire at exactly
+                  0 (>= 0 and <= 0) and printed "0 credits" twice. */}
+              <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2 py-0.5 text-xs font-semibold text-[#4a729f]">
+                {credits ?? 0} {(credits ?? 0) === 1 ? 'credit' : 'credits'}
+              </span>
             </div>
           </>
         ) : (
           <>
-            <Link href="/" className="text-2xl font-serif font-bold text-[#1e293b]">
-              ScoreMax
+            <Link href="/" className="inline-flex items-center">
+              <Image src={siteImages.logoWide} alt="ScoreMax" width={140} height={32} className="h-6 w-auto max-w-none" />
             </Link>
             <div className="mt-2 text-xs font-medium uppercase tracking-wider text-gray-500">
               {role} Portal

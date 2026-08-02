@@ -142,7 +142,63 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
       )}
 
       {filtered.length > 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
+        <>
+        {/* Phones get stacked cards — an 8-column table forces sideways
+            scrolling at that width. The table starts at md. */}
+        <div className="md:hidden space-y-3">
+          {filtered.map((order) => (
+            <div key={order.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  {isAdmin && (
+                    <p className="text-sm font-semibold text-[#1e293b] truncate">
+                      {order.customers?.full_name ?? '—'}
+                    </p>
+                  )}
+                  <Badge variant="secondary" className={`font-medium bg-slate-100 text-slate-600 ${isAdmin ? 'mt-1' : ''}`}>
+                    {planLabels[order.id] || order.payment_type}
+                  </Badge>
+                  {getSubjectNames(order.subjects) !== '—' && (
+                    <p className="text-xs text-gray-500 mt-1.5">{getSubjectNames(order.subjects)}</p>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-semibold text-[#1e293b]">{formatOrderAmount(order)}</p>
+                  <span
+                    className={`mt-1 inline-flex px-2 py-0.5 text-xs font-semibold rounded-full capitalize ${
+                      order.status === 'paid'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : order.status === 'refunded'
+                          ? 'bg-red-50 text-red-700'
+                          : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <span className="text-xs text-gray-500">
+                  {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {order.session_type && (
+                    <span className="capitalize"> · {order.session_type === 'in-person' ? 'In Person' : order.session_type}</span>
+                  )}
+                </span>
+                <div className="flex items-center gap-3">
+                  {order.stripe_payment_intent_id && <ReceiptButton bookingId={order.id} compact />}
+                  <Link
+                    href={`/dashboard/orders/${order.id}`}
+                    className="text-sm text-[#4a729f] hover:text-[#3b5c85] font-medium transition-colors"
+                  >
+                    View
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gray-50/80">
@@ -231,18 +287,31 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
             </tbody>
           </table>
         </div>
+        </>
       ) : (
-        <div className="bg-white rounded-lg border border-dashed border-gray-200 py-16 text-center">
-          <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+        <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 py-14 px-6 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#517cad]/10">
+            <BookOpen className="h-7 w-7 text-[#4a729f]" aria-hidden="true" />
+          </div>
           {hasFilters ? (
             <>
-              <p className="text-gray-500 font-medium">No matching orders</p>
-              <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
+              <p className="font-semibold text-[#1e293b]">No matching orders</p>
+              <p className="text-sm text-gray-500 mt-1">Try adjusting your filters</p>
             </>
           ) : (
             <>
-              <p className="text-gray-500 font-medium">No orders yet</p>
-              <p className="text-sm text-gray-400 mt-1">Your orders will appear here</p>
+              <p className="font-semibold text-[#1e293b]">No orders yet</p>
+              <p className="text-sm text-gray-500 mt-1 mx-auto max-w-sm">
+                Receipts for your sessions, packages, and memberships will appear here.
+              </p>
+              {!isAdmin && (
+                <Link
+                  href="/book"
+                  className="mt-6 inline-flex items-center justify-center bg-[#b08a30] hover:bg-[#9a7628] text-white px-6 py-2.5 rounded-md text-sm font-medium transition-colors"
+                >
+                  Book Your First Session
+                </Link>
+              )}
             </>
           )}
         </div>

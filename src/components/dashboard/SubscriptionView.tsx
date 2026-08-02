@@ -303,7 +303,13 @@ function PlansGrid({
           const planRank = TIER_ORDER[tierKey] ?? -1
           const isUpgrade = currentTier !== null && planRank > currentTierRank
           const isDowngrade = currentTier !== null && planRank < currentTierRank
-          const features = TIER_FEATURES[tierKey] ?? []
+          // Rollover is capped at one month's included hours — state the
+          // actual cap instead of the vague blanket claim.
+          const features = (TIER_FEATURES[tierKey] ?? []).map((f) =>
+            f === 'Unused hours roll over'
+              ? `Unused hours roll over (up to ${plan.included_hours} carried forward)`
+              : f
+          )
           const isCore = tierKey === 'core'
 
           return (

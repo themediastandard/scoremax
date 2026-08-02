@@ -56,7 +56,7 @@ export default async function SessionsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
           <p className="mt-1 text-gray-500">{active.length} active · {totalCompleted} completed</p>
         </div>
         <SessionMetrics
@@ -141,7 +141,7 @@ export default async function SessionsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">My Sessions</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">My Sessions</h1>
           <p className="mt-1 text-gray-500">{upcoming.length} upcoming · {completed.length} completed</p>
         </div>
 
@@ -189,7 +189,10 @@ export default async function SessionsPage() {
 
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Your Sessions</h1>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Your Sessions</h1>
+          <p className="mt-1 text-gray-500">Upcoming and pending tutoring sessions</p>
+        </div>
         <FlatSessionList
           sessions={sessions || []}
           tutors={[]}

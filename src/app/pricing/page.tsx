@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Pricing - ScoreMax Tutoring | Memberships, Packages & Courses',
@@ -8,6 +9,9 @@ export const metadata: Metadata = {
   keywords: 'ScoreMax pricing, tutoring cost, SAT tutoring price, ACT tutoring, membership, tutoring packages',
 };
 
+// Single-session hourly rates mirror the subject catalog
+// (src/lib/subject-catalog.js), which is the authority checkout uses for
+// 'single' plans. Update both together.
 const oneOnOneRates = [
   { name: 'SAT / ACT', rate: '$250', note: 'Includes materials' },
   { name: 'AP Math & Science', rate: '$200', note: 'Per hour' },
@@ -15,21 +19,79 @@ const oneOnOneRates = [
   { name: 'Elementary', rate: '$150', note: 'Reading, math, science' },
 ];
 
-const memberships = [
-  { name: 'Starter', price: 299, hours: 2, perks: ['Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
-  { name: 'Core', price: 549, hours: 4, perks: ['Priority scheduling', 'Month-to-month', 'Unused hours roll over (up to one month\u2019s worth)'], featured: true },
-  { name: 'Premier', price: 899, hours: 8, perks: ['Priority + weekend access', 'Monthly expert chat', 'SAT diagnostics', 'Unused hours roll over (up to one month\u2019s worth)'], featured: false },
+// Perk copy per membership tier. Prices and hours come from the `pricing`
+// table so admin edits show up here; only the marketing copy lives in code.
+const TIER_PERKS: Record<string, string[]> = {
+  starter: ['Month-to-month', 'Unused hours roll over (up to one month’s worth)'],
+  core: ['Priority scheduling', 'Month-to-month', 'Unused hours roll over (up to one month’s worth)'],
+  premier: ['Priority + weekend access', 'Monthly expert chat', 'SAT diagnostics', 'Unused hours roll over (up to one month’s worth)'],
+};
+const DEFAULT_PERKS = ['Month-to-month', 'Unused hours roll over (up to one month’s worth)'];
+
+// Fallbacks keep the page whole if the pricing query ever fails. They mirror
+// the table as of 2026-08-02; the live render prefers the table.
+const FALLBACK_MEMBERSHIPS = [
+  { name: 'Starter', price: 299, hours: 2, perks: TIER_PERKS.starter, featured: false },
+  { name: 'Core', price: 549, hours: 4, perks: TIER_PERKS.core, featured: true },
+  { name: 'Premier', price: 899, hours: 8, perks: TIER_PERKS.premier, featured: false },
+];
+const FALLBACK_PACKAGES = [
+  { hours: 10, price: 1200, perHour: 120, saving: null as string | null },
+  { hours: 20, price: 2160, perHour: 108, saving: '10% off' as string | null },
 ];
 
-// Mirrors the `pricing` table, where type = 'package'. Checkout resolves the
-// real amount from that table, never from here — this is display only. Change
-// both together or the page will quote a price the checkout does not charge.
-const packages = [
-  { hours: 10, price: 1200, perHour: 120, saving: null },
-  { hours: 20, price: 2160, perHour: 108, saving: '10% off' },
-];
+export default async function PricingPage() {
+  // Same table Stripe checkout resolves prices from — the page can never
+  // quote a number checkout doesn't charge.
+  const supabase = await createClient();
+  const { data: pricingRows } = await supabase
+    .from('pricing')
+    .select('name, type, tier, price_cents, included_hours')
+    .eq('is_active', true)
+    .order('price_cents');
+  const rows = pricingRows ?? [];
 
-export default function PricingPage() {
+  const membershipRows = rows.filter((r) => r.type === 'membership' && r.included_hours);
+  const memberships = membershipRows.length
+    ? membershipRows.map((r) => {
+        const tier = r.tier?.toLowerCase() ?? '';
+        return {
+          name: r.name.replace(/\s+Membership$/i, ''),
+          price: r.price_cents / 100,
+          hours: r.included_hours as number,
+          perks: TIER_PERKS[tier] ?? DEFAULT_PERKS,
+          featured: tier === 'core',
+        };
+      })
+    : FALLBACK_MEMBERSHIPS;
+
+  const packageRows = rows.filter((r) => r.type === 'package' && r.included_hours);
+  const basePerHour = Math.max(...packageRows.map((r) => r.price_cents / (r.included_hours as number)), 0);
+  const packages = packageRows.length
+    ? packageRows.map((r) => {
+        const perHourCents = r.price_cents / (r.included_hours as number);
+        const savingPct = basePerHour > 0 ? Math.round((1 - perHourCents / basePerHour) * 100) : 0;
+        return {
+          hours: r.included_hours as number,
+          price: r.price_cents / 100,
+          perHour: Math.round(perHourCents / 100),
+          saving: savingPct > 0 ? `${savingPct}% off` : null,
+        };
+      })
+    : FALLBACK_PACKAGES;
+
+  const courseRows = rows.filter((r) => r.type === 'course');
+  const courseBullets = courseRows.length
+    ? courseRows.map((r) => `${r.name}: ${r.included_hours} one-hour sessions`)
+    : [
+        'Full SAT Course: 10 one-hour sessions',
+        'Full ACT Course: 12 one-hour sessions',
+        'Combined SAT + ACT course available',
+      ];
+  const courseFrom = courseRows.length
+    ? Math.min(...courseRows.map((r) => r.price_cents)) / 100
+    : 2500;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -180,13 +242,13 @@ export default function PricingPage() {
               <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-6" />
               <p className="text-gray-500 text-sm mb-6">Structured online test prep with strategy, targeted practice, and expert support.</p>
               <ul className="space-y-2 mb-6 text-sm text-gray-600">
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Full SAT Course: 10 one-hour sessions</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Full ACT Course: 12 one-hour sessions</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Combined SAT + ACT course available</li>
+                {courseBullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> {bullet}</li>
+                ))}
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-[#b08a30] shrink-0 mt-0.5" /> Diagnostics, strategy, and structured practice</li>
               </ul>
               <div className="mb-6">
-                <span className="font-[family-name:var(--font-playfair)] text-3xl text-gray-900">$2,500+</span>
+                <span className="font-[family-name:var(--font-playfair)] text-3xl text-gray-900">${courseFrom.toLocaleString()}+</span>
               </div>
               <Link href="/book" className="block text-center py-3 bg-[#b08a30] text-white text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
                 Choose Test Prep

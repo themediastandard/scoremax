@@ -13,7 +13,7 @@ export default async function SubscriptionPage() {
   if (profile?.role !== 'customer') {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Subscription</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Subscription</h1>
         <p className="text-gray-500">This page is for customers only.</p>
       </div>
     )
@@ -108,7 +108,7 @@ export default async function SubscriptionPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">My Subscription</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">My Subscription</h1>
         <p className="mt-1 text-gray-500">View and manage your membership</p>
       </div>
       <SubscriptionView

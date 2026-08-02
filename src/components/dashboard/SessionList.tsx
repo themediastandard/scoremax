@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { ChevronDown, ChevronRight, Calendar, User, Video, MapPin, BookOpen, Search, X } from 'lucide-react'
 import { SessionForm } from './SessionForm'
 import { Badge } from '@/components/ui/badge'
@@ -54,11 +55,13 @@ function SessionCard({
 
   return (
     <div className="rounded-lg border border-gray-100 bg-white overflow-hidden">
+      {/* Stacks below sm — the badge, subjects, date, and tutor don't fit one
+          phone-width row. */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50/60 cursor-pointer"
+        className="w-full p-4 text-left flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 hover:bg-gray-50/60 cursor-pointer"
       >
-        <div className="flex items-center gap-4 min-w-0 flex-1">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <Badge variant="secondary" className={cfg.className}>
             {cfg.label}
           </Badge>
@@ -70,7 +73,7 @@ function SessionCard({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-1 sm:shrink-0 pl-0.5">
           {session.confirmed_start && (
             <span className="flex items-center gap-1.5 text-sm text-gray-500">
               <Calendar className="h-3.5 w-3.5" />
@@ -491,7 +494,23 @@ export function FlatSessionList({
 }) {
   if (sessions.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">No sessions found.</div>
+      <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 py-14 px-6 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#517cad]/10">
+          <Calendar className="h-7 w-7 text-[#4a729f]" aria-hidden="true" />
+        </div>
+        <p className="font-semibold text-[#1e293b]">No upcoming sessions</p>
+        <p className="text-sm text-gray-500 mt-1 mx-auto max-w-sm">
+          When you book tutoring, your sessions and meeting links will appear here.
+        </p>
+        {!isAdmin && (
+          <Link
+            href="/book"
+            className="mt-6 inline-flex items-center justify-center bg-[#b08a30] hover:bg-[#9a7628] text-white px-6 py-2.5 rounded-md text-sm font-medium transition-colors"
+          >
+            Book a Session
+          </Link>
+        )}
+      </div>
     )
   }
 

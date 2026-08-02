@@ -40,7 +40,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Settings</h1>
         <p className="mt-1 text-gray-500">Manage your account</p>
       </div>
 
@@ -68,7 +68,7 @@ export default async function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
                 <div className="font-medium">ScoreMax Google Account</div>
                 <p className="text-sm text-gray-500">
@@ -99,12 +99,12 @@ export default async function SettingsPage() {
           <CardTitle>Security</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <div className="font-medium">Password</div>
               <p className="text-sm text-gray-500">Update your account password.</p>
             </div>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="self-start sm:self-auto">
               <a href="/forgot-password">Change Password</a>
             </Button>
           </div>

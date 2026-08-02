@@ -142,53 +142,30 @@ export default async function DashboardHome() {
       return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
     }
 
+    const adminMetrics = [
+      { label: 'Pending Sessions', value: pendingSessionCount || 0, sub: 'Needs scheduling', color: 'text-[#b08a30]' },
+      { label: 'Upcoming Sessions', value: scheduledSessionCount || 0, sub: 'Scheduled & confirmed', color: 'text-[#4a729f]' },
+      { label: 'Active Members', value: memberCount || 0, sub: 'Paying subscribers', color: 'text-green-600' },
+      { label: 'Total Customers', value: customerCount || 0, sub: 'Registered customers', color: 'text-gray-700' },
+    ]
+
     return (
-      <div className="space-y-8">
-        <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
+      <div className="space-y-6">
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Pending Sessions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-[#b08a30]">{pendingSessionCount || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Needs scheduling</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Upcoming Sessions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-[#4a729f]">{scheduledSessionCount || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Scheduled & confirmed</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Active Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-green-600">{memberCount || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Paying subscribers</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Customers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-gray-700">{customerCount || 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Registered customers</p>
-            </CardContent>
-          </Card>
+        {/* Dense stat tiles — the Card version gave each number a whole
+            screen-width card on phones. */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {adminMetrics.map((m) => (
+            <div key={m.label} className="bg-white rounded-lg border border-gray-200 shadow-sm px-4 py-3.5">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{m.label}</p>
+              <p className={`text-2xl sm:text-3xl font-bold mt-1 ${m.color}`}>{m.value}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{m.sub}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -246,7 +223,11 @@ export default async function DashboardHome() {
                   })}
                 </div>
               ) : (
-                <p className="text-gray-400 text-sm py-4 text-center">No orders yet</p>
+                <div className="py-8 text-center">
+                  <CreditCard className="h-8 w-8 text-gray-300 mx-auto mb-2" aria-hidden="true" />
+                  <p className="text-sm font-medium text-gray-500">No orders yet</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Paid bookings will show up here</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -322,22 +303,28 @@ export default async function DashboardHome() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-sm py-4 text-center">No upcoming sessions</p>
+                <div className="py-8 text-center">
+                  <Calendar className="h-8 w-8 text-gray-300 mx-auto mb-2" aria-hidden="true" />
+                  <p className="text-sm font-medium text-gray-500">No upcoming sessions</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Scheduled sessions will show up here</p>
+                </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        <div className="flex gap-4">
-          <Link href="/dashboard/orders">
-            <Button>Manage Orders</Button>
-          </Link>
-          <Link href="/dashboard/sessions">
-            <Button variant="outline">Manage Sessions</Button>
-          </Link>
-          <Link href="/dashboard/tutors">
-            <Button variant="outline">Manage Tutors</Button>
-          </Link>
+        {/* Stacked full-width on phones — a fixed row of three overflowed the
+            viewport sideways. */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button asChild>
+            <Link href="/dashboard/orders">Manage Orders</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/sessions">Manage Sessions</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/dashboard/tutors">Manage Tutors</Link>
+          </Button>
         </div>
       </div>
     )
@@ -387,7 +374,7 @@ export default async function DashboardHome() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
           <p className="mt-1 text-gray-500">Here&apos;s your schedule overview</p>
         </div>
 
@@ -589,7 +576,7 @@ export default async function DashboardHome() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
+      <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Welcome back, {profile.full_name}</h1>
 
       {nextSession && hoursUntilNext !== null && hoursUntilNext <= 24 && (
         <div className={`rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
@@ -647,25 +634,26 @@ export default async function DashboardHome() {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-5 sm:gap-6">
-                <div className="text-center">
+              {/* 2×2 grid on phones; the divider-separated row needs sm+. */}
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-6">
+                <div className="text-center rounded-lg bg-slate-50 py-2.5 sm:bg-transparent sm:py-0">
                   <p className="text-2xl sm:text-3xl font-bold text-[#1e293b]">{totalCredits}</p>
                   <p className="text-xs text-gray-500">Credits left</p>
                 </div>
-                <div className="h-8 w-px bg-gray-200" />
-                <div className="text-center">
+                <div className="hidden sm:block h-8 w-px bg-gray-200" />
+                <div className="text-center rounded-lg bg-slate-50 py-2.5 sm:bg-transparent sm:py-0">
                   <p className="text-2xl sm:text-3xl font-bold text-gray-400">{totalUsed}</p>
                   <p className="text-xs text-gray-500">Used</p>
                 </div>
-                <div className="h-8 w-px bg-gray-200" />
-                <div className="text-center">
+                <div className="hidden sm:block h-8 w-px bg-gray-200" />
+                <div className="text-center rounded-lg bg-slate-50 py-2.5 sm:bg-transparent sm:py-0">
                   <p className="text-2xl sm:text-3xl font-bold text-gray-300">{totalIncluded}</p>
                   <p className="text-xs text-gray-500">Total</p>
                 </div>
                 {(completedCount ?? 0) > 0 && (
                   <>
-                    <div className="h-8 w-px bg-gray-200" />
-                    <div className="text-center">
+                    <div className="hidden sm:block h-8 w-px bg-gray-200" />
+                    <div className="text-center rounded-lg bg-slate-50 py-2.5 sm:bg-transparent sm:py-0">
                       <p className="text-2xl sm:text-3xl font-bold text-[#4a729f]">{completedCount}</p>
                       <p className="text-xs text-gray-500">Completed</p>
                     </div>
@@ -677,12 +665,17 @@ export default async function DashboardHome() {
         </Card>
       ) : (
         <Card className="border-dashed border-2 border-gray-200 bg-[#f8fafc]">
-          <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <p className="font-semibold text-[#1e293b]">No session credits</p>
-              <p className="text-sm text-gray-500 mt-0.5">Purchase a package or subscribe to get session credits.</p>
+          <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#517cad]/10">
+                <CreditCard className="h-6 w-6 text-[#4a729f]" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#1e293b]">No session credits</p>
+                <p className="text-sm text-gray-500 mt-0.5">Purchase a package or subscribe to get session credits.</p>
+              </div>
             </div>
-            <Link href="/book">
+            <Link href="/dashboard/subscription">
               <Button className="bg-[#b08a30] hover:bg-[#b58b2a]">View Plans</Button>
             </Link>
           </CardContent>

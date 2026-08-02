@@ -208,3 +208,13 @@
 .premium-backdrop {
   animation: premium-nav-fade-in 0.25s ease-out;
 }
+
+/* Dashboard drawer enters from the left (the sidebar's home side). */
+@keyframes dashboard-drawer-slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.dashboard-drawer {
+  animation: dashboard-drawer-slide-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}

@@ -81,8 +81,14 @@ export function PricingForm({ item, children }: PricingFormProps) {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={item.type === 'course'}
               className="mt-1"
             />
+            {item.type === 'course' && (
+              <p className="mt-1 text-xs text-gray-400">
+                Course names can&apos;t be changed — checkout matches courses by name.
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="price">Price ($)</Label>

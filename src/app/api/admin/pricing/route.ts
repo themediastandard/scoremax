@@ -6,9 +6,12 @@ export async function GET() {
   const authError = await requireAdmin()
   if (authError) return authError
 
+  // In-person SAT courses are no longer offered (checkout rejects the plan
+  // type outright), so the legacy row stays out of the admin list.
   const { data, error } = await supabaseAdmin
     .from('pricing')
     .select('*')
+    .neq('type', 'sat-course-inperson')
     .order('type', { ascending: true })
     .order('price_cents', { ascending: true })
 
@@ -34,14 +37,16 @@ export async function PATCH(req: NextRequest) {
     if (existing.type === 'membership' && existing.stripe_price_id) {
       return NextResponse.json({ error: 'Membership pricing is handled by Stripe' }, { status: 400 })
     }
-    if (existing.type === 'course') {
-      return NextResponse.json({ error: 'Course pricing is managed in code' }, { status: 400 })
+    if (existing.type === 'sat-course-inperson') {
+      return NextResponse.json({ error: 'In-person courses are no longer offered' }, { status: 400 })
     }
   }
 
   const updates: Record<string, unknown> = {}
   if (typeof price_cents === 'number' && price_cents >= 0) updates.price_cents = price_cents
-  if (typeof name === 'string') updates.name = name
+  // Checkout matches course rows by NAME (sat/act keywords), so a course
+  // rename can silently break purchasing. Prices and hours are fair game.
+  if (typeof name === 'string' && existing?.type !== 'course') updates.name = name
   if (included_hours !== undefined) updates.included_hours = included_hours ?? null
   if (typeof is_active === 'boolean') updates.is_active = is_active
 

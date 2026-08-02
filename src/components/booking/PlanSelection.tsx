@@ -62,6 +62,24 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
   const isACT = subjects.some(id => subjectMap[id]?.slug?.includes('act'))
   const singleRate = getSingleRate()
 
+  // Course prices come from the same `pricing` rows checkout charges from,
+  // matched by the same sat/act name keywords — the cards can never quote a
+  // number checkout disagrees with. Fallbacks only cover a failed fetch.
+  const courseRows = pricing.filter(p => p.type === 'course')
+  const findCourse = (courseType: string) =>
+    courseRows.find(c => {
+      const n = String(c.name ?? '').toLowerCase()
+      const hasSat = n.includes('sat')
+      const hasAct = n.includes('act')
+      if (courseType === 'sat-act-combined') return hasSat && hasAct
+      if (courseType === 'act') return hasAct && !hasSat
+      return hasSat && !hasAct
+    })
+  const combinedCourse = findCourse('sat-act-combined') ?? { price_cents: 325000, included_hours: 13 }
+  const satCourse = findCourse('sat') ?? { price_cents: 250000, included_hours: 10 }
+  const actCourse = findCourse('act') ?? { price_cents: 250000, included_hours: 10 }
+  const dollars = (cents: number) => `$${(cents / 100).toLocaleString()}`
+
   const packageList = pricing.filter(p => p.type === 'package').map(pkg => {
     const packageHourlyCents = pkg.price_cents / pkg.included_hours
     const singleRateCents = singleRate * 100
@@ -157,8 +175,8 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
                 <CardHeader>
                   <CardTitle>Combined SAT+ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">$3,250</span></div>
-                  <p className="text-sm text-gray-500">13 Sessions • Full Prep for Both Exams</p>
+                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(combinedCourse.price_cents)}</span></div>
+                  <p className="text-sm text-gray-500">{combinedCourse.included_hours} Sessions • Full Prep for Both Exams</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
@@ -167,7 +185,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: 325000, name: 'Combined SAT+ACT Course' })} disabled={processing}>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: combinedCourse.price_cents, name: 'Combined SAT+ACT Course' })} disabled={processing}>
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>
@@ -178,18 +196,18 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
                 <CardHeader>
                   <CardTitle>Full SAT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
-                  <p className="text-sm text-gray-500">10 Sessions • Complete Prep</p>
+                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(satCourse.price_cents)}</span></div>
+                  <p className="text-sm text-gray-500">{satCourse.included_hours} Sessions • Complete Prep</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 10 one-hour sessions</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {satCourse.included_hours} one-hour sessions</li>
                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling</li>
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: 250000, name: 'Full SAT Course' })} disabled={processing}>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: satCourse.price_cents, name: 'Full SAT Course' })} disabled={processing}>
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>
@@ -200,17 +218,17 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
                 <CardHeader>
                   <CardTitle>Full ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">$2,500</span></div>
-                  <p className="text-sm text-gray-500">12 Sessions • Complete Prep</p>
+                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(actCourse.price_cents)}</span></div>
+                  <p className="text-sm text-gray-500">{actCourse.included_hours} Sessions • Complete Prep</p>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> 12 one-hour sessions</li>
+                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {actCourse.included_hours} one-hour sessions</li>
                     <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: 300000, name: 'Full ACT Course' })} disabled={processing}>
+                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: actCourse.price_cents, name: 'Full ACT Course' })} disabled={processing}>
                     {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
                   </Button>
                 </CardFooter>

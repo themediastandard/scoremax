@@ -25,8 +25,9 @@ const typeLabels: Record<string, string> = {
 }
 
 function getNonEditableReason(item: PricingRow): string | null {
+  // Stripe bills subscriptions off stripe_price_id, so editing the table's
+  // price would not change what members are charged.
   if (item.type === 'membership' && item.stripe_price_id) return 'Handled by Stripe'
-  if (item.type === 'course') return 'Managed in code'
   return null
 }
 
@@ -53,7 +54,49 @@ export function PricingTable() {
   }
 
   return (
-    <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+    <>
+    {/* Stacked cards below md — the five-column table was clipped by
+        overflow-hidden on phones, hiding Price/Hours/Actions entirely. */}
+    <div className="md:hidden space-y-3">
+      {items.map((item) => {
+        const reason = getNonEditableReason(item)
+        return (
+          <div key={item.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {typeLabels[item.type] || item.type}
+                  {item.included_hours != null && ` · ${item.included_hours} hrs`}
+                </p>
+              </div>
+              <p className="text-sm font-semibold text-gray-900 shrink-0">
+                ${(item.price_cents / 100).toLocaleString()}
+              </p>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-end">
+              {reason ? (
+                <span className="text-xs text-muted-foreground">{reason}</span>
+              ) : (
+                <PricingForm item={item}>
+                  <Button variant="outline" size="sm" className="cursor-pointer gap-1.5">
+                    <Pencil className="w-3.5 h-3.5 text-gray-500" />
+                    Edit
+                  </Button>
+                </PricingForm>
+              )}
+            </div>
+          </div>
+        )
+      })}
+      {items.length === 0 && (
+        <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 py-10 text-center text-sm text-gray-500">
+          No pricing records found.
+        </div>
+      )}
+    </div>
+
+    <div className="hidden md:block bg-white rounded-md border border-gray-200 overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -102,5 +145,6 @@ export function PricingTable() {
         </tbody>
       </table>
     </div>
+    </>
   )
 }

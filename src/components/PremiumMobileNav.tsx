@@ -70,10 +70,6 @@ const navItems: (NavItem | TutoringNavItem)[] = [
   {
     label: 'Contact',
     href: '/contact'
-  },
-  {
-    label: 'Client Login',
-    href: '/login'
   }
 ];
 
@@ -288,6 +284,16 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                 ) : null}
               </div>
             ))}
+
+            {/* Login as a proper button so it reads as an action, not another
+                nav destination. */}
+            <Link
+              href="/login"
+              onClick={handleLinkClick}
+              className="mt-4 flex items-center justify-center border-2 border-[#1e293b] text-[#1e293b] px-6 py-3 font-semibold text-base uppercase tracking-wide hover:bg-[#1e293b] hover:text-white transition-colors duration-200 touch-manipulation"
+            >
+              Student Login
+            </Link>
           </nav>
         </div>
 
