@@ -8,10 +8,10 @@ export default function StepUpSection() {
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         {/* No aspect box below md — a 16:9 frame around a small logo left the
             stacked mobile layout with a screenful of empty gray. */}
-        <div className="relative md:aspect-video rounded-2xl overflow-hidden bg-transparent md:order-1 order-2 flex items-center justify-center md:justify-start">
+        <div className="relative md:aspect-video rounded-2xl overflow-hidden bg-transparent flex items-center justify-center md:justify-start">
           <Image src={siteImages.stepUpLogo} alt="Step Up for Students" width={800} height={600} className="w-auto h-[110px] sm:h-[150px] md:h-[200px] lg:h-[235px]" />
         </div>
-        <div className="md:order-2 order-1">
+        <div>
           <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Florida Scholarship Provider</div>
           <h3 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-gray-900 mb-1">Scholarship</h3>
           <div className="w-10 h-[2px] bg-[#b08a30] mt-4 mb-5" />
