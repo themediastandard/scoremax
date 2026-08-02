@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Check } from 'lucide-react'
+
+const GRADE_OPTIONS = Array.from({ length: 12 }, (_, i) => {
+  const n = i + 1
+  const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'
+  return `${n}${suffix} Grade`
+})
 
 interface ProfileFormProps {
   fullName: string
@@ -73,7 +80,21 @@ export function ProfileForm({ fullName, email, phone, studentGrade, role }: Prof
         {role === 'customer' && (
           <div className="space-y-2">
             <Label>Student Grade</Label>
-            <Input value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="e.g. 11th Grade" />
+            <Select value={grade || undefined} onValueChange={setGrade}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select grade" />
+              </SelectTrigger>
+              <SelectContent>
+                {/* Keep a legacy free-typed value selectable so it still
+                    displays until the user picks a canonical grade. */}
+                {grade && !GRADE_OPTIONS.includes(grade) && (
+                  <SelectItem value={grade}>{grade}</SelectItem>
+                )}
+                {GRADE_OPTIONS.map((g) => (
+                  <SelectItem key={g} value={g}>{g}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
