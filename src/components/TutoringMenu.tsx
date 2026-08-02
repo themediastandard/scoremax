@@ -42,10 +42,6 @@ const SECTIONS: { title: string; links: { label: string; href: string }[] }[] = 
       { label: 'Elementary Tutoring', href: '/elementary-tutoring' },
     ],
   },
-  {
-    title: 'Subjects',
-    links: [{ label: 'Browse All Subjects', href: '/subjects' }],
-  },
 ]
 
 export function TutoringMenu({
@@ -154,8 +150,8 @@ export function TutoringMenu({
             align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
           }`}
         >
-          <div className="bg-white border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[680px] overflow-hidden font-[family-name:var(--font-playfair)]">
-            <div className="grid grid-cols-3 py-5">
+          <div className="bg-white border border-gray-100/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] border-t-2 border-t-[#b08a30] min-w-[480px] overflow-hidden font-[family-name:var(--font-playfair)]">
+            <div className="grid grid-cols-2 py-5">
               {SECTIONS.map((section, i) => (
                 <div
                   key={section.title}

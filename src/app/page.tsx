@@ -312,13 +312,8 @@ export default function Home() {
               <span>A+ BBB Rating</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 aspect-video rounded-2xl overflow-hidden bg-white [&>div]:rounded-lg">
-            <div className="relative">
-              <Image src={siteImages.student2} alt="A student in an online tutoring session with her tutor on the laptop screen" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-            </div>
-            <div className="relative">
-              <Image src={siteImages.student1} alt="College student" fill className="object-cover" />
-            </div>
+          <div className="relative aspect-video rounded-2xl overflow-hidden bg-white">
+            <Image src={siteImages.student2} alt="A student in an online tutoring session with her tutor on the laptop screen" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
           </div>
         </div>
       </section>
