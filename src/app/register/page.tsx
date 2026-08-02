@@ -10,7 +10,7 @@ import { siteImages } from '@/lib/site-images'
 import { Label } from '@/components/ui/label'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import Link from 'next/link'
-import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award } from 'lucide-react'
+import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck } from 'lucide-react'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -21,6 +21,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -33,7 +34,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.toLowerCase().trim(),
       password,
       options: {
@@ -46,10 +47,23 @@ export default function RegisterPage() {
     if (error) {
       setError(error.message)
       setLoading(false)
-    } else {
-      router.push('/dashboard')
-      router.refresh()
+      return
     }
+
+    // No session means Supabase is set to confirm addresses before granting
+    // access. Pushing to /dashboard then just bounces off the middleware to
+    // /login with nothing explaining why, which reads as a failed signup and
+    // gets people re-registering. Tell them to check their inbox instead.
+    // Works either way: with confirmation off a session comes back and the
+    // redirect happens as before.
+    if (!data.session) {
+      setAwaitingConfirmation(true)
+      setLoading(false)
+      return
+    }
+
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
@@ -115,6 +129,32 @@ export default function RegisterPage() {
               />
             </Link>
           </div>
+          {awaitingConfirmation ? (
+            <div className="text-center">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#b08a30]/10">
+                <MailCheck className="h-7 w-7 text-[#b08a30]" aria-hidden="true" />
+              </div>
+              <h1 className="font-[family-name:var(--font-playfair)] text-3xl text-black mb-2">
+                Check your email
+              </h1>
+              <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
+              <p className="text-black text-sm leading-relaxed">
+                We sent a confirmation link to{' '}
+                <span className="font-semibold break-all">{email.toLowerCase().trim()}</span>.
+                Click it to activate your account, then sign in.
+              </p>
+              <p className="text-gray-500 text-xs leading-relaxed mt-4">
+                The link can take a minute to arrive. Check your spam folder if you don&apos;t see it.
+              </p>
+              <Link
+                href="/login"
+                className="mt-8 inline-flex w-full items-center justify-center bg-[#b08a30] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#9a7628] font-[family-name:var(--font-playfair)]"
+              >
+                Go to Sign In
+              </Link>
+            </div>
+          ) : (
+          <>
           <div className="text-center">
             <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
               Account
@@ -224,6 +264,8 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>
