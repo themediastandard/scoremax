@@ -110,11 +110,13 @@ export default function Header({ variant = 'default' }: HeaderProps) {
       <>
       <nav className={`fixed top-0 left-0 right-0 z-50 ${scrolled ? 'bg-white/98 backdrop-blur-sm shadow-sm' : 'bg-white/90 backdrop-blur-sm'}`}>
         <div className="w-full px-4 lg:px-6">
-          <div className="grid grid-cols-3 items-center h-16">
+          {/* Flex below md: a 3-column grid gives the logo a 1/3-width cell on
+              phones, and next/image's max-width:100% squashes it inside that. */}
+          <div className="flex items-center justify-between h-16 md:grid md:grid-cols-3">
             {/* Logo far left */}
-            <div className="justify-self-start">
+            <div className="md:justify-self-start shrink-0">
               <Link href="/" className="flex items-center">
-                <Image src={siteImages.logoWide} alt="ScoreMax Logo" width={140} height={32} className="h-6 w-auto" />
+                <Image src={siteImages.logoWide} alt="ScoreMax Logo" width={140} height={32} className="h-6 w-auto max-w-none" />
               </Link>
             </div>
 
@@ -131,7 +133,7 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </div>
 
             {/* Right icons far right */}
-            <div className="flex items-center space-x-4 justify-self-end">
+            <div className="flex items-center gap-2 md:gap-4 md:justify-self-end">
               <Link href="/book" className="hidden md:inline-flex items-center justify-center bg-[#b08a30] text-white px-5 py-2 rounded-full font-semibold text-xs tracking-wide uppercase hover:brightness-95 transition-colors font-[family-name:var(--font-playfair)]">
                 Book A Session
               </Link>

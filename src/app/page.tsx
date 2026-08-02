@@ -136,15 +136,18 @@ export default function Home() {
       >
         {/* Fully remote notice, flush under the video frame */}
         <div className="bg-[#b08a30]">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
+          <div className="max-w-6xl mx-auto px-4 py-2 sm:py-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
             {/*
               White on the brand gold is a fixed part of the visual identity and
               is intentional here. The second line was previously text-white/90;
               it is solid white now, which reads better against the gold.
+
+              On phones the full sentence wrapped the strip to three lines, so
+              below sm only the bold claim shows and the strip stays one line.
             */}
             <Video className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
             <span className="text-sm text-white font-semibold">100% online tutoring.</span>
-            <span className="text-sm text-white">
+            <span className="text-sm text-white hidden sm:inline">
               Every session is held live over video conferencing. No in-person or in-home visits.
             </span>
           </div>
@@ -167,7 +170,7 @@ export default function Home() {
           {/* Five across on desktop so the row fills evenly — a 3-column grid
               left an orphaned row of two. The school-level grid below is four
               across for the same reason. */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             <Link href="/test-prep/sat" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src="https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1200&auto=format&fit=crop" alt="SAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
@@ -216,7 +219,7 @@ export default function Home() {
                 <p className="text-xs leading-snug text-white/85">Under two hours. Verbal, quant and writing.</p>
               </div>
             </Link>
-            <Link href="/test-prep/gmat" className="group relative h-56 sm:col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
+            <Link href="/test-prep/gmat" className="group relative h-56 col-span-2 lg:col-span-1 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src={heroImages.gmat} alt="GMAT Prep" fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />
               <div className="absolute top-3 left-3 text-[11px] tracking-[0.2em] uppercase text-white/90">Test Prep</div>
@@ -234,7 +237,7 @@ export default function Home() {
             <h3 className="font-[family-name:var(--font-playfair)] text-2xl text-gray-900">Tutoring by School Level</h3>
             <div className="w-10 h-[2px] bg-[#b08a30] mt-3" />
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Link href="/college-tutoring" className="group relative h-56 rounded-2xl overflow-hidden border border-gray-200 bg-white transition-transform hover:scale-[1.01] shadow-sm hover:shadow-md">
               <Image src={siteImages.student1} alt="College Tutoring" fill sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30" />

@@ -186,3 +186,25 @@
     scroll-behavior: auto !important;
   }
 }
+/*
+ * Mobile nav drawer entrance. The drawer unmounts when closed, so a mount
+ * animation is all that's needed; the global prefers-reduced-motion block
+ * above already collapses these to ~0ms for users who ask for that.
+ */
+@keyframes premium-nav-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes premium-nav-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.premium-mobile-nav {
+  animation: premium-nav-slide-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.premium-backdrop {
+  animation: premium-nav-fade-in 0.25s ease-out;
+}

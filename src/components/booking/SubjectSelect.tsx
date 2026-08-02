@@ -83,9 +83,20 @@ export function SubjectSelect({ subjects, selected, onChange, onComplete }: Subj
       </div>
       
       <Tabs defaultValue="test-prep" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-4">
+        {/* Below md the five tabs become a horizontally scrollable pill row —
+            they don't fit a phone width, and wrapping them into a grid left a
+            lumpy 2/2/1 layout. The trailing tab peeking past the edge is the
+            scroll affordance; the scrollbar itself is hidden. h-auto overrides
+            the h-9 the tabs primitive pins for horizontal orientation. */}
+        <TabsList className="w-full mb-4 flex justify-start overflow-x-auto md:grid md:grid-cols-5 md:overflow-visible group-data-[orientation=horizontal]/tabs:h-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {Object.entries(categories).map(([key, label]) => (
-            <TabsTrigger key={key} value={key} className="text-xs md:text-sm">{label}</TabsTrigger>
+            <TabsTrigger
+              key={key}
+              value={key}
+              className="text-xs md:text-sm h-auto py-2 px-3.5 flex-none md:flex-1 whitespace-nowrap font-medium data-[state=active]:text-[#1e293b]"
+            >
+              {label}
+            </TabsTrigger>
           ))}
         </TabsList>
         

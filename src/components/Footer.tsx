@@ -8,7 +8,6 @@ import { siteImages } from "@/lib/site-images";
 const quickLinks = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  { label: "Tutors", href: "/tutors" },
   { label: "Subjects", href: "/subjects" },
   { label: "Pricing", href: "/pricing" },
   { label: "Book a Session", href: "/book" },
@@ -50,19 +49,21 @@ export default function Footer() {
     <footer className="bg-gray-800 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+        {/* Two columns on phones — Quick Links and Services side by side —
+            otherwise the footer stacks into one enormous single-column list. */}
+        <div className="py-8 sm:py-12 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Column */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block mb-5">
+          <div className="col-span-2 lg:col-span-1">
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src={siteImages.logoWhite}
                 alt="ScoreMax Tutoring"
                 width={360}
                 height={108}
-                className="h-16 w-auto"
+                className="h-12 sm:h-16 w-auto"
               />
             </Link>
-            <p className="text-sm leading-relaxed text-white/50 mb-6">
+            <p className="text-sm leading-relaxed text-white/50 mb-5">
               Empowering students to reach their full academic potential through
               personalized, expert tutoring.
             </p>
@@ -82,10 +83,10 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-4">
               Quick Links
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -101,10 +102,10 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-4">
               Services
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {serviceLinks.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -119,11 +120,11 @@ export default function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-5">
+          <div className="col-span-2 lg:col-span-1">
+            <h3 className="text-white/80 font-semibold text-sm uppercase tracking-wider mb-4">
               Contact Us
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-2.5">
               <li>
                 <a
                   href="tel:9542148880"

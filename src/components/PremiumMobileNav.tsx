@@ -56,10 +56,6 @@ const navItems: (NavItem | TutoringNavItem)[] = [
     ]
   },
   {
-    label: 'Tutors',
-    href: '/tutors'
-  },
-  {
     label: 'Pricing',
     href: '/pricing'
   },
@@ -163,42 +159,34 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         onClick={onClose}
       />
 
-      {/* Navigation Panel */}
+      {/* Navigation Panel. Must be a flex column: the link list scrolls via
+          flex-1 + overflow-y-auto, which only works when the parent lays its
+          children out as flex items. 100dvh tracks the real visible height on
+          phones where the browser chrome collapses (100vh does not). */}
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
-        className="fixed top-0 right-0 h-full w-full max-w-sm shadow-2xl z-50 lg:hidden premium-mobile-nav"
-        style={{ 
-          backgroundColor: '#ffffff',
-          background: '#ffffff',
-          opacity: 1,
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          height: '100vh',
-          width: '100%',
-          maxWidth: '24rem',
-          zIndex: 50
-        }}
+        className="fixed top-0 right-0 h-[100dvh] w-full sm:max-w-sm bg-white shadow-2xl z-50 lg:hidden premium-mobile-nav flex flex-col"
       >
         {/* Header (brand removed per request) */}
-        <div className="flex items-center justify-end p-6 border-b border-gray-100 bg-[#b08a30]">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-[#b08a30] shrink-0">
+          <span className="text-white text-sm font-semibold tracking-[0.25em] uppercase font-[family-name:var(--font-playfair)]">Menu</span>
           <button
             ref={closeButtonRef}
             onClick={onClose}
             className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors duration-200 touch-manipulation"
             aria-label="Close menu"
           >
-            <svg aria-hidden="true" focusable="false" className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Navigation Items */}
-        <div className="flex-1 overflow-y-auto py-6">
+        <div className="flex-1 min-h-0 overflow-y-auto py-4">
           <nav className="px-6 space-y-2 font-[family-name:var(--font-playfair)]">
             {navItems.map((item) => (
               <div key={item.label} className="premium-nav-item">
@@ -208,10 +196,10 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       onClick={() => toggleExpanded(item.label)}
                       aria-expanded={expandedItems.has(item.label)}
                       aria-controls={`mobile-nav-panel-${item.label}`}
-                      className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
+                      className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
+                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
                         <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,10 +245,10 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                       onClick={() => toggleExpanded(item.label)}
                       aria-expanded={expandedItems.has(item.label)}
                       aria-controls={`mobile-nav-panel-${item.label}`}
-                      className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
+                      className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                     >
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold text-gray-900 text-xl uppercase">{item.label}</span>
+                        <span className="font-semibold text-gray-900 text-lg uppercase">{item.label}</span>
                       </div>
                       <div className={`transform transition-transform duration-200 ${expandedItems.has(item.label) ? 'rotate-180' : ''}`}>
                         <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,9 +279,9 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
                   <Link
                     href={item.href}
                     onClick={handleLinkClick}
-                    className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
+                    className="flex items-center space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-all duration-200 touch-manipulation group touch-feedback"
                   >
-                    <span className="font-medium text-gray-900 text-xl group-hover:text-[#b08a30] transition-colors duration-200 uppercase">
+                    <span className="font-medium text-gray-900 text-lg group-hover:text-[#b08a30] transition-colors duration-200 uppercase">
                       {item.label}
                     </span>
                   </Link>
@@ -304,13 +292,13 @@ export default function PremiumMobileNav({ isOpen, onClose }: PremiumMobileNavPr
         </div>
 
         {/* Footer CTA */}
-        <div className="p-6 border-t border-gray-100 bg-gray-50">
+        <div className="p-4 border-t border-gray-100 bg-gray-50 shrink-0">
           <Link
-            href="/contact"
+            href="/book"
             onClick={handleLinkClick}
             className="w-full bg-[#b08a30] text-white px-6 py-4 rounded-none font-medium text-sm hover:brightness-95 transition shadow-md hover:shadow-lg duration-200 whitespace-nowrap inline-flex items-center justify-center touch-manipulation min-h-[48px] font-[family-name:var(--font-playfair)]"
           >
-            Book Free Consultation
+            Book A Session
           </Link>
           <p className="text-center text-sm text-gray-500 mt-3">
             Get started with expert tutoring today
