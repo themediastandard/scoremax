@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, Instagram, Facebook, Youtube } from "lucide-react";
+import { Phone, Instagram, Facebook, Youtube } from "lucide-react";
 import { siteImages } from "@/lib/site-images";
 
 const quickLinks = [
@@ -132,24 +132,6 @@ export default function Footer() {
                 >
                   <Phone className="w-4 h-4 text-[#b08a30] shrink-0" />
                   (954) 214-8880
-                </a>
-              </li>
-              <li>
-                <a
-                  href="tel:9542241511"
-                  className="flex items-center gap-3 text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
-                >
-                  <Phone className="w-4 h-4 text-[#b08a30] shrink-0" />
-                  (954) 224-1511
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:info@scoremaxtutoring.com"
-                  className="flex items-center gap-3 text-sm text-white/70 hover:text-[#b08a30] transition-colors duration-200"
-                >
-                  <Mail className="w-4 h-4 text-[#b08a30] shrink-0" />
-                  info@scoremaxtutoring.com
                 </a>
               </li>
             </ul>
