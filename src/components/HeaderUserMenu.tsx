@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { signOutAndRedirect } from '@/lib/sign-out'
 import Link from 'next/link'
 import {
   DropdownMenu,
@@ -19,8 +19,6 @@ export function HeaderUserMenu() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [role, setRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     const client = createClient()
@@ -61,9 +59,7 @@ export function HeaderUserMenu() {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    await signOutAndRedirect('/')
   }
 
   return (

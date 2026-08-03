@@ -15,7 +15,7 @@ import {
   CreditCard,
   DollarSign
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { signOutAndRedirect } from '@/lib/sign-out'
 import { siteImages } from '@/lib/site-images'
 import { useEffect, useState } from 'react'
 import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
@@ -29,9 +29,9 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ role, fullName, membershipTier: serverTier, googleConnected }: DashboardSidebarProps) {
   const pathname = usePathname()
-  const supabase = createClient()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
   const [credits, setCredits] = useState<number | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
     if (serverTier != null) setTier(serverTier)
@@ -53,8 +53,9 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
   }, [role])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    window.location.href = '/login'
+    if (signingOut) return
+    setSigningOut(true)
+    await signOutAndRedirect('/login')
   }
 
   const links = [
@@ -203,10 +204,11 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
         <button
           type="button"
           onClick={handleSignOut}
-          className="group flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer touch-manipulation"
+          disabled={signingOut}
+          className="group flex w-full items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer touch-manipulation disabled:cursor-not-allowed disabled:opacity-60"
         >
           <LogOut className="mr-3 h-5 w-5 text-gray-400 group-hover:text-red-600" />
-          Sign Out
+          {signingOut ? 'Signing out…' : 'Sign Out'}
         </button>
       </div>
     </div>
