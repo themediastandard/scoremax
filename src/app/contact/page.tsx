@@ -46,11 +46,12 @@ export default function ContactPage() {
       <section className="pt-32 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl lg:text-5xl text-gray-900 mb-4">
-            Schedule a Free Consultation
+            Get in Touch
           </h1>
           <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
           <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
-            Start with a short call to discuss your student&apos;s goals, current needs, and the best tutoring plan.
+            Ask us a quick question, or request a free consultation to discuss your student&apos;s
+            goals, current needs, and the best tutoring plan.
           </p>
         </div>
       </section>
@@ -59,12 +60,13 @@ export default function ContactPage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">Tell Us About Yourself</div>
+            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">How Can We Help?</div>
             <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
-              Tell Us What Your Student Needs
+              Choose What You Need
             </h2>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xl mx-auto">
-              Send the basics and we&apos;ll follow up to schedule a free consultation.
+              An inquiry takes under a minute. A consultation inquiry tells us more up front so
+              the call is time well spent.
             </p>
           </div>
           
