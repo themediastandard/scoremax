@@ -49,7 +49,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
-          <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto">
+          <p className="text-gray-600 text-base lg:text-lg leading-relaxed max-w-2xl mx-auto">
             Ask us a quick question, or request a free consultation to discuss your student&apos;s
             goals, current needs, and the best tutoring plan.
           </p>
@@ -58,19 +58,8 @@ export default function ContactPage() {
 
       {/* Contact Form Section */}
       <section className="py-16 bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">How Can We Help?</div>
-            <h2 className="font-[family-name:var(--font-playfair)] text-2xl lg:text-3xl text-gray-900 mb-4">
-              Choose What You Need
-            </h2>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-xl mx-auto">
-              An inquiry takes under a minute. A consultation inquiry tells us more up front so
-              the call is time well spent.
-            </p>
-          </div>
-          
-          <div className="bg-white p-8 md:p-10 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white p-6 sm:p-10 md:p-12 rounded-2xl border border-gray-100 shadow-sm">
             <ContactForm />
           </div>
         </div>
