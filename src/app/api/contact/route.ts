@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { cleanEmail, cleanString, isHoneypotTripped, MAX_TEXT_LENGTH } from '@/lib/form-validation'
 import { getClientIp, withinRateLimit, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit'
@@ -21,6 +21,14 @@ import { getClientIp, withinRateLimit, RATE_LIMITED_MESSAGE } from '@/lib/rate-l
  * to 'general', and each branch reads only the fields it expects, so a caller
  * cannot mix the two to get consultation answers onto a general enquiry.
  */
+
+/**
+ * Shown when we could not put the enquiry in front of anyone. Names a fallback
+ * channel rather than just reporting failure — the phone number is the one the
+ * footer still lists.
+ */
+const UNDELIVERABLE =
+  "We couldn't deliver your message just now. Please try again in a moment, or call us at (954) 214-8880."
 
 /** Per IP. Generous enough for a family enquiring about two children. */
 const MAX_PER_IP = 5
@@ -112,8 +120,25 @@ export async function POST(req: NextRequest) {
 
     const adminSubject = isConsultation ? 'New Consultation Inquiry' : 'New Inquiry'
 
-    if (adminEmails.length > 0) {
-      await resend.emails.send({
+    /*
+     * This route persists nothing — the notification email *is* the record of
+     * the enquiry. So a failed admin send means the enquiry is gone, and
+     * telling the sender "Sent" would be a lie that costs a real lead. An
+     * empty notification list is the same loss by a different route, and was
+     * previously an `if` that silently skipped.
+     *
+     * Deliberately before the auto-reply: return here and the sender is never
+     * told we received something we did not.
+     */
+    if (adminEmails.length === 0) {
+      console.error(
+        '[email:contact:admin] admin_settings.notification_emails is empty — nobody would receive this enquiry'
+      )
+      return NextResponse.json({ error: UNDELIVERABLE }, { status: 502 })
+    }
+
+    const adminNotified = await sendEmail(
+      {
         ...getEmailDefaults(),
         to: adminEmails,
         replyTo: email,
@@ -124,25 +149,38 @@ export async function POST(req: NextRequest) {
           ctaText: 'View Dashboard',
           ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
         }),
-      })
+      },
+      'contact:admin'
+    )
+
+    if (!adminNotified) {
+      return NextResponse.json({ error: UNDELIVERABLE }, { status: 502 })
     }
 
-    await resend.emails.send({
-      ...getEmailDefaults(),
-      to: email,
-      subject: isConsultation
-        ? "We've received your consultation inquiry"
-        : "We've received your inquiry",
-      html: emailLayout({
-        title: isConsultation
-          ? "We've Received Your Consultation Inquiry"
-          : "We've Received Your Inquiry",
-        greeting: 'Hi,',
-        body: isConsultation
-          ? '<p style="margin: 0;">Thank you for reaching out to ScoreMax. We review every inquiry personally and will be in touch shortly to schedule your free consultation.</p>'
-          : '<p style="margin: 0;">Thank you for reaching out to ScoreMax. We review every inquiry personally and will get back to you shortly.</p>',
-      }),
-    })
+    /*
+     * Best effort. The enquiry is safely with the team by this point, so a
+     * failed acknowledgement is cosmetic — failing the request would push the
+     * sender into submitting again and duplicate a lead we already hold.
+     */
+    await sendEmail(
+      {
+        ...getEmailDefaults(),
+        to: email,
+        subject: isConsultation
+          ? "We've received your consultation inquiry"
+          : "We've received your inquiry",
+        html: emailLayout({
+          title: isConsultation
+            ? "We've Received Your Consultation Inquiry"
+            : "We've Received Your Inquiry",
+          greeting: 'Hi,',
+          body: isConsultation
+            ? '<p style="margin: 0;">Thank you for reaching out to ScoreMax. We review every inquiry personally and will be in touch shortly to schedule your free consultation.</p>'
+            : '<p style="margin: 0;">Thank you for reaching out to ScoreMax. We review every inquiry personally and will get back to you shortly.</p>',
+        }),
+      },
+      'contact:auto-reply'
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

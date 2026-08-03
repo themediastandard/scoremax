@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { type calendar_v3 } from 'googleapis'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import {
@@ -166,8 +166,15 @@ async function sendScheduleEmails(
     ? ' A calendar invite is on its way to your inbox.'
     : ''
 
-  try {
-    await resend.emails.send({
+  /*
+   * Best effort by design — see the note below on why these run only after the
+   * database write. The session is scheduled and the calendar invite already
+   * sent, so neither failure should unwind anything; both simply need to be
+   * visible. Note these two fire back to back, which is exactly the shape that
+   * trips Resend's 2-requests-per-second default.
+   */
+  await sendEmail(
+    {
       ...getEmailDefaults(),
       to: session.customers.email,
       subject: 'Session Confirmed: Your session is scheduled',
@@ -181,13 +188,12 @@ async function sendScheduleEmails(
           detailRow('Location:', locationText),
         ].join(''),
       }),
-    })
-  } catch (emailError) {
-    console.error('Failed to send student schedule notification:', emailError)
-  }
+    },
+    `admin:session-confirmed:customer:${session.id}`
+  )
 
-  try {
-    await resend.emails.send({
+  await sendEmail(
+    {
       ...getEmailDefaults(),
       to: session.tutors.email,
       subject: 'New Session Assigned',
@@ -201,10 +207,9 @@ async function sendScheduleEmails(
           detailRow('Location:', locationText),
         ].join(''),
       }),
-    })
-  } catch (emailError) {
-    console.error('Failed to send tutor schedule notification:', emailError)
-  }
+    },
+    `admin:session-confirmed:tutor:${session.id}`
+  )
 }
 
 // Calendar work happens now (so a failure aborts the whole change with a 400
@@ -260,18 +265,23 @@ async function handleReassign(session: SessionRecord): Promise<ScheduleOutcome> 
 }
 
 async function sendCompletionEmail(session: SessionRecord) {
-  await resend.emails.send({
-    ...getEmailDefaults(),
-    to: session.customers.email,
-    subject: 'Thank you for choosing ScoreMax',
-    html: emailLayout({
-      title: 'Session Completed',
-      greeting: `Hi ${session.customers.full_name},`,
-      body: '<p style="margin: 0;">We hope you had a great session! Please leave us a review.</p>',
-      ctaText: 'Book Another Session',
-      ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
-    }),
-  })
+  // Purely a review prompt, so the mildest failure of the set — but it was also
+  // the only send with no error handling of any kind, not even a try/catch.
+  await sendEmail(
+    {
+      ...getEmailDefaults(),
+      to: session.customers.email,
+      subject: 'Thank you for choosing ScoreMax',
+      html: emailLayout({
+        title: 'Session Completed',
+        greeting: `Hi ${session.customers.full_name},`,
+        body: '<p style="margin: 0;">We hope you had a great session! Please leave us a review.</p>',
+        ctaText: 'Book Another Session',
+        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
+      }),
+    },
+    `admin:session-completed:${session.id}`
+  )
 }
 
 async function handleCancel(session: SessionRecord) {

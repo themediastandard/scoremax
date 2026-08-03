@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { requireAdmin } from '@/lib/auth'
 
@@ -70,8 +70,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: tutorError.message }, { status: 500 })
   }
 
-  try {
-    await resend.emails.send({
+  /*
+   * The tutor and their auth user already exist, so this cannot fail the
+   * request — that would report "not created" for an account that was. But the
+   * email carries their sign-in credentials, so silently losing it leaves a
+   * tutor who cannot get in and an admin who thinks they can.
+   *
+   * The password came from the admin in the first place, so the recovery is
+   * simply passing it on themselves. `welcomeEmailSent` is what lets the UI
+   * tell them that is needed.
+   */
+  const welcomeEmailSent = await sendEmail(
+    {
       ...getEmailDefaults(),
       to: email,
       subject: 'Welcome to ScoreMax',
@@ -87,10 +97,9 @@ export async function POST(req: NextRequest) {
         ctaText: 'Sign In',
         ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
       }),
-    })
-  } catch (e) {
-    console.error('Failed to send tutor welcome email', e)
-  }
+    },
+    `admin:tutor-welcome:${tutor.id}`
+  )
 
-  return NextResponse.json(tutor)
+  return NextResponse.json({ ...tutor, welcomeEmailSent })
 }

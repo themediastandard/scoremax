@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 
 export async function POST(req: NextRequest) {
@@ -88,10 +88,26 @@ export async function POST(req: NextRequest) {
 
   // 3. Notify Admin
   const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
-  const adminEmails = adminSettings?.value?.split(',') || []
+  // Trimmed to match the contact and step-up routes. Untrimmed, a
+  // notification_emails value written as "a@x.com, b@y.com" yields " b@y.com" —
+  // not a valid address, and one more way for a notification to go nowhere.
+  const adminEmails =
+    adminSettings?.value?.split(',').map((e: string) => e.trim()).filter(Boolean) || []
 
+  /*
+   * Both sends are best effort, and deliberately so. By this point
+   * redeem_credit_and_create_booking() has already committed — credit is spent
+   * and the booking row exists. Failing the request over an email would tell
+   * the customer their booking did not happen while it demonstrably did, and
+   * invite them to spend a second hour of credit re-submitting it.
+   *
+   * The booking is recoverable from the database, so a lost notification is an
+   * inconvenience rather than a lost record. It still needs to be *visible*,
+   * which is what the log lines in sendEmail are for.
+   */
   if (adminEmails.length > 0) {
-    await resend.emails.send({
+    await sendEmail(
+      {
         ...getEmailDefaults(),
         to: adminEmails,
         subject: `New Booking Request (${creditSource} Credit Used)`,
@@ -105,11 +121,18 @@ export async function POST(req: NextRequest) {
           ctaText: 'View Order',
           ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${booking.id}`,
         }),
-    })
+      },
+      `booking:admin:${booking.id}`
+    )
+  } else {
+    console.error(
+      `[email:booking:admin:${booking.id}] notification_emails is empty — no one was told about this booking`
+    )
   }
-  
+
   // 7. Notify Student
-  await resend.emails.send({
+  await sendEmail(
+    {
       ...getEmailDefaults(),
       to: customer.email,
       subject: 'Booking Request Received',
@@ -118,7 +141,9 @@ export async function POST(req: NextRequest) {
         greeting: `Hi ${customer.full_name},`,
         body: '<p style="margin: 0;">We received your booking request. We will assign a tutor and confirm the time shortly.</p>',
       }),
-  })
+    },
+    `booking:customer:${booking.id}`
+  )
 
   return NextResponse.json(booking)
 }

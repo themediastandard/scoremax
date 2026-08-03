@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
 import { stripe } from '@/lib/stripe'
 import { requireAdmin } from '@/lib/auth'
@@ -108,8 +108,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   if (currentBooking.customers?.email) {
-    try {
-      await resend.emails.send({
+    /*
+     * Best effort — the cancellation or refund has already been issued, so
+     * failing here would misreport work that is done. The old try/catch caught
+     * only thrown errors, letting a Resend rejection through unlogged; that
+     * left a customer whose money moved with no word of it.
+     */
+    await sendEmail(
+      {
         ...getEmailDefaults(),
         to: currentBooking.customers.email,
         subject: isCreditFunded ? 'Booking Cancelled' : 'Refund Processed',
@@ -120,10 +126,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             ? '<p style="margin: 0;">Your booking has been cancelled and the session credit has been returned to your account.</p>'
             : '<p style="margin: 0;">Your order has been cancelled and a refund has been initiated.</p>',
         }),
-      })
-    } catch (emailError) {
-      console.error('Failed to send refund notification:', emailError)
-    }
+      },
+      `admin:order-${isCreditFunded ? 'cancelled' : 'refunded'}:${currentBooking.id}`
+    )
   }
 
   const { data, error } = await supabaseAdmin

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { cleanEmail, cleanString, isHoneypotTripped } from '@/lib/form-validation'
 import { getClientIp, withinRateLimit, RATE_LIMITED_MESSAGE } from '@/lib/rate-limit'
@@ -14,6 +14,10 @@ import { getClientIp, withinRateLimit, RATE_LIMITED_MESSAGE } from '@/lib/rate-l
 const MAX_PER_IP = 5
 const MAX_PER_EMAIL = 3
 const WINDOW = '1 hour'
+
+/** Shown when the registration could not be put in front of anyone. */
+const UNDELIVERABLE =
+  "We couldn't submit your registration just now. Please try again in a moment, or call us at (954) 214-8880."
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,8 +59,20 @@ export async function POST(req: NextRequest) {
       phone && detailRow('Phone:', phone),
     ].filter(Boolean)
 
-    if (adminEmails.length > 0) {
-      await resend.emails.send({
+    /*
+     * Like the contact route, this persists nothing — the notification email is
+     * the only record the registration ever existed. A failed send, or an empty
+     * notification list, loses it outright, so neither can report success.
+     */
+    if (adminEmails.length === 0) {
+      console.error(
+        '[email:step-up:admin] admin_settings.notification_emails is empty — nobody would receive this registration'
+      )
+      return NextResponse.json({ error: UNDELIVERABLE }, { status: 502 })
+    }
+
+    const adminNotified = await sendEmail(
+      {
         ...getEmailDefaults(),
         to: adminEmails,
         replyTo: email,
@@ -67,19 +83,28 @@ export async function POST(req: NextRequest) {
           ctaText: 'View Dashboard',
           ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
         }),
-      })
+      },
+      'step-up:admin'
+    )
+
+    if (!adminNotified) {
+      return NextResponse.json({ error: UNDELIVERABLE }, { status: 502 })
     }
 
-    await resend.emails.send({
-      ...getEmailDefaults(),
-      to: email,
-      subject: "We've received your Step Up registration",
-      html: emailLayout({
-        title: "We've Received Your Registration",
-        greeting: `Hi ${firstName || 'there'},`,
-        body: '<p style="margin: 0;">Thank you for registering for Step Up For Students tutoring with ScoreMax. We will be in touch shortly to schedule your sessions.</p>',
-      }),
-    })
+    // Best effort — the registration is safely with the team by now.
+    await sendEmail(
+      {
+        ...getEmailDefaults(),
+        to: email,
+        subject: "We've received your Step Up registration",
+        html: emailLayout({
+          title: "We've Received Your Registration",
+          greeting: `Hi ${firstName || 'there'},`,
+          body: '<p style="margin: 0;">Thank you for registering for Step Up For Students tutoring with ScoreMax. We will be in touch shortly to schedule your sessions.</p>',
+        }),
+      },
+      'step-up:auto-reply'
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

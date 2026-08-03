@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { resend, getEmailDefaults } from '@/lib/resend'
+import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
@@ -339,13 +339,25 @@ export async function POST(req: Request) {
 
     // 6. Notify Admin
     const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
-    const adminEmails = adminSettings?.value?.split(',') || []
+    // Trimmed to match the other notification routes — an untrimmed
+    // "a@x.com, b@y.com" yields " b@y.com", which is not a valid address.
+    const adminEmails =
+      adminSettings?.value?.split(',').map((e: string) => e.trim()).filter(Boolean) || []
     
     if (adminEmails.length > 0) {
         const planLabel = planName || (planType === 'membership' ? 'Membership' : planType === 'package' ? 'Tutoring Package' : planType === 'single' ? 'Single Session' : planType === 'course' ? 'Course Program' : String(planType))
 
-        try {
-        await resend.emails.send({
+        /*
+         * Best effort, and it must stay that way: the payment is already
+         * recorded and the event already de-duped in
+         * processed_stripe_events, so a non-2xx here would make Stripe retry
+         * an event whose side effects are deliberately skipped on replay —
+         * the email would not be resent, and the retry would achieve nothing
+         * but noise. The previous try/catch only caught *thrown* errors, so a
+         * Resend rejection passed straight through it unlogged.
+         */
+        await sendEmail(
+          {
             ...getEmailDefaults(),
             to: adminEmails,
             subject: 'New Payment & Booking',
@@ -359,10 +371,9 @@ export async function POST(req: Request) {
               ctaText: 'View Orders',
               ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders`,
             }),
-        })
-        } catch (emailError) {
-          console.error('Failed to send admin payment notification:', emailError)
-        }
+          },
+          `stripe:admin-payment:${session.id}`
+        )
     }
 
     // 7. Notify Customer (post-payment confirmation)
@@ -379,8 +390,15 @@ export async function POST(req: Request) {
           ].join('')
         : ''
 
-      try {
-        await resend.emails.send({
+      /*
+       * Best effort for the same de-dupe reason as the admin notification
+       * above, but the consequence is worse and worth knowing about: on a
+       * guest checkout this email carries the set-password link, so losing it
+       * leaves someone who has already paid unable to reach their account.
+       * The log line is how that surfaces — it will not resend on retry.
+       */
+      await sendEmail(
+        {
           ...getEmailDefaults(),
           to: contactEmail,
           subject: 'Thank you for your purchase',
@@ -391,10 +409,9 @@ export async function POST(req: Request) {
             ctaText: isGuestCheckout && setPasswordUrl ? 'Set Your Password & Sign In' : 'Sign In to Your Dashboard',
             ctaUrl: isGuestCheckout && setPasswordUrl ? setPasswordUrl : `${process.env.NEXT_PUBLIC_APP_URL}/login`,
           }),
-        })
-      } catch (emailError) {
-        console.error('Failed to send customer payment notification:', emailError)
-      }
+        },
+        `stripe:customer-purchase:${session.id}${isGuestCheckout ? ':guest-password-link' : ''}`
+      )
     }
   }
 
