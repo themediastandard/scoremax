@@ -8,6 +8,7 @@ import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
 import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
+import { reportError, reportIssue } from '@/lib/report-error'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -31,7 +32,13 @@ export async function POST(req: Request) {
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.error(`Webhook Error: ${message}`)
+    /*
+     * Usually a stray probe hitting the endpoint, which is noise — but it is
+     * also exactly how a rotated STRIPE_WEBHOOK_SECRET presents, and that is a
+     * silent, total payment outage. Kept its own tag so it can be muted
+     * independently if the noise ever outweighs the signal.
+     */
+    reportIssue('stripe:webhook-signature', 'Webhook signature verification failed', { message })
     return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
@@ -523,11 +530,11 @@ export async function POST(req: Request) {
            * anyway. An already-cancelled subscription lands here too via
            * resource_missing, which is the desired end state regardless.
            */
-          console.error(
-            `[refund] could not cancel subscription ${membership.stripe_subscription_id} ` +
-              `for membership ${membership.id} — cancel it by hand in Stripe:`,
-            cancelError
-          )
+          reportError('refund:subscription-cancel', cancelError, {
+            subscriptionId: membership.stripe_subscription_id,
+            membershipId: membership.id,
+            note: 'customer will keep being billed until this is cancelled by hand',
+          })
         }
       }
 
@@ -659,7 +666,17 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Stripe webhook processing failed:', error)
+    /*
+     * Reported explicitly, not left to Sentry's automatic instrumentation:
+     * onRequestError only fires for errors that escape the handler, and this
+     * catch swallows every one of them to return a controlled 500. Without this
+     * line the most consequential route in the app is invisible.
+     *
+     * A 500 makes Stripe retry, and the retry re-runs the handler because the
+     * processed_stripe_events marker is only written on success — so a spike
+     * here means credit grants are failing, not merely that one delivery did.
+     */
+    reportError('stripe:webhook', error, { eventId: event.id, eventType: event.type })
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
   }
 }

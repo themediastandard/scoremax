@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
+import { reportIssue } from '@/lib/report-error'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     if (error?.message?.includes('no_available_credits')) {
       return NextResponse.json({ error: 'No available credits' }, { status: 400 })
     }
-    console.error('Credit redemption failed:', error?.message)
+    reportIssue('booking:credit-redemption', 'Credit redemption failed', { supabaseError: error?.message })
     return NextResponse.json({ error: 'Could not create booking' }, { status: 500 })
   }
 

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /**
  * Security response headers.
@@ -73,4 +74,35 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * Sentry wraps the config to build source maps and instrument the server.
+ *
+ * Every credential is optional on purpose. With no SENTRY_AUTH_TOKEN the plugin
+ * skips the source-map upload and warns rather than failing — which keeps
+ * `next build` working locally and on any deploy where the secrets are not set.
+ * Without source maps, stack traces arrive minified but still arrive.
+ *
+ * Note this is the one place Sentry runs regardless of NEXT_PUBLIC_SENTRY_DSN;
+ * the SDK itself is inert without it (see sentry.server.config.ts).
+ */
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // The build already logs plenty; only speak up in CI.
+  silent: !process.env.CI,
+
+  // Netlify serves client chunks from paths the default glob misses.
+  widenClientFileUpload: true,
+
+  // Strips Sentry's own debug logging from the client bundle. (The older
+  // `disableLogger` flag is deprecated in v10 and warns on every build.)
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+
+  telemetry: false,
+});

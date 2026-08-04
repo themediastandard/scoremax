@@ -1,6 +1,7 @@
 import { calendar } from '@/lib/google-calendar'
 import { getAdminGoogleAuth } from '@/lib/google-admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { reportError, reportIssue } from '@/lib/report-error'
 
 /**
  * Delete the Google Calendar events belonging to a refunded booking's sessions.
@@ -30,7 +31,10 @@ export async function cancelCalendarEventsForBookings(bookingIds: string[]): Pro
     .not('tutor_calendar_event_id', 'is', null)
 
   if (error) {
-    console.error('[refund] could not load sessions for calendar cleanup:', error.message)
+    reportIssue('refund:calendar-load', 'Could not load sessions for calendar cleanup', {
+      bookingIds,
+      supabaseError: error.message,
+    })
     return 0
   }
   if (!sessions?.length) return 0
@@ -38,9 +42,10 @@ export async function cancelCalendarEventsForBookings(bookingIds: string[]): Pro
   // Resolved once: every event belongs to the single ScoreMax business account.
   const adminAuth = await getAdminGoogleAuth()
   if (!adminAuth) {
-    console.error(
-      `[refund] Google is not connected — ${sessions.length} calendar event(s) left live for ` +
-        `bookings ${bookingIds.join(', ')}. Delete them by hand.`
+    reportIssue(
+      'refund:calendar-disconnected',
+      'Google not connected — refunded bookings left live calendar invites',
+      { bookingIds, eventCount: sessions.length }
     )
     return 0
   }
@@ -65,11 +70,11 @@ export async function cancelCalendarEventsForBookings(bookingIds: string[]): Pro
       const status =
         (e as { code?: number; status?: number })?.code ?? (e as { status?: number })?.status
       if (status !== 404 && status !== 410) {
-        console.error(
-          `[refund] could not delete calendar event ${eventId} for session ${session.id} — ` +
-            `the invite is probably still live, delete it by hand:`,
-          e
-        )
+        reportError('refund:calendar-delete', e, {
+          eventId,
+          sessionId: session.id,
+          note: 'invite is probably still live on attendee calendars',
+        })
         continue
       }
     }
@@ -84,9 +89,10 @@ export async function cancelCalendarEventsForBookings(bookingIds: string[]): Pro
       .eq('id', session.id)
 
     if (clearError) {
-      console.error(
-        `[refund] deleted calendar event ${eventId} but could not clear session ${session.id}:`,
-        clearError.message
+      reportIssue(
+        'refund:calendar-clear',
+        'Deleted the calendar event but could not clear the session reference',
+        { eventId, sessionId: session.id, supabaseError: clearError.message }
       )
     }
   }

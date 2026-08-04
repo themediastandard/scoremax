@@ -10,6 +10,7 @@ import {
   isRevokedGoogleTokenError,
 } from '@/lib/google-admin'
 import { requireAdmin } from '@/lib/auth'
+import { reportError } from '@/lib/report-error'
 import {
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
@@ -101,7 +102,7 @@ async function createSessionEvent(session: SessionRecord): Promise<Record<string
     }
   } catch (error) {
     if (error instanceof SchedulingError) throw error
-    console.error('Failed to create session calendar event', error)
+    reportError('schedule:calendar-create', error, { sessionId: session.id })
 
     // A revoked token would otherwise leave the dashboard showing "Google
     // Connected" while every booking failed. Clear it so the badge flips and
@@ -256,7 +257,7 @@ async function handleReassign(session: SessionRecord): Promise<ScheduleOutcome> 
       requestBody: plan.requestBody,
     })
   } catch (error) {
-    console.error('Failed to update calendar event for tutor change', error)
+    reportError('schedule:calendar-tutor-change', error, { sessionId: session.id })
   }
   return {
     updates: {},
@@ -340,7 +341,7 @@ async function handleReschedule(session: SessionRecord, newStart: string, newEnd
       },
     })
   } catch (e) {
-    console.error('Failed to update session calendar event', e)
+    reportError('schedule:calendar-update', e, { sessionId: session.id })
   }
 }
 

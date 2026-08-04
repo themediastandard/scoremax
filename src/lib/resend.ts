@@ -1,4 +1,5 @@
 import { Resend, type CreateEmailOptions } from 'resend'
+import { reportError, reportIssue } from '@/lib/report-error'
 
 export const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -39,13 +40,27 @@ export async function sendEmail(
   try {
     const { error } = await resend.emails.send(payload)
     if (error) {
-      console.error(`[email:${context}] Resend rejected the send:`, error.name, error.message)
+      reportIssue(`email:${groupingKey(context)}`, `Resend rejected the send: ${error.name}`, {
+        emailContext: context,
+        resendMessage: error.message,
+      })
       return false
     }
     return true
   } catch (err) {
     // Thrown rather than returned — network failure, DNS, aborted request.
-    console.error(`[email:${context}] Resend threw:`, err)
+    reportError(`email:${groupingKey(context)}`, err, { emailContext: context })
     return false
   }
+}
+
+/**
+ * Call-site contexts carry a row id — `admin:order-refunded:<uuid>` — which is
+ * exactly what you want in a log line and exactly what you do not want in a
+ * Sentry tag, where every occurrence would become its own group. Keep the first
+ * two segments, which identify the *kind* of send; the full string stays in
+ * `emailContext` on the event.
+ */
+function groupingKey(context: string): string {
+  return context.split(':').slice(0, 2).join(':')
 }

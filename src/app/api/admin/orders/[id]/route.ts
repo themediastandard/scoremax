@@ -5,6 +5,7 @@ import { emailLayout } from '@/lib/email-templates'
 import { stripe } from '@/lib/stripe'
 import { requireAdmin } from '@/lib/auth'
 import { isPaymentIntentId } from '@/lib/stripe-subscription'
+import { reportError, reportIssue } from '@/lib/report-error'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
@@ -77,7 +78,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         payment_intent: currentBooking.stripe_payment_intent_id,
       })
     } catch (e) {
-      console.error('Stripe refund failed', e)
+      reportError('refund:stripe', e, { bookingId: id })
       return NextResponse.json({ error: 'Stripe refund failed' }, { status: 502 })
     }
   }
@@ -93,7 +94,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .rpc('refund_booking', { p_booking_id: id })
 
   if (refundError) {
-    console.error('Refund bookkeeping failed after Stripe refund:', refundError.message)
+    reportIssue('refund:bookkeeping', 'Stripe refunded but refund_booking failed — money moved, credit not revoked', { bookingId: id, supabaseError: refundError.message })
     return NextResponse.json(
       { error: 'Refund was issued but could not be recorded. Check this order manually.' },
       { status: 500 }
@@ -102,9 +103,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const creditAction = (refundResult as { credit_action?: string } | null)?.credit_action
   if (creditAction === 'unknown_source_not_restored' || creditAction === 'source_row_missing') {
-    console.error(
-      `Refunded booking ${id} but could not restore credit (${creditAction}). Adjust the customer's balance manually.`
-    )
+    reportIssue('refund:credit-not-restored', 'Refunded but could not restore credit — adjust the balance by hand', { bookingId: id, creditAction })
   }
 
   if (currentBooking.customers?.email) {
