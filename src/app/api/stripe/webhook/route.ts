@@ -7,6 +7,7 @@ import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
+import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -487,6 +488,24 @@ export async function POST(req: Request) {
        * rare and recoverable by resubscribing; continuing to bill a member whose
        * credit has just been revoked is neither.
        */
+      /*
+       * refund_booking cancels the session rows, but it runs in Postgres and
+       * cannot call Google — so the invite stayed live on the customer's and
+       * tutor's calendars, Meet link included, with nothing in the UI pointing at
+       * the orphan. Confirmed live on 2026-08-04: a refunded booking left a
+       * confirmed event six days out.
+       *
+       * The admin route's handleCancel does the same cleanup but only fires on a
+       * status transition away from 'scheduled'; after a refund the row is
+       * already 'cancelled', so it can never reach these. Runs over every matched
+       * booking, not only freshly settled ones, so the app's own refunds — where
+       * the row was flipped before this event arrived — are covered too.
+       */
+      const deletedEvents = await cancelCalendarEventsForBookings(rows.map((row) => row.id))
+      if (deletedEvents > 0) {
+        console.log(`[refund] deleted ${deletedEvents} calendar event(s) for ${paymentIntentId}`)
+      }
+
       const { data: refundedMemberships } = await supabaseAdmin
         .from('memberships')
         .select('id, stripe_subscription_id')
