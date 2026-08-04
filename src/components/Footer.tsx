@@ -150,6 +150,40 @@ export default function Footer() {
         {/* Divider */}
         <div className="h-px bg-white/20" />
 
+        {/*
+         * Accounts and Google sign-in.
+         *
+         * Google's OAuth branding verification requires the home page itself to
+         * "explain with transparency the purpose for which your app requests
+         * user data" — not merely what the business does. Without it the check
+         * fails with "your home page does not explain the purpose of your app",
+         * and the consent screen falls back to naming the raw Supabase project
+         * URL instead of ScoreMax. Saying it in the privacy policy alone does
+         * not satisfy it; the requirement is on the page.
+         *
+         * The footer renders on every page, so this covers the home page and is
+         * honest disclosure everywhere else too. Keep it accurate: the OAuth
+         * scopes really are `email` and `profile` and nothing more.
+         */}
+        <div className="pt-6">
+          <p className="text-xs leading-relaxed text-white/50 max-w-3xl">
+            <strong className="text-white/70">Accounts and Google sign-in.</strong>{" "}
+            Booking a session requires a ScoreMax account. You can create one with an
+            email address and password, or choose &ldquo;Sign in with Google&rdquo;, which
+            shares only your name and email address with us. We use them to create and
+            identify your account, confirm your bookings, and send session reminders. We
+            never receive your Google password and never access your Gmail, contacts, or
+            files. See our{" "}
+            <Link
+              href="/privacy"
+              className="underline underline-offset-2 hover:text-white/80 transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>{" "}
+            for the full detail.
+          </p>
+        </div>
+
         {/* Bottom Bar */}
         <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">
