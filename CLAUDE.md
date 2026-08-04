@@ -9,9 +9,18 @@ ScoreMax is a **production tutoring business platform** — not a starter app. I
 credit (memberships/packages/course enrollments), and schedules sessions onto Google
 Calendar with Meet links. ~18k lines across ~150 TS/TSX files in `src/`.
 
-It is **pre-launch**: the production domain `www.scoremaxtutoring.com` still serves the
-old Wix site. Treat the Supabase project as live data regardless — it holds real
-customer, payment, and tutor rows.
+**It is live.** As of 2026-08-04 `https://www.scoremaxtutoring.com` serves this app,
+not the old Wix site: DNS runs on Netlify's nameservers, HTTPS is provisioned, the
+apex 301s to `www`, and Netlify holds live Stripe keys. A real customer payment has
+settled and been refunded through it. Treat the Supabase project and the Stripe
+account as production in every sense.
+
+`www` is canonical — `NEXT_PUBLIC_APP_URL` is `https://www.scoremaxtutoring.com`
+with no trailing slash, and a dozen call sites append paths to it directly.
+
+Still unexercised in production: membership renewal (`invoice.paid` with
+`billing_reason = 'subscription_cycle'`) has never fired through the deployed
+endpoint.
 
 ## Commands
 
@@ -20,7 +29,7 @@ customer, payment, and tutor rows.
 - `npm run dev:clean` — same, after `rm -rf .next`
 - `npm run build` — guard + `rm -rf .next` + `next build`
 - `npm run start` / `npm run lint`
-- **Tests: `node --test "test/*.test.mjs"`** (7 tests, all passing as of 2026-07-27).
+- **Tests: `node --test "test/*.test.mjs"`** (44 tests, all passing as of 2026-08-04).
   Quote the glob — the bare directory form `node --test test/` does **not** work on
   Node 22 here and exits 1 without running anything. There is no `test` script in
   `package.json`, so tests never run in CI or on build. Run them by hand.
@@ -105,9 +114,13 @@ the refresh token is stored in `admin_settings` under the key `google_refresh_to
 OAuth state is signed via `src/lib/google-oauth-state.ts`, bound to an httpOnly nonce
 cookie with a 10-minute expiry, and re-checks admin on both legs of the flow.
 
-⚠️ As of 2026-07-27 the `google_refresh_token` row **does not exist** — `admin_settings`
-holds only `notification_emails`. Scheduling an online session hard-fails with a 400
-until an admin completes that one-time connection.
+The `google_refresh_token` row exists (connected 2026-07-28) and was verified working
+on 2026-08-04 — a live refresh against Google succeeded with scope
+`calendar.events`. Scheduling an online session does not need a reconnect.
+
+If it ever *is* missing, scheduling hard-fails with a 400 until an admin redoes the
+one-time connection in Dashboard → Settings → Integrations. Check with
+`select key from admin_settings` rather than assuming either way.
 
 ### Plain-JavaScript modules in `src/lib/`
 
@@ -153,9 +166,10 @@ a genuine client-side write, grant the specific columns explicitly and add a
 
 ## Before changing anything
 
-Read the audit reports in the repo root (`AUDIT-2026-07-28.md` is current,
-`AUDIT-2026-07-27.md` precedes it) — they catalogue known findings with file paths and
-line numbers. Don't re-report them as new; check whether they're still open.
+Read the audit reports in the repo root — `AUDIT-2026-08-04.md` is current, preceded by
+`AUDIT-2026-08-01.md`, `AUDIT-2026-07-28.md`, `AUDIT-2026-07-27.md`. They catalogue
+known findings with file paths and line numbers, plus deferred feature requests. Don't
+re-report them as new; check whether they're still open.
 
 These files are **gitignored on purpose** — they contain working reproduction steps for
 unpatched vulnerabilities and the repo has a GitHub remote. They exist only in the local
