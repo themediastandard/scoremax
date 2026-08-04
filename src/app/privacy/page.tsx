@@ -67,6 +67,28 @@ export default function PrivacyPage() {
       </section>
 
       <section>
+        <h2>Signing in with Google</h2>
+        <p>
+          You can create your account with an email and password, or by choosing
+          &ldquo;Sign in with Google&rdquo;. If you choose Google, Google shares your name
+          and email address with us so that we can create and identify your account. That
+          is all we ask for and all we receive.
+        </p>
+        <p>
+          We never receive your Google password, and we do not read your Gmail, contacts,
+          files, photos, or anything else in your Google account. We use your name and
+          email address only to run your ScoreMax account &mdash; signing you in,
+          confirming bookings, and sending session reminders. We do not use them for
+          advertising and we do not sell them.
+        </p>
+        <p>
+          Booking an online session creates a Google Calendar event with a Google Meet
+          link, described under Google below. That is a separate thing from signing in,
+          and it happens whichever way you created your account.
+        </p>
+      </section>
+
+      <section>
         <h2>Students under 18</h2>
         <p>
           Our services are bought by parents and guardians, and the student is often a

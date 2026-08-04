@@ -94,7 +94,7 @@ export default function Home() {
       {/* Video Hero */}
       <VideoHero
         mp4Src="/video/hero-home.mp4"
-        subtitle="Expert tutoring for SAT, ACT, and academics, 100% online over live video. Personalized plans, proven results, nationwide reach."
+        subtitle="ScoreMax provides expert 1:1 online tutoring for the SAT, ACT, LSAT, GRE and GMAT, plus academic subjects from elementary through college. Every session is live over video."
       >
         {/* Fully remote notice, flush under the video frame */}
         <div className="bg-[#b08a30]">
