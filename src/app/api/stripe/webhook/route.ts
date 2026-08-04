@@ -8,7 +8,7 @@ import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
 import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
-import { reportError, reportIssue } from '@/lib/report-error'
+import { reportError, reportIssue, flushReports } from '@/lib/report-error'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -39,6 +39,7 @@ export async function POST(req: Request) {
      * independently if the noise ever outweighs the signal.
      */
     reportIssue('stripe:webhook-signature', 'Webhook signature verification failed', { message })
+    await flushReports()
     return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
@@ -677,6 +678,7 @@ export async function POST(req: Request) {
      * here means credit grants are failing, not merely that one delivery did.
      */
     reportError('stripe:webhook', error, { eventId: event.id, eventType: event.type })
+    await flushReports()
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 })
   }
 }

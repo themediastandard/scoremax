@@ -32,6 +32,25 @@ export function reportError(
 }
 
 /**
+ * Wait for queued events to actually leave the process.
+ *
+ * Sentry sends asynchronously, and Netlify freezes a function the moment it
+ * returns a response — so a captured event is queued and then killed before the
+ * request goes out. Nothing arrives and nothing warns you. Await this before
+ * returning from any handler that reported something.
+ *
+ * Swallows its own failure: a monitoring flush must never be the reason a
+ * request fails.
+ */
+export async function flushReports(timeoutMs = 2000): Promise<void> {
+  try {
+    await Sentry.flush(timeoutMs)
+  } catch {
+    // Nothing useful to do here — the event is lost either way.
+  }
+}
+
+/**
  * Same, for a failure with no thrown error behind it — a Supabase call that
  * returns `{ error }`, a precondition that should not have been reachable.
  */
