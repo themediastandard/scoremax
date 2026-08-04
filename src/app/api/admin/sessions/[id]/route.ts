@@ -39,6 +39,28 @@ type SessionRecord = {
 // ScoreMax Google connection). Surfaces to the admin UI as a 400.
 class SchedulingError extends Error {}
 
+/**
+ * sessions.subjects stores subject *ids*; the calendar event title needs names.
+ * Returns them in the session's own order, dropping any id that no longer
+ * resolves — a deleted subject should cost you that one name, not the title.
+ */
+async function resolveSubjectNames(subjects: unknown): Promise<string[]> {
+  const ids = Array.isArray(subjects)
+    ? subjects.filter((value): value is string => typeof value === 'string' && value.length > 0)
+    : []
+  if (!ids.length) return []
+
+  const { data, error } = await supabaseAdmin.from('subjects').select('id, name').in('id', ids)
+  if (error) {
+    // Non-fatal: buildSessionCalendarPlan falls back to the subject-less title.
+    reportError('schedule:subject-lookup', error, { subjectIds: ids })
+    return []
+  }
+
+  const byId = new Map((data ?? []).map((row) => [row.id as string, row.name as string]))
+  return ids.map((id) => byId.get(id)).filter((name): name is string => Boolean(name))
+}
+
 function getMeetUrl(event: { data?: calendar_v3.Schema$Event }) {
   const videoEntry = event?.data?.conferenceData?.entryPoints?.find(
     (entry) => entry.entryPointType === 'video'
@@ -387,6 +409,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (fetchError || !currentSession) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 })
   }
+
+  // Attached once, here, so every scheduling path below inherits it — including
+  // the reassign branch, which spreads currentSession into `merged`.
+  currentSession.subjectNames = await resolveSubjectNames(currentSession.subjects)
 
   let updates: Record<string, unknown> = {
     assigned_tutor_id,

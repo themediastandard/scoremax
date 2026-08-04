@@ -1,6 +1,31 @@
 const IN_PERSON_LOCATION =
   'Florida Blue Center · 1970 Sawgrass Mills Cir, Sunrise, FL 33323-2994'
 
+// Google truncates long summaries in month and week view, and the names either
+// side of the subject are the part a tutor scans for. Keep the subject segment
+// short enough that "with <tutor>" survives; the description carries the full
+// list either way.
+const MAX_SUBJECT_LABEL = 40
+
+/**
+ * Render resolved subject names for the event title.
+ * One or two fit; beyond that, name the first and count the rest so a
+ * five-subject session does not push the student's name off the grid.
+ * @param {string[]} names
+ */
+function buildSubjectLabel(names) {
+  if (!names.length) return ''
+
+  const joined = names.join(', ')
+  if (joined.length <= MAX_SUBJECT_LABEL) return joined
+
+  const [first, ...rest] = names
+  const summarised = `${first} +${rest.length}`
+  return summarised.length <= MAX_SUBJECT_LABEL
+    ? summarised
+    : `${first.slice(0, MAX_SUBJECT_LABEL - 1).trimEnd()}…`
+}
+
 /**
  * Builds the single ScoreMax-owned calendar event for a session.
  * The event is created on the ScoreMax (admin) Google account's calendar with
@@ -12,6 +37,7 @@ const IN_PERSON_LOCATION =
  *   session_type?: string | null,
  *   confirmed_start?: string | null,
  *   confirmed_end?: string | null,
+ *   subjectNames?: string[] | null,
  *   customers: { full_name?: string | null, email?: string | null },
  *   tutors: { full_name?: string | null, email?: string | null },
  * }} session
@@ -43,14 +69,35 @@ function buildSessionCalendarPlan(session) {
     attendees.push({ email: session.customers.email, displayName: session.customers.full_name || undefined })
   }
 
+  /*
+   * The subject goes in the title so a tutor with several students in one day
+   * can tell their sessions apart from the calendar grid alone.
+   *
+   * `subjectNames` is resolved by the caller: sessions.subjects stores subject
+   * *ids*, and raw UUIDs in an event title would be worse than no subject. When
+   * they are absent — no subjects on the session, or a caller that did not
+   * resolve them — fall back to the original title rather than emitting
+   * "ScoreMax : Ada with Sam".
+   */
+  const subjectNames = Array.isArray(session.subjectNames)
+    ? session.subjectNames.filter((name) => typeof name === 'string' && name.trim())
+    : []
+  const subjectLabel = buildSubjectLabel(subjectNames)
+
   return {
     isOnline,
     shouldCreateMeet: isOnline,
     requestBody: {
-      summary: `ScoreMax Session: ${session.customers.full_name} with ${session.tutors.full_name}`,
+      summary: subjectLabel
+        ? `ScoreMax ${subjectLabel}: ${session.customers.full_name} with ${session.tutors.full_name}`
+        : `ScoreMax Session: ${session.customers.full_name} with ${session.tutors.full_name}`,
       description: [
         `Student: ${session.customers.full_name}`,
         `Tutor: ${session.tutors.full_name}`,
+        // Full list, untruncated — the title is the constrained surface, not this.
+        ...(subjectNames.length
+          ? [`Subject${subjectNames.length > 1 ? 's' : ''}: ${subjectNames.join(', ')}`]
+          : []),
         `Location: ${isOnline ? 'Online (Google Meet)' : IN_PERSON_LOCATION}`,
       ].join('\n'),
       start: { dateTime: start.toISOString() },

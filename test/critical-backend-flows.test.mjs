@@ -148,6 +148,70 @@ test('online calendar plan builds one ScoreMax-owned event inviting tutor and st
   assert.equal(plan.requestBody.end.dateTime, '2026-03-01T16:00:00.000Z')
 })
 
+// The subject in the title is what lets a tutor with several students in a day
+// tell their sessions apart from the calendar grid alone.
+test('calendar plan puts resolved subject names in the event title', () => {
+  const base = {
+    id: 'session-subj',
+    session_type: 'online',
+    confirmed_start: '2026-03-01T15:00:00.000Z',
+    confirmed_end: '2026-03-01T16:00:00.000Z',
+    customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
+  }
+
+  const one = buildSessionCalendarPlan({ ...base, subjectNames: ['SAT Math'] })
+  assert.equal(one.requestBody.summary, 'ScoreMax SAT Math: Ada Student with Grace Tutor')
+  assert.match(one.requestBody.description, /Subject: SAT Math/)
+
+  const two = buildSessionCalendarPlan({ ...base, subjectNames: ['SAT Math', 'ACT Science'] })
+  assert.equal(
+    two.requestBody.summary,
+    'ScoreMax SAT Math, ACT Science: Ada Student with Grace Tutor'
+  )
+  assert.match(two.requestBody.description, /Subjects: SAT Math, ACT Science/)
+
+  // Falls back rather than emitting "ScoreMax : Ada with Grace". Covers a
+  // session with no subjects and a caller that never resolved them.
+  for (const missing of [undefined, null, [], ['', '   ']]) {
+    const plan = buildSessionCalendarPlan({ ...base, subjectNames: missing })
+    assert.equal(plan.requestBody.summary, 'ScoreMax Session: Ada Student with Grace Tutor')
+    assert.doesNotMatch(plan.requestBody.description, /Subject/)
+  }
+
+  // sessions.subjects holds ids, so a caller that forgets to resolve them must
+  // not leak a UUID into the title. Nothing resolves it, so nothing is shown.
+  const unresolved = buildSessionCalendarPlan({ ...base, subjects: ['137d560d-96e4-47a1-abaf-494140324d96'] })
+  assert.equal(unresolved.requestBody.summary, 'ScoreMax Session: Ada Student with Grace Tutor')
+})
+
+test('calendar plan keeps the title short when a session has many subjects', () => {
+  const base = {
+    id: 'session-many',
+    session_type: 'online',
+    confirmed_start: '2026-03-01T15:00:00.000Z',
+    confirmed_end: '2026-03-01T16:00:00.000Z',
+    customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
+  }
+  const many = ['SAT Math', 'ACT Science', 'AP Chemistry', 'AP Biology', 'AP Physics C']
+
+  const plan = buildSessionCalendarPlan({ ...base, subjectNames: many })
+
+  // Summarised, not enumerated — otherwise the tutor's name falls off the grid.
+  assert.equal(plan.requestBody.summary, 'ScoreMax SAT Math +4: Ada Student with Grace Tutor')
+  // The description is unconstrained, so it keeps every one of them.
+  assert.match(plan.requestBody.description, /Subjects: SAT Math, ACT Science, AP Chemistry, AP Biology, AP Physics C/)
+
+  // A single subject longer than the cap is truncated rather than dropped.
+  const long = buildSessionCalendarPlan({
+    ...base,
+    subjectNames: ['Advanced Placement Comparative Government and Politics'],
+  })
+  assert.match(long.requestBody.summary, /^ScoreMax Advanced Placement .*…: Ada Student with Grace Tutor$/)
+  assert.ok(long.requestBody.summary.includes('with Grace Tutor'))
+})
+
 test('in-person calendar plan sets the location and skips the Meet request', () => {
   const plan = buildSessionCalendarPlan({
     id: 'session-2',
