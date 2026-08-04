@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   description:
     'ScoreMax’s commitment to making its website and tutoring services usable by people with disabilities, how to report a barrier, and how to request an accommodation.',
   robots: { index: true, follow: true },
+  // See /privacy: without its own og:url and og:title this previewed as the homepage.
+  openGraph: {
+    type: 'website',
+    url: 'https://www.scoremaxtutoring.com/accessibility',
+    siteName: 'ScoreMax',
+    title: 'Accessibility Statement | ScoreMax',
+    description:
+      'ScoreMax’s commitment to making its website and tutoring services usable by people with disabilities, how to report a barrier, and how to request an accommodation.',
+  },
   alternates: { canonical: 'https://www.scoremaxtutoring.com/accessibility' },
 }
 

@@ -1,6 +1,13 @@
 import { Metadata } from 'next';
 import { AcademicTutoringLanding } from '@/components/AcademicTutoringLanding';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { tutoringService } from '@/lib/structured-data';
+
+// See /college-tutoring for why the Service node lives on the page rather than
+// inside the shared AcademicTutoringLanding shell.
+const INTRO =
+  'We help high school students master challenging subjects, improve grades, and build academic confidence. Whether it is math, science, or test prep, our tutors guide students through the material step by step.';
 
 export const metadata: Metadata = {
   title: 'High School Tutoring Services | Math, Science & Test Prep | ScoreMax',
@@ -42,48 +49,59 @@ export const metadata: Metadata = {
 
 export default function HighSchoolTutoringPage() {
   return (
-    <AcademicTutoringLanding
-      eyebrow="High School"
-      title="Expert High School Tutoring"
-      intro="We help high school students master challenging subjects, improve grades, and build academic confidence. Whether it is math, science, or test prep, our tutors guide students through the material step by step."
-      servicesTitle="Comprehensive High School Support"
-      servicesIntro="Tutoring services designed to help high school students excel in their academic journey."
-      services={[
-        {
-          title: 'Mathematics',
-          description: 'Support for core and advanced math classes with an emphasis on understanding and problem solving.',
-          items: ['Algebra I & II', 'Geometry', 'Pre-Calculus & Calculus', 'Statistics'],
-        },
-        {
-          title: 'Science',
-          description: 'Focused science tutoring that helps students understand complex principles and prepare for exams.',
-          items: ['Chemistry', 'Physics', 'Biology', 'Environmental Science'],
-        },
-        {
-          title: 'Personalized Learning',
-          description: "A tailored approach built around each student's class, strengths, weaknesses, learning style, and goals.",
-        },
-      ]}
-      whyTitle="Expertise, Flexibility & Results"
-      whyIntro="We provide the expertise, flexibility, and personalized attention that high school students need to succeed."
-      reasons={[
-        {
-          title: 'Expert Tutors',
-          description: 'Our skilled tutors have deep subject knowledge and a proven track record of student success.',
-        },
-        {
-          title: 'Flexible Schedule',
-          description: 'We offer convenient scheduling that works around school, sports, activities, and family commitments.',
-        },
-        {
-          title: 'Success-Driven',
-          description: 'Our mission is to help students understand the material, improve performance, and move toward their goals.',
-        },
-      ]}
-      ctaTitle="Ready to Excel in High School?"
-      ctaIntro="Start with a free consultation and we will match your student with the right tutor."
-      heroImage={heroImages.highSchool}
-      heroImageAlt="A high school student takes notes on graph paper during an online one-on-one tutoring session on a laptop."
-    />
+    <>
+      <JsonLd
+        data={tutoringService({
+          path: '/high-school-tutoring',
+          name: 'High School Tutoring',
+          serviceType: 'Online 1:1 high school mathematics and science tutoring',
+          description: INTRO,
+          audienceType: 'High school students',
+        })}
+      />
+      <AcademicTutoringLanding
+        eyebrow="High School"
+        title="Expert High School Tutoring"
+        intro={INTRO}
+        servicesTitle="Comprehensive High School Support"
+        servicesIntro="Tutoring services designed to help high school students excel in their academic journey."
+        services={[
+          {
+            title: 'Mathematics',
+            description: 'Support for core and advanced math classes with an emphasis on understanding and problem solving.',
+            items: ['Algebra I & II', 'Geometry', 'Pre-Calculus & Calculus', 'Statistics'],
+          },
+          {
+            title: 'Science',
+            description: 'Focused science tutoring that helps students understand complex principles and prepare for exams.',
+            items: ['Chemistry', 'Physics', 'Biology', 'Environmental Science'],
+          },
+          {
+            title: 'Personalized Learning',
+            description: "A tailored approach built around each student's class, strengths, weaknesses, learning style, and goals.",
+          },
+        ]}
+        whyTitle="Expertise, Flexibility & Results"
+        whyIntro="We provide the expertise, flexibility, and personalized attention that high school students need to succeed."
+        reasons={[
+          {
+            title: 'Expert Tutors',
+            description: 'Our skilled tutors have deep subject knowledge and a proven track record of student success.',
+          },
+          {
+            title: 'Flexible Schedule',
+            description: 'We offer convenient scheduling that works around school, sports, activities, and family commitments.',
+          },
+          {
+            title: 'Success-Driven',
+            description: 'Our mission is to help students understand the material, improve performance, and move toward their goals.',
+          },
+        ]}
+        ctaTitle="Ready to Excel in High School?"
+        ctaIntro="Start with a free consultation and we will match your student with the right tutor."
+        heroImage={heroImages.highSchool}
+        heroImageAlt="A high school student takes notes on graph paper during an online one-on-one tutoring session on a laptop."
+      />
+    </>
   );
 }

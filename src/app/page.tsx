@@ -6,6 +6,8 @@ import StepUpSection from '../components/StepUpSection';
 import { Metadata } from 'next';
 import { heroImages } from '@/lib/hero-images';
 import { siteImages } from '@/lib/site-images';
+import { JsonLd } from '@/components/JsonLd';
+import { educationalOrganization, faqPage } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'ScoreMax - Expert SAT & ACT Tutoring | Boost Your Test Scores',
@@ -52,81 +54,41 @@ export const metadata: Metadata = {
   },
 };
 
+// The four Q&As that have been live on this page since before the schema was
+// centralised. Every answer restates something the page or the site says in
+// visible copy: the 260+ figure and the subject list come from the hero and the
+// Browse by Subject grid, the online-only answer from the gold strip under the
+// video, and the getting-started answer from the Book Your Session section.
+const HOMEPAGE_FAQ = [
+  {
+    question: 'How much can I improve my SAT score with ScoreMax tutoring?',
+    answer:
+      'Students typically improve their SAT scores by 260+ points with our expert tutoring services. Our personalized approach and proven strategies help students achieve significant score improvements.',
+  },
+  {
+    question: 'What subjects does ScoreMax offer tutoring for?',
+    answer:
+      'ScoreMax offers comprehensive tutoring services including SAT preparation, ACT preparation, mathematics, science, and academic subject tutoring for both high school and college students.',
+  },
+  {
+    question: 'Are ScoreMax sessions online or in person?',
+    answer:
+      'All ScoreMax tutoring is 100% online. Every session is held live over video conferencing, and you receive a private video link for each booking. We do not offer in-person or in-home tutoring, so students can work with expert tutors from anywhere with an internet connection.',
+  },
+  {
+    question: 'How do I get started with ScoreMax tutoring?',
+    answer:
+      // A plain apostrophe. This string is JSON, not JSX: it previously read
+      // "We&apos;ll", and JSON.stringify has no reason to decode that, so the
+      // answer Google and every assistant read carried the raw entity.
+      'Getting started is easy! Simply contact us to book your free consultation. We’ll assess your needs, create a personalized learning plan, and match you with the perfect tutor.',
+  },
+];
+
 export default function Home() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "name": "ScoreMax",
-    "description": "Fully remote SAT and ACT tutoring delivered online over video conferencing, with expert tutors. Help students improve test scores by 260+ points.",
-    "url": "https://www.scoremaxtutoring.com",
-    "logo": "https://www.scoremaxtutoring.com/logo.avif",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "url": "https://www.scoremaxtutoring.com/contact"
-    },
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "US"
-    },
-    "offers": {
-      "@type": "Offer",
-      "description": "SAT and ACT tutoring services",
-      "category": "Educational Services"
-    },
-    "serviceType": ["SAT Tutoring", "ACT Tutoring", "Test Preparation", "Academic Tutoring"],
-    "areaServed": "United States"
-  };
-
-  const faqStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "How much can I improve my SAT score with ScoreMax tutoring?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Students typically improve their SAT scores by 260+ points with our expert tutoring services. Our personalized approach and proven strategies help students achieve significant score improvements."
-        }
-      },
-      {
-        "@type": "Question", 
-        "name": "What subjects does ScoreMax offer tutoring for?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "ScoreMax offers comprehensive tutoring services including SAT preparation, ACT preparation, mathematics, science, and academic subject tutoring for both high school and college students."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Are ScoreMax sessions online or in person?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "All ScoreMax tutoring is 100% online. Every session is held live over video conferencing, and you receive a private video link for each booking. We do not offer in-person or in-home tutoring, so students can work with expert tutors from anywhere with an internet connection."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I get started with ScoreMax tutoring?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Getting started is easy! Simply contact us to book your free consultation. We&apos;ll assess your needs, create a personalized learning plan, and match you with the perfect tutor."
-        }
-      }
-    ]
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
-      />
+      <JsonLd data={[educationalOrganization(), faqPage(HOMEPAGE_FAQ)]} />
       {/* Header now rendered globally in RootLayout */}
 
       {/* Video Hero */}

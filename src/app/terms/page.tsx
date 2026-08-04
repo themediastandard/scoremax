@@ -15,6 +15,15 @@ export const metadata: Metadata = {
   description:
     'The terms governing use of ScoreMax tutoring services, including booking, payment, cancellation and credit.',
   robots: { index: true, follow: true },
+  // See /privacy: without its own og:url and og:title this previewed as the homepage.
+  openGraph: {
+    type: 'website',
+    url: 'https://www.scoremaxtutoring.com/terms',
+    siteName: 'ScoreMax',
+    title: 'Terms of Service | ScoreMax',
+    description:
+      'The terms governing use of ScoreMax tutoring services, including booking, payment, cancellation and credit.',
+  },
   alternates: { canonical: 'https://www.scoremaxtutoring.com/terms' },
 }
 

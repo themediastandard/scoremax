@@ -2,6 +2,13 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbList, tutoringService } from '@/lib/structured-data';
+
+// The hero intro, verbatim. Schema descriptions restate visible copy rather
+// than paraphrasing it, so what an assistant quotes is what a reader sees.
+const INTRO =
+  'We understand the importance of achieving high SAT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you reach your desired score.';
 
 export const metadata: Metadata = {
   title: 'SAT Tutoring Services | Expert SAT Test Prep | ScoreMax',
@@ -46,10 +53,28 @@ export default function SATPage() {
     <div className="min-h-screen bg-white overflow-hidden">
       {/* Header removed; global in layout */}
 
+      <JsonLd
+        data={[
+          tutoringService({
+            path: '/test-prep/sat',
+            name: 'SAT Tutoring',
+            serviceType: 'Online 1:1 SAT test preparation tutoring',
+            description: INTRO,
+            audienceType: 'High school students preparing for college admissions',
+          }),
+          // Two rungs, not three: /test-prep has no index page, so a "Test Prep"
+          // rung would have to point at a 404.
+          breadcrumbList([
+            { name: 'Home', path: '/' },
+            { name: 'SAT Tutoring', path: '/test-prep/sat' },
+          ]),
+        ]}
+      />
+
       <PageHero
         eyebrow="Test Prep"
         title="Expert SAT Tutoring"
-        intro="We understand the importance of achieving high SAT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you reach your desired score."
+        intro={INTRO}
         image={heroImages.sat}
         imageAlt="A high school student works through an SAT practice test during an online one-on-one tutoring session."
       />

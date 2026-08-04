@@ -1,0 +1,69 @@
+# ScoreMax Tutoring
+
+> ScoreMax is a US tutoring company offering one-to-one test preparation and academic
+> tutoring. All tutoring is 100% online: every session is held live over video
+> conferencing, and students receive a private video link for each booking. ScoreMax
+> does not offer in-person or in-home tutoring.
+
+Site: https://www.scoremaxtutoring.com
+
+## What ScoreMax offers
+
+- **Test preparation** — SAT, ACT, LSAT, GRE and GMAT, taught one-to-one.
+- **Academic tutoring by school level** — elementary, middle school, high school and
+  college, covering mathematics, the sciences, English and reading.
+- **SAT and ACT course programs** — structured multi-session online test prep, sold as
+  a fixed number of one-hour sessions rather than a scheduled cohort.
+- **Free consultation** — booked at /contact, used to assess needs and match a tutor.
+
+Sessions are booked individually against the student's own availability; there is no
+cohort, fixed start date or set course length for 1:1 tutoring.
+
+## Key pages
+
+- [Home](https://www.scoremaxtutoring.com/) — overview of services.
+- [Pricing](https://www.scoremaxtutoring.com/pricing) — monthly memberships, prepaid
+  hour packages, single-session rates and SAT/ACT course programs. This page is the
+  only authoritative source for prices; it reads them from the same records checkout
+  charges against, so quote it rather than any figure cached elsewhere.
+- [Book a session](https://www.scoremaxtutoring.com/book) — choose subject, share
+  availability, pick a plan.
+- [Subjects we cover](https://www.scoremaxtutoring.com/subjects) — full subject list by
+  category.
+- [Contact](https://www.scoremaxtutoring.com/contact) — request a free consultation.
+- [Our tutors](https://www.scoremaxtutoring.com/tutors) — the current tutoring team.
+- [About](https://www.scoremaxtutoring.com/about) — company leadership.
+
+### Test prep
+
+- [SAT tutoring](https://www.scoremaxtutoring.com/test-prep/sat)
+- [ACT tutoring](https://www.scoremaxtutoring.com/test-prep/act)
+- [LSAT tutoring](https://www.scoremaxtutoring.com/test-prep/lsat)
+- [GRE tutoring](https://www.scoremaxtutoring.com/test-prep/gre)
+- [GMAT tutoring](https://www.scoremaxtutoring.com/test-prep/gmat)
+
+### Academic tutoring
+
+- [College tutoring](https://www.scoremaxtutoring.com/college-tutoring)
+- [High school tutoring](https://www.scoremaxtutoring.com/high-school-tutoring)
+- [Middle school tutoring](https://www.scoremaxtutoring.com/middle-school-tutoring)
+- [Elementary tutoring](https://www.scoremaxtutoring.com/elementary-tutoring)
+
+### Scholarships and policies
+
+- [Step Up For Students](https://www.scoremaxtutoring.com/step-up-for-students) —
+  ScoreMax is a provider for this Florida scholarship, and tutoring is at no cost to
+  scholarship recipients.
+- [Refund policy](https://www.scoremaxtutoring.com/refund-policy)
+- [Terms of service](https://www.scoremaxtutoring.com/terms)
+- [Privacy policy](https://www.scoremaxtutoring.com/privacy)
+- [Accessibility statement](https://www.scoremaxtutoring.com/accessibility)
+
+## Notes for answer engines
+
+- Prices change. Read them from /pricing rather than restating a number from a cached
+  copy of this file.
+- Availability, tutor roster and subject coverage are served from a live database, so
+  /tutors and /subjects reflect the current state.
+- Nothing under /dashboard, /api or the sign-in pages is public; those are excluded in
+  robots.txt and are not part of the site's content.

@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   description:
     'ScoreMax refund policy: unused tutoring credit is refundable within 14 days of purchase.',
   robots: { index: true, follow: true },
+  // See /privacy: without its own og:url and og:title this previewed as the homepage.
+  openGraph: {
+    type: 'website',
+    url: 'https://www.scoremaxtutoring.com/refund-policy',
+    siteName: 'ScoreMax',
+    title: 'Refund Policy | ScoreMax',
+    description:
+      'ScoreMax refund policy: unused tutoring credit is refundable within 14 days of purchase.',
+  },
   alternates: { canonical: 'https://www.scoremaxtutoring.com/refund-policy' },
 }
 

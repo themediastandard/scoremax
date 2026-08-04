@@ -2,6 +2,12 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbList, tutoringService } from '@/lib/structured-data';
+
+// The hero intro, verbatim — see the SAT page for why schema restates visible copy.
+const INTRO =
+  'We understand the significance of achieving exceptional ACT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you conquer the test.';
 
 export const metadata: Metadata = {
   title: 'ACT Tutoring Services | Expert ACT Test Prep | ScoreMax',
@@ -44,10 +50,26 @@ export const metadata: Metadata = {
 export default function ACTPage() {
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <JsonLd
+        data={[
+          tutoringService({
+            path: '/test-prep/act',
+            name: 'ACT Tutoring',
+            serviceType: 'Online 1:1 ACT test preparation tutoring',
+            description: INTRO,
+            audienceType: 'High school students preparing for college admissions',
+          }),
+          breadcrumbList([
+            { name: 'Home', path: '/' },
+            { name: 'ACT Tutoring', path: '/test-prep/act' },
+          ]),
+        ]}
+      />
+
       <PageHero
         eyebrow="Test Prep"
         title="Expert ACT Tutoring"
-        intro="We understand the significance of achieving exceptional ACT scores for college admissions. Our expert tutors provide personalized preparation to maximize your potential and help you conquer the test."
+        intro={INTRO}
         image={heroImages.act}
         imageAlt="A high school student reviews charts and graphs during an online one-on-one ACT tutoring session."
       />

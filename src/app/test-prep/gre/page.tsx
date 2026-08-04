@@ -2,6 +2,12 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbList, tutoringService } from '@/lib/structured-data';
+
+// The hero intro, verbatim — see the SAT page for why schema restates visible copy.
+const INTRO =
+  'The GRE is now under two hours, which leaves very little room for a slow start. Our tutors work with you one-on-one on the reasoning, vocabulary in context, and quantitative fundamentals that graduate programs weigh most, and on the pacing the shorter test demands.';
 
 export const metadata: Metadata = {
   title: 'GRE Tutoring Services | Expert GRE Test Prep | ScoreMax',
@@ -44,10 +50,26 @@ export const metadata: Metadata = {
 export default function GREPage() {
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <JsonLd
+        data={[
+          tutoringService({
+            path: '/test-prep/gre',
+            name: 'GRE Tutoring',
+            serviceType: 'Online 1:1 GRE General Test preparation tutoring',
+            description: INTRO,
+            audienceType: 'Graduate school applicants',
+          }),
+          breadcrumbList([
+            { name: 'Home', path: '/' },
+            { name: 'GRE Tutoring', path: '/test-prep/gre' },
+          ]),
+        ]}
+      />
+
       <PageHero
         eyebrow="Test Prep"
         title="Expert GRE Tutoring"
-        intro="The GRE is now under two hours, which leaves very little room for a slow start. Our tutors work with you one-on-one on the reasoning, vocabulary in context, and quantitative fundamentals that graduate programs weigh most, and on the pacing the shorter test demands."
+        intro={INTRO}
         image={heroImages.gre}
         imageAlt="A graduate seminar room with a glass writing wall of worked equations beside a table stacked with academic journals."
       />

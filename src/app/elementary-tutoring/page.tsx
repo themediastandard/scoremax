@@ -1,6 +1,13 @@
 import { Metadata } from 'next';
 import { AcademicTutoringLanding } from '@/components/AcademicTutoringLanding';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { tutoringService } from '@/lib/structured-data';
+
+// See /college-tutoring for why the Service node lives on the page rather than
+// inside the shared AcademicTutoringLanding shell.
+const INTRO =
+  'Elementary tutoring should feel supportive, clear, and confidence-building. ScoreMax helps young learners strengthen reading, math, and science fundamentals while developing a better relationship with schoolwork.';
 
 export const metadata: Metadata = {
   title: 'Elementary Tutoring Services | Reading, Math & Science | ScoreMax',
@@ -42,49 +49,60 @@ export const metadata: Metadata = {
 
 export default function ElementaryTutoringPage() {
   return (
-    <AcademicTutoringLanding
-      eyebrow="Elementary"
-      title="Expert Elementary Tutoring"
-      intro="Elementary tutoring should feel supportive, clear, and confidence-building. ScoreMax helps young learners strengthen reading, math, and science fundamentals while developing a better relationship with schoolwork."
-      servicesTitle="Foundational Support for Young Learners"
-      servicesIntro="Tutoring that helps elementary students build the core skills they will use for years."
-      services={[
-        {
-          title: 'Reading & Comprehension',
-          description: 'Students get structured support with fluency, vocabulary, comprehension, and written responses. We help reading feel less frustrating and more manageable.',
-          items: ['Reading fluency', 'Comprehension', 'Vocabulary', 'Written responses'],
-        },
-        {
-          title: 'Math Confidence',
-          description: 'Elementary math support focused on number sense, operations, problem solving, and class concepts. Students learn the steps and the reasoning behind them.',
-          items: ['Number sense', 'Addition and subtraction', 'Multiplication and division', 'Word problems'],
-        },
-        {
-          title: 'Science & Homework Help',
-          description: 'Support for science concepts, assignments, project planning, and homework routines so students can stay on track without feeling overwhelmed.',
-          items: ['Science basics', 'Homework routines', 'Project support', 'Study confidence'],
-        },
-      ]}
-      whyTitle="Confidence First, Skills Always"
-      whyIntro="Young students need clear instruction, patience, and a plan that meets them where they are."
-      reasons={[
-        {
-          title: 'Age-Appropriate Pacing',
-          description: 'Sessions move at a pace that keeps students engaged while still building real academic progress.',
-        },
-        {
-          title: 'Positive Reinforcement',
-          description: 'We help students see what they can do, then use that confidence to work through harder material.',
-        },
-        {
-          title: 'Parent Clarity',
-          description: 'Families get a clearer picture of what the student needs, what is improving, and what to focus on next.',
-        },
-      ]}
-      ctaTitle="Ready to Help Your Student Grow?"
-      ctaIntro="Book a free consultation and we will recommend the right tutoring path for your elementary student."
-      heroImage={heroImages.elementary}
-      heroImageAlt="A young elementary student raises a hand excitedly during an online one-on-one tutoring session at the kitchen table."
-    />
+    <>
+      <JsonLd
+        data={tutoringService({
+          path: '/elementary-tutoring',
+          name: 'Elementary Tutoring',
+          serviceType: 'Online 1:1 elementary reading, math and science tutoring',
+          description: INTRO,
+          audienceType: 'Elementary school students',
+        })}
+      />
+      <AcademicTutoringLanding
+        eyebrow="Elementary"
+        title="Expert Elementary Tutoring"
+        intro={INTRO}
+        servicesTitle="Foundational Support for Young Learners"
+        servicesIntro="Tutoring that helps elementary students build the core skills they will use for years."
+        services={[
+          {
+            title: 'Reading & Comprehension',
+            description: 'Students get structured support with fluency, vocabulary, comprehension, and written responses. We help reading feel less frustrating and more manageable.',
+            items: ['Reading fluency', 'Comprehension', 'Vocabulary', 'Written responses'],
+          },
+          {
+            title: 'Math Confidence',
+            description: 'Elementary math support focused on number sense, operations, problem solving, and class concepts. Students learn the steps and the reasoning behind them.',
+            items: ['Number sense', 'Addition and subtraction', 'Multiplication and division', 'Word problems'],
+          },
+          {
+            title: 'Science & Homework Help',
+            description: 'Support for science concepts, assignments, project planning, and homework routines so students can stay on track without feeling overwhelmed.',
+            items: ['Science basics', 'Homework routines', 'Project support', 'Study confidence'],
+          },
+        ]}
+        whyTitle="Confidence First, Skills Always"
+        whyIntro="Young students need clear instruction, patience, and a plan that meets them where they are."
+        reasons={[
+          {
+            title: 'Age-Appropriate Pacing',
+            description: 'Sessions move at a pace that keeps students engaged while still building real academic progress.',
+          },
+          {
+            title: 'Positive Reinforcement',
+            description: 'We help students see what they can do, then use that confidence to work through harder material.',
+          },
+          {
+            title: 'Parent Clarity',
+            description: 'Families get a clearer picture of what the student needs, what is improving, and what to focus on next.',
+          },
+        ]}
+        ctaTitle="Ready to Help Your Student Grow?"
+        ctaIntro="Book a free consultation and we will recommend the right tutoring path for your elementary student."
+        heroImage={heroImages.elementary}
+        heroImageAlt="A young elementary student raises a hand excitedly during an online one-on-one tutoring session at the kitchen table."
+      />
+    </>
   );
 }

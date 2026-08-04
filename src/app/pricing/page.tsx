@@ -2,11 +2,36 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { JsonLd } from '@/components/JsonLd';
+import {
+  aggregatePriceOffer,
+  priceOffer,
+  pricedTutoringService,
+} from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Pricing - ScoreMax Tutoring | Memberships, Packages & Courses',
   description: 'Transparent pricing for SAT, ACT, and academic tutoring. Monthly memberships from $299, prepaid packages, and online course programs. Book a free consultation.',
   keywords: 'ScoreMax pricing, tutoring cost, SAT tutoring price, ACT tutoring, membership, tutoring packages',
+  // Without these the page inherited the root layout's openGraph wholesale, so
+  // a link to /pricing shared anywhere previewed as the homepage — homepage
+  // title, homepage description, and an og:url pointing at the homepage.
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://www.scoremaxtutoring.com/pricing',
+    siteName: 'ScoreMax',
+    title: 'Pricing - ScoreMax Tutoring | Memberships, Packages & Courses',
+    description: 'Transparent pricing for SAT, ACT, and academic tutoring: monthly memberships, prepaid packages, and online SAT & ACT course programs.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pricing - ScoreMax Tutoring',
+    description: 'Monthly memberships, prepaid packages, and online SAT & ACT course programs.',
+  },
+  alternates: {
+    canonical: 'https://www.scoremaxtutoring.com/pricing',
+  },
 };
 
 // Single-session hourly rates mirror the subject catalog
@@ -92,8 +117,60 @@ export default async function PricingPage() {
     ? Math.min(...courseRows.map((r) => r.price_cents)) / 100
     : 2500;
 
+  /*
+   * Offers are built from `memberships`, `packages` and `courseRows` — the same
+   * resolved values the markup below renders, which come from the `pricing`
+   * table checkout resolves against. Nothing here re-states a number; if the
+   * table changes, the page and the schema move together.
+   *
+   * Two things are deliberately left out:
+   *  - The 1:1 hourly rates. They are hardcoded in `oneOnOneRates` above as a
+   *    mirror of the subject catalog rather than read from the table, so
+   *    asserting them machine-readably would publish a figure that is one
+   *    forgotten edit away from disagreeing with what checkout charges.
+   *  - `offerCount` on the course aggregate when the query returned no rows and
+   *    the page fell back to its hardcoded bullets — a count of nothing.
+   */
+  const offers = [
+    ...memberships.map((plan) =>
+      priceOffer({
+        name: `${plan.name} Membership`,
+        description: `${plan.hours} hours of 1:1 tutoring per month`,
+        price: plan.price,
+        url: '/book',
+        category: 'Membership',
+      })
+    ),
+    ...packages.map((pkg) =>
+      priceOffer({
+        name: `${pkg.hours}-hour tutoring package`,
+        description: `${pkg.hours} prepaid hours of 1:1 tutoring`,
+        price: pkg.price,
+        url: '/book',
+        category: 'Prepaid package',
+      })
+    ),
+    aggregatePriceOffer({
+      name: 'SAT & ACT course programs',
+      description: 'Structured online test prep with strategy, targeted practice, and expert support.',
+      lowPrice: courseFrom,
+      offerCount: courseRows.length,
+      url: '/book',
+    }),
+  ];
+
   return (
     <div className="min-h-screen bg-white">
+      <JsonLd
+        data={pricedTutoringService({
+          path: '/pricing',
+          name: 'ScoreMax Tutoring',
+          description:
+            'Online 1:1 tutoring and SAT/ACT test preparation sold as monthly memberships, prepaid hour packages, or structured course programs.',
+          offers,
+        })}
+      />
+
       {/* Header */}
       <section className="pt-32 pb-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

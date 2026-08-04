@@ -2,6 +2,12 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbList, tutoringService } from '@/lib/structured-data';
+
+// The hero intro, verbatim — see the SAT page for why schema restates visible copy.
+const INTRO =
+  'The LSAT rewards a small set of reasoning skills practiced deliberately. Our tutors work through real argument structures and dense passages with you one-on-one, building both the accuracy and the pacing that a competitive law school score demands.';
 
 export const metadata: Metadata = {
   title: 'LSAT Tutoring Services | Expert LSAT Test Prep | ScoreMax',
@@ -44,10 +50,26 @@ export const metadata: Metadata = {
 export default function LSATPage() {
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <JsonLd
+        data={[
+          tutoringService({
+            path: '/test-prep/lsat',
+            name: 'LSAT Tutoring',
+            serviceType: 'Online 1:1 LSAT preparation tutoring',
+            description: INTRO,
+            audienceType: 'Law school applicants',
+          }),
+          breadcrumbList([
+            { name: 'Home', path: '/' },
+            { name: 'LSAT Tutoring', path: '/test-prep/lsat' },
+          ]),
+        ]}
+      />
+
       <PageHero
         eyebrow="Test Prep"
         title="Expert LSAT Tutoring"
-        intro="The LSAT rewards a small set of reasoning skills practiced deliberately. Our tutors work through real argument structures and dense passages with you one-on-one, building both the accuracy and the pacing that a competitive law school score demands."
+        intro={INTRO}
         image={heroImages.lsat}
         imageAlt="A law library reading room lined with bound case reporters, with an open casebook and legal pad on a study table."
       />

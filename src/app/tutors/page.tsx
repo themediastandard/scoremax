@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { JsonLd } from '@/components/JsonLd';
+import { absoluteUrl, organizationRef } from '@/lib/structured-data';
 
 // Tutor records change rarely; re-fetch hourly so dashboard edits appear without
 // a redeploy.
@@ -94,18 +96,22 @@ function splitSpecialties(specialties: string[] | null): string[] {
 export default async function TutorsPage() {
   const tutors = await getTutors();
 
+  // Every property below comes from the `tutors` row this page renders. Nothing
+  // is added that the row does not carry — see the note above getTutors about
+  // the fabricated people this page used to ship.
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'ScoreMax Tutors',
     description: 'The ScoreMax tutoring team',
-    url: 'https://www.scoremaxtutoring.com/tutors',
+    url: absoluteUrl('/tutors'),
     itemListElement: tutors.map((tutor, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       item: {
         '@type': 'Person',
         name: tutor.full_name,
+        worksFor: organizationRef(),
         ...(splitSpecialties(tutor.specialties).length && {
           knowsAbout: splitSpecialties(tutor.specialties),
         }),
@@ -116,10 +122,7 @@ export default async function TutorsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* Hero */}
       <section className="bg-white pt-16 pb-12">

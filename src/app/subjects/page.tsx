@@ -5,8 +5,22 @@ export const metadata: Metadata = {
   title: 'Subjects We Cover | ScoreMax Tutoring',
   description: 'ScoreMax offers expert tutoring across test prep (SAT, ACT, GMAT, GRE), high school math and science, college-level courses, middle school, and elementary subjects. Find the right tutor for your goals.',
   openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    // Was inherited from the root layout, which points at the homepage — so a
+    // shared /subjects link carried the homepage's og:url.
+    url: 'https://www.scoremaxtutoring.com/subjects',
+    siteName: 'ScoreMax',
     title: 'Subjects We Cover | ScoreMax Tutoring',
     description: 'Expert tutoring across test prep, high school, college, middle school, and elementary subjects.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Subjects We Cover | ScoreMax Tutoring',
+    description: 'Expert tutoring across test prep, high school, college, middle school, and elementary subjects.',
+  },
+  alternates: {
+    canonical: 'https://www.scoremaxtutoring.com/subjects',
   },
 };
 

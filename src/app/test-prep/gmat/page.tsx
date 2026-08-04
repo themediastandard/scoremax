@@ -2,6 +2,12 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { heroImages } from '@/lib/hero-images';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbList, tutoringService } from '@/lib/structured-data';
+
+// The hero intro, verbatim — see the SAT page for why schema restates visible copy.
+const INTRO =
+  'Data Insights now counts for a full third of your GMAT score, and it is the section most applicants underestimate. Our tutors prepare you across all three sections one-on-one, with the pacing and the review discipline a competitive business school score requires.';
 
 export const metadata: Metadata = {
   title: 'GMAT Tutoring Services | Expert GMAT Test Prep | ScoreMax',
@@ -44,10 +50,26 @@ export const metadata: Metadata = {
 export default function GMATPage() {
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <JsonLd
+        data={[
+          tutoringService({
+            path: '/test-prep/gmat',
+            name: 'GMAT Tutoring',
+            serviceType: 'Online 1:1 GMAT preparation tutoring',
+            description: INTRO,
+            audienceType: 'Business school applicants',
+          }),
+          breadcrumbList([
+            { name: 'Home', path: '/' },
+            { name: 'GMAT Tutoring', path: '/test-prep/gmat' },
+          ]),
+        ]}
+      />
+
       <PageHero
         eyebrow="Test Prep"
         title="Expert GMAT Tutoring"
-        intro="Data Insights now counts for a full third of your GMAT score, and it is the section most applicants underestimate. Our tutors prepare you across all three sections one-on-one, with the pacing and the review discipline a competitive business school score requires."
+        intro={INTRO}
         image={heroImages.gmat}
         imageAlt="A business school case-study classroom with tiered wooden desks facing a lit screen showing a rising chart."
       />

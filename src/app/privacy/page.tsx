@@ -14,6 +14,16 @@ export const metadata: Metadata = {
   description:
     'How ScoreMax collects, uses, stores and shares personal information, including information about students under 18.',
   robots: { index: true, follow: true },
+  // Only the fields that read wrong when inherited. Without an og:url and
+  // og:title of its own, a link to this page previewed as the homepage.
+  openGraph: {
+    type: 'website',
+    url: 'https://www.scoremaxtutoring.com/privacy',
+    siteName: 'ScoreMax',
+    title: 'Privacy Policy | ScoreMax',
+    description:
+      'How ScoreMax collects, uses, stores and shares personal information, including information about students under 18.',
+  },
   alternates: { canonical: 'https://www.scoremaxtutoring.com/privacy' },
 }
 
