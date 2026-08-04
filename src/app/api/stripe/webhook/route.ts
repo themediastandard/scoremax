@@ -442,19 +442,84 @@ export async function POST(req: Request) {
         : getStripeId((event.data.object as Stripe.Dispute).payment_intent)
 
     if (paymentIntentId) {
-      const { data: affected } = await supabaseAdmin
+      /*
+       * Deliberately not filtered on status. Settlement still only applies to a
+       * 'paid' row, but the admin notification below must fire for the app's own
+       * refunds too — those have already flipped the row to 'refunded' by the
+       * time this event lands, so a status filter here would silently limit the
+       * notification to externally-issued refunds.
+       */
+      const { data: matched } = await supabaseAdmin
         .from('booking_requests')
-        .select('id')
+        .select('id, amount_cents, payment_type, status, customers(full_name, email)')
         .eq('stripe_payment_intent_id', paymentIntentId)
-        .eq('status', 'paid')
 
-      for (const row of affected ?? []) {
+      const rows = matched ?? []
+
+      for (const row of rows) {
+        if (row.status !== 'paid') continue
         const { error: refundError } = await supabaseAdmin
           .rpc('refund_booking', { p_booking_id: row.id })
         if (refundError) {
           throw new Error(
             `Failed to settle external refund for booking ${row.id}: ${refundError.message}`
           )
+        }
+      }
+
+      /*
+       * Money going back out was the one movement nobody was told about:
+       * purchases notify the admin list, refunds notified only the customer, and
+       * a dashboard-issued refund reached no inbox at all. Reported here rather
+       * than in the admin route so both origins are covered by one path.
+       *
+       * Best effort for the same reason as the purchase notification — the
+       * refund is settled and the event de-duped, so a non-2xx would only make
+       * Stripe retry an event whose side effects are skipped on replay.
+       */
+      if (rows.length > 0) {
+        const { data: refundAdminSettings } = await supabaseAdmin
+          .from('admin_settings')
+          .select('value')
+          .eq('key', 'notification_emails')
+          .single()
+        const refundAdminEmails =
+          refundAdminSettings?.value?.split(',').map((e: string) => e.trim()).filter(Boolean) || []
+
+        if (refundAdminEmails.length > 0) {
+          const isDispute = event.type === 'charge.dispute.created'
+          // The event carries what actually moved; the booking's amount_cents is
+          // the original total and overstates a partial refund.
+          const movedCents = isDispute
+            ? (event.data.object as Stripe.Dispute).amount
+            : (event.data.object as Stripe.Charge).amount_refunded
+
+          for (const row of rows) {
+            const customer = (Array.isArray(row.customers) ? row.customers[0] : row.customers) as
+              | { full_name?: string | null; email?: string | null }
+              | null
+
+            await sendEmail(
+              {
+                ...getEmailDefaults(),
+                to: refundAdminEmails,
+                subject: isDispute ? 'Chargeback Opened' : 'Refund Issued',
+                html: emailLayout({
+                  title: isDispute ? 'Chargeback Opened' : 'Refund Issued',
+                  body: [
+                    detailRow('Customer:', customer?.full_name || customer?.email || 'Unknown'),
+                    detailRow('Amount:', `$${(movedCents ?? 0) / 100}`),
+                    detailRow('Original order:', `$${(row.amount_cents ?? 0) / 100}`),
+                    detailRow('Payment type:', row.payment_type || 'Unknown'),
+                    detailRow('Credit revoked:', row.status === 'paid' ? 'Yes' : 'Already settled'),
+                  ].join(''),
+                  ctaText: 'View Orders',
+                  ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders`,
+                }),
+              },
+              `webhook:${isDispute ? 'chargeback' : 'refund'}:admin:${row.id}`
+            )
+          }
         }
       }
     }
