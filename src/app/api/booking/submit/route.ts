@@ -4,6 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { reportIssue } from '@/lib/report-error'
+import {
+  availabilityWindowsFromLegacy,
+  legacyAvailabilityFromWindows,
+  normalizeAvailabilityWindows,
+} from '@/lib/availability-windows'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -14,10 +19,27 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { subjects, available_days, available_time_start, available_time_end, timezone, session_type, notes, use_credit, full_name, phone, student_grade } = body
+  const { subjects, available_days, available_time_start, available_time_end, available_windows, timezone, session_type, notes, use_credit, full_name, phone, student_grade } = body
 
   if (!use_credit) {
     return NextResponse.json({ error: 'This endpoint is for credit usage only' }, { status: 400 })
+  }
+
+  // Validate the availability before it reaches Postgres. The per-day array is
+  // the shape the form now sends; the legacy triple is accepted as a fallback
+  // so a browser still running the previous bundle mid-deploy keeps working.
+  // The legacy columns are then derived from the result rather than taken from
+  // the request, so the two shapes on the row cannot contradict each other.
+  const windows =
+    normalizeAvailabilityWindows(available_windows) ??
+    availabilityWindowsFromLegacy(available_days, available_time_start, available_time_end)
+  const legacy = legacyAvailabilityFromWindows(windows)
+
+  if (!windows || !legacy) {
+    return NextResponse.json(
+      { error: 'Select at least one day, each with a start and end time.' },
+      { status: 400 }
+    )
   }
 
   // 1. Redeem credit and create the booking + session atomically.
@@ -30,9 +52,10 @@ export async function POST(req: NextRequest) {
     .rpc('redeem_credit_and_create_booking', {
       p_profile_id: user.id,
       p_subjects: subjects,
-      p_available_days: available_days,
-      p_available_time_start: available_time_start,
-      p_available_time_end: available_time_end,
+      p_available_days: legacy.days,
+      p_available_time_start: legacy.startTime,
+      p_available_time_end: legacy.endTime,
+      p_available_windows: windows,
       p_timezone: timezone,
       p_session_type: session_type,
       p_notes: notes,

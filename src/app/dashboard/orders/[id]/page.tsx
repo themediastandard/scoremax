@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { formatDateTime, formatPlanLabel, formatTime24To12 } from '@/lib/order-format'
+import { formatDateTime, formatPlanLabel } from '@/lib/order-format'
 import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
-import { ArrowLeft, BookOpen, Video, CreditCard, Clock, Calendar, User, MapPin } from 'lucide-react'
+import { ArrowLeft, BookOpen, Video, CreditCard, Calendar, User, MapPin } from 'lucide-react'
+import { RequestedAvailability } from '@/components/dashboard/RequestedAvailability'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
@@ -216,33 +217,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            {(order.available_days || order.available_time_start) && (
-              <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  Requested Availability
-                </p>
-                <div className="rounded-lg bg-amber-50/60 border border-amber-100 p-4 space-y-2">
-                  {order.available_days && order.available_days.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {order.available_days.map((day: string) => (
-                        <span key={day} className="px-2.5 py-0.5 rounded-full bg-white border border-amber-200 text-sm font-medium text-amber-800 capitalize">
-                          {day}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {(order.available_time_start || order.available_time_end) && (
-                    <p className="text-sm text-amber-800">
-                      {order.available_time_start && order.available_time_end
-                        ? `${formatTime24To12(order.available_time_start)} – ${formatTime24To12(order.available_time_end)}`
-                        : formatTime24To12(order.available_time_start) || formatTime24To12(order.available_time_end)}
-                      {order.timezone && <span className="text-amber-600 ml-1">({order.timezone})</span>}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+            <RequestedAvailability booking={order} className="pt-4 border-t border-gray-100" />
 
             {order.notes && (
               <div className="pt-4 border-t border-gray-100">

@@ -3,6 +3,11 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { buildSubjectCatalog, getSubjectMap } from '@/lib/subject-catalog'
+import {
+    availabilityWindowsFromLegacy,
+    legacyAvailabilityFromWindows,
+    normalizeAvailabilityWindows,
+} from '@/lib/availability-windows'
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,6 +43,22 @@ export async function POST(req: NextRequest) {
 
     const rawSubjects: string[] = Array.isArray(booking_details.subjects) ? booking_details.subjects : []
     const resolvedSubjects = rawSubjects.filter(id => id !== 'in-person-sat')
+
+    // Per-day availability, with the pre-2026-08-04 flat shape accepted as a
+    // fallback so a client running the previous bundle mid-deploy still books.
+    // Both shapes are written from the same normalised value — see the note in
+    // src/lib/availability-windows.js on why the legacy columns get the
+    // envelope. Unlike /api/booking/submit this is not rejected when empty:
+    // availability has never been required to take a payment, and refusing the
+    // checkout over it would turn a missing preference into a lost sale.
+    const availabilityWindows =
+        normalizeAvailabilityWindows(booking_details.available_windows) ??
+        availabilityWindowsFromLegacy(
+            booking_details.available_days,
+            booking_details.available_time_start,
+            booking_details.available_time_end
+        )
+    const legacyAvailability = legacyAvailabilityFromWindows(availabilityWindows)
 
     // Resolve trusted price from server based on plan type
     let trustedPriceCents = 0
@@ -129,9 +150,13 @@ export async function POST(req: NextRequest) {
         .insert({
             customer_id: dbCustomerId,
             subjects: resolvedSubjects,
-            available_days: booking_details.available_days,
-            available_time_start: booking_details.available_time_start,
-            available_time_end: booking_details.available_time_end,
+            // Left `undefined` rather than null when there is no availability:
+            // supabase-js drops undefined keys, so the column is omitted from
+            // the insert exactly as it was before this field existed.
+            available_days: legacyAvailability?.days,
+            available_time_start: legacyAvailability?.startTime,
+            available_time_end: legacyAvailability?.endTime,
+            available_windows: availabilityWindows,
             timezone: booking_details.timezone,
             session_type: booking_details.session_type,
             status: 'pending_payment',

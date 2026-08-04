@@ -372,18 +372,28 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (authError) return authError
 
   const { id } = await params
+  // booking_requests is joined through sessions.order_id so a caller scheduling
+  // this session can see the availability the customer actually asked for. The
+  // FK makes this a read-path change — nothing is copied onto sessions, so
+  // there is no second value to drift.
   const { data, error } = await supabaseAdmin
     .from('sessions')
     .select(`
       *,
       customers (id, email, full_name),
-      tutors (id, email, full_name)
+      tutors (id, email, full_name),
+      booking_requests!sessions_order_id_fkey (
+        available_windows, available_days, available_time_start,
+        available_time_end, timezone
+      )
     `)
     .eq('id', id)
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 404 })
+    // requireAdmin() above already scoped this to admins, so the only way here
+    // is a genuinely missing id. Don't hand the caller the Postgres message.
+    return NextResponse.json({ error: 'Session not found' }, { status: 404 })
   }
   return NextResponse.json(data)
 }

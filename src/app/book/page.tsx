@@ -2,7 +2,7 @@
 
 import { useBookingForm } from '@/hooks/useBookingForm'
 import { SubjectSelect } from '@/components/booking/SubjectSelect'
-import { AvailabilityForm } from '@/components/booking/AvailabilityForm'
+import { AvailabilityForm, isAvailabilityReady } from '@/components/booking/AvailabilityForm'
 import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
 import { useRouter } from 'next/navigation'
@@ -264,9 +264,10 @@ export default function BookPage() {
           body: JSON.stringify({
              use_credit: true,
              subjects: state.subjects,
-             available_days: state.availability.days,
-             available_time_start: state.availability.startTime,
-             available_time_end: state.availability.endTime,
+             // The per-day shape is what the server stores; it derives the
+             // legacy available_days/start/end envelope itself, so there is no
+             // second copy for the two to disagree about.
+             available_windows: state.availability.windows,
              timezone: state.availability.timezone,
              session_type: state.sessionType,
              notes: state.contact.notes,
@@ -308,9 +309,7 @@ export default function BookPage() {
            courseType: plan.courseType,
            booking_details: {
              subjects: state.subjects,
-             available_days: state.availability.days,
-             available_time_start: state.availability.startTime,
-             available_time_end: state.availability.endTime,
+             available_windows: state.availability.windows,
              timezone: state.availability.timezone,
              session_type: state.sessionType,
              full_name: state.contact.fullName,
@@ -393,17 +392,17 @@ export default function BookPage() {
           isOpen={activeSection === 'availability'}
           isCompleted={revealed.contact}
           disabled={!revealed.availability}
-          summary={`${state.availability.days.length} days selected`}
+          summary={`${state.availability.windows.length} days selected`}
           onEdit={() => setActiveSection('availability')}
         >
-              <AvailabilityForm 
-                value={state.availability} 
-                onChange={(avail) => updateAvailability(avail)} 
+              <AvailabilityForm
+                value={state.availability}
+                onChange={(avail) => updateAvailability(avail)}
               />
               <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={() => handleNext('availability')} 
-                  disabled={state.availability.days.length === 0 || !state.availability.startTime || !state.availability.endTime}
+                <Button
+                  onClick={() => handleNext('availability')}
+                  disabled={!isAvailabilityReady(state.availability.windows)}
                   className="bg-[#1e293b]"
                 >
                   Continue

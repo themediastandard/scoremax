@@ -13,6 +13,7 @@ import {
   toLocalTimeValue,
   fromLocalDateTimeValues,
 } from '@/lib/local-datetime'
+import { RequestedAvailability } from './RequestedAvailability'
 
 interface SessionFormProps {
   session: {
@@ -24,9 +25,21 @@ interface SessionFormProps {
     internal_notes: string | null
   }
   tutors: { id: string; full_name: string }[]
+  /**
+   * The booking_requests row this session came from, joined through
+   * sessions.order_id. Shown above the controls so the time below is picked
+   * against what the customer said they were free for rather than blind.
+   */
+  requestedAvailability?: {
+    available_windows?: unknown
+    available_days?: string[] | null
+    available_time_start?: string | null
+    available_time_end?: string | null
+    timezone?: string | null
+  } | null
 }
 
-export function SessionForm({ session, tutors }: SessionFormProps) {
+export function SessionForm({ session, tutors, requestedAvailability }: SessionFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -127,6 +140,8 @@ export function SessionForm({ session, tutors }: SessionFormProps) {
 
   return (
     <div className="space-y-5">
+      <RequestedAvailability booking={requestedAvailability} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Assign Tutor</Label>

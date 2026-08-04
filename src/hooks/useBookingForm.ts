@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { AvailabilityWindow } from '@/lib/availability-windows'
 
 export interface BookingState {
   subjects: string[]
@@ -8,9 +9,11 @@ export interface BookingState {
   // `booking_requests` and `sessions`.
   sessionType: 'online'
   availability: {
-    days: string[]
-    startTime: string
-    endTime: string
+    // One entry per selected day, each with its own range, so "Mon 4–6pm, Thu
+    // 9–11am" is expressible. Replaced a single {days, startTime, endTime}
+    // triple that forced one range across every day. `start`/`end` are "HH:MM"
+    // and may be empty while the student is still filling the day in.
+    windows: AvailabilityWindow[]
     timezone: string
   }
   contact: {
@@ -27,9 +30,7 @@ export const useBookingForm = () => {
     subjects: [],
     sessionType: 'online',
     availability: {
-      days: [],
-      startTime: '',
-      endTime: '',
+      windows: [],
       timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC'
     },
     contact: {

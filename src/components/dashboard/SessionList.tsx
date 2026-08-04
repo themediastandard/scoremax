@@ -23,6 +23,18 @@ interface Session {
   internal_notes: string | null
   tutors: { id: string; full_name: string } | null
   customers: { full_name: string; email: string } | null
+  // Joined through sessions.order_id -> booking_requests.id so the admin can
+  // see what the customer actually asked for while picking the time. Read
+  // through the FK rather than copied onto sessions: a copy would drift, and
+  // nothing here wants a frozen snapshot. Absent on the customer and tutor
+  // views, which do not select it.
+  booking_requests?: {
+    available_windows?: unknown
+    available_days?: string[] | null
+    available_time_start?: string | null
+    available_time_end?: string | null
+    timezone?: string | null
+  } | null
 }
 
 interface CustomerGroup {
@@ -110,7 +122,11 @@ function SessionCard({
       {expanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50/40">
           {isAdmin ? (
-            <SessionForm session={session} tutors={tutors} />
+            <SessionForm
+              session={session}
+              tutors={tutors}
+              requestedAvailability={session.booking_requests ?? null}
+            />
           ) : (
             <SessionDetails session={session} subjectMap={subjectMap} />
           )}

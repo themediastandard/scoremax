@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { buildSubjectCatalog, resolveSubjectNames } from '@/lib/subject-catalog'
+import { readAvailabilityWindows } from '@/lib/availability-windows'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('session_id')
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from('booking_requests')
-      .select('subjects, available_days, available_time_start, available_time_end, session_type, payment_type')
+      .select('subjects, available_days, available_time_start, available_time_end, available_windows, session_type, payment_type')
       .eq('id', bookingRequestId)
       .single()
 
@@ -98,6 +99,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       plan: planInfo,
       availability: {
+        // Per-day windows, falling back to the flat shape for bookings taken
+        // before that column existed. `days`/`startTime`/`endTime` are kept in
+        // the response so an older cached bundle still renders something.
+        windows: readAvailabilityWindows(booking) ?? [],
         days: booking.available_days ?? [],
         startTime: fmtTime(String(booking.available_time_start ?? '')),
         endTime: fmtTime(String(booking.available_time_end ?? '')),

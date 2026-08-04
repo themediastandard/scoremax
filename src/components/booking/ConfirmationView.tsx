@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Calendar, Clock, Video, CreditCard } from 'lucide-react'
+import { CheckCircle2, Calendar, Video, CreditCard } from 'lucide-react'
 
 function formatTime24To12(time24: string) {
   const [h, m] = (time24 || '').split(':').map(Number)
@@ -14,7 +14,13 @@ function formatTime24To12(time24: string) {
 
 export interface BookingDetails {
   plan?: { name: string; amountCents: number; type: string } | null
-  availability?: { days?: string[]; startTime?: string | null; endTime?: string | null } | null
+  availability?: {
+    /** Per-day ranges. Empty for bookings taken before this shape existed. */
+    windows?: { day: string; start: string; end: string }[] | null
+    days?: string[]
+    startTime?: string | null
+    endTime?: string | null
+  } | null
   sessionType?: string | null
   subjects?: string[] | null
   subjectIds?: string[] | null
@@ -26,6 +32,21 @@ interface ConfirmationViewProps {
 }
 
 export function ConfirmationView({ bookingDetails, onBookAnother }: ConfirmationViewProps) {
+  // The API returns per-day windows and, for rows predating them, rebuilds the
+  // same shape from the flat triple — so this only has to fall back when an
+  // older cached bundle of the API response is in play.
+  const availability = bookingDetails?.availability
+  const windows =
+    availability?.windows?.length
+      ? availability.windows
+      : availability?.days?.length && availability.startTime && availability.endTime
+        ? availability.days.map((day) => ({
+            day,
+            start: availability.startTime as string,
+            end: availability.endTime as string,
+          }))
+        : []
+
   return (
     <div className="max-w-2xl mx-auto space-y-8 py-12">
       <div className="text-center space-y-4">
@@ -58,26 +79,27 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start space-x-3">
+            {/* Days and times used to be two separate cells, which only worked
+                while one range covered every day. Each day now carries its own
+                range, so they belong on one line together. */}
+            <div className="flex items-start space-x-3 md:col-span-2">
               <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
               <div>
-                <p className="font-medium">Requested Days</p>
-                <p className="text-sm text-gray-500">
-                  {bookingDetails?.availability?.days?.length
-                    ? bookingDetails.availability.days.join(', ')
-                    : 'Flexible'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-medium">Time Preference</p>
-                <p className="text-sm text-gray-500">
-                  {bookingDetails?.availability?.startTime && bookingDetails?.availability?.endTime
-                    ? `${formatTime24To12(bookingDetails.availability.startTime)} – ${formatTime24To12(bookingDetails.availability.endTime)}`
-                    : 'Flexible'}
-                </p>
+                <p className="font-medium">Requested Availability</p>
+                {windows.length > 0 ? (
+                  <ul className="text-sm text-gray-500 space-y-0.5 mt-0.5">
+                    {windows.map((w) => (
+                      <li key={w.day} className="flex items-baseline gap-2">
+                        <span className="min-w-[5.5rem] font-medium text-gray-600">{w.day}</span>
+                        <span>
+                          {formatTime24To12(w.start)} – {formatTime24To12(w.end)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">Flexible</p>
+                )}
               </div>
             </div>
 

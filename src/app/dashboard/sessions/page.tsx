@@ -25,7 +25,11 @@ export default async function SessionsPage() {
         .select(`
           *,
           customers (full_name, email),
-          tutors (id, full_name)
+          tutors (id, full_name),
+          booking_requests!sessions_order_id_fkey (
+            available_windows, available_days, available_time_start,
+            available_time_end, timezone
+          )
         `)
         .in('status', ['pending_scheduling', 'scheduled', 'completed'])
         .order('created_at', { ascending: false }),
