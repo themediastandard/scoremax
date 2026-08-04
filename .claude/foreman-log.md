@@ -162,3 +162,11 @@ remains the source of truth, per `CLAUDE.md`.
   Supabase custom domain is the real fix
 - Resend 2/sec rate limit on paired sends
 - Outgoing tutor email on reassignment (parked by Tommy 2026-08-04)
+- **Email authentication — blocked on ScoreMax having its own email addresses.**
+  `scoremaxtutoring.com` publishes no SPF, DKIM or DMARC and hosts no mail, so
+  anything sent as `@scoremaxtutoring.com` is unauthenticated and likely filtered
+  by Gmail and Outlook. Invisible from inside the app: Resend accepting a send is
+  not delivery, and nothing reaches Sentry. Bundle it with adding the domain to
+  Google Workspace so the OAuth consent screen can use a ScoreMax support
+  address instead of `info@themediastandard.com`. Detail in
+  `AUDIT-2026-08-04.md`. Parked by Tommy 2026-08-04.
