@@ -152,15 +152,26 @@ remains the source of truth, per `CLAUDE.md`.
   collects errors but never tells anyone.
 - Restart Claude Code to pick up the `/foreman` skill (added after this session
   started, so it is not loaded here).
-- Three tutors hidden for want of bios; 8 of 9 tutors have no photo. Gating real
-  customers on a live site.
+- Two console cleanups, low priority: remove the old
+  `fceekjlispfjduetumrf.supabase.co/auth/v1/callback` redirect URI from the OAuth
+  client (keep the three `/api/google/callback` entries — those are Calendar),
+  and prune the two stale `scoremaxtutor.netlify.app` entries from Supabase's
+  redirect allowlist.
+- Three tutors hidden for want of bios; 8 of 9 tutors have no photo.
+  **Deprioritised by Tommy 2026-08-04** — recorded as a known state, not an open
+  action. Do not keep raising it.
 
 ## Queue
 
-- Analytics stack — GA4, Tag Manager, Search Console, Meta Pixel
-- Supabase URL visible during Google sign-up — OAuth consent branding is free,
-  Supabase custom domain is the real fix
-- Resend 2/sec rate limit on paired sends
+- Analytics stack — **GA4 done** (003), **Search Console done** (domain property
+  verified, sitemap submitted). Remaining: Google Tag Manager, Meta Pixel,
+  Google Business Profile. GTM would take over loading GA4;
+  `src/components/Analytics.tsx` is the single place to swap it.
+- ~~Supabase URL visible during Google sign-up~~ **CLOSED 2026-08-04** — see
+  [[scoremax-supabase-custom-domain]] and the audit. Auth serves from
+  `auth.scoremaxtutoring.com`; the consent screen reads "to continue to ScoreMax".
+- Resend 2/sec rate limit on paired sends — purchase and scheduling each fire two
+  sends back to back. 002's reminder job already paces correctly and is the model.
 - Outgoing tutor email on reassignment (parked by Tommy 2026-08-04)
 - **Email authentication — blocked on ScoreMax having its own email addresses.**
   `scoremaxtutoring.com` publishes no SPF, DKIM or DMARC and hosts no mail, so
