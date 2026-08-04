@@ -314,6 +314,10 @@ export async function POST(req: Request) {
             customer_id: customer.id,
             tier,
             stripe_subscription_id: subscription.id,
+            // How refund_booking finds this row to revoke. Packages and course
+            // enrollments have always carried it; memberships did not, which is
+            // why a refunded membership kept its credit.
+            stripe_payment_intent_id: stripePaymentIntentId,
             status: 'active',
             included_hours: includedHours,
             used_hours: 1,
@@ -463,6 +467,47 @@ export async function POST(req: Request) {
         if (refundError) {
           throw new Error(
             `Failed to settle external refund for booking ${row.id}: ${refundError.message}`
+          )
+        }
+      }
+
+      /*
+       * A refund returns the money already charged; it does not stop the next
+       * one. Nothing cancelled the subscription, so a refunded member was billed
+       * again the following cycle — confirmed live on 2026-08-04, and cancelled
+       * by hand at the time.
+       *
+       * Runs after refund_booking so the credit is already revoked: cancelling
+       * first would emit customer.subscription.deleted against a membership that
+       * still looked active. Read by payment intent, the same key refund_booking
+       * revokes on, so this only ever cancels a subscription that this refund
+       * actually settled.
+       *
+       * Disputes cancel too. A chargeback that later resolves in our favour is
+       * rare and recoverable by resubscribing; continuing to bill a member whose
+       * credit has just been revoked is neither.
+       */
+      const { data: refundedMemberships } = await supabaseAdmin
+        .from('memberships')
+        .select('id, stripe_subscription_id')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .not('stripe_subscription_id', 'is', null)
+
+      for (const membership of refundedMemberships ?? []) {
+        try {
+          await stripe.subscriptions.cancel(membership.stripe_subscription_id as string)
+        } catch (cancelError) {
+          /*
+           * Logged, never thrown. The refund and the credit revocation have both
+           * committed; a non-2xx here would make Stripe retry an event whose side
+           * effects are skipped on replay, so the cancel would not be reattempted
+           * anyway. An already-cancelled subscription lands here too via
+           * resource_missing, which is the desired end state regardless.
+           */
+          console.error(
+            `[refund] could not cancel subscription ${membership.stripe_subscription_id} ` +
+              `for membership ${membership.id} — cancel it by hand in Stripe:`,
+            cancelError
           )
         }
       }
