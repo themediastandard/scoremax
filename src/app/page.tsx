@@ -94,6 +94,15 @@ export default function Home() {
       {/* Video Hero */}
       <VideoHero
         mp4Src="/video/hero-home.mp4"
+        // The brand name has to appear in the h1, not just the title tag, the
+        // logo alt and body copy. Google's OAuth branding check compares the
+        // consent-screen app name against the name on the home page and reads
+        // the main heading to find it; with the bare slogan here it reported
+        // "the app name ScoreMax ... does not match the app name on your home
+        // page" and fell back to showing the raw Supabase project URL to anyone
+        // signing in with Google. Passed explicitly rather than changed in
+        // VideoHero's default so the reason travels with the page that needs it.
+        headline="Unlock Your Full Academic Potential with ScoreMax"
         subtitle="ScoreMax provides expert 1:1 online tutoring for the SAT, ACT, LSAT, GRE and GMAT, plus academic subjects from elementary through college. Every session is live over video."
       >
         {/* Fully remote notice, flush under the video frame */}
