@@ -193,8 +193,9 @@ async function sendScheduleEmails(
    * Best effort by design — see the note below on why these run only after the
    * database write. The session is scheduled and the calendar invite already
    * sent, so neither failure should unwind anything; both simply need to be
-   * visible. Note these two fire back to back, which is exactly the shape that
-   * trips Resend's 2-requests-per-second default.
+   * visible. These two fire back to back, which is the shape that used to trip
+   * Resend's 2-requests-per-second default; sendEmail now spaces them itself,
+   * so this pair costs one extra ~550ms and no caller has to think about it.
    */
   await sendEmail(
     {

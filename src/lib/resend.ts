@@ -1,5 +1,6 @@
 import { Resend, type CreateEmailOptions } from 'resend'
 import { reportError, reportIssue } from '@/lib/report-error'
+import { createPacer } from '@/lib/send-pacer'
 
 export const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -9,15 +10,45 @@ export function getEmailDefaults() {
 }
 
 /**
+ * Floor between the *starts* of two Resend requests.
+ *
+ * Resend's default allowance is 2 requests/second, which puts the arithmetic
+ * floor at 500ms. The extra 50ms is headroom: the limit is counted on Resend's
+ * side against arrival time, not against the moment we called send, so two
+ * requests that left here exactly 500ms apart can still land inside the same
+ * second after a little network jitter.
+ */
+const MIN_SEND_INTERVAL_MS = 550
+
+/**
+ * Every send in the app goes through here, so no call site has to know the
+ * limit exists. Five routes fire two sends back to back; before this, the
+ * second could be rejected and its email simply never arrive.
+ *
+ * Module state, and therefore per function invocation: Netlify gives each
+ * invocation a fresh module instance, so this paces sends *within one request*
+ * — which is exactly the paired-send case it was built for. Two concurrent
+ * requests each sending twice can still collide and get one rejected. That is
+ * known and accepted: a distributed limiter would need shared state on the hot
+ * path of a payment webhook to fix a case that is already reported to Sentry
+ * and rare at this volume. Revisit if the Sentry `email:*` groups say otherwise.
+ */
+const paceSend = createPacer({ intervalMs: MIN_SEND_INTERVAL_MS })
+
+/**
  * Send an email and say plainly whether it worked.
  *
  * The Resend SDK does **not** throw when the API rejects a send — it resolves
  * with `{ data: null, error }`. So `await resend.emails.send(...)` inside a
  * try/catch looks safe while silently swallowing every API-level failure:
- * unverified domain, exhausted quota, rejected recipient, rate limit (the
- * default is 2 requests/second, and several routes fire two sends back to
- * back). Callers that ignored the return value reported success to the user
- * and logged nothing, so a lost enquiry was invisible from both ends.
+ * unverified domain, exhausted quota, rejected recipient. Callers that ignored
+ * the return value reported success to the user and logged nothing, so a lost
+ * enquiry was invisible from both ends.
+ *
+ * Rate limiting used to belong on that list too. It no longer does: the send is
+ * routed through `paceSend`, so back-to-back sends from one request are spaced
+ * under Resend's limit and callers need do nothing. Pacing can only delay a
+ * send, never replace one — see `createPacer`.
  *
  * This wraps both failure modes — the resolved `error` and a genuinely thrown
  * network/DNS error — into one boolean, and logs with a `context` tag so the
@@ -38,7 +69,7 @@ export async function sendEmail(
   context: string
 ): Promise<boolean> {
   try {
-    const { error } = await resend.emails.send(payload)
+    const { error } = await paceSend(() => resend.emails.send(payload))
     if (error) {
       reportIssue(`email:${groupingKey(context)}`, `Resend rejected the send: ${error.name}`, {
         emailContext: context,

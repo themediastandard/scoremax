@@ -58,14 +58,6 @@ const RUN_DEADLINE_MS = 8_000
  */
 const MAX_CANDIDATES_FETCHED = 100
 
-/**
- * Resend's default limit is 2 requests per second and each session is two sends,
- * so the run paces itself to under that. Measured between send *starts*, not as
- * a flat sleep: a send that itself took 400ms only waits another 150ms, which
- * keeps the rate correct without paying twice for network latency.
- */
-const MIN_SEND_INTERVAL_MS = 550
-
 const RequestBody = z.strictObject({
   /**
    * Report what would be sent, send nothing, write nothing. Strict object on
@@ -133,10 +125,6 @@ function checkCronAuth(req: NextRequest): 'ok' | 'denied' | 'unconfigured' {
   const expectedDigest = createHash('sha256').update(expected, 'utf8').digest()
   const providedDigest = createHash('sha256').update(provided, 'utf8').digest()
   return timingSafeEqual(expectedDigest, providedDigest) ? 'ok' : 'denied'
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export async function POST(req: NextRequest) {
@@ -235,13 +223,10 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  let lastSendStartedAt = 0
-  const paceSend = async () => {
-    const wait = lastSendStartedAt + MIN_SEND_INTERVAL_MS - Date.now()
-    if (wait > 0) await sleep(wait)
-    lastSendStartedAt = Date.now()
-  }
-
+  // This loop used to pace its own sends under Resend's 2-per-second limit. That
+  // now lives inside sendEmail (src/lib/send-pacer.js), which every route shares,
+  // so the wall-clock cost per session is unchanged and RUN_DEADLINE_MS below
+  // still bounds the run the same way. Do not add a second pacer here.
   const results: SessionResult[] = []
   let deferred = 0
   // Counted rather than merely reported, so a run that sends nothing can still
@@ -311,7 +296,6 @@ export async function POST(req: NextRequest) {
         recipientName: candidate.customers?.full_name,
         counterpartName: candidate.tutors?.full_name,
       })
-      await paceSend()
       const ok = await sendEmail(
         { ...getEmailDefaults(), to: studentEmail, subject, html },
         `cron:session-reminder:student:${candidate.id}`
@@ -326,7 +310,6 @@ export async function POST(req: NextRequest) {
         recipientName: candidate.tutors?.full_name,
         counterpartName: candidate.customers?.full_name,
       })
-      await paceSend()
       const ok = await sendEmail(
         { ...getEmailDefaults(), to: tutorEmail, subject, html },
         `cron:session-reminder:tutor:${candidate.id}`
