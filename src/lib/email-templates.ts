@@ -1,4 +1,9 @@
 import { escapeHtml } from '@/lib/html-escape'
+import {
+  buildReminderLocation,
+  formatSessionTime,
+  type ReminderSessionRow,
+} from '@/lib/session-reminders'
 
 const GOLD = '#b08a30'
 const DARK = '#1e293b'
@@ -108,4 +113,66 @@ export function emailLayout(options: {
  */
 export function detailRow(label: string, value: string): string {
   return `<p style="margin: 0 0 8px 0;"><strong style="color: ${DARK};">${escapeHtml(label)}</strong> ${escapeHtml(value)}</p>`
+}
+
+/**
+ * Same row, for a value that is already HTML — a link, typically.
+ *
+ * Kept separate from detailRow() rather than added as a flag, because the
+ * difference is which argument is trusted, and that should be visible at the
+ * call site. The label is still escaped; `valueHtml` is not, so build it from
+ * escaped pieces.
+ */
+export function detailRowHtml(label: string, valueHtml: string): string {
+  return `<p style="margin: 0 0 8px 0;"><strong style="color: ${DARK};">${escapeHtml(label)}</strong> ${valueHtml}</p>`
+}
+
+/**
+ * The reminder that goes out roughly an hour before a session, to the student
+ * and to the assigned tutor.
+ *
+ * Both emails are the same shape and differ only in who the other person is, so
+ * they are one function with a `recipient` discriminator rather than the two
+ * near-identical literals the scheduling route in
+ * src/app/api/admin/sessions/[id]/route.ts keeps side by side.
+ *
+ * Everything user-supplied goes through detailRow() or the escaped `greeting`,
+ * and the one piece of raw HTML — the location line — is assembled by
+ * buildReminderLocation() from escaped parts. Sender: /api/cron/session-reminders.
+ */
+export function sessionReminderEmail(options: {
+  recipient: 'student' | 'tutor'
+  /** The `sessions` row; only session_type, meet_url and confirmed_start are read. */
+  session: ReminderSessionRow
+  /** Who the email is addressed to. */
+  recipientName?: string | null
+  /** The other person on the session — the tutor for a student, the student for a tutor. */
+  counterpartName?: string | null
+}): { subject: string; html: string } {
+  const { recipient, session } = options
+  const recipientName = options.recipientName?.trim() || ''
+  const counterpartName =
+    options.counterpartName?.trim() ||
+    (recipient === 'student' ? 'Your ScoreMax tutor' : 'Your ScoreMax student')
+
+  const { locationHtml, joinUrl } = buildReminderLocation(session)
+
+  return {
+    subject: 'Reminder: Your session starts in about an hour',
+    html: emailLayout({
+      title: 'Your Session Starts Soon',
+      greeting: recipientName ? `Hi ${recipientName},` : 'Hi there,',
+      body: [
+        `<p style="margin: 0 0 16px 0;">This is a reminder that your ScoreMax session starts in about an hour.</p>`,
+        detailRow(recipient === 'student' ? 'Tutor:' : 'Student:', counterpartName),
+        detailRow('Time:', formatSessionTime(session.confirmed_start)),
+        detailRowHtml('Location:', locationHtml),
+      ].join(''),
+      // No button at all when there is nothing to join — an in-person session,
+      // or an online one whose Meet link was never created or has been cleared.
+      // A CTA with an empty href renders as a dead button an hour before the
+      // session, which is worse than no button.
+      ...(joinUrl ? { ctaText: 'Join Your Session', ctaUrl: joinUrl } : {}),
+    }),
+  }
 }
