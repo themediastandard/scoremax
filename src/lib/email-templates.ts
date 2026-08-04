@@ -176,3 +176,52 @@ export function sessionReminderEmail(options: {
     }),
   }
 }
+
+/**
+ * The note to a tutor whose already-scheduled session has been handed to
+ * someone else.
+ *
+ * Google sends its own mail when the reassign patch drops the tutor from the
+ * event's attendees, but it is unbranded, easy to lose in a busy inbox, and
+ * says only that an event changed — never which student, and never that the
+ * change was deliberate. A session that is in your calendar one day and gone
+ * the next should be explained by us.
+ *
+ * No CTA, by the same reasoning sessionReminderEmail() uses to drop its button:
+ * the tutor has been removed from the event, so a Join link would point at a
+ * Meet they can no longer enter. It also gives no reason for the change —
+ * nothing in the schema records one, so any sentence here would be invented.
+ *
+ * `studentName` and `tutorName` come from customer- and admin-entered rows, and
+ * both reach the HTML through detailRow() or the escaped `greeting`.
+ *
+ * Sender: PATCH /api/admin/sessions/[id].
+ */
+export function sessionUnassignedEmail(options: {
+  /** The outgoing tutor — who this is addressed to. */
+  tutorName?: string | null
+  /** The student who was on the session. */
+  studentName?: string | null
+  /**
+   * The start the *outgoing* tutor knew about. When an admin reassigns and
+   * reschedules in one go, this is the old time — it is what is on their
+   * calendar, and identifying the session is the whole job of this line.
+   */
+  startsAt?: string | Date | null
+}): { subject: string; html: string } {
+  const tutorName = options.tutorName?.trim() || ''
+  const studentName = options.studentName?.trim() || 'a ScoreMax student'
+
+  return {
+    subject: 'Session Reassigned',
+    html: emailLayout({
+      title: 'Session Reassigned',
+      greeting: tutorName ? `Hi ${tutorName},` : 'Hi there,',
+      body: [
+        `<p style="margin: 0 0 16px 0;">This session has been reassigned to another tutor, so it is no longer yours. It has been removed from your calendar and there is nothing you need to do.</p>`,
+        detailRow('Student:', studentName),
+        detailRow('Time:', formatSessionTime(options.startsAt)),
+      ].join(''),
+    }),
+  }
+}

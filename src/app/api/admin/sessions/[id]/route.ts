@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { type calendar_v3 } from 'googleapis'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
-import { emailLayout, detailRow } from '@/lib/email-templates'
+import { emailLayout, detailRow, sessionUnassignedEmail } from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import {
   getAdminGoogleAuth,
@@ -234,6 +234,44 @@ async function sendScheduleEmails(
     },
     `admin:session-confirmed:tutor:${session.id}`
   )
+}
+
+/**
+ * Tell the tutor who just lost a session that they lost it.
+ *
+ * The reassign patch removes them from the calendar event's attendees, which
+ * makes Google send its own unbranded "the event has changed" notice — the only
+ * thing they used to hear from us. Everything this needs is passed in rather
+ * than read off the session record, because by the time the reassign branch has
+ * finished building `merged` the outgoing tutor and the old start time are both
+ * gone from it.
+ *
+ * Best effort, like the other sends in this route: it runs on the deferred path
+ * after the write, so the reassignment is already durable and a failed send must
+ * not unwind it. sendEmail() reports its own failures to Sentry; the log line
+ * here is what ties one to a session id in the Netlify log.
+ */
+async function sendUnassignedEmail(outgoing: {
+  tutor: SessionPerson
+  studentName: string | null | undefined
+  startsAt: string | null | undefined
+  sessionId: string
+}) {
+  const { subject, html } = sessionUnassignedEmail({
+    tutorName: outgoing.tutor.full_name,
+    studentName: outgoing.studentName,
+    startsAt: outgoing.startsAt,
+  })
+
+  const ok = await sendEmail(
+    { ...getEmailDefaults(), to: outgoing.tutor.email, subject, html },
+    `admin:session-unassigned:tutor:${outgoing.sessionId}`
+  )
+  if (!ok) {
+    console.error(
+      `Session ${outgoing.sessionId} was reassigned but the outgoing tutor could not be notified.`
+    )
+  }
 }
 
 // Calendar work happens now (so a failure aborts the whole change with a 400
@@ -494,6 +532,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         confirmed_start: confirmed_start || currentSession.confirmed_start,
         confirmed_end: confirmed_end || currentSession.confirmed_end,
       }
+      // Read before the line below overwrites it: right now `currentSession
+      // .tutors` is the tutor being taken *off* the session, and once
+      // `merged.tutors` becomes the incoming one there is no longer anywhere to
+      // find them. Nullable, because assigned_tutor_id is — a session that had
+      // no tutor has nobody to tell.
+      const previousTutor = currentSession.tutors as SessionPerson | null
+      const previousStart = currentSession.confirmed_start as string | null
+
       const { data: newTutor } = await supabaseAdmin
         .from('tutors')
         .select('id, email, full_name')
@@ -505,7 +551,29 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       // reschedule call is unnecessary even when times changed together.
       const outcome = await handleReassign(merged)
       updates = { ...updates, ...outcome.updates }
-      pendingEmails = outcome.sendEmails
+
+      // Same id on both sides means nobody actually lost the session: either a
+      // self-reassign that `tutorChanged` should already have excluded, or the
+      // tutors lookup above came back empty and `merged.tutors` is still the
+      // outgoing tutor — in which case the "New Session Assigned" mail is
+      // already going to them and a "you have lost it" beside it would be
+      // nonsense. Send nothing either way.
+      const notifyOutgoing =
+        previousTutor?.email && previousTutor.id !== (merged.tutors as SessionPerson | null)?.id
+          ? previousTutor
+          : null
+
+      pendingEmails = async () => {
+        await outcome.sendEmails()
+        if (notifyOutgoing) {
+          await sendUnassignedEmail({
+            tutor: notifyOutgoing,
+            studentName: (currentSession.customers as SessionPerson | null)?.full_name,
+            startsAt: previousStart,
+            sessionId: id,
+          })
+        }
+      }
     } else if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
       await handleReschedule(
         currentSession,
