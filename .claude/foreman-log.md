@@ -47,6 +47,42 @@ instead: an unauthenticated POST returning **401** proves the route can see
 run with his own value.
 | 003 | Add Google Analytics 4 to the site (`G-JJ8TFYH2FN`) | medium | done | `e1caf42`, merged, deployed, verified live |
 | 004 | Add structured data and technical SEO/AEO fixes | medium | done | `b2b8f32`, merged, deployed, verified live |
+| 005 | Pace email sends under Resend's rate limit | high | running | — |
+
+005 is high rather than medium because the change lives inside `sendEmail`, the
+single choke point every customer email flows through including purchase
+confirmations, and a break there stops mail without erroring visibly.
+
+### 005 — what the brief asked for, so the review can check it
+
+Five paired-send routes were verified before briefing, not two as the queue said:
+`stripe/webhook/route.ts:375,416` (purchase), `booking/submit/route.ts:133,158`,
+`admin/sessions/[id]/route.ts:199,218` (scheduling), `contact/route.ts:140,165`,
+`step-up/route.ts:74,95`. All sequential awaits, all unpaced. A third send sits at
+`admin/sessions/[id]/route.ts:293` on the reassignment path.
+
+Agreed approach — **the limiter goes inside `sendEmail` in `src/lib/resend.ts`**,
+not at the five call sites, so future routes inherit it. Shape copied from
+`api/cron/session-reminders/route.ts` (~:240), which already does this correctly:
+it waits `lastSendStartedAt + MIN_SEND_INTERVAL_MS - Date.now()`, accounting for
+elapsed time rather than sleeping a flat amount.
+
+Review must confirm:
+- `sendEmail`'s signature and boolean return are unchanged, and it still reports
+  both the resolved-`error` and thrown cases to Sentry.
+- **No double-pacing with 002.** The reminder cron paces its own loop; if that was
+  left in place alongside the shared limiter it halves throughput. Either answer is
+  acceptable if reasoned — but `RUN_DEADLINE_MS` in that route must still work.
+- A throw inside the pacing logic cannot prevent a send. A limiter that stops mail
+  is worse than the rate limit.
+- The serverless caveat is *commented*: module state resets per invocation, so this
+  paces within one request (the actual paired-send case) and concurrent requests can
+  still collide. Deliberate, not overlooked.
+- Tests fake the clock rather than really sleeping, and cover: two immediate calls
+  spaced, a slow first send shortening the wait, a much-later send waiting not at
+  all, and a throwing send not wedging the queue.
+- Baseline is **117 tests passing**. `tsc` may show pre-existing `site-images.ts`
+  errors from a gitignored `next-env.d.ts`; establish the count, do not assume zero.
 
 ### 004 review (2026-08-04)
 
