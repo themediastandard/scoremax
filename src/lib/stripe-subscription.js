@@ -19,9 +19,32 @@ function getCheckoutPaymentIntentId(session) {
   return isPaymentIntentId(id) ? id : null
 }
 
+// Stripe's 2025 invoice rework removed `invoice.payment_intent` and
+// `invoice.charge` outright. The payment now lives in `invoice.payments`, a list
+// that is absent unless expanded — so a stale `expand: ['latest_invoice.payment_intent']`
+// silently resolves nothing and the caller stores a null payment intent. That is
+// exactly what left the first live membership unrefundable: the refund route
+// requires a `pi_`, found none, and 400'd.
+//
+// Read the new shape first, keep the old one as a fallback so a fixture or an
+// account still on an older API version resolves the same way.
 function getInvoicePaymentIntentId(invoice) {
-  const id = getStripeId(invoice?.payment_intent)
-  return isPaymentIntentId(id) ? id : null
+  const payments = invoice?.payments?.data
+  if (Array.isArray(payments)) {
+    // A settled payment is the one worth refunding; fall back to any entry that
+    // carries an id, since a single-payment invoice may not be marked yet.
+    const ordered = [
+      ...payments.filter((entry) => entry?.status === 'paid'),
+      ...payments.filter((entry) => entry?.status !== 'paid'),
+    ]
+    for (const entry of ordered) {
+      const id = getStripeId(entry?.payment?.payment_intent)
+      if (isPaymentIntentId(id)) return id
+    }
+  }
+
+  const legacy = getStripeId(invoice?.payment_intent)
+  return isPaymentIntentId(legacy) ? legacy : null
 }
 
 // Stripe moved the subscription reference on invoices: older API versions expose

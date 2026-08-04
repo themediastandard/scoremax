@@ -43,6 +43,45 @@ test('stores only real payment intent ids in payment-intent fields', () => {
   assert.equal(isPaymentIntentId('sub_not_a_payment_intent'), false)
 })
 
+// Regression: the first live membership stored a null payment intent and could
+// not be refunded. Stripe's current invoice shape carries the payment under
+// `payments`, not `payment_intent`.
+test('resolves the payment intent from the current invoice payments shape', () => {
+  assert.equal(
+    getInvoicePaymentIntentId({
+      payment_intent: null,
+      payments: { data: [{ status: 'paid', payment: { payment_intent: 'pi_from_payments' } }] },
+    }),
+    'pi_from_payments'
+  )
+
+  // A settled payment wins over an earlier failed attempt on the same invoice.
+  assert.equal(
+    getInvoicePaymentIntentId({
+      payments: {
+        data: [
+          { status: 'failed', payment: { payment_intent: 'pi_failed_attempt' } },
+          { status: 'paid', payment: { payment_intent: 'pi_settled' } },
+        ],
+      },
+    }),
+    'pi_settled'
+  )
+
+  // Expanded object form, and the legacy field still wins when payments is absent.
+  assert.equal(
+    getInvoicePaymentIntentId({
+      payments: { data: [{ status: 'paid', payment: { payment_intent: { id: 'pi_expanded' } } }] },
+    }),
+    'pi_expanded'
+  )
+  assert.equal(getInvoicePaymentIntentId({ payment_intent: 'pi_legacy', payments: { data: [] } }), 'pi_legacy')
+
+  // Nothing usable must stay null rather than storing a non-pi_ id.
+  assert.equal(getInvoicePaymentIntentId({ payments: { data: [{ payment: { payment_intent: null } }] } }), null)
+  assert.equal(getInvoicePaymentIntentId({}), null)
+})
+
 test('customer credit summary does not expose internal record ids', () => {
   const summary = sanitizeCustomerCreditSummary({
     customer: { id: 'cus-db-id', full_name: 'Ada Student' },

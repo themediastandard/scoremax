@@ -70,7 +70,10 @@ export async function POST(req: Request) {
 
     if (planType === 'membership' && session.subscription) {
       membershipSubscription = await stripe.subscriptions.retrieve(session.subscription as string, {
-        expand: ['latest_invoice.payment_intent'],
+        // `latest_invoice.payment_intent` no longer exists — see the note on
+        // getInvoicePaymentIntentId. `payments` is what carries it now, and it
+        // is only returned when explicitly expanded.
+        expand: ['latest_invoice.payments'],
       })
       stripePaymentIntentId ||= getInvoicePaymentIntentId(membershipSubscription.latest_invoice)
     }
