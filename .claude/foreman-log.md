@@ -46,7 +46,40 @@ instead: an unauthenticated POST returning **401** proves the route can see
 `CRON_SECRET`; **503** would mean the scope is wrong. Tommy runs the real dry
 run with his own value.
 | 003 | Add Google Analytics 4 to the site (`G-JJ8TFYH2FN`) | medium | done | `e1caf42`, merged, deployed, verified live |
-| 004 | Add structured data and technical SEO/AEO fixes | medium | spawned, awaiting start | — |
+| 004 | Add structured data and technical SEO/AEO fixes | medium | done | `b2b8f32`, merged, deployed, verified live |
+
+### 004 review (2026-08-04)
+
+117/117 tests after rebasing onto 002, lint and `tsc --noEmit` clean. 26 files.
+Did not touch 002's files or `src/app/sitemap.ts`.
+
+The truth constraint held. No `aggregateRating`, `review` or `ratingValue`
+anywhere, and the module documents their absence as deliberate. Prices in the
+`/pricing` schema are built from the live `pricing` table — the same rows
+checkout charges against — so page and schema move together. It **declined** to
+publish the 1:1 hourly rates, because those are hardcoded in the page as a mirror
+of the subject catalog rather than read from the table, and asserting them
+machine-readably would be one forgotten edit away from quoting a price checkout
+does not charge. That is the judgement the brief asked for.
+
+Caught something the brief did not anticipate: Next passes inherited metadata to
+child routes verbatim, so `/book/confirmation` would have declared its canonical
+as `/book`. It is now noindex with its own canonical.
+
+Chose `Service` over `Course` — tutoring sold by the hour has no course
+instances, start dates or fixed length, and `Course` would promise rich-result
+fields the business cannot honestly fill.
+
+Verified on production after deploy: 9 pages sampled, **0 invalid JSON-LD
+blocks**. Landing pages carry `@graph` of `Service` (provider
+`EducationalOrganization`, `areaServed` United States) plus `BreadcrumbList`.
+Every sampled page has a self-referential absolute canonical. `/llms.txt` serves
+200 as `text/plain`; `/sitemap.xml` still 200 with 21 URLs; `robots.txt` still
+points at it.
+
+Breadcrumbs on `/test-prep/*` read `Home > SAT Tutoring`, skipping a
+`/test-prep` level — correct, because no such index page exists and linking one
+would point at a 404.
 
 004 runs alongside 002. No file overlap: 002 owns `src/lib/email-templates.ts`,
 the cron route, the Netlify function and `supabase/migrations/`; 004 owns the
