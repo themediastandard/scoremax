@@ -48,6 +48,29 @@ run with his own value.
 | 003 | Add Google Analytics 4 to the site (`G-JJ8TFYH2FN`) | medium | done | `e1caf42`, merged, deployed, verified live |
 | 004 | Add structured data and technical SEO/AEO fixes | medium | done | `b2b8f32`, merged, deployed, verified live |
 | 005 | Pace email sends under Resend's rate limit | high | done | `d763fa6`, merged and pushed |
+| 006 | Tell the outgoing tutor when a session is reassigned | medium | done | `739de0b`, merged and pushed |
+
+### 006 review (2026-08-04)
+
+145/145 tests (10 new), lint and `tsc` clean, 3 files, nothing out of scope.
+Unparked by Tommy after being deferred earlier the same day.
+
+Reasoned past the brief in three places, all correct:
+- **Covers the no-Google-auth fallback.** The send wraps `handleReassign`'s
+  callback rather than sitting inside it, so it also fires on the path where
+  `handleReassign` degrades to `handleSchedule` — the case where Google sends no
+  attendee notice at all and ScoreMax is the only thing that can tell them.
+- **Uses the pre-update start time** on purpose. When an admin reassigns and
+  reschedules in one PATCH, the old time is what is on the outgoing tutor's
+  calendar, so that is what identifies the session for them.
+- **Same-id guard for a case the brief did not name:** if the incoming-tutor
+  lookup returns nothing, `merged.tutors` is still the outgoing tutor, and
+  without the guard that person would receive "New Session Assigned" and "you
+  have lost it" together. Sends nothing in that case.
+
+No CTA in the email — the tutor has been removed from the Meet, so a Join button
+would be dead. No reason for the change either: nothing in the schema records
+one, so any sentence would be invented.
 
 005 is high rather than medium because the change lives inside `sendEmail`, the
 single choke point every customer email flows through including purchase
@@ -232,7 +255,11 @@ remains the source of truth, per `CLAUDE.md`.
   `auth.scoremaxtutoring.com`; the consent screen reads "to continue to ScoreMax".
 - Resend 2/sec rate limit on paired sends — purchase and scheduling each fire two
   sends back to back. 002's reminder job already paces correctly and is the model.
-- Outgoing tutor email on reassignment (parked by Tommy 2026-08-04)
+- ~~Outgoing tutor email on reassignment~~ **DONE** as 006.
+- **Offline payments (Zelle / Step Up) — design not decided.** Tommy is thinking
+  it through; do not build without a decision. Full analysis in
+  `AUDIT-2026-08-04.md`, including why per-family Stripe discount codes were set
+  aside and the three unanswered questions about how Step Up actually disburses.
 - **Email authentication — blocked on ScoreMax having its own email addresses.**
   `scoremaxtutoring.com` publishes no SPF, DKIM or DMARC and hosts no mail, so
   anything sent as `@scoremaxtutoring.com` is unauthenticated and likely filtered
