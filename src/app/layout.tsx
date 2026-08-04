@@ -3,6 +3,7 @@ import { Inter, Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
 import { HeaderFooterWrapper } from "../components/HeaderFooterWrapper";
+import Analytics from "../components/Analytics";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -76,6 +77,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} ${dmSans.variable} antialiased`}>
         <MobileOptimizations />
+        <Analytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

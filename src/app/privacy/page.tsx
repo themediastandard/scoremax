@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" lastUpdated="28 July 2026">
+    <LegalPage title="Privacy Policy" lastUpdated="4 August 2026">
       <section>
         <p>
           This policy explains what {LEGAL_ENTITY_NAME} (&ldquo;ScoreMax&rdquo;,
@@ -188,8 +188,15 @@ export default function PrivacyPage() {
         <h2>Cookies</h2>
         <p>
           We set a cookie to keep you signed in. It is required for the site to work and
-          is not used for advertising. We do not currently run third-party analytics or
-          advertising trackers.
+          is not used for advertising.
+        </p>
+        <p>
+          We also use Google Analytics to understand how people find and use the site,
+          such as how many visitors we get and which pages they read. Google Analytics
+          sets its own cookies to do this. It is analytics, not advertising: we do not
+          use it to build advertising profiles or to show you ads, and we do not run
+          advertising trackers. We switch it off on the pages you reach from a password
+          reset email, so those links are never sent to Google.
         </p>
       </section>
 
