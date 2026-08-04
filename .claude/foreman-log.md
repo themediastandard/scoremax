@@ -47,11 +47,35 @@ instead: an unauthenticated POST returning **401** proves the route can see
 run with his own value.
 | 003 | Add Google Analytics 4 to the site (`G-JJ8TFYH2FN`) | medium | done | `e1caf42`, merged, deployed, verified live |
 | 004 | Add structured data and technical SEO/AEO fixes | medium | done | `b2b8f32`, merged, deployed, verified live |
-| 005 | Pace email sends under Resend's rate limit | high | running | — |
+| 005 | Pace email sends under Resend's rate limit | high | done | `d763fa6`, merged and pushed |
 
 005 is high rather than medium because the change lives inside `sendEmail`, the
 single choke point every customer email flows through including purchase
 confirmations, and a break there stops mail without erroring visibly.
+
+### 005 review (2026-08-04) — met every criterion
+
+135/135 tests (18 new), lint and `tsc` clean, 6 files, nothing out of scope.
+Pacing lives in `src/lib/send-pacer.js` (+ `.d.ts`), wired into `sendEmail`;
+signature and boolean return untouched.
+
+Three things worth knowing later:
+- **The limiter cannot stop mail.** `slot.then(run, run)` runs the send on both
+  settled outcomes of the pacing slot, so a throwing clock or timer means the
+  send goes out *unpaced* rather than not at all.
+- **The queue advances on the slot, not the task**, so a send that throws or
+  hangs cannot wedge everything behind it. Both cases are tested.
+- **Clock-step guard**: the wait is clamped to one interval, because an NTP
+  correction backwards would otherwise compute an unbounded wait that looks
+  exactly like email having stopped.
+
+002's own pacing was removed and `RUN_DEADLINE_MS` still bounds the run; there is
+a regression test named "the reminder cron does not pace a second time on top of
+sendEmail" and a comment in that route saying not to re-add one.
+
+Not verified in production: no email has been sent through the new path yet.
+`sessions` is empty, so the reminder cron sends nothing; the next real
+purchase or contact-form submission is the first live exercise.
 
 ### 005 — what the brief asked for, so the review can check it
 
