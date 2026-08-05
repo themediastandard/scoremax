@@ -231,8 +231,9 @@ remains the source of truth, per `CLAUDE.md`.
 
 - Resolve Sentry issues SCOREMAX-1 and SCOREMAX-2 — both are coordinator smoke
   tests, not real problems.
-- Create a Sentry alert rule (Alerts → new issue → email). Without it Sentry
-  collects errors but never tells anyone.
+- ~~Create a Sentry alert rule~~ **Already working.** A real alert reached Tommy
+  by email on 2026-08-04, triggered by Sentry's default "Send a notification for
+  high priority issues" rule. Earlier notes claiming no rule existed were wrong.
 - Restart Claude Code to pick up the `/foreman` skill (added after this session
   started, so it is not loaded here).
 - Two console cleanups, low priority: remove the old
