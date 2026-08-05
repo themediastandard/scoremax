@@ -227,6 +227,20 @@ Supabase recorded its own version stamp for the applied migration — the local
 directory and the remote history do not line up one-to-one. `list_migrations`
 remains the source of truth, per `CLAUDE.md`.
 
+## Not delegated — done inline
+
+- `d57f925` — replaced the drifting hand-written `public/sitemap.xml` with a
+  generated `src/app/sitemap.ts`.
+- `cfbe309`, `db44392`, `4d191f6` — home page names the company, privacy policy
+  discloses Google sign-in, footer explains what Google data is received. Done
+  chasing the OAuth branding check; kept because they are right regardless.
+- `f65454c` — widened the reminder window to `[t+45, t+75]` and slowed the cron
+  to every 15 minutes. Prompted by a real `fetch failed` tick: the old geometry
+  meant one failed tick silently lost ~5 minutes of coverage. Now every start is
+  covered by two ticks, and it costs a third fewer invocations. A test reads the
+  cron expression out of the Netlify function and asserts the window is at least
+  twice it, because the two numbers live in different files.
+
 ## Waiting on Tommy (not delegatable)
 
 - Resolve Sentry issues SCOREMAX-1 and SCOREMAX-2 — both are coordinator smoke
