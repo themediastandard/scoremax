@@ -155,7 +155,7 @@ export default function AboutPage() {
               </div>
 
               <div className="text-gray-600 text-sm leading-relaxed space-y-3">
-                <p>Taimir is a highly accomplished entrepreneur whose career is a testament to her innate business acumen. Born into a business-oriented family, she made her first investment at just 13 years old and went on to acquire and grow Pest-Logic over 17 years before selling to a national firm.</p>
+                <p>Taimir is a highly accomplished entrepreneur who&rsquo;s built and scaled successful businesses over many years. That journey sharpened her skills in operations, growth, and delivering consistent results.</p>
                 <p>Now as Vice President at ScoreMax, Taimir brings invaluable insights, seasoned leadership, and a strategic mindset. She is not just a leader but a visionary, a strong, determined, and impactful force behind the company.</p>
               </div>
             </div>
