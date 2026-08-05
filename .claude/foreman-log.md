@@ -268,8 +268,9 @@ remains the source of truth, per `CLAUDE.md`.
 - ~~Supabase URL visible during Google sign-up~~ **CLOSED 2026-08-04** — see
   [[scoremax-supabase-custom-domain]] and the audit. Auth serves from
   `auth.scoremaxtutoring.com`; the consent screen reads "to continue to ScoreMax".
-- Resend 2/sec rate limit on paired sends — purchase and scheduling each fire two
-  sends back to back. 002's reminder job already paces correctly and is the model.
+- ~~Resend 2/sec rate limit on paired sends~~ **DONE** as 005 (`d763fa6`).
+  `src/lib/send-pacer.js` paces every send through `sendEmail`. Not yet exercised
+  in production — no mail has gone through the new path.
 - ~~Outgoing tutor email on reassignment~~ **DONE** as 006.
 - **Offline payments (Zelle / Step Up) — design not decided.** Tommy is thinking
   it through; do not build without a decision. Full analysis in
