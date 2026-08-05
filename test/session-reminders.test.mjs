@@ -36,21 +36,50 @@ function sessionAt(minutes, overrides = {}) {
 // reminder or silently does not, and nothing downstream would notice either way.
 // ---------------------------------------------------------------------------
 
-test('the window runs from 55 to 70 minutes ahead, inclusive at both ends', () => {
-  assert.equal(REMINDER_LEAD_MIN_MINUTES, 55)
-  assert.equal(REMINDER_LEAD_MAX_MINUTES, 70)
+test('the window runs from 45 to 75 minutes ahead, inclusive at both ends', () => {
+  assert.equal(REMINDER_LEAD_MIN_MINUTES, 45)
+  assert.equal(REMINDER_LEAD_MAX_MINUTES, 75)
 
-  assert.equal(isReminderDue(sessionAt(55), NOW), true, 'exactly 55 minutes out is in')
-  assert.equal(isReminderDue(sessionAt(70), NOW), true, 'exactly 70 minutes out is in')
-  assert.equal(isReminderDue(sessionAt(62), NOW), true, 'the middle of the window is in')
+  assert.equal(isReminderDue(sessionAt(45), NOW), true, 'exactly 45 minutes out is in')
+  assert.equal(isReminderDue(sessionAt(75), NOW), true, 'exactly 75 minutes out is in')
+  assert.equal(isReminderDue(sessionAt(60), NOW), true, 'the middle of the window is in')
 })
 
 test('a session one second outside either edge is not selected', () => {
-  const justEarly = { ...sessionAt(55), confirmed_start: new Date(NOW.getTime() + 55 * MINUTE - 1000).toISOString() }
-  const justLate = { ...sessionAt(70), confirmed_start: new Date(NOW.getTime() + 70 * MINUTE + 1000).toISOString() }
+  const justEarly = { ...sessionAt(45), confirmed_start: new Date(NOW.getTime() + 45 * MINUTE - 1000).toISOString() }
+  const justLate = { ...sessionAt(75), confirmed_start: new Date(NOW.getTime() + 75 * MINUTE + 1000).toISOString() }
 
   assert.equal(isReminderDue(justEarly, NOW), false)
   assert.equal(isReminderDue(justLate, NOW), false)
+})
+
+test('the window is at least twice the cron interval, so one failed tick loses nothing', () => {
+  // The two numbers are only correct relative to each other, and they live in
+  // different files — the window here, the cadence in the Netlify function — so
+  // nothing but this test stops them drifting apart.
+  //
+  // Why twice and not merely wider: on 2026-08-04 a tick failed reaching
+  // Supabase and Netlify's three immediate retries all failed inside the same
+  // few-second blip. Under the old geometry ([t+55,t+70] every 10 minutes) a
+  // five-minute slice of start times was covered by that tick alone, so those
+  // reminders would never have been sent — no error, no alert, reminder_sent_for
+  // still null. A window of exactly 2x the interval means every start time is
+  // seen by two consecutive ticks, so a single failure costs nothing.
+  const fn = readFileSync(new URL('../netlify/functions/session-reminders.mts', import.meta.url), 'utf8')
+  const schedule = fn.match(/schedule:\s*'([^']+)'/)?.[1]
+  assert.ok(schedule, 'could not find the cron schedule in the Netlify function')
+
+  const everyNMinutes = schedule.match(/^\*\/(\d+) \* \* \* \*$/)?.[1]
+  assert.ok(everyNMinutes, `cron expression is not a simple minute interval: ${schedule}`)
+
+  const intervalMinutes = Number(everyNMinutes)
+  const windowMinutes = REMINDER_LEAD_MAX_MINUTES - REMINDER_LEAD_MIN_MINUTES
+
+  assert.ok(
+    windowMinutes >= intervalMinutes * 2,
+    `window is ${windowMinutes}min but the cron fires every ${intervalMinutes}min; ` +
+      `it must be at least ${intervalMinutes * 2}min so every session start is covered by two ticks`
+  )
 })
 
 test('a session already under way, or long past, is never selected', () => {
@@ -64,8 +93,8 @@ test('reminderWindow returns exactly the bounds isReminderDue tests, so the quer
   // inclusive. If these drifted apart, the query would hand the route rows it
   // then silently discarded — or worse, miss rows the re-check would have kept.
   const { start, end } = reminderWindow(NOW)
-  assert.equal(start, '2026-08-04T18:55:00.000Z')
-  assert.equal(end, '2026-08-04T19:10:00.000Z')
+  assert.equal(start, '2026-08-04T18:45:00.000Z')
+  assert.equal(end, '2026-08-04T19:15:00.000Z')
 
   assert.equal(isReminderDue({ ...sessionAt(0), confirmed_start: start }, NOW), true)
   assert.equal(isReminderDue({ ...sessionAt(0), confirmed_start: end }, NOW), true)

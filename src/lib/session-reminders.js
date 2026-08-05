@@ -24,23 +24,36 @@ const { IN_PERSON_LOCATION } = require('./session-calendar.js')
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 /*
- * The selection window: sessions starting between 55 and 70 minutes from now.
+ * The selection window: sessions starting between 45 and 75 minutes from now.
  *
- * The width (15 minutes) MUST stay wider than the cron interval (10 minutes, see
- * netlify/functions/session-reminders.mts). Ticks fire at t, t+10, t+20 …, each
- * covering [t+55, t+70], so consecutive windows overlap by 5 minutes and every
- * session start is covered by at least one tick. Equal width and interval would
- * make the windows merely abut, and any cron drift at all — Netlify makes no
- * promise of firing on the second — opens a gap that a session falls through
+ * The width (30 minutes) MUST stay wider than the cron interval (15 minutes, see
+ * netlify/functions/session-reminders.mts). Ticks fire at t, t+15, t+30 …, each
+ * covering [t+45, t+75], so the window is exactly twice the interval and **every
+ * session start is covered by two consecutive ticks**. Equal width and interval
+ * would make the windows merely abut, and any cron drift at all — Netlify makes
+ * no promise of firing on the second — opens a gap that a session falls through
  * silently and permanently.
  *
- * The overlap means a session near a boundary is selected by two consecutive
- * ticks. That is fine and expected: reminder_sent_for is what stops the second
- * tick sending again, and it is the reason this design does not rely on the
- * windows being disjoint.
+ * WHY TWO TICKS, not the 1.5 this used to give. On 2026-08-04 a tick failed with
+ * `TypeError: fetch failed` reaching Supabase, and Netlify's three immediate
+ * retries all failed inside the same few-second blip. Under the old geometry
+ * ([t+55, t+70] every 10 minutes, overlapping by only 5) a five-minute slice of
+ * session start times was covered by that tick alone, so those reminders would
+ * simply never have been sent — no error, no alert, `reminder_sent_for` still
+ * null. Doubling the window makes a single failed tick cost nothing.
+ *
+ * It also costs a third *fewer* invocations: 96 ticks a day instead of 144. The
+ * two were coupled the whole time through the overlap, so widening the window is
+ * what buys the slower cadence. The price is precision — a reminder now lands
+ * 45 to 75 minutes ahead rather than 55 to 70 — which is still "about an hour"
+ * to anyone reading it.
+ *
+ * A session near a boundary is selected by two ticks by design.
+ * reminder_sent_for is what stops the second one sending again, and it is the
+ * reason this design never needed the windows to be disjoint.
  */
-const REMINDER_LEAD_MIN_MINUTES = 55
-const REMINDER_LEAD_MAX_MINUTES = 70
+const REMINDER_LEAD_MIN_MINUTES = 45
+const REMINDER_LEAD_MAX_MINUTES = 75
 
 const MINUTE_MS = 60 * 1000
 

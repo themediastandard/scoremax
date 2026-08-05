@@ -13,14 +13,21 @@
  * netlify/functions/ automatically; the `config.schedule` export below is what
  * registers the cron.
  *
- * SCHEDULE — every 10 minutes, and it must stay tighter than the 15-minute
- * selection window in src/lib/session-reminders.js. Windows are [t+55, t+70], so
- * a 10-minute interval makes consecutive windows overlap by 5 minutes and every
- * session start is covered by at least one tick with room for cron drift. Widen
- * this to 15 and the windows merely abut: a tick firing even seconds late opens
- * a gap, and a session that falls through it is never reminded and never logged.
- * The overlap sends some sessions to two ticks, which sessions.reminder_sent_for
- * absorbs.
+ * SCHEDULE — every 15 minutes, and it must stay tighter than the 30-minute
+ * selection window in src/lib/session-reminders.js. Windows are [t+45, t+75],
+ * exactly twice the interval, so every session start is covered by **two**
+ * consecutive ticks. That is deliberate redundancy, not slack: on 2026-08-04 a
+ * tick failed reaching Supabase and Netlify's three immediate retries all failed
+ * inside the same blip, which under the previous geometry would have silently
+ * dropped a five-minute slice of reminders. A second tick covers that.
+ *
+ * The two numbers move together. Slowing this cadence without widening the
+ * window there, or narrowing that window without speeding this up, makes the
+ * windows abut — and a tick firing even seconds late then opens a gap that a
+ * session falls through, never reminded and never logged. Change both or
+ * neither.
+ *
+ * Sessions seen by two ticks are absorbed by sessions.reminder_sent_for.
  *
  * REQUIRES: CRON_SECRET set in Netlify, scoped to both Functions and Runtime —
  * this file needs it to send, and the Next.js route needs it to verify.
@@ -75,5 +82,5 @@ export default async () => {
 }
 
 export const config = {
-  schedule: '*/10 * * * *',
+  schedule: '*/15 * * * *',
 }
