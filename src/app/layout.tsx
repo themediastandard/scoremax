@@ -4,6 +4,7 @@ import "./globals.css";
 import MobileOptimizations from "../components/MobileOptimizations";
 import { HeaderFooterWrapper } from "../components/HeaderFooterWrapper";
 import Analytics from "../components/Analytics";
+import { CrispChat } from "../components/CrispChat";
 import { JsonLd } from "../components/JsonLd";
 import { webSite } from "@/lib/structured-data";
 
@@ -80,6 +81,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} ${dmSans.variable} antialiased`}>
         <MobileOptimizations />
         <Analytics />
+        <CrispChat />
         {/* Site-wide. Page-level nodes live on the pages themselves and point
             back at the organisation by @id — see src/lib/structured-data.js. */}
         <JsonLd data={webSite()} />
