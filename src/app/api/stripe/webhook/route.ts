@@ -8,6 +8,7 @@ import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
 import { escapeLikePattern } from '@/lib/postgrest-escape'
 import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
+import { buildAuthContinueUrl } from '@/lib/auth-email-link'
 import { reportError, reportIssue, flushReports } from '@/lib/report-error'
 import {
   getCheckoutPaymentIntentId,
@@ -166,7 +167,7 @@ export async function POST(req: Request) {
             })
             const tokenHash = linkData?.properties?.hashed_token
             if (tokenHash) {
-                setPasswordUrl = `${appUrl}/auth/callback?token_hash=${tokenHash}&type=recovery`
+                setPasswordUrl = buildAuthContinueUrl(appUrl, tokenHash, 'recovery')
             } else if (linkError) {
                 console.error('Failed to generate set-password link for guest checkout:', linkError.message)
             }

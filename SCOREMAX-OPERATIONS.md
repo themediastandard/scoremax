@@ -221,10 +221,30 @@ Guest checkout customers receive a branded invite email via Resend instead of Su
 **Setup**
 
 1. Supabase Dashboard → Auth → Hooks → Send Email hook
-2. Create hook, set URL to `https://scoremaxtutor.netlify.app/api/auth/send-email` (or your deployed app URL)
+2. Create hook, set URL to `https://www.scoremaxtutoring.com/api/auth/send-email`
 3. Generate secret, add to env as `SEND_EMAIL_HOOK_SECRET`
 4. Ensure `RESEND_API_KEY` and `NEXT_PUBLIC_SUPABASE_URL` are set
 5. Enable the hook and turn on Email Provider in Auth settings
+
+### Auth Bot Protection (Cloudflare Turnstile)
+
+Turnstile protects email/password signup, sign-in, and password recovery. Supabase validates each token, so the app receives only Cloudflare's public site key; the Turnstile secret stays in Supabase Auth settings.
+
+**Safe rollout order**
+
+1. In Cloudflare, create a managed Turnstile widget for the canonical host `www.scoremaxtutoring.com`. Add the bare host only if it is ever served directly instead of redirecting to `www`.
+2. Add the public site key to Netlify as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+3. Deploy the app bundle containing `AuthTurnstile`. Do not enable CAPTCHA in Supabase before this deploy or email auth will fail.
+4. In Supabase Dashboard → Auth → Bot and Abuse Protection, choose Cloudflare Turnstile, enter the Turnstile secret, and enable CAPTCHA protection.
+5. Verify email signup, password sign-in, and password reset. Also verify a direct Auth request without a CAPTCHA token is rejected.
+
+Keep email confirmation enabled. Never put the Turnstile secret in source control, Netlify browser-exposed variables, or any `NEXT_PUBLIC_` variable.
+
+### Auth Link and Canonical Host Safety
+
+- Auth emails link to `/auth/continue`, which shows an explicit confirmation button. The single-use Supabase token is verified only after the customer presses that button, preventing email scanners from consuming it on receipt.
+- `scoremaxtutor.netlify.app` redirects to `https://www.scoremaxtutoring.com` while the server-to-server email-hook path remains available during the transition.
+- After the hook uses the official domain and production auth has been verified, remove the Netlify hostname and callback from Supabase Auth redirect URLs.
 
 ---
 

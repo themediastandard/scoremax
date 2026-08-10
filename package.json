@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@marsidev/react-turnstile": "1.5.5",
     "@sentry/nextjs": "^10.69.0",
     "@stripe/stripe-js": "^8.7.0",
     "@supabase/ssr": "^0.8.0",

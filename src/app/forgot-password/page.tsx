@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import { Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -14,19 +15,28 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaGeneration, setCaptchaGeneration] = useState(0)
   const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
+      setError('Complete the security check to continue')
+      return
+    }
     setLoading(true)
     setError(null)
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback`,
+      ...(captchaToken && { captchaToken }),
     })
 
     if (error) {
       setError(error.message)
+      setCaptchaToken(null)
+      setCaptchaGeneration((generation) => generation + 1)
     } else {
       setSent(true)
     }
@@ -77,7 +87,17 @@ export default function ForgotPasswordPage() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full bg-[#1e293b]" disabled={loading}>
+            <AuthTurnstile
+              key={captchaGeneration}
+              action="password-reset"
+              onTokenChange={setCaptchaToken}
+            />
+
+            <Button
+              type="submit"
+              className="w-full bg-[#1e293b]"
+              disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
+            >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Send Reset Link'}
             </Button>
 

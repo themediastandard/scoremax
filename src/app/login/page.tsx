@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { siteImages } from '@/lib/site-images'
 import { Label } from '@/components/ui/label'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
+import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
 import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award } from 'lucide-react'
 
@@ -22,21 +23,32 @@ export default function LoginPage() {
   // no password to get right, so "Invalid login credentials" sends them in
   // circles — which is exactly how a real account got stuck.
   const [lastUsedGoogle, setLastUsedGoogle] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaGeneration, setCaptchaGeneration] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLastUsedGoogle(false)
+    if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
+      setError('Complete the security check to continue')
+      return
+    }
     setLoading(true)
     setError(null)
-    setLastUsedGoogle(false)
 
     const { error } = await supabase.auth.signInWithPassword({
       email: email.toLowerCase().trim(),
-      password
+      password,
+      options: {
+        ...(captchaToken && { captchaToken }),
+      },
     })
 
     if (error) {
+      setCaptchaToken(null)
+      setCaptchaGeneration((generation) => generation + 1)
       // Before showing a generic failure, check whether this address last got
       // in with Google. Never let this lookup change the outcome.
       try {
@@ -203,6 +215,12 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <AuthTurnstile
+              key={captchaGeneration}
+              action="login"
+              onTokenChange={setCaptchaToken}
+            />
+
             {error && !lastUsedGoogle && (
               <p className="text-sm text-red-500">{error}</p>
             )}
@@ -221,7 +239,11 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Button type="submit" className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
+              disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
+            >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign In'}
             </Button>
           </form>

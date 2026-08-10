@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'standardwebhooks'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
+import { buildAuthContinueUrl, readEmailOtpType } from '@/lib/auth-email-link'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
-
-function buildVerifyUrl(tokenHash: string, type: string): string {
-  const params = new URLSearchParams({ token_hash: tokenHash, type })
-  return `${APP_URL}/auth/callback?${params.toString()}`
-}
 
 const EMAIL_CONFIG: Record<
   string,
@@ -79,8 +75,20 @@ export async function POST(req: NextRequest) {
 
   const actionType = emailData.email_action_type || 'signup'
   const config = EMAIL_CONFIG[actionType] || EMAIL_CONFIG.signup
-  const verifyType = actionType === 'magic_link' ? 'magiclink' : actionType
-  const verifyUrl = buildVerifyUrl(emailData.token_hash, verifyType)
+  const verifyType = readEmailOtpType(actionType === 'magic_link' ? 'magiclink' : actionType)
+  if (!verifyType) {
+    console.error('Send email hook: unsupported action type', actionType)
+    return NextResponse.json(
+      { error: { message: 'Unsupported email action type' } },
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+  const verifyUrl = buildAuthContinueUrl(
+    APP_URL,
+    emailData.token_hash,
+    verifyType,
+    emailData.redirect_to
+  )
 
   const fullName = user.user_metadata?.full_name
   const greeting = fullName ? `Hi ${fullName},` : undefined

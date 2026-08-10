@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { siteImages } from '@/lib/site-images'
 import { Label } from '@/components/ui/label'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
+import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
 import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck } from 'lucide-react'
 
@@ -22,6 +23,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaGeneration, setCaptchaGeneration] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
@@ -31,6 +34,10 @@ export default function RegisterPage() {
       setError('Passwords do not match')
       return
     }
+    if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
+      setError('Complete the security check to continue')
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -38,6 +45,7 @@ export default function RegisterPage() {
       email: email.toLowerCase().trim(),
       password,
       options: {
+        ...(captchaToken && { captchaToken }),
         data: {
           full_name: fullName
         }
@@ -46,6 +54,8 @@ export default function RegisterPage() {
 
     if (error) {
       setError(error.message)
+      setCaptchaToken(null)
+      setCaptchaGeneration((generation) => generation + 1)
       setLoading(false)
       return
     }
@@ -250,9 +260,19 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <AuthTurnstile
+              key={captchaGeneration}
+              action="register"
+              onTokenChange={setCaptchaToken}
+            />
+
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
+              disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
+            >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
             </Button>
           </form>
