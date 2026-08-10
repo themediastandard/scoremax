@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { TutoringCtaButtons } from '@/components/TutoringCtaButtons';
 import { heroImages } from '@/lib/hero-images';
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbList, tutoringService } from '@/lib/structured-data';
@@ -72,6 +72,9 @@ export default function GREPage() {
         intro={INTRO}
         image={heroImages.gre}
         imageAlt="A graduate seminar room with a glass writing wall of worked equations beside a table stacked with academic journals."
+        ctaText="Book a Session"
+        ctaHref="/book"
+        secondaryCtaText="Book Free Consultation"
       />
 
       {/* Why Choose ScoreMax Section */}
@@ -247,14 +250,7 @@ export default function GREPage() {
             Start with a free consultation. We will look at your target programs, your test date, and which section
             will move your application furthest.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
-              Book Free Consultation
-            </Link>
-            <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
-              View Pricing
-            </Link>
-          </div>
+          <TutoringCtaButtons />
         </div>
       </section>
     </div>

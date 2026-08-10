@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import type { StaticImageData } from 'next/image';
 import { Check } from 'lucide-react';
 import { PageHero } from './PageHero';
+import { TutoringCtaButtons } from './TutoringCtaButtons';
 
 type DetailCard = {
   title: string;
@@ -62,6 +62,9 @@ export function AcademicTutoringLanding({
         intro={intro}
         image={heroImage}
         imageAlt={heroImageAlt}
+        ctaText="Book a Session"
+        ctaHref="/book"
+        secondaryCtaText="Book Free Consultation"
       />
 
       <section className="py-20 bg-gray-50">
@@ -134,14 +137,7 @@ export function AcademicTutoringLanding({
           <p className="text-gray-500 text-sm max-w-lg mx-auto mb-8">
             {ctaIntro}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
-              Book Free Consultation
-            </Link>
-            <Link href="/pricing" className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
-              View Pricing
-            </Link>
-          </div>
+          <TutoringCtaButtons />
         </div>
       </section>
     </div>

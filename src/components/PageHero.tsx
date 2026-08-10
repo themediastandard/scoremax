@@ -32,13 +32,15 @@ type PageHeroProps = {
   logoAlt?: string;
   ctaText?: string;
   ctaHref?: string;
+  secondaryCtaText?: string;
+  secondaryCtaHref?: string;
   /** Omit the CTA for pages whose action lives further down, e.g. an inline form. */
   showCta?: boolean;
 };
 
 /**
  * The hero shared by every marketing landing page — the four grade-level pages
- * (via AcademicTutoringLanding) and the SAT/ACT test-prep pages, which each had
+ * (via AcademicTutoringLanding) and the five test-prep pages, which each had
  * their own copy of this markup before.
  */
 export function PageHero({
@@ -51,6 +53,8 @@ export function PageHero({
   logoAlt,
   ctaText = 'Book Free Consultation',
   ctaHref = '/contact',
+  secondaryCtaText,
+  secondaryCtaHref = '/contact',
   showCta = true,
 }: PageHeroProps) {
   if (!image) {
@@ -69,9 +73,16 @@ export function PageHero({
             {intro}
           </p>
           {showCta ? (
-            <Link href={ctaHref} className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
-              {ctaText}
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href={ctaHref} className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
+                {ctaText}
+              </Link>
+              {secondaryCtaText ? (
+                <Link href={secondaryCtaHref} className="inline-flex items-center justify-center border border-gray-300 text-gray-700 px-6 py-3 text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors">
+                  {secondaryCtaText}
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </section>
@@ -116,9 +127,16 @@ export function PageHero({
             {intro}
           </p>
           {showCta ? (
-            <Link href={ctaHref} className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
-              {ctaText}
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <Link href={ctaHref} className="inline-flex items-center justify-center bg-[#b08a30] text-white px-6 py-3 text-sm font-medium hover:bg-[#9a7628] transition-colors font-[family-name:var(--font-playfair)]">
+                {ctaText}
+              </Link>
+              {secondaryCtaText ? (
+                <Link href={secondaryCtaHref} className="inline-flex items-center justify-center border border-white/70 text-white px-6 py-3 text-sm font-medium hover:bg-white hover:text-gray-900 transition-colors">
+                  {secondaryCtaText}
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>
