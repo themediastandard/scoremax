@@ -84,12 +84,26 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
           membership = existing
         } else {
           const priceId = sub.items?.data?.[0]?.price?.id
-          const { data: pricing } = await supabaseAdmin
-            .from('pricing')
-            .select('name, included_hours')
-            .eq('stripe_price_id', priceId)
-            .eq('type', 'membership')
-            .maybeSingle()
+          const pricingId = sub.metadata?.pricing_id
+          let pricing = null
+          if (pricingId) {
+            pricing = await supabaseAdmin
+              .from('pricing')
+              .select('name, included_hours')
+              .eq('id', pricingId)
+              .eq('type', 'membership')
+              .maybeSingle()
+              .then((r) => r.data)
+          }
+          if (!pricing && priceId) {
+            pricing = await supabaseAdmin
+              .from('pricing')
+              .select('name, included_hours')
+              .eq('type', 'membership')
+              .or(`stripe_price_id.eq.${priceId},stripe_online_price_id.eq.${priceId}`)
+              .maybeSingle()
+              .then((r) => r.data)
+          }
           const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
           const includedHours = pricing?.included_hours ?? 2
           const period = getSubscriptionPeriod(sub)

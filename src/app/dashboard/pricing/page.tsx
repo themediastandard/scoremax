@@ -3,6 +3,7 @@ import { getAuthUser, getProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { PricingTable } from '@/components/dashboard/PricingTable'
 import { buildSubjectCatalog, flattenSubjectCatalog } from '@/lib/subject-catalog'
+import { getOnlinePriceCents } from '@/lib/online-price'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'test-prep': 'Test Prep',
@@ -49,7 +50,7 @@ export default async function PricingPage() {
       <div>
         <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Pricing</h1>
         <p className="mt-1 text-gray-500 text-sm">
-          Manage pricing for memberships, packages, and courses. Changes apply to new bookings.
+          Review the discounted Zelle/base amount and the standard online amount charged through Stripe.
         </p>
       </div>
       <PricingTable />
@@ -72,9 +73,11 @@ export default async function PricingPage() {
               </div>
               <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
                 <p className="text-sm font-semibold text-gray-900">
-                  ${(r.rateCents / 100).toLocaleString()}/hr
+                  ${(getOnlinePriceCents(r.rateCents) / 100).toLocaleString()}/hr online
                 </p>
-                <span className="text-xs text-muted-foreground">Managed in code</span>
+                <span className="text-xs text-muted-foreground">
+                  ${(r.rateCents / 100).toLocaleString()}/hr Zelle/base · Managed in code
+                </span>
               </div>
             </div>
           ))}

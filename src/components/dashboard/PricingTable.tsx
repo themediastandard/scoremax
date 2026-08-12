@@ -11,7 +11,9 @@ interface PricingRow {
   type: string
   tier: string | null
   price_cents: number
+  online_price_cents: number | null
   stripe_price_id: string | null
+  stripe_online_price_id: string | null
   included_hours: number | null
   is_active: boolean
 }
@@ -25,9 +27,9 @@ const typeLabels: Record<string, string> = {
 }
 
 function getNonEditableReason(item: PricingRow): string | null {
-  // Stripe bills subscriptions off stripe_price_id, so editing the table's
-  // price would not change what members are charged.
-  if (item.type === 'membership' && item.stripe_price_id) return 'Handled by Stripe'
+  // Stripe subscriptions use immutable recurring Price objects. A membership
+  // price change must create a replacement Stripe Price before this row moves.
+  if (item.type === 'membership' && item.stripe_online_price_id) return 'Recurring price managed in Stripe'
   return null
 }
 
@@ -70,9 +72,14 @@ export function PricingTable() {
                   {item.included_hours != null && ` · ${item.included_hours} hrs`}
                 </p>
               </div>
-              <p className="text-sm font-semibold text-gray-900 shrink-0">
-                ${(item.price_cents / 100).toLocaleString()}
-              </p>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-semibold text-gray-900">
+                  ${((item.online_price_cents ?? item.price_cents) / 100).toLocaleString()} online
+                </p>
+                <p className="text-xs text-gray-500">
+                  ${(item.price_cents / 100).toLocaleString()} Zelle/base
+                </p>
+              </div>
             </div>
             <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-end">
               {reason ? (
@@ -102,7 +109,8 @@ export function PricingTable() {
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zelle/Base</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Online</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
@@ -118,6 +126,9 @@ export function PricingTable() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 ${(item.price_cents / 100).toLocaleString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                ${((item.online_price_cents ?? item.price_cents) / 100).toLocaleString()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {item.included_hours ?? '—'}
@@ -137,7 +148,7 @@ export function PricingTable() {
           ))}
           {items.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+              <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
                 No pricing records found.
               </td>
             </tr>

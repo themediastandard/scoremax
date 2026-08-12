@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { buildSubjectCatalog, getSubjectMap } from '@/lib/subject-catalog'
 import { hasSatOrActSubject } from '@/lib/booking-plan-rules'
+import { getOnlinePriceCents } from '@/lib/online-price'
 import {
     availabilityWindowsFromLegacy,
     legacyAvailabilityFromWindows,
@@ -65,22 +66,40 @@ export async function POST(req: NextRequest) {
     let trustedPriceCents = 0
     let trustedPlanName = plan_name || ''
     let trustedIncludedHours: number | null = null
+    let trustedPlanId: string | null = null
     const line_items: Array<{ price?: string; price_data?: { currency: string; product_data: { name: string }; unit_amount: number }; quantity: number }> = []
     let mode: 'payment' | 'subscription' = 'payment'
 
     if (plan_type === 'membership') {
-        if (!price_id) throw new Error('Missing price_id for membership')
-        const { data: memberPlan } = await supabaseAdmin
-            .from('pricing')
-            .select('price_cents, name, stripe_price_id')
-            .eq('stripe_price_id', price_id)
-            .eq('type', 'membership')
-            .single()
+        const memberPlanId = body.plan_id || body.booking_details?.plan_id
+        if (!memberPlanId && !price_id) throw new Error('Missing membership plan')
+        const membershipSelect = 'id, price_cents, online_price_cents, name, included_hours, stripe_price_id, stripe_online_price_id'
+        let memberPlan = memberPlanId
+            ? await supabaseAdmin
+                .from('pricing')
+                .select(membershipSelect)
+                .eq('type', 'membership')
+                .eq('id', memberPlanId)
+                .maybeSingle()
+                .then((r) => r.data)
+            : null
+        if (!memberPlan && price_id) {
+            memberPlan = await supabaseAdmin
+                .from('pricing')
+                .select(membershipSelect)
+                .eq('type', 'membership')
+                .or(`stripe_price_id.eq.${price_id},stripe_online_price_id.eq.${price_id}`)
+                .maybeSingle()
+                .then((r) => r.data)
+        }
         if (!memberPlan) throw new Error('Invalid membership plan')
-        trustedPriceCents = memberPlan.price_cents
+        if (!memberPlan.stripe_online_price_id) throw new Error('Online membership price is not configured')
+        trustedPriceCents = getOnlinePriceCents(memberPlan.price_cents, memberPlan.online_price_cents)
         trustedPlanName = memberPlan.name
+        trustedIncludedHours = memberPlan.included_hours
+        trustedPlanId = memberPlan.id
         mode = 'subscription'
-        line_items.push({ price: memberPlan.stripe_price_id, quantity: 1 })
+        line_items.push({ price: memberPlan.stripe_online_price_id, quantity: 1 })
     } else if (plan_type === 'package') {
         const { data: subjectRows, error: subjectsError } = await supabaseAdmin
             .from('subjects')
@@ -97,16 +116,17 @@ export async function POST(req: NextRequest) {
         if (!pkgId) throw new Error('Missing plan_id for package')
         const { data: pkg } = await supabaseAdmin
             .from('pricing')
-            .select('price_cents, name, included_hours')
+            .select('price_cents, online_price_cents, name, included_hours')
             .eq('id', pkgId)
             .eq('type', 'package')
             .single()
         if (!pkg) throw new Error('Invalid package plan')
-        trustedPriceCents = pkg.price_cents
+        trustedPriceCents = getOnlinePriceCents(pkg.price_cents, pkg.online_price_cents)
         trustedPlanName = pkg.name
         trustedIncludedHours = pkg.included_hours
+        trustedPlanId = pkgId
         line_items.push({
-            price_data: { currency: 'usd', product_data: { name: pkg.name }, unit_amount: pkg.price_cents },
+            price_data: { currency: 'usd', product_data: { name: pkg.name }, unit_amount: trustedPriceCents },
             quantity: 1,
         })
     } else if (plan_type === 'single') {
@@ -122,16 +142,16 @@ export async function POST(req: NextRequest) {
             return Math.max(max, rate)
         }, 0)
         if (maxRate <= 0) throw new Error('Could not determine session rate')
-        trustedPriceCents = maxRate
+        trustedPriceCents = getOnlinePriceCents(maxRate)
         trustedPlanName = 'Single Session'
         line_items.push({
-            price_data: { currency: 'usd', product_data: { name: 'Tutoring Session' }, unit_amount: maxRate },
+            price_data: { currency: 'usd', product_data: { name: 'Tutoring Session' }, unit_amount: trustedPriceCents },
             quantity: 1,
         })
     } else if (plan_type === 'course') {
         const { data: coursePricing } = await supabaseAdmin
             .from('pricing')
-            .select('price_cents, name')
+            .select('id, price_cents, online_price_cents, name, included_hours')
             .eq('type', 'course')
         const courseType = String(body.courseType || 'sat')
         const matchesCourseType = (name: string) => {
@@ -145,8 +165,10 @@ export async function POST(req: NextRequest) {
         const matched = coursePricing?.find((c: { name: string }) => matchesCourseType(c.name))
         if (!matched) throw new Error(`No course pricing found for course type: ${courseType}`)
 
-        trustedPriceCents = matched.price_cents
+        trustedPriceCents = getOnlinePriceCents(matched.price_cents, matched.online_price_cents)
         trustedPlanName = matched.name
+        trustedIncludedHours = matched.included_hours
+        trustedPlanId = matched.id
 
         if (trustedPriceCents <= 0) throw new Error('Could not determine course price')
         line_items.push({
@@ -195,7 +217,7 @@ export async function POST(req: NextRequest) {
             booking_request_id: booking.id,
             plan_type,
             plan_name: trustedPlanName || plan_type,
-            ...(body.plan_id && { plan_id: body.plan_id }),
+            ...(trustedPlanId && { plan_id: trustedPlanId }),
             ...(trustedIncludedHours && { package_hours: String(trustedIncludedHours) }),
             user_id: user?.id,
             contact_name: booking_details.full_name,
@@ -211,7 +233,8 @@ export async function POST(req: NextRequest) {
         } : undefined,
         subscription_data: mode === 'subscription' ? {
             metadata: {
-                booking_request_id: booking.id
+                booking_request_id: booking.id,
+                ...(trustedPlanId && { pricing_id: trustedPlanId }),
             }
         } : undefined
     })

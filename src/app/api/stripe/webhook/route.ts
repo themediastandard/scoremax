@@ -19,6 +19,27 @@ import {
   isRenewalInvoice,
 } from '@/lib/stripe-subscription'
 
+async function findMembershipPricing(pricingId?: string | null, stripePriceId?: string | null) {
+  if (pricingId) {
+    const { data } = await supabaseAdmin
+      .from('pricing')
+      .select('name, included_hours')
+      .eq('id', pricingId)
+      .eq('type', 'membership')
+      .maybeSingle()
+    if (data) return data
+  }
+
+  if (!stripePriceId) return null
+  const { data } = await supabaseAdmin
+    .from('pricing')
+    .select('name, included_hours')
+    .eq('type', 'membership')
+    .or(`stripe_price_id.eq.${stripePriceId},stripe_online_price_id.eq.${stripePriceId}`)
+    .maybeSingle()
+  return data
+}
+
 export async function POST(req: Request) {
   const body = await req.text()
   const signature = (await headers()).get('Stripe-Signature') as string
@@ -299,12 +320,7 @@ export async function POST(req: Request) {
         })
         const priceId = subscription.items?.data?.[0]?.price?.id
         const period = getSubscriptionPeriod(subscription)
-        const { data: pricing } = await supabaseAdmin
-            .from('pricing')
-            .select('name, included_hours')
-            .eq('stripe_price_id', priceId)
-            .eq('type', 'membership')
-            .single()
+        const pricing = await findMembershipPricing(metadata.plan_id, priceId)
         // If the lookup misses, the fallback silently grants a Starter allocation
         // — so a customer who paid $899 for Premier would receive 2 hours and
         // nobody would find out. The fallback stays, because refusing to grant
@@ -314,7 +330,7 @@ export async function POST(req: Request) {
             console.error(
                 `Membership pricing lookup failed for Stripe price ${priceId} ` +
                 `(subscription ${subscription.id}, customer ${customer.id}). ` +
-                `Granting the 2-hour Starter fallback — verify pricing.stripe_price_id ` +
+                `Granting the 2-hour Starter fallback — verify the membership Stripe price IDs ` +
                 `matches the live Stripe prices and correct this membership by hand.`
             )
         }
@@ -639,17 +655,10 @@ export async function POST(req: Request) {
 
     if (event.type === 'customer.subscription.updated') {
       const priceId = subscription.items?.data?.[0]?.price?.id
-      if (priceId) {
-        const { data: pricing } = await supabaseAdmin
-          .from('pricing')
-          .select('name, included_hours')
-          .eq('stripe_price_id', priceId)
-          .eq('type', 'membership')
-          .single()
-        if (pricing) {
-          updates.tier = pricing.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
-          updates.included_hours = pricing.included_hours
-        }
+      const pricing = await findMembershipPricing(subscription.metadata?.pricing_id, priceId)
+      if (pricing) {
+        updates.tier = pricing.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
+        updates.included_hours = pricing.included_hours
       }
     }
 

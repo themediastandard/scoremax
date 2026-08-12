@@ -19,7 +19,9 @@ interface PricingRow {
   type: string
   tier: string | null
   price_cents: number
+  online_price_cents: number | null
   stripe_price_id: string | null
+  stripe_online_price_id: string | null
   included_hours: number | null
   is_active: boolean
 }
@@ -33,6 +35,7 @@ export function PricingForm({ item, children }: PricingFormProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [priceDollars, setPriceDollars] = useState((item.price_cents / 100).toFixed(2))
+  const [onlinePriceDollars, setOnlinePriceDollars] = useState(((item.online_price_cents ?? item.price_cents) / 100).toFixed(2))
   const [name, setName] = useState(item.name)
   const [includedHours, setIncludedHours] = useState(item.included_hours?.toString() ?? '')
   const router = useRouter()
@@ -42,6 +45,7 @@ export function PricingForm({ item, children }: PricingFormProps) {
     setLoading(true)
     try {
       const price_cents = Math.round(parseFloat(priceDollars) * 100)
+      const online_price_cents = Math.round(parseFloat(onlinePriceDollars) * 100)
       const res = await fetch('/api/admin/pricing', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -49,6 +53,7 @@ export function PricingForm({ item, children }: PricingFormProps) {
           id: item.id,
           name: name.trim(),
           price_cents,
+          online_price_cents,
           included_hours: includedHours ? parseInt(includedHours, 10) : null,
         }),
       })
@@ -91,7 +96,7 @@ export function PricingForm({ item, children }: PricingFormProps) {
             )}
           </div>
           <div>
-            <Label htmlFor="price">Price ($)</Label>
+            <Label htmlFor="price">Zelle/Base Price ($)</Label>
             <Input
               id="price"
               type="number"
@@ -101,6 +106,24 @@ export function PricingForm({ item, children }: PricingFormProps) {
               onChange={(e) => setPriceDollars(e.target.value)}
               className="mt-1"
             />
+            <p className="mt-1 text-xs text-gray-400">
+              The discounted amount recorded for Zelle and manual payments.
+            </p>
+          </div>
+          <div>
+            <Label htmlFor="online-price">Online Price ($)</Label>
+            <Input
+              id="online-price"
+              type="number"
+              step="0.01"
+              min={priceDollars || '0'}
+              value={onlinePriceDollars}
+              onChange={(e) => setOnlinePriceDollars(e.target.value)}
+              className="mt-1"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              The standard amount shown online and charged through Stripe.
+            </p>
           </div>
           {(item.type === 'membership' || item.type === 'package' || item.type === 'course' || item.type === 'sat-course-inperson') && (
             <div>

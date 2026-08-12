@@ -8,10 +8,11 @@ import {
   priceOffer,
   pricedTutoringService,
 } from '@/lib/structured-data';
+import { getOnlinePriceCents } from '@/lib/online-price';
 
 export const metadata: Metadata = {
   title: 'Pricing - ScoreMax Tutoring | Memberships, Packages & Courses',
-  description: 'Transparent pricing for SAT, ACT, and academic tutoring. Monthly memberships from $299, prepaid packages, and online course programs. Book a free consultation.',
+  description: 'Transparent pricing for SAT, ACT, and academic tutoring. Monthly memberships from $309, prepaid packages, and online course programs. Book a free consultation.',
   keywords: 'ScoreMax pricing, tutoring cost, SAT tutoring price, ACT tutoring, membership, tutoring packages',
   // Without these the page inherited the root layout's openGraph wholesale, so
   // a link to /pricing shared anywhere previewed as the homepage — homepage
@@ -34,14 +35,13 @@ export const metadata: Metadata = {
   },
 };
 
-// Single-session hourly rates mirror the subject catalog
-// (src/lib/subject-catalog.js), which is the authority checkout uses for
-// 'single' plans. Update both together.
+// Single-session online rates are the approved rounded amounts derived from
+// the subject catalog's base/Zelle rates. Checkout applies the same mapping.
 const oneOnOneRates = [
-  { name: 'SAT / ACT', rate: '$250', note: 'Includes materials' },
-  { name: 'AP Math & Science', rate: '$200', note: 'Per hour' },
-  { name: 'Middle & High School', rate: '$175', note: 'Math & Science (non-AP)' },
-  { name: 'Elementary', rate: '$150', note: 'Reading, math, science' },
+  { name: 'SAT / ACT', rate: '$260', note: 'Includes materials' },
+  { name: 'AP Math & Science', rate: '$210', note: 'Per hour' },
+  { name: 'Middle & High School', rate: '$185', note: 'Math & Science (non-AP)' },
+  { name: 'Elementary', rate: '$155', note: 'Reading, math, science' },
 ];
 
 // Perk copy per membership tier. Prices and hours come from the `pricing`
@@ -54,15 +54,15 @@ const TIER_PERKS: Record<string, string[]> = {
 const DEFAULT_PERKS = ['Month-to-month', 'Unused hours roll over (up to one month’s worth)'];
 
 // Fallbacks keep the page whole if the pricing query ever fails. They mirror
-// the table as of 2026-08-02; the live render prefers the table.
+// the table as of 2026-08-12; the live render prefers the table.
 const FALLBACK_MEMBERSHIPS = [
-  { name: 'Starter', price: 299, hours: 2, perks: TIER_PERKS.starter, featured: false },
-  { name: 'Core', price: 549, hours: 4, perks: TIER_PERKS.core, featured: true },
-  { name: 'Premier', price: 899, hours: 8, perks: TIER_PERKS.premier, featured: false },
+  { name: 'Starter', price: 309, hours: 2, perks: TIER_PERKS.starter, featured: false },
+  { name: 'Core', price: 569, hours: 4, perks: TIER_PERKS.core, featured: true },
+  { name: 'Premier', price: 929, hours: 8, perks: TIER_PERKS.premier, featured: false },
 ];
 const FALLBACK_PACKAGES = [
-  { hours: 10, price: 1200, perHour: 120, saving: null as string | null },
-  { hours: 20, price: 2160, perHour: 108, saving: '10% off' as string | null },
+  { hours: 10, price: 1240, perHour: 124, saving: null as string | null },
+  { hours: 20, price: 2225, perHour: 111, saving: '10% off' as string | null },
 ];
 
 export default async function PricingPage() {
@@ -71,7 +71,7 @@ export default async function PricingPage() {
   const supabase = await createClient();
   const { data: pricingRows } = await supabase
     .from('pricing')
-    .select('name, type, tier, price_cents, included_hours')
+    .select('name, type, tier, price_cents, online_price_cents, included_hours')
     .eq('is_active', true)
     .order('price_cents');
   const rows = pricingRows ?? [];
@@ -82,7 +82,7 @@ export default async function PricingPage() {
         const tier = r.tier?.toLowerCase() ?? '';
         return {
           name: r.name.replace(/\s+Membership$/i, ''),
-          price: r.price_cents / 100,
+          price: getOnlinePriceCents(r.price_cents, r.online_price_cents) / 100,
           hours: r.included_hours as number,
           perks: TIER_PERKS[tier] ?? DEFAULT_PERKS,
           featured: tier === 'core',
@@ -91,14 +91,18 @@ export default async function PricingPage() {
     : FALLBACK_MEMBERSHIPS;
 
   const packageRows = rows.filter((r) => r.type === 'package' && r.included_hours);
-  const basePerHour = Math.max(...packageRows.map((r) => r.price_cents / (r.included_hours as number)), 0);
+  const basePerHour = Math.max(
+    ...packageRows.map((r) => getOnlinePriceCents(r.price_cents, r.online_price_cents) / (r.included_hours as number)),
+    0
+  );
   const packages = packageRows.length
     ? packageRows.map((r) => {
-        const perHourCents = r.price_cents / (r.included_hours as number);
+        const onlinePriceCents = getOnlinePriceCents(r.price_cents, r.online_price_cents);
+        const perHourCents = onlinePriceCents / (r.included_hours as number);
         const savingPct = basePerHour > 0 ? Math.round((1 - perHourCents / basePerHour) * 100) : 0;
         return {
           hours: r.included_hours as number,
-          price: r.price_cents / 100,
+          price: onlinePriceCents / 100,
           perHour: Math.round(perHourCents / 100),
           saving: savingPct > 0 ? `${savingPct}% off` : null,
         };
@@ -114,8 +118,8 @@ export default async function PricingPage() {
         'Combined SAT + ACT course available',
       ];
   const courseFrom = courseRows.length
-    ? Math.min(...courseRows.map((r) => r.price_cents)) / 100
-    : 2500;
+    ? Math.min(...courseRows.map((r) => getOnlinePriceCents(r.price_cents, r.online_price_cents))) / 100
+    : 2575;
 
   /*
    * Offers are built from `memberships`, `packages` and `courseRows` — the same
@@ -182,6 +186,9 @@ export default async function PricingPage() {
             Choose the option that fits your goals. All plans include expert tutors, personalized support, and proven results.
           </p>
           <p className="text-[#b08a30] text-sm font-medium mt-2">All materials included with all subjects.</p>
+          <p className="text-gray-500 text-xs mt-2">
+            Prices shown are standard online payment prices. Paying by Zelle? Contact ScoreMax for the discounted price.
+          </p>
         </div>
       </section>
 

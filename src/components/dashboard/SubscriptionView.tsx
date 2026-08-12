@@ -23,8 +23,9 @@ interface Plan {
   name: string
   tier: string
   price_cents: number
+  online_price_cents: number
   included_hours: number
-  stripe_price_id: string
+  stripe_online_price_id: string
 }
 
 interface SubscriptionViewProps {
@@ -157,7 +158,7 @@ export function SubscriptionView({ membership, hasStripeCustomer, plans }: Subsc
                   {formatTierName(membership.tier)}
                 </CardTitle>
                 <p className="mt-1 text-lg font-semibold text-[#b08a30]">
-                  ${(plans.find(p => p.tier === membership.tier)?.price_cents ?? 0) / 100}/mo
+                  ${(plans.find(p => p.tier === membership.tier)?.online_price_cents ?? 0) / 100}/mo
                 </p>
               </div>
               <Badge
@@ -336,11 +337,11 @@ function PlansGrid({
               <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold text-[#1e293b]">${plan.price_cents / 100}</span>
+                  <span className="text-3xl font-bold text-[#1e293b]">${plan.online_price_cents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
                 <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included</p>
-                <p className="text-xs text-gray-400">${Math.round(plan.price_cents / plan.included_hours / 100)}/hr effective rate</p>
+                <p className="text-xs text-gray-400">${Math.round(plan.online_price_cents / plan.included_hours / 100)}/hr effective rate</p>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-2 text-sm">

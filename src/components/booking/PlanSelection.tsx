@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
 import { PACKAGE_VALIDITY_MONTHS } from '@/lib/package-expiry'
 import { getSatActSelection } from '@/lib/booking-plan-rules'
+import { getOnlinePriceCents } from '@/lib/online-price'
 
 interface PlanSelectionProps {
   subjects: string[]
@@ -47,20 +48,23 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
     })
   }, [])
 
-  const getSingleRate = () => {
+  const getSingleRateCents = () => {
     if (subjects.length === 0) return 0
     let maxRate = 0
     subjects.forEach(id => {
       const s = subjectMap[id]
       if (s && s.hourly_rate_cents > maxRate) maxRate = s.hourly_rate_cents
     })
-    return maxRate / 100
+    return maxRate > 0 ? getOnlinePriceCents(maxRate) : 0
   }
 
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
 
   const { isSAT, isACT } = getSatActSelection(subjects, subjectMap)
-  const singleRate = getSingleRate()
+  const singleRateCents = getSingleRateCents()
+  const singleRate = singleRateCents / 100
+  const onlinePriceFor = (row: { price_cents: number; online_price_cents?: number | null }) =>
+    getOnlinePriceCents(row.price_cents, row.online_price_cents)
 
   // Course prices come from the same `pricing` rows checkout charges from,
   // matched by the same sat/act name keywords — the cards can never quote a
@@ -75,16 +79,16 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       if (courseType === 'act') return hasAct && !hasSat
       return hasSat && !hasAct
     })
-  const combinedCourse = findCourse('sat-act-combined') ?? { price_cents: 325000, included_hours: 13 }
-  const satCourse = findCourse('sat') ?? { price_cents: 250000, included_hours: 10 }
-  const actCourse = findCourse('act') ?? { price_cents: 250000, included_hours: 10 }
+  const combinedCourse = findCourse('sat-act-combined') ?? { price_cents: 325000, online_price_cents: 335000, included_hours: 13 }
+  const satCourse = findCourse('sat') ?? { price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
+  const actCourse = findCourse('act') ?? { price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
   const dollars = (cents: number) => `$${(cents / 100).toLocaleString()}`
 
   const packageList = pricing.filter(p => p.type === 'package').map(pkg => {
-    const packageHourlyCents = pkg.price_cents / pkg.included_hours
-    const singleRateCents = singleRate * 100
+    const onlinePriceCents = onlinePriceFor(pkg)
+    const packageHourlyCents = onlinePriceCents / pkg.included_hours
     const savingsPercent = singleRateCents > 0 ? Math.round(((singleRateCents - packageHourlyCents) / singleRateCents) * 100) : null
-    return { pkg, savingsPercent }
+    return { pkg, onlinePriceCents, savingsPercent }
   })
 
   // Existing Credits View
@@ -159,6 +163,9 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
         <p className="text-center font-medium text-[#1e293b]">
           Choose <span className="font-bold">one</span> plan below. Pick the option that works best for you.
         </p>
+        <p className="mt-1 text-center text-sm text-gray-600">
+          Prices shown are standard online payment prices. Paying by Zelle? Contact ScoreMax for the discounted price.
+        </p>
       </div>
 
       {/* Option 1: Monthly Memberships */}
@@ -169,8 +176,8 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {pricing.filter(p => p.type === 'membership').map(plan => {
-            const membershipHourlyCents = plan.price_cents / plan.included_hours
-            const singleRateCents = singleRate * 100
+            const onlinePriceCents = onlinePriceFor(plan)
+            const membershipHourlyCents = onlinePriceCents / plan.included_hours
             const savingsPercent = singleRateCents > 0
               ? Math.round(((singleRateCents - membershipHourlyCents) / singleRateCents) * 100)
               : null
@@ -181,7 +188,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold">${plan.price_cents / 100}</span>
+                  <span className="text-3xl font-bold">${onlinePriceCents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
                 <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included per month</p>
@@ -208,7 +215,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <CardFooter>
                 <Button 
                   className={`w-full ${plan.tier === 'core' ? 'bg-[#b08a30] hover:bg-[#b58b2a]' : ''}`}
-                  onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_price_id, name: plan.name })}
+                  onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_online_price_id, name: plan.name })}
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Join & Book'}
@@ -233,7 +240,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
               <CardHeader>
                 <CardTitle>Combined SAT + ACT Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(combinedCourse.price_cents)}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(combinedCourse))}</span></div>
                 <p className="text-sm text-gray-500">{combinedCourse.included_hours} Sessions • Full Prep for Both Exams</p>
               </CardHeader>
               <CardContent>
@@ -243,7 +250,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: combinedCourse.price_cents, name: 'Combined SAT + ACT Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: onlinePriceFor(combinedCourse), name: 'Combined SAT + ACT Package' })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -254,7 +261,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
               <CardHeader>
                 <CardTitle>SAT Prep Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(satCourse.price_cents)}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(satCourse))}</span></div>
                 <p className="text-sm text-gray-500">{satCourse.included_hours} Sessions • Complete Prep</p>
               </CardHeader>
               <CardContent>
@@ -265,7 +272,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: satCourse.price_cents, name: 'SAT Prep Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: onlinePriceFor(satCourse), name: 'SAT Prep Package' })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -276,7 +283,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
               <CardHeader>
                 <CardTitle>ACT Prep Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(actCourse.price_cents)}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(actCourse))}</span></div>
                 <p className="text-sm text-gray-500">{actCourse.included_hours} Sessions • Complete Prep</p>
               </CardHeader>
               <CardContent>
@@ -286,22 +293,22 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: actCourse.price_cents, name: 'ACT Prep Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: onlinePriceFor(actCourse), name: 'ACT Prep Package' })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
             </Card>
           )}
-          {!isSAT && !isACT && packageList.map(({ pkg, savingsPercent }) => (
+          {!isSAT && !isACT && packageList.map(({ pkg, onlinePriceCents, savingsPercent }) => (
             <Card key={pkg.id} className="border-gray-200 bg-white hover:border-[#517cad]/50 hover:shadow-lg transition-all">
               <CardHeader>
                 <CardTitle className="text-xl">{pkg.name}</CardTitle>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-[#1e293b]">${pkg.price_cents / 100}</span>
+                  <span className="text-3xl font-bold text-[#1e293b]">${onlinePriceCents / 100}</span>
                   <span className="text-gray-500 text-sm">for {pkg.included_hours} hours</span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#4a729f]">${(pkg.price_cents / pkg.included_hours / 100).toFixed(0)}/hr</span>
+                  <span className="text-sm font-medium text-[#4a729f]">${(onlinePriceCents / pkg.included_hours / 100).toFixed(0)}/hr</span>
                   {savingsPercent != null && savingsPercent > 0 && (
                     <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs font-semibold">
                       Save {savingsPercent}%
@@ -318,7 +325,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: pkg.price_cents, name: pkg.name })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: onlinePriceCents, name: pkg.name })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -349,7 +356,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
             </ul>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRate * 100, name: 'Single Session' })} disabled={processing}>
+            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRateCents, name: 'Single Session' })} disabled={processing}>
               {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : `Book Single Session for $${singleRate}`}
             </Button>
           </CardFooter>
