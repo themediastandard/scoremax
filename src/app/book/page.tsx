@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, ReactNode } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Check, Loader2 } from 'lucide-react'
+import { Check, Loader2, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 // Types for Subject Data
@@ -356,15 +356,27 @@ export default function BookPage() {
           entered; this catches it before they have typed anything.
         */}
         {!signedInEmail && (
-          <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-            Already have a ScoreMax account?{' '}
-            <Link
-              href={`/login?next=${encodeURIComponent('/book')}`}
-              className="font-semibold text-[#4a729f] underline underline-offset-2 hover:text-[#3b5c85]"
-            >
-              Sign in
-            </Link>{' '}
-            to book with your existing credits.
+          <div className="mb-8 overflow-hidden rounded-xl border-2 border-[#b08a30]/45 bg-gradient-to-r from-amber-50 to-white shadow-sm">
+            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#b08a30]/15 text-[#8a6a25]">
+                  <LogIn className="size-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-[#1e293b]">Returning customer?</p>
+                  <p className="mt-1 max-w-xl text-sm leading-6 text-gray-600">
+                    Sign in before booking to use your existing session credits and avoid paying again.
+                    New to ScoreMax? Continue with Step 1 below.
+                  </p>
+                </div>
+              </div>
+              <Button asChild className="w-full shrink-0 bg-[#1e293b] hover:bg-[#334155] sm:w-auto">
+                <Link href={`/login?next=${encodeURIComponent('/book')}`}>
+                  <LogIn className="size-4" aria-hidden="true" />
+                  Sign In to Use Credits
+                </Link>
+              </Button>
+            </div>
           </div>
         )}
 

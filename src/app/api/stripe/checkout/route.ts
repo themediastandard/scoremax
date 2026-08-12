@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { buildSubjectCatalog, getSubjectMap } from '@/lib/subject-catalog'
+import { hasSatOrActSubject } from '@/lib/booking-plan-rules'
 import {
     availabilityWindowsFromLegacy,
     legacyAvailabilityFromWindows,
@@ -81,6 +82,17 @@ export async function POST(req: NextRequest) {
         mode = 'subscription'
         line_items.push({ price: memberPlan.stripe_price_id, quantity: 1 })
     } else if (plan_type === 'package') {
+        const { data: subjectRows, error: subjectsError } = await supabaseAdmin
+            .from('subjects')
+            .select('*')
+            .eq('is_active', true)
+        if (subjectsError) throw new Error('Could not validate subjects for this package')
+
+        const subjectMap = getSubjectMap(buildSubjectCatalog(subjectRows ?? []))
+        if (hasSatOrActSubject(resolvedSubjects, subjectMap)) {
+            throw new Error('SAT and ACT bookings require the dedicated exam prep package')
+        }
+
         const pkgId = body.plan_id || body.booking_details?.plan_id
         if (!pkgId) throw new Error('Missing plan_id for package')
         const { data: pkg } = await supabaseAdmin

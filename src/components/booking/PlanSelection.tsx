@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, Star, Loader2 } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
 import { PACKAGE_VALIDITY_MONTHS } from '@/lib/package-expiry'
+import { getSatActSelection } from '@/lib/booking-plan-rules'
 
 interface PlanSelectionProps {
   subjects: string[]
@@ -58,8 +59,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
 
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
 
-  const isSAT = subjects.some(id => subjectMap[id]?.slug?.includes('sat'))
-  const isACT = subjects.some(id => subjectMap[id]?.slug?.includes('act'))
+  const { isSAT, isACT } = getSatActSelection(subjects, subjectMap)
   const singleRate = getSingleRate()
 
   // Course prices come from the same `pricing` rows checkout charges from,
@@ -161,83 +161,6 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
         </p>
       </div>
 
-      {/* SAT/ACT Exam Prep - shown when applicable, before options */}
-      {(isSAT || isACT) && (
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg text-[#1e293b] flex items-center">
-            <Star className="w-5 h-5 text-[#b08a30] mr-2 fill-current" />
-            Exam Prep Course Programs
-          </h3>
-          <p className="text-sm text-gray-600">Structured curriculum for SAT/ACT. Choose one of these or a plan below.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {isSAT && isACT && (
-              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden md:col-span-2">
-                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
-                <CardHeader>
-                  <CardTitle>Combined SAT+ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(combinedCourse.price_cents)}</span></div>
-                  <p className="text-sm text-gray-500">{combinedCourse.included_hours} Sessions • Full Prep for Both Exams</p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum covering both tests</li>
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling (2-4x/week)</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: combinedCourse.price_cents, name: 'Combined SAT+ACT Course' })} disabled={processing}>
-                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-            {isSAT && !isACT && (
-              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
-                <CardHeader>
-                  <CardTitle>Full SAT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(satCourse.price_cents)}</span></div>
-                  <p className="text-sm text-gray-500">{satCourse.included_hours} Sessions • Complete Prep</p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {satCourse.included_hours} one-hour sessions</li>
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: satCourse.price_cents, name: 'Full SAT Course' })} disabled={processing}>
-                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-            {isACT && !isSAT && (
-              <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
-                <CardHeader>
-                  <CardTitle>Full ACT Course</CardTitle>
-                  <div className="mt-2"><span className="text-3xl font-bold">{dollars(actCourse.price_cents)}</span></div>
-                  <p className="text-sm text-gray-500">{actCourse.included_hours} Sessions • Complete Prep</p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {actCourse.included_hours} one-hour sessions</li>
-                    <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: actCourse.price_cents, name: 'Full ACT Course' })} disabled={processing}>
-                    {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Enroll Now'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Option 1: Monthly Memberships */}
       <OptionSection
         optionNum={1}
@@ -300,10 +223,76 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       <OptionSection
         optionNum={2}
         title="Prepaid Packages"
-        description={`Pay upfront for a block of sessions. Valid ${PACKAGE_VALIDITY_MONTHS} months, ideal for short-term goals.`}
+        description={isSAT || isACT
+          ? 'Pay upfront for a complete SAT or ACT preparation package.'
+          : `Pay upfront for a block of sessions. Valid ${PACKAGE_VALIDITY_MONTHS} months, ideal for short-term goals.`}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {packageList.map(({ pkg, savingsPercent }) => (
+          {isSAT && isACT && (
+            <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden md:col-span-2">
+              <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
+              <CardHeader>
+                <CardTitle>Combined SAT + ACT Package</CardTitle>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(combinedCourse.price_cents)}</span></div>
+                <p className="text-sm text-gray-500">{combinedCourse.included_hours} Sessions • Full Prep for Both Exams</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum covering both tests</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling (2-4x/week)</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: combinedCourse.price_cents, name: 'Combined SAT + ACT Package' })} disabled={processing}>
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+          {isSAT && !isACT && (
+            <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
+              <CardHeader>
+                <CardTitle>SAT Prep Package</CardTitle>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(satCourse.price_cents)}</span></div>
+                <p className="text-sm text-gray-500">{satCourse.included_hours} Sessions • Complete Prep</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {satCourse.included_hours} one-hour sessions</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Flexible scheduling</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: satCourse.price_cents, name: 'SAT Prep Package' })} disabled={processing}>
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+          {isACT && !isSAT && (
+            <Card className="border-[#517cad] border-2 shadow-md relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
+              <CardHeader>
+                <CardTitle>ACT Prep Package</CardTitle>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(actCourse.price_cents)}</span></div>
+                <p className="text-sm text-gray-500">{actCourse.included_hours} Sessions • Complete Prep</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> {actCourse.included_hours} one-hour sessions</li>
+                  <li className="flex items-start"><Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" /> Structured curriculum</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: actCourse.price_cents, name: 'ACT Prep Package' })} disabled={processing}>
+                  {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+          {!isSAT && !isACT && packageList.map(({ pkg, savingsPercent }) => (
             <Card key={pkg.id} className="border-gray-200 bg-white hover:border-[#517cad]/50 hover:shadow-lg transition-all">
               <CardHeader>
                 <CardTitle className="text-xl">{pkg.name}</CardTitle>
