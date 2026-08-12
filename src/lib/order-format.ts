@@ -1,10 +1,20 @@
+import { formatPackageHoursLabel } from '@/lib/package-order-label'
+import { formatBusinessDateTime } from '@/lib/business-datetime'
+
 /** Format payment_type + amount into a friendly plan label */
 export function formatPlanLabel(order: {
   payment_type?: string | null
   amount_cents?: number | null
+  package_hours?: number | null
 }): string {
   const type = order.payment_type ?? ''
   const cents = order.amount_cents ?? 0
+  const packageLabel = type === 'package'
+    ? formatPackageHoursLabel(order.package_hours, cents === 0)
+    : null
+
+  if (packageLabel) return packageLabel
+
   if (cents === 0 && type) {
     if (type === 'membership') return 'Membership Credit'
     if (type === 'package') return 'Package Credit'
@@ -36,17 +46,7 @@ export function formatAmount(cents: number | null | undefined): string {
 
 /** Format timestamp to readable date + time */
 export function formatDateTime(ts: string | null | undefined): string {
-  if (!ts) return '—'
-  const d = new Date(ts)
-  if (isNaN(d.getTime())) return '—'
-  return d.toLocaleString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  return formatBusinessDateTime(ts) ?? '—'
 }
 
 /** Format Postgres time "HH:mm:ss" to "h:mm AM/PM" */

@@ -23,7 +23,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     .from('booking_requests')
     .select(`
       *,
-      customers (full_name, email, phone, student_grade, notes),
+      customers (full_name, email, phone, student_grade, notes, packages(total_hours, stripe_payment_intent_id)),
       payments (amount_cents)
     `)
     .eq('id', (await params).id)
@@ -88,7 +88,16 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   }>
 
   const effectiveAmount = getChargedCents(order) ?? 0
-  let planLabel = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
+  const linkedPackage = order.customers?.packages?.find(
+    (pkg: { stripe_payment_intent_id?: string | null }) =>
+      Boolean(order.stripe_payment_intent_id) &&
+      pkg.stripe_payment_intent_id === order.stripe_payment_intent_id
+  )
+  let planLabel = formatPlanLabel({
+    payment_type: order.payment_type,
+    amount_cents: effectiveAmount,
+    package_hours: linkedPackage?.total_hours,
+  })
 
   if (effectiveAmount === 0 && order.customer_id) {
     if (order.payment_type === 'package') {

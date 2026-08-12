@@ -26,9 +26,10 @@ type AdminOrderRow = {
   amount_cents: number | null
   subjects: string[] | null
   session_type: string | null
+  stripe_payment_intent_id: string | null
   customers: {
     full_name: string | null
-    packages: Array<{ total_hours: number | null }> | null
+    packages: Array<{ total_hours: number | null; stripe_payment_intent_id: string | null }> | null
     memberships: Array<{ tier: string | null; status: string | null }> | null
   } | null
   payments: Array<{ amount_cents: number | null }> | null
@@ -101,7 +102,7 @@ export default async function DashboardHome() {
         .select('*', { count: 'exact', head: true }),
       supabase
         .from('booking_requests')
-        .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, customers(full_name, packages(total_hours), memberships(tier, status)), payments(amount_cents)')
+        .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, stripe_payment_intent_id, customers(full_name, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)), payments(amount_cents)')
         .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(10),
@@ -123,14 +124,26 @@ export default async function DashboardHome() {
     const resolvePlanLabel = (order: {
       amount_cents?: number | null
       payment_type?: string | null
+      stripe_payment_intent_id?: string | null
       payments?: Array<{ amount_cents?: number | null }> | null
       customers?: {
-        packages?: Array<{ total_hours?: number | null }> | null
+        packages?: Array<{ total_hours?: number | null; stripe_payment_intent_id?: string | null }> | null
         memberships?: Array<{ status?: string | null; tier?: string | null }> | null
       } | null
     }) => {
       const amt = getChargedCents(order) ?? 0
-      if (amt > 0) return formatPlanLabel({ payment_type: order.payment_type, amount_cents: amt })
+      const linkedPackage = order.customers?.packages?.find(
+        (pkg) =>
+          Boolean(order.stripe_payment_intent_id) &&
+          pkg.stripe_payment_intent_id === order.stripe_payment_intent_id
+      )
+      if (amt > 0) {
+        return formatPlanLabel({
+          payment_type: order.payment_type,
+          amount_cents: amt,
+          package_hours: linkedPackage?.total_hours,
+        })
+      }
       if (order.payment_type === 'package') {
         const pkg = order.customers?.packages?.[0]
         if (pkg) return `${pkg.total_hours}-Hr Package (Credit)`

@@ -17,7 +17,7 @@ export default async function OrdersPage() {
 
   let query = supabase.from('booking_requests').select(`
     *,
-    customers (full_name, email, packages(total_hours), memberships(tier, status)),
+    customers (full_name, email, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)),
     payments (amount_cents)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
@@ -40,7 +40,16 @@ export default async function OrdersPage() {
   const planLabels: Record<string, string> = {}
   for (const order of orders ?? []) {
     const effectiveAmount = getChargedCents(order) ?? 0
-    let label = formatPlanLabel({ payment_type: order.payment_type, amount_cents: effectiveAmount })
+    const linkedPackage = order.customers?.packages?.find(
+      (pkg: { stripe_payment_intent_id?: string | null }) =>
+        Boolean(order.stripe_payment_intent_id) &&
+        pkg.stripe_payment_intent_id === order.stripe_payment_intent_id
+    )
+    let label = formatPlanLabel({
+      payment_type: order.payment_type,
+      amount_cents: effectiveAmount,
+      package_hours: linkedPackage?.total_hours,
+    })
     if (effectiveAmount === 0) {
       if (order.payment_type === 'package') {
         const pkg = order.customers?.packages?.[0]
