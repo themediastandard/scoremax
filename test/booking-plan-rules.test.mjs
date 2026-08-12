@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const {
+  canPurchaseMembershipForSubjects,
   getSatActSelection,
   hasSatOrActSubject,
 } = require('../src/lib/booking-plan-rules.js')
@@ -26,4 +27,11 @@ test('academic and unknown subjects can still use generic prepaid packages', () 
   assert.deepEqual(getSatActSelection(['algebra'], subjectMap), { isSAT: false, isACT: false })
   assert.equal(hasSatOrActSubject(['algebra'], subjectMap), false)
   assert.equal(hasSatOrActSubject(['unknown'], subjectMap), false)
+})
+
+test('memberships are hidden and rejected for SAT or ACT selections', () => {
+  assert.equal(canPurchaseMembershipForSubjects(['sat'], subjectMap), false)
+  assert.equal(canPurchaseMembershipForSubjects(['act'], subjectMap), false)
+  assert.equal(canPurchaseMembershipForSubjects(['sat', 'act'], subjectMap), false)
+  assert.equal(canPurchaseMembershipForSubjects(['algebra'], subjectMap), true)
 })

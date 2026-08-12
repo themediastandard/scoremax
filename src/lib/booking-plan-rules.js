@@ -28,7 +28,20 @@ function hasSatOrActSubject(subjectIds, subjectMap) {
   return isSAT || isACT
 }
 
+/**
+ * Academic memberships are not priced for SAT/ACT tutoring. Keep this rule
+ * shared by the booking UI and checkout so hiding the cards cannot be bypassed
+ * by posting a membership plan directly.
+ *
+ * @param {string[]} subjectIds
+ * @param {Record<string, { slug?: string | null } | undefined>} subjectMap
+ */
+function canPurchaseMembershipForSubjects(subjectIds, subjectMap) {
+  return !hasSatOrActSubject(subjectIds, subjectMap)
+}
+
 module.exports = {
+  canPurchaseMembershipForSubjects,
   getSatActSelection,
   hasSatOrActSubject,
 }

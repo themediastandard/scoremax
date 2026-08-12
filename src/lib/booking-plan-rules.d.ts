@@ -11,3 +11,8 @@ export function hasSatOrActSubject(
   subjectIds: string[],
   subjectMap: Record<string, BookingSubject | undefined>
 ): boolean
+
+export function canPurchaseMembershipForSubjects(
+  subjectIds: string[],
+  subjectMap: Record<string, BookingSubject | undefined>
+): boolean

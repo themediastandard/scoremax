@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { buildSubjectCatalog, getSubjectMap } from '@/lib/subject-catalog'
-import { hasSatOrActSubject } from '@/lib/booking-plan-rules'
+import { canPurchaseMembershipForSubjects, hasSatOrActSubject } from '@/lib/booking-plan-rules'
 import { getOnlinePriceCents } from '@/lib/online-price'
 import {
     availabilityWindowsFromLegacy,
@@ -71,6 +71,16 @@ export async function POST(req: NextRequest) {
     let mode: 'payment' | 'subscription' = 'payment'
 
     if (plan_type === 'membership') {
+        const { data: membershipSubjectRows, error: membershipSubjectsError } = await supabaseAdmin
+            .from('subjects')
+            .select('*')
+            .eq('is_active', true)
+        if (membershipSubjectsError) throw new Error('Could not validate subjects for this membership')
+        const membershipSubjectMap = getSubjectMap(buildSubjectCatalog(membershipSubjectRows ?? []))
+        if (!canPurchaseMembershipForSubjects(resolvedSubjects, membershipSubjectMap)) {
+            throw new Error('Monthly memberships are not available for SAT or ACT tutoring')
+        }
+
         const memberPlanId = body.plan_id || body.booking_details?.plan_id
         if (!memberPlanId && !price_id) throw new Error('Missing membership plan')
         const membershipSelect = 'id, price_cents, online_price_cents, name, included_hours, stripe_price_id, stripe_online_price_id'

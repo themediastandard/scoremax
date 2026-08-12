@@ -7,7 +7,7 @@ import { Check, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
 import { PACKAGE_VALIDITY_MONTHS } from '@/lib/package-expiry'
-import { getSatActSelection } from '@/lib/booking-plan-rules'
+import { canPurchaseMembershipForSubjects, getSatActSelection } from '@/lib/booking-plan-rules'
 import { getOnlinePriceCents } from '@/lib/online-price'
 
 interface PlanSelectionProps {
@@ -61,6 +61,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
 
   const { isSAT, isACT } = getSatActSelection(subjects, subjectMap)
+  const showMemberships = canPurchaseMembershipForSubjects(subjects, subjectMap)
   const singleRateCents = getSingleRateCents()
   const singleRate = singleRateCents / 100
   const onlinePriceFor = (row: { price_cents: number; online_price_cents?: number | null }) =>
@@ -168,14 +169,15 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
         </p>
       </div>
 
-      {/* Option 1: Monthly Memberships */}
-      <OptionSection
-        optionNum={1}
-        title="Monthly Membership"
-        description="Best for ongoing support. Cancel anytime, no commitment."
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {pricing.filter(p => p.type === 'membership').map(plan => {
+      {/* Academic memberships are not priced for SAT/ACT tutoring. */}
+      {showMemberships && (
+        <OptionSection
+          optionNum={1}
+          title="Monthly Membership"
+          description="Best for ongoing support. Cancel anytime, no commitment."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pricing.filter(p => p.type === 'membership').map(plan => {
             const onlinePriceCents = onlinePriceFor(plan)
             const membershipHourlyCents = onlinePriceCents / plan.included_hours
             const savingsPercent = singleRateCents > 0
@@ -198,7 +200,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                   {/*
                     Only claim a saving when there is one. The rate compared
                     against is the highest of the subjects the customer picked,
-                    so on a $150 subject Starter works out at $149.50/hr and this
+                    so on a $155 subject Starter works out at $154.50/hr and this
                     rendered the words "Save 0% vs Single Rate". Matches the
                     guard the package cards already had.
                   */}
@@ -222,13 +224,14 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </Button>
               </CardFooter>
             </Card>
-          )})}
-        </div>
-      </OptionSection>
+            )})}
+          </div>
+        </OptionSection>
+      )}
 
-      {/* Option 2: Prepaid Packages */}
+      {/* The exam-prep package becomes the first option when memberships are hidden. */}
       <OptionSection
-        optionNum={2}
+        optionNum={showMemberships ? 2 : 1}
         title="Prepaid Packages"
         description={isSAT || isACT
           ? 'Pay upfront for a complete SAT or ACT preparation package.'
@@ -334,9 +337,9 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
         </div>
       </OptionSection>
 
-      {/* Option 3: Single Session */}
+      {/* Single sessions are second for SAT/ACT, third for academic subjects. */}
       <OptionSection
-        optionNum={3}
+        optionNum={showMemberships ? 3 : 2}
         title="Single Session"
         description="Pay as you go. No commitment, perfect to try before committing."
       >
