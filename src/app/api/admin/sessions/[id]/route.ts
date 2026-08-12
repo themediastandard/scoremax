@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { type calendar_v3 } from 'googleapis'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
-import { emailLayout, detailRow, sessionUnassignedEmail } from '@/lib/email-templates'
+import {
+  emailLayout,
+  detailRow,
+  sessionRescheduledEmail,
+  sessionUnassignedEmail,
+} from '@/lib/email-templates'
 import { calendar } from '@/lib/google-calendar'
 import {
   getAdminGoogleAuth,
@@ -175,7 +180,7 @@ async function sendScheduleEmails(
   session: SessionRecord,
   meetUrl: string | null,
   hasCalendarInvite: boolean
-) {
+): Promise<boolean> {
   const startTime = formatSessionTime(session.confirmed_start)
   const isOnline = session.session_type === 'online'
   const locationText = isOnline
@@ -197,7 +202,7 @@ async function sendScheduleEmails(
    * Resend's 2-requests-per-second default; sendEmail now spaces them itself,
    * so this pair costs one extra ~550ms and no caller has to think about it.
    */
-  await sendEmail(
+  const customerOk = await sendEmail(
     {
       ...getEmailDefaults(),
       to: session.customers.email,
@@ -216,7 +221,7 @@ async function sendScheduleEmails(
     `admin:session-confirmed:customer:${session.id}`
   )
 
-  await sendEmail(
+  const tutorOk = await sendEmail(
     {
       ...getEmailDefaults(),
       to: session.tutors.email,
@@ -234,6 +239,8 @@ async function sendScheduleEmails(
     },
     `admin:session-confirmed:tutor:${session.id}`
   )
+
+  return customerOk && tutorOk
 }
 
 /**
@@ -256,7 +263,7 @@ async function sendUnassignedEmail(outgoing: {
   studentName: string | null | undefined
   startsAt: string | null | undefined
   sessionId: string
-}) {
+}): Promise<boolean> {
   const { subject, html } = sessionUnassignedEmail({
     tutorName: outgoing.tutor.full_name,
     studentName: outgoing.studentName,
@@ -272,6 +279,49 @@ async function sendUnassignedEmail(outgoing: {
       `Session ${outgoing.sessionId} was reassigned but the outgoing tutor could not be notified.`
     )
   }
+  return ok
+}
+
+async function sendRescheduleEmails(options: {
+  session: SessionRecord
+  previousStart: string | null | undefined
+  previousEnd: string | null | undefined
+  calendarUpdated: boolean
+}): Promise<boolean> {
+  const { session, previousStart, previousEnd, calendarUpdated } = options
+  const shared = {
+    previousStart,
+    previousEnd,
+    newStart: session.confirmed_start,
+    newEnd: session.confirmed_end,
+    sessionType: session.session_type,
+    meetUrl: session.meet_url,
+    calendarUpdated,
+  }
+
+  const customerMessage = sessionRescheduledEmail({
+    ...shared,
+    recipient: 'student',
+    recipientName: session.customers.full_name,
+    counterpartName: session.tutors.full_name,
+  })
+  const customerOk = await sendEmail(
+    { ...getEmailDefaults(), to: session.customers.email, ...customerMessage },
+    `admin:session-rescheduled:customer:${session.id}`
+  )
+
+  const tutorMessage = sessionRescheduledEmail({
+    ...shared,
+    recipient: 'tutor',
+    recipientName: session.tutors.full_name,
+    counterpartName: session.customers.full_name,
+  })
+  const tutorOk = await sendEmail(
+    { ...getEmailDefaults(), to: session.tutors.email, ...tutorMessage },
+    `admin:session-rescheduled:tutor:${session.id}`
+  )
+
+  return customerOk && tutorOk
 }
 
 // Calendar work happens now (so a failure aborts the whole change with a 400
@@ -281,13 +331,23 @@ async function sendUnassignedEmail(outgoing: {
 // confirmation email for a session the database did not record as scheduled.
 type ScheduleOutcome = {
   updates: Record<string, string | null>
-  sendEmails: () => Promise<void>
+  rollbackCalendar: (() => Promise<void>) | null
+  sendEmails: () => Promise<boolean>
 }
 
 async function handleSchedule(session: SessionRecord): Promise<ScheduleOutcome> {
   const updates = await createSessionEvent(session)
+  const eventId = updates.tutor_calendar_event_id
   return {
     updates,
+    // If the subsequent database write fails, remove the event we just made.
+    // This also protects the reassign fallback that has to create a missing
+    // event rather than leaving an orphaned invite in Google Calendar.
+    rollbackCalendar: eventId
+      ? async () => {
+          await handleCancel({ ...session, tutor_calendar_event_id: eventId })
+        }
+      : null,
     sendEmails: () =>
       sendScheduleEmails(
         session,
@@ -300,28 +360,54 @@ async function handleSchedule(session: SessionRecord): Promise<ScheduleOutcome> 
 // Tutor changed on an already-scheduled session: patch the existing event's
 // attendees (Google notifies the removed tutor, invites the new one) and keep
 // the same Meet link. Falls back to creating a fresh event if none exists.
-async function handleReassign(session: SessionRecord): Promise<ScheduleOutcome> {
+async function handleReassign(
+  session: SessionRecord,
+  previousSession: SessionRecord
+): Promise<ScheduleOutcome> {
   const adminAuth = await getAdminGoogleAuth()
   const eventId = session.tutor_calendar_event_id
 
-  if (!adminAuth || !eventId) {
+  if (!eventId) {
     return handleSchedule(session)
   }
 
+  if (!adminAuth) {
+    throw new SchedulingError(
+      'Google Calendar is not connected, so the tutor or time could not be changed. Reconnect it in Settings → Integrations, then try again.'
+    )
+  }
+
   const plan = buildSessionCalendarPlan(session)
-  try {
-    await calendar.events.patch({
+  const previousPlan = buildSessionCalendarPlan(previousSession)
+  const patchEvent = (requestBody: calendar_v3.Schema$Event) =>
+    calendar.events.patch({
       auth: adminAuth,
       calendarId: 'primary',
       eventId,
       sendUpdates: 'all',
-      requestBody: plan.requestBody,
+      requestBody,
     })
+
+  try {
+    await patchEvent(plan.requestBody)
   } catch (error) {
     reportError('schedule:calendar-tutor-change', error, { sessionId: session.id })
+    if (isRevokedGoogleTokenError(error)) {
+      await clearAdminGoogleConnection()
+      throw new SchedulingError(
+        'The ScoreMax Google connection has expired, so no changes were saved. Reconnect it in Settings → Integrations, then try again.'
+      )
+    }
+    throw new SchedulingError(
+      'Google Calendar could not update the tutor or time, so no changes were saved. Please try again.'
+    )
   }
+
   return {
     updates: {},
+    rollbackCalendar: async () => {
+      await patchEvent(previousPlan.requestBody)
+    },
     sendEmails: () => sendScheduleEmails(session, session.meet_url ?? null, true),
   }
 }
@@ -385,24 +471,101 @@ async function handleCancel(session: SessionRecord) {
   }
 }
 
-async function handleReschedule(session: SessionRecord, newStart: string, newEnd: string) {
+type RescheduleOutcome = {
+  calendarUpdated: boolean
+  rollbackCalendar: (() => Promise<void>) | null
+  sendEmails: () => Promise<boolean>
+}
+
+async function handleReschedule(
+  session: SessionRecord,
+  newStart: string,
+  newEnd: string
+): Promise<RescheduleOutcome> {
   const adminAuth = await getAdminGoogleAuth()
   const eventId = session.tutor_calendar_event_id
-  if (!adminAuth || !eventId) return
+  const previousStart = session.confirmed_start
+  const previousEnd = session.confirmed_end
 
-  try {
-    await calendar.events.patch({
+  if (!previousStart || !previousEnd) {
+    throw new SchedulingError(
+      'This session is missing its previous start or end time, so it cannot be safely rescheduled.'
+    )
+  }
+
+  // In-person sessions may legitimately have no calendar event if ScoreMax was
+  // disconnected when they were first scheduled. The branded emails still
+  // make the new time explicit. An online session must never silently drift
+  // away from its Meet invitation.
+  if (!eventId) {
+    if (session.session_type === 'online') {
+      throw new SchedulingError(
+        'This online session has no linked Google Calendar event, so no changes were saved. Reconnect Google in Settings → Integrations and repair the calendar event before rescheduling.'
+      )
+    }
+
+    const updatedSession = { ...session, confirmed_start: newStart, confirmed_end: newEnd }
+    return {
+      calendarUpdated: false,
+      rollbackCalendar: null,
+      sendEmails: () =>
+        sendRescheduleEmails({
+          session: updatedSession,
+          previousStart,
+          previousEnd,
+          calendarUpdated: false,
+        }),
+    }
+  }
+
+  if (!adminAuth) {
+    throw new SchedulingError(
+      'Google Calendar is not connected, so no changes were saved. Reconnect it in Settings → Integrations, then try again.'
+    )
+  }
+
+  const patchCalendarTime = (start: string, end: string) =>
+    calendar.events.patch({
       auth: adminAuth,
       calendarId: 'primary',
       eventId,
       sendUpdates: 'all',
       requestBody: {
-        start: { dateTime: new Date(newStart).toISOString() },
-        end: { dateTime: new Date(newEnd).toISOString() },
+        start: { dateTime: new Date(start).toISOString() },
+        end: { dateTime: new Date(end).toISOString() },
       },
     })
+
+  try {
+    await patchCalendarTime(newStart, newEnd)
   } catch (e) {
     reportError('schedule:calendar-update', e, { sessionId: session.id })
+    if (isRevokedGoogleTokenError(e)) {
+      await clearAdminGoogleConnection()
+      throw new SchedulingError(
+        'The ScoreMax Google connection has expired, so no changes were saved. Reconnect it in Settings → Integrations, then try again.'
+      )
+    }
+    throw new SchedulingError(
+      'Google Calendar could not be updated, so no changes were saved. Please try again.'
+    )
+  }
+
+  const updatedSession = { ...session, confirmed_start: newStart, confirmed_end: newEnd }
+  return {
+    calendarUpdated: true,
+    // Google has already notified attendees. If the database write fails, put
+    // the event back immediately so the calendar and ScoreMax do not disagree.
+    rollbackCalendar: async () => {
+      await patchCalendarTime(previousStart, previousEnd)
+    },
+    sendEmails: () =>
+      sendRescheduleEmails({
+        session: updatedSession,
+        previousStart,
+        previousEnd,
+        calendarUpdated: true,
+      }),
   }
 }
 
@@ -475,7 +638,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const oldStatus = currentSession.status
 
   // Queued until the database write succeeds — see ScheduleOutcome.
-  let pendingEmails: (() => Promise<void>) | null = null
+  let pendingEmails: (() => Promise<void | boolean>) | null = null
+  let rollbackExternalChange: (() => Promise<void>) | null = null
+  let rescheduleCalendarUpdated: boolean | null = null
 
   try {
     if (newStatus && newStatus !== oldStatus) {
@@ -503,6 +668,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         const outcome = await handleSchedule(merged)
         updates = { ...updates, ...outcome.updates }
+        rollbackExternalChange = outcome.rollbackCalendar
         pendingEmails = outcome.sendEmails
       }
 
@@ -549,8 +715,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
       // The reassign patch carries the merged start/end too, so a separate
       // reschedule call is unnecessary even when times changed together.
-      const outcome = await handleReassign(merged)
+      const outcome = await handleReassign(merged, currentSession)
       updates = { ...updates, ...outcome.updates }
+      rollbackExternalChange = outcome.rollbackCalendar
 
       // Same id on both sides means nobody actually lost the session: either a
       // self-reassign that `tutorChanged` should already have excluded, or the
@@ -564,22 +731,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           : null
 
       pendingEmails = async () => {
-        await outcome.sendEmails()
+        let delivered = await outcome.sendEmails()
         if (notifyOutgoing) {
-          await sendUnassignedEmail({
-            tutor: notifyOutgoing,
-            studentName: (currentSession.customers as SessionPerson | null)?.full_name,
-            startsAt: previousStart,
-            sessionId: id,
-          })
+          delivered =
+            (await sendUnassignedEmail({
+              tutor: notifyOutgoing,
+              studentName: (currentSession.customers as SessionPerson | null)?.full_name,
+              startsAt: previousStart,
+              sessionId: id,
+            })) && delivered
         }
+        return delivered
       }
     } else if (statusUnchanged && oldStatus === 'scheduled' && timesChanged) {
-      await handleReschedule(
+      const outcome = await handleReschedule(
         currentSession,
         confirmed_start || currentSession.confirmed_start,
         confirmed_end || currentSession.confirmed_end
       )
+      rescheduleCalendarUpdated = outcome.calendarUpdated
+      rollbackExternalChange = outcome.rollbackCalendar
+      pendingEmails = outcome.sendEmails
     }
   } catch (error) {
     if (error instanceof SchedulingError) {
@@ -606,19 +778,53 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if (error) {
     console.error(`Failed to persist session ${id}:`, error.message)
+    if (rollbackExternalChange) {
+      try {
+        await rollbackExternalChange()
+      } catch (rollbackError) {
+        reportError('schedule:calendar-rollback', rollbackError, { sessionId: id })
+        return NextResponse.json(
+          {
+            error:
+              'The session could not be saved, and its calendar event may need manual review. Please check Google Calendar before trying again.',
+          },
+          { status: 500 }
+        )
+      }
+    }
     return NextResponse.json({ error: 'Could not save the session' }, { status: 500 })
   }
 
   // Only now that the change is durable. A failure here is logged rather than
   // surfaced: the session IS scheduled, and returning an error would invite the
   // admin to retry and create a duplicate calendar event.
+  let notificationWarning: string | null = null
   if (pendingEmails) {
     try {
-      await pendingEmails()
+      const delivered = await pendingEmails()
+      if (delivered === false) {
+        notificationWarning = rescheduleCalendarUpdated
+          ? 'The session was saved and Google Calendar was updated, but one or more confirmation emails could not be delivered.'
+          : 'The session was saved, but one or more confirmation emails could not be delivered.'
+      }
     } catch (emailError) {
       console.error(`Session ${id} saved but notification emails failed:`, emailError)
+      notificationWarning = rescheduleCalendarUpdated
+        ? 'The session was saved and Google Calendar was updated, but the confirmation emails could not be sent.'
+        : 'The session was saved, but the confirmation emails could not be sent.'
     }
   }
 
-  return NextResponse.json(data)
+  return NextResponse.json({
+    ...data,
+    ...(rescheduleCalendarUpdated !== null
+      ? {
+          reschedule: {
+            calendar_updated: rescheduleCalendarUpdated,
+            notifications_sent: !notificationWarning,
+          },
+        }
+      : {}),
+    ...(notificationWarning ? { warning: notificationWarning } : {}),
+  })
 }

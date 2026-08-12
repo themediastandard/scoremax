@@ -178,6 +178,54 @@ export function sessionReminderEmail(options: {
 }
 
 /**
+ * A branded confirmation sent after an admin changes an already-scheduled
+ * session. Google also updates the shared calendar event, but its generic
+ * notification does not make the old and new times easy to compare.
+ */
+export function sessionRescheduledEmail(options: {
+  recipient: 'student' | 'tutor'
+  recipientName?: string | null
+  counterpartName?: string | null
+  previousStart?: string | Date | null
+  previousEnd?: string | Date | null
+  newStart?: string | Date | null
+  newEnd?: string | Date | null
+  sessionType?: string | null
+  meetUrl?: string | null
+  calendarUpdated: boolean
+}): { subject: string; html: string } {
+  const recipientName = options.recipientName?.trim() || ''
+  const counterpartName =
+    options.counterpartName?.trim() ||
+    (options.recipient === 'student' ? 'Your ScoreMax tutor' : 'Your ScoreMax student')
+  const isOnline = options.sessionType === 'online'
+  const location = isOnline ? 'Online (Google Meet)' : 'Sawgrass, FL'
+  const calendarLine = options.calendarUpdated
+    ? ' Your calendar invitation has also been updated.'
+    : ' Please use the new date and time below.'
+
+  return {
+    subject: 'Session Rescheduled: New Date and Time',
+    html: emailLayout({
+      title: 'Your Session Has Been Rescheduled',
+      greeting: recipientName ? `Hi ${recipientName},` : 'Hi there,',
+      body: [
+        `<p style="margin: 0 0 16px 0;">The date or time for your ScoreMax tutoring session has changed.${calendarLine}</p>`,
+        detailRow(options.recipient === 'student' ? 'Tutor:' : 'Student:', counterpartName),
+        detailRow('Previous start:', formatSessionTime(options.previousStart)),
+        detailRow('Previous end:', formatSessionTime(options.previousEnd)),
+        detailRow('New start:', formatSessionTime(options.newStart)),
+        detailRow('New end:', formatSessionTime(options.newEnd)),
+        detailRow('Location:', location),
+      ].join(''),
+      ...(isOnline && options.meetUrl
+        ? { ctaText: 'Open Google Meet', ctaUrl: options.meetUrl }
+        : {}),
+    }),
+  }
+}
+
+/**
  * The note to a tutor whose already-scheduled session has been handed to
  * someone else.
  *

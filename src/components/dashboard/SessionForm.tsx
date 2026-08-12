@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2 } from 'lucide-react'
+import { CalendarClock, CheckCircle2, Loader2, TriangleAlert } from 'lucide-react'
 import {
   toLocalDateValue,
   toLocalTimeValue,
@@ -42,6 +42,10 @@ interface SessionFormProps {
 export function SessionForm({ session, tutors, requestedAvailability }: SessionFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [feedback, setFeedback] = useState<{
+    tone: 'success' | 'warning' | 'error'
+    message: string
+  } | null>(null)
 
   const [tutorId, setTutorId] = useState(session.assigned_tutor_id || '')
   const [date, setDate] = useState(
@@ -87,6 +91,11 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
     status !== initial.status ||
     internalNotes !== initial.internalNotes
 
+  const isReschedule =
+    session.status === 'scheduled' &&
+    status === 'scheduled' &&
+    (date !== initial.date || time !== initial.time || duration !== initial.duration)
+
   const handleReset = () => {
     setTutorId(initial.tutorId)
     setDate(initial.date)
@@ -94,10 +103,12 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
     setDuration(initial.duration)
     setStatus(initial.status)
     setInternalNotes(initial.internalNotes)
+    setFeedback(null)
   }
 
   const handleSave = async () => {
     setLoading(true)
+    setFeedback(null)
 
     let confirmedStart = null
     let confirmedEnd = null
@@ -125,14 +136,27 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
 
       if (!res.ok) {
         const err = await res.json()
-        alert(err.error || 'Failed to update session')
+        setFeedback({ tone: 'error', message: err.error || 'Failed to update session' })
       } else {
+        const result = await res.json()
         setInitial({ tutorId, date, time, duration, status, internalNotes })
+        setFeedback(
+          result.warning
+            ? { tone: 'warning', message: result.warning }
+            : {
+                tone: 'success',
+                message: isReschedule
+                  ? result.reschedule?.calendar_updated === false
+                    ? 'Session rescheduled. Confirmations were sent to the student and tutor. This session did not have a linked Google Calendar event.'
+                    : 'Session rescheduled. Google Calendar was updated and confirmations were sent to the student and tutor.'
+                  : 'Session saved successfully.',
+              }
+        )
         router.refresh()
       }
     } catch (err) {
       console.error(err)
-      alert('Error updating session')
+      setFeedback({ tone: 'error', message: 'Error updating session' })
     } finally {
       setLoading(false)
     }
@@ -194,8 +218,39 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
         />
       </div>
 
-      <div className="flex items-end justify-between gap-4">
-        <div className="space-y-2 w-48">
+      {isReschedule && (
+        <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            Saving will update the linked Google Calendar event, when present, and notify the
+            student and tutor. Their Meet link and the customer&apos;s credit balance will stay the
+            same.
+          </p>
+        </div>
+      )}
+
+      {feedback && (
+        <div
+          role={feedback.tone === 'error' ? 'alert' : 'status'}
+          className={`flex gap-2 rounded-lg border p-3 text-sm ${
+            feedback.tone === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : feedback.tone === 'warning'
+                ? 'border-amber-200 bg-amber-50 text-amber-800'
+                : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.tone === 'success' ? (
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+          ) : (
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          )}
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="w-full space-y-2 sm:w-48">
           <Label>Status</Label>
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger>
@@ -209,21 +264,29 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           {hasChanges && (
-            <>
-              <span className="flex items-center gap-1.5 text-xs text-amber-600">
-                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                Unsaved changes
-              </span>
+            <span className="flex items-center gap-1.5 text-xs text-amber-600">
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              Unsaved changes
+            </span>
+          )}
+          <div className="flex items-center justify-end gap-3">
+            {hasChanges && (
               <Button variant="outline" size="sm" onClick={handleReset} disabled={loading}>
                 Undo
               </Button>
-            </>
-          )}
-          <Button onClick={handleSave} disabled={loading} className="bg-[#1e293b]">
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Save Changes'}
-          </Button>
+            )}
+            <Button onClick={handleSave} disabled={loading} className="bg-[#1e293b]">
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : isReschedule ? (
+                'Reschedule Session'
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
