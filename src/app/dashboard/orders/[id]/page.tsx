@@ -12,6 +12,8 @@ import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 import { formatPaymentMethod, isOfflinePaymentMethod } from '@/lib/payment-method'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { OrderStudentAssignment } from '@/components/dashboard/OrderStudentAssignment'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
@@ -72,7 +74,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const { data: sessionsData } = await supabase
     .from('sessions')
-    .select('id, status, confirmed_start, confirmed_end, session_type, subjects, assigned_tutor_id, meet_url, tutors (full_name)')
+    .select('id, status, student_id, confirmed_start, confirmed_end, session_type, subjects, assigned_tutor_id, internal_notes, meet_url, tutors (full_name)')
     .eq('order_id', order.id)
     .order('created_at', { ascending: true })
 
@@ -80,14 +82,25 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const sessions = (sessionsData ?? []) as unknown as Array<{
     id: string
     status: string | null
+    student_id: string | null
     confirmed_start: string | null
     confirmed_end: string | null
     session_type: string | null
     subjects: string[] | null
     assigned_tutor_id: string | null
+    internal_notes: string | null
     meet_url: string | null
     tutors: { full_name: string | null } | null
   }>
+
+  const { data: accountStudents } = profile?.role === 'admin' && order.customer_id
+    ? await supabaseAdmin
+        .from('students')
+        .select('id, full_name, email, grade, is_active')
+        .eq('customer_id', order.customer_id)
+        .order('is_active', { ascending: false })
+        .order('full_name', { ascending: true })
+    : { data: [] }
 
   const effectiveAmount = getChargedCents(order) ?? 0
   const linkedPackage = order.customers?.packages?.find(
@@ -225,6 +238,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </div>
             ) : (
               <p className="font-medium text-amber-700">Student not assigned</p>
+            )}
+            {profile?.role === 'admin' && (
+              <OrderStudentAssignment
+                orderId={order.id}
+                currentStudentId={order.student_id ?? null}
+                students={accountStudents ?? []}
+                linkedSession={sessions[0] ?? null}
+              />
             )}
           </CardContent>
         </Card>
