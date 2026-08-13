@@ -34,7 +34,7 @@ async function completeGoogleSignup(
     })
     .eq('profile_id', user.id)
     .is('account_type', null)
-    .select('id, full_name, email, account_type')
+    .select('id, full_name, email, phone, account_type')
     .maybeSingle()
 
   if (updateError) {
@@ -72,6 +72,7 @@ async function completeGoogleSignup(
     customer_id: customer.id,
     full_name: customer.full_name || metadataName || 'Student',
     email: normalizedEmail,
+    phone: customer.phone?.trim() || null,
     grade: studentGrade,
   })
 

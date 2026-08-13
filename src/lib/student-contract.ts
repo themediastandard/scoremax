@@ -11,6 +11,7 @@ export interface StudentDto {
   id: string
   fullName: string
   email: string
+  phone: string | null
   grade: string
   isActive: boolean
   createdAt: string
@@ -30,6 +31,7 @@ export interface StudentsResponse {
 export interface CreateStudentRequest {
   fullName: string
   email: string
+  phone?: string
   grade: string
 }
 
@@ -40,6 +42,7 @@ export interface CreateStudentResponse {
 export interface UpdateStudentRequest {
   fullName?: string
   email?: string
+  phone?: string
   grade?: string
   isActive?: boolean
 }

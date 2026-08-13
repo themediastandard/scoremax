@@ -29,6 +29,8 @@ test('customer directory is a compact read-only index with details navigation', 
   assert.match(customersTable, /\{displayStudents\.length\} students/)
   assert.doesNotMatch(customersTable, /\+\{moreCount\}/)
   assert.match(customersTable, /aria-label=\{`View details for/)
+  assert.match(customersTable, /<td className="px-4 py-5">/)
+  assert.doesNotMatch(customersTable, /<td className="[^\"]*py-3[^\"]*">/)
   assert.match(customersPage, /\.select\('customer_id, status, confirmed_start'\)/)
   assert.match(customersPage, /\.from\('course_enrollments'\)/)
   assert.match(customersPage, /\.from\('act_course_enrollments'\)/)

@@ -20,9 +20,14 @@ import type {
 
 const STUDENT_EMAIL_HELPER = 'This email receives session schedules and reminders. It does not create a ScoreMax login.'
 
-type StudentDraft = Pick<StudentDto, 'fullName' | 'email' | 'grade'>
+type StudentDraft = {
+  fullName: string
+  email: string
+  phone: string
+  grade: string
+}
 
-const EMPTY_DRAFT: StudentDraft = { fullName: '', email: '', grade: '' }
+const EMPTY_DRAFT: StudentDraft = { fullName: '', email: '', phone: '', grade: '' }
 
 async function responseError(response: Response, fallback: string) {
   const body = await response.json().catch(() => null) as StudentApiError | null
@@ -71,6 +76,19 @@ function StudentFields({
         <p id={helperId} className="text-xs leading-5 text-gray-500">{STUDENT_EMAIL_HELPER}</p>
       </div>
       <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-phone`}>Student Phone <span className="font-normal text-gray-500">(Optional)</span></Label>
+        <Input
+          id={`${idPrefix}-phone`}
+          type="tel"
+          value={draft.phone}
+          onChange={(event) => onChange({ ...draft, phone: event.target.value })}
+          placeholder="(555) 123-4567"
+          autoComplete="tel"
+          maxLength={50}
+          disabled={disabled}
+        />
+      </div>
+      <div className="space-y-2">
         <Label htmlFor={`${idPrefix}-grade`}>Grade</Label>
         <Select
           value={draft.grade || undefined}
@@ -105,13 +123,14 @@ function StudentCard({
   const [draft, setDraft] = useState<StudentDraft>({
     fullName: student.fullName,
     email: student.email,
+    phone: student.phone ?? '',
     grade: student.grade,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const closeEditor = () => {
-    setDraft({ fullName: student.fullName, email: student.email, grade: student.grade })
+    setDraft({ fullName: student.fullName, email: student.email, phone: student.phone ?? '', grade: student.grade })
     setError(null)
     setEditing(false)
   }
@@ -149,6 +168,7 @@ function StudentCard({
     const saved = await patchStudent({
       fullName: draft.fullName.trim(),
       email: draft.email.trim(),
+      phone: draft.phone.trim(),
       grade: draft.grade,
     })
     if (saved) setEditing(false)
@@ -174,6 +194,7 @@ function StudentCard({
               </Badge>
             </div>
             <p className="mt-1 break-all text-sm text-gray-600">{student.email}</p>
+            <p className="mt-1 text-sm text-gray-500">{student.phone || 'Phone not provided'}</p>
             <p className="mt-1 text-sm text-gray-500">{student.grade}</p>
           </div>
         </div>
@@ -264,6 +285,7 @@ export function StudentsManager() {
     const request: CreateStudentRequest = {
       fullName: draft.fullName.trim(),
       email: draft.email.trim(),
+      phone: draft.phone.trim(),
       grade: draft.grade,
     }
     setSaving(true)

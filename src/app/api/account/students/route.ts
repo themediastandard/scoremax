@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import {
   findAccountOwner,
   normalizeStudentEmail,
+  normalizeStudentPhone,
   toStudentDto,
   type ManagedStudent,
 } from '@/lib/student-server'
@@ -12,6 +13,7 @@ import {
 const createStudentSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320),
+  phone: z.string().trim().max(50).optional().default(''),
   grade: z.string().trim().min(1).max(100),
 })
 
@@ -28,7 +30,7 @@ export async function GET() {
 
   const { data, error } = await supabaseAdmin
     .from('students')
-    .select('id, customer_id, full_name, email, grade, is_active, created_at, updated_at')
+    .select('id, customer_id, full_name, email, phone, grade, is_active, created_at, updated_at')
     .eq('customer_id', owner.id)
     .order('is_active', { ascending: false })
     .order('full_name', { ascending: true })
@@ -76,9 +78,10 @@ export async function POST(req: NextRequest) {
       customer_id: owner.id,
       full_name: parsed.data.fullName,
       email: normalizeStudentEmail(parsed.data.email),
+      phone: normalizeStudentPhone(parsed.data.phone),
       grade: parsed.data.grade,
     })
-    .select('id, customer_id, full_name, email, grade, is_active, created_at, updated_at')
+    .select('id, customer_id, full_name, email, phone, grade, is_active, created_at, updated_at')
     .single()
 
   if (error?.code === '23505') {
