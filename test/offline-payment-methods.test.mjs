@@ -280,7 +280,7 @@ test('admin customer controls expose separate audited Step Up and Zelle approval
     /approvals\[paymentMethod\] = Boolean\(approval\.approved_at && !approval\.revoked_at\)/
   )
   assert.doesNotMatch(customersTable, /<PaymentApprovalControls/)
-  assert.match(customersTable, />Payment Access<\/th>/)
+  assert.match(customersTable, />Payment access<\/p>/)
   assert.match(customersTable, /<PaymentAccess approvals=\{paymentApprovalMap\[customer\.id\]\}/)
   assert.match(customerDetail, /Payment Approvals/)
   assert.match(customerDetail, /<PaymentApprovalControls/)

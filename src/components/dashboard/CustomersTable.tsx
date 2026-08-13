@@ -61,6 +61,7 @@ interface CustomersTableProps {
   nextSessionMap: Record<string, CustomerNextSession>
   studentMap: Record<string, ManagedStudent[]>
   paymentApprovalMap: Record<string, PaymentApprovalState>
+  totalSpentMap: Record<string, number>
 }
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'credits' | 'orders' | 'sessions'
@@ -194,6 +195,15 @@ function PaymentAccess({ approvals }: { approvals?: PaymentApprovalState }) {
   )
 }
 
+function formatTotalSpent(amountCents: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: amountCents % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amountCents / 100)
+}
+
 export function CustomersTable({
   customers,
   membershipMap,
@@ -204,6 +214,7 @@ export function CustomersTable({
   nextSessionMap,
   studentMap,
   paymentApprovalMap = {},
+  totalSpentMap = {},
 }: CustomersTableProps) {
   const [search, setSearch] = useState('')
   const [planFilter, setPlanFilter] = useState('all')
@@ -403,6 +414,7 @@ export function CustomersTable({
                     <div><p className="text-xs text-gray-500">Students</p><CompactStudents students={managedStudents} /></div>
                     <div><p className="text-xs text-gray-500">Account type</p><p className="mt-0.5 font-medium text-[#1e293b]">{formatAccountType(customer.account_type)}</p></div>
                     <div><p className="text-xs text-gray-500">Payment access</p><div className="mt-1"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div></div>
+                    <div><p className="text-xs text-gray-500">Total spent</p><p className="mt-0.5 font-medium text-[#1e293b]">{formatTotalSpent(totalSpentMap[customer.id] ?? 0)}</p></div>
                     <div><p className="text-xs text-gray-500">Credits</p><p className="mt-0.5 font-medium text-[#1e293b]">{credits}</p></div>
                     <div><p className="text-xs text-gray-500">Orders</p><p className="mt-0.5 font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0}</p></div>
                     <div><p className="text-xs text-gray-500">Next session</p><NextSession session={nextSessionMap[customer.id]} /></div>
@@ -421,74 +433,94 @@ export function CustomersTable({
             })}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm xl:block">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50/80">
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Account Owner</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Students</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Access</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Credits</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Orders</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Next Session</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Joined</th>
-                  <th className="w-12 px-4 py-3"><span className="sr-only">View customer details</span></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtered.map((customer) => {
-                  const membership = membershipMap[customer.id]
-                  const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
-                  const detailsHref = `/dashboard/customers/${customer.id}`
+          <div className="hidden space-y-4 xl:block">
+            {filtered.map((customer) => {
+              const membership = membershipMap[customer.id]
+              const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
+              const managedStudents = studentMap[customer.id] ?? []
+              const detailsHref = `/dashboard/customers/${customer.id}`
+              const customerNameId = `customer-${customer.id}-name`
 
-                  return (
-                    <tr key={customer.id} className="transition-colors hover:bg-gray-50/60">
-                      <td className="px-4 py-5">
-                        <Link href={detailsHref} className="text-sm font-medium text-[#1e293b] hover:text-[#4a729f] hover:underline">
-                          {customer.full_name || 'Unnamed'}
-                        </Link>
-                      </td>
-                      <td className="max-w-[15rem] px-4 py-5">
-                        <p className="truncate text-sm text-gray-600">{customer.email}</p>
-                        {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
-                      </td>
-                      <td className="px-4 py-5"><CompactStudents students={studentMap[customer.id] ?? []} /></td>
-                      <td className="px-4 py-5">
-                        <span className={`whitespace-nowrap text-xs font-medium ${customer.account_type ? 'text-[#1e293b]' : 'text-amber-700'}`}>
-                          {formatAccountType(customer.account_type)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-5">
+              return (
+                <article
+                  key={customer.id}
+                  aria-labelledby={customerNameId}
+                  className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-[#517cad]/35"
+                >
+                  <div className="grid grid-cols-12 items-start gap-x-5 gap-y-4 px-6 py-5">
+                    <div className="col-span-3 min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account owner</p>
+                      <Link id={customerNameId} href={detailsHref} className="mt-1 block truncate text-base font-semibold text-[#1e293b] hover:text-[#4a729f] hover:underline">
+                        {customer.full_name || 'Unnamed'}
+                      </Link>
+                    </div>
+                    <div className="col-span-3 min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Contact</p>
+                      <p className="mt-1 truncate text-sm text-gray-600">{customer.email}</p>
+                      {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Type</p>
+                      <p className={`mt-1 whitespace-nowrap text-sm font-medium ${customer.account_type ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                        {formatAccountType(customer.account_type)}
+                      </p>
+                    </div>
+                    <div className="col-span-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Plan</p>
+                      <div className="mt-1.5">
                         <CustomerPlan
                           membership={membership}
                           hasPackage={(packageCreditsMap[customer.id] ?? 0) > 0}
                           hasCourse={(courseCreditsMap[customer.id] ?? 0) > 0}
                         />
-                      </td>
-                      <td className="px-4 py-5"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></td>
-                      <td className="px-4 py-5 text-center">
-                        <span className={credits > 0 ? 'inline-flex rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]' : 'text-xs text-gray-400'}>
-                          {credits}
-                        </span>
-                      </td>
-                      <td className="px-4 py-5 text-center text-sm text-gray-700">{orderCountMap[customer.id] ?? 0}</td>
-                      <td className="max-w-[13rem] px-4 py-5"><NextSession session={nextSessionMap[customer.id]} /></td>
-                      <td className="whitespace-nowrap px-4 py-5 text-right text-xs text-gray-400">
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Payment access</p>
+                      <div className="mt-1.5"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div>
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <Link href={detailsHref} aria-label={`View details for ${customer.full_name || customer.email}`} className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]">
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 items-center gap-x-5 gap-y-4 border-t border-gray-100 bg-slate-50/60 px-6 py-4">
+                    <div className="col-span-3 min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Students</p>
+                      <div className="mt-1"><CompactStudents students={managedStudents} /></div>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Total spent</p>
+                      <p className="mt-1 text-sm font-semibold text-[#1e293b]">
+                        {formatTotalSpent(totalSpentMap[customer.id] ?? 0)}
+                      </p>
+                    </div>
+                    <div className="col-span-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Credits</p>
+                      <span className={credits > 0 ? 'mt-1 inline-flex rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]' : 'mt-1 block text-sm text-gray-400'}>
+                        {credits}
+                      </span>
+                    </div>
+                    <div className="col-span-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Orders</p>
+                      <p className="mt-1 text-sm font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0}</p>
+                    </div>
+                    <div className="col-span-3 min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Next session</p>
+                      <div className="mt-1"><NextSession session={nextSessionMap[customer.id]} /></div>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Joined</p>
+                      <p className="mt-1 whitespace-nowrap text-xs text-gray-500">
                         {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </td>
-                      <td className="px-4 py-5 text-right">
-                        <Link href={detailsHref} aria-label={`View details for ${customer.full_name || customer.email}`} className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]">
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </>
       ) : (

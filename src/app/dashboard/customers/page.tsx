@@ -4,6 +4,7 @@ import { getAuthUser, getProfile } from '@/lib/auth'
 import { CustomersTable } from '@/components/dashboard/CustomersTable'
 import { CustomerMetrics } from '@/components/dashboard/CustomerMetrics'
 import { unexpiredPackagesClause } from '@/lib/package-expiry'
+import { getChargedCents } from '@/lib/order-amount'
 
 export default async function CustomersPage() {
   const user = await getAuthUser()
@@ -48,7 +49,7 @@ export default async function CustomersPage() {
       .gt('remaining_sessions', 0),
     supabaseAdmin
       .from('booking_requests')
-      .select('customer_id')
+      .select('customer_id, amount_cents, stripe_payment_intent_id, payments(amount_cents)')
       .eq('status', 'paid'),
     supabaseAdmin
       .from('sessions')
@@ -85,8 +86,11 @@ export default async function CustomersPage() {
   }
 
   const orderCountMap: Record<string, number> = {}
+  const totalSpentMap: Record<string, number> = {}
   for (const o of orders ?? []) {
     orderCountMap[o.customer_id] = (orderCountMap[o.customer_id] ?? 0) + 1
+    totalSpentMap[o.customer_id] =
+      (totalSpentMap[o.customer_id] ?? 0) + (getChargedCents(o) ?? 0)
   }
 
   const paymentApprovalMap: Record<string, { step_up: boolean; zelle: boolean }> = {}
@@ -180,6 +184,7 @@ export default async function CustomersPage() {
         nextSessionMap={nextSessionMap}
         studentMap={studentMap}
         paymentApprovalMap={paymentApprovalMap}
+        totalSpentMap={totalSpentMap}
       />
     </div>
   )
