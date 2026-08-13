@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
 import { SubscriptionView } from '@/components/dashboard/SubscriptionView'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { stripe } from '@/lib/stripe'
 import { getAuthUser, getProfile } from '@/lib/auth'
-import { getSubscriptionPeriod } from '@/lib/stripe-subscription'
+import { getCustomerMembership } from '@/lib/customer-membership'
 
 export default async function SubscriptionPage() {
   const user = await getAuthUser()
@@ -19,99 +18,8 @@ export default async function SubscriptionPage() {
     )
   }
 
-  let customer = await supabaseAdmin
-    .from('customers')
-    .select('id, stripe_customer_id, email')
-    .eq('profile_id', user.id)
-    .maybeSingle()
-    .then((r) => r.data)
-
-  if (!customer && user.email) {
-    customer = await supabaseAdmin
-      .from('customers')
-      .select('id, stripe_customer_id, email')
-      .eq('email', user.email)
-      .maybeSingle()
-      .then((r) => r.data)
-  }
-
-  if (!customer?.stripe_customer_id && customer?.email) {
-    const stripeCustomers = await stripe.customers.list({ email: customer.email, limit: 1 })
-    const sc = stripeCustomers.data[0]
-    if (sc) {
-      await supabaseAdmin.from('customers').update({ stripe_customer_id: sc.id }).eq('id', customer.id)
-      customer = { ...customer, stripe_customer_id: sc.id }
-    }
-  }
-
-  let membership = await supabaseAdmin
-    .from('memberships')
-    .select('*')
-    .eq('customer_id', customer?.id)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .maybeSingle()
-    .then((r) => r.data)
-
-  if (!membership && customer?.stripe_customer_id) {
-    const subs = await stripe.subscriptions.list({
-      customer: customer.stripe_customer_id,
-      status: 'all',
-      limit: 10,
-    })
-    const sub = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') ?? subs.data[0]
-    if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
-      const { data: existing } = await supabaseAdmin
-        .from('memberships')
-        .select('*')
-        .eq('stripe_subscription_id', sub.id)
-        .maybeSingle()
-      if (existing) {
-        membership = existing
-      } else {
-        const priceId = sub.items?.data?.[0]?.price?.id
-        const pricingId = sub.metadata?.pricing_id
-        let pricing = null
-        if (pricingId) {
-          pricing = await supabaseAdmin
-            .from('pricing')
-            .select('name, included_hours')
-            .eq('id', pricingId)
-            .eq('type', 'membership')
-            .maybeSingle()
-            .then((r) => r.data)
-        }
-        if (!pricing && priceId) {
-          pricing = await supabaseAdmin
-            .from('pricing')
-            .select('name, included_hours')
-            .eq('type', 'membership')
-            .or(`stripe_price_id.eq.${priceId},stripe_online_price_id.eq.${priceId}`)
-            .maybeSingle()
-            .then((r) => r.data)
-        }
-        const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
-        const includedHours = pricing?.included_hours ?? 2
-        const period = getSubscriptionPeriod(sub)
-        const { data: inserted } = await supabaseAdmin
-          .from('memberships')
-          .insert({
-            customer_id: customer.id,
-            tier,
-            stripe_subscription_id: sub.id,
-            status: 'active',
-            included_hours: includedHours,
-            used_hours: 0,
-            rollover_hours: 0,
-            current_period_start: period.currentPeriodStart,
-            current_period_end: period.currentPeriodEnd,
-          })
-          .select()
-          .single()
-        membership = inserted
-      }
-    }
-  }
+  const customerMembership = await getCustomerMembership(user.id, user.email ?? null)
+  const membership = customerMembership?.membership ?? null
 
   const { data: plans } = await supabaseAdmin
     .from('pricing')
@@ -126,8 +34,8 @@ export default async function SubscriptionPage() {
         <p className="mt-1 text-gray-500">View and manage your membership</p>
       </div>
       <SubscriptionView
-        membership={membership ?? null}
-        hasStripeCustomer={!!customer?.stripe_customer_id}
+        membership={membership}
+        hasStripeCustomer={customerMembership?.hasStripeCustomer ?? false}
         plans={plans ?? []}
       />
     </div>
