@@ -13,6 +13,8 @@ import {
 } from '@/lib/availability-windows'
 import { randomUUID } from 'node:crypto'
 import { findAccountOwner, findOwnedStudent } from '@/lib/student-server'
+import { isMissingStripeCustomerError } from '@/lib/stripe-customer-error'
+import { recoverMissingStripeCustomer } from '@/lib/stripe-customer-server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Select an active student on your account' }, { status: 400 })
     }
 
-    let customerId = null
+    let customerId: string | null = null
     let dbCustomerId: string = owner.id
     let customerEmail = owner.email
 
@@ -273,40 +275,58 @@ export async function POST(req: NextRequest) {
         throw new Error(`Failed to create booking: ${bookingError.message}`)
     }
 
-    const session = await stripe.checkout.sessions.create({
-        customer: customerId ?? undefined,
-        customer_email: customerId ? undefined : customerEmail,
-        line_items,
-        mode,
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/book/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
-        allow_promotion_codes: true,
-        metadata: {
-            booking_request_id: booking.id,
-            purchase_key: purchaseKey,
-            plan_type,
-            plan_name: trustedPlanName || plan_type,
-            ...(trustedPlanId && { plan_id: trustedPlanId }),
-            ...(trustedIncludedHours && { package_hours: String(trustedIncludedHours) }),
-            user_id: user?.id,
-            student_id: studentId,
-            contact_name: booking_details.full_name,
-            contact_email: booking_details.email,
-            ...(booking_details.phone && { contact_phone: booking_details.phone }),
-            ...(body.courseType && { course_type: body.courseType }),
-        },
-        payment_intent_data: mode === 'payment' ? {
-            metadata: {
-                booking_request_id: booking.id
-            }
-        } : undefined,
-        subscription_data: mode === 'subscription' ? {
+    const createCheckoutSession = (stripeId: string | null) =>
+        stripe.checkout.sessions.create({
+            customer: stripeId ?? undefined,
+            customer_email: stripeId ? undefined : customerEmail,
+            line_items,
+            mode,
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/book/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
+            allow_promotion_codes: true,
             metadata: {
                 booking_request_id: booking.id,
-                ...(trustedPlanId && { pricing_id: trustedPlanId }),
-            }
-        } : undefined
-    })
+                purchase_key: purchaseKey,
+                plan_type,
+                plan_name: trustedPlanName || plan_type,
+                ...(trustedPlanId && { plan_id: trustedPlanId }),
+                ...(trustedIncludedHours && { package_hours: String(trustedIncludedHours) }),
+                user_id: user?.id,
+                student_id: studentId,
+                contact_name: booking_details.full_name,
+                contact_email: booking_details.email,
+                ...(booking_details.phone && { contact_phone: booking_details.phone }),
+                ...(body.courseType && { course_type: body.courseType }),
+            },
+            payment_intent_data: mode === 'payment' ? {
+                metadata: {
+                    booking_request_id: booking.id
+                }
+            } : undefined,
+            subscription_data: mode === 'subscription' ? {
+                metadata: {
+                    booking_request_id: booking.id,
+                    ...(trustedPlanId && { pricing_id: trustedPlanId }),
+                }
+            } : undefined
+        })
+
+    let session
+    try {
+        session = await createCheckoutSession(customerId)
+    } catch (error) {
+        if (!customerId || !isMissingStripeCustomerError(error)) throw error
+
+        customerId = await recoverMissingStripeCustomer(
+            {
+                id: dbCustomerId,
+                email: customerEmail,
+                stripe_customer_id: customerId,
+            },
+            customerId
+        )
+        session = await createCheckoutSession(customerId)
+    }
 
     return NextResponse.json({ url: session.url })
   } catch (error: unknown) {

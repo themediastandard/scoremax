@@ -2,6 +2,12 @@ import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getSubscriptionPeriod } from '@/lib/stripe-subscription'
 import type { AccountType } from '@/lib/account-type'
+import { isMissingStripeCustomerError } from '@/lib/stripe-customer-error'
+import {
+  linkStripeCustomerByEmail,
+  recoverMissingStripeCustomer,
+} from '@/lib/stripe-customer-server'
+import { flushReports, reportError } from '@/lib/report-error'
 
 export interface MembershipRecord {
   id: string
@@ -46,15 +52,13 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
 
   if (!customer) return null
 
-  if (!customer.stripe_customer_id && customer.email) {
-    const stripeCustomers = await stripe.customers.list({ email: customer.email, limit: 1 })
-    const stripeCustomer = stripeCustomers.data[0]
-    if (stripeCustomer) {
-      await supabaseAdmin
-        .from('customers')
-        .update({ stripe_customer_id: stripeCustomer.id })
-        .eq('id', customer.id)
-      customer = { ...customer, stripe_customer_id: stripeCustomer.id }
+  let stripeCustomerId = customer.stripe_customer_id
+  if (!stripeCustomerId && customer.email) {
+    try {
+      stripeCustomerId = await linkStripeCustomerByEmail(customer)
+    } catch (error) {
+      reportError('billing:customer-email-link', error, { customerId: customer.id })
+      await flushReports()
     }
   }
 
@@ -67,64 +71,82 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
     .maybeSingle()
     .then((r) => r.data)
 
-  if (!membership && customer.stripe_customer_id) {
+  const syncMembershipFromStripe = async (stripeId: string) => {
+    const subs = await stripe.subscriptions.list({
+      customer: stripeId,
+      status: 'all',
+      limit: 10,
+    })
+    const sub = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') ?? subs.data[0]
+    if (!sub || (sub.status !== 'active' && sub.status !== 'trialing')) return null
+
+    const existing = await supabaseAdmin
+      .from('memberships')
+      .select('tier')
+      .eq('stripe_subscription_id', sub.id)
+      .maybeSingle()
+      .then((r) => r.data)
+    if (existing) return existing
+
+    const priceId = sub.items?.data?.[0]?.price?.id
+    const pricingId = sub.metadata?.pricing_id
+    let pricing = null
+    if (pricingId) {
+      pricing = await supabaseAdmin
+        .from('pricing')
+        .select('name, included_hours')
+        .eq('id', pricingId)
+        .eq('type', 'membership')
+        .maybeSingle()
+        .then((r) => r.data)
+    }
+    if (!pricing && priceId) {
+      pricing = await supabaseAdmin
+        .from('pricing')
+        .select('name, included_hours')
+        .eq('type', 'membership')
+        .or(`stripe_price_id.eq.${priceId},stripe_online_price_id.eq.${priceId}`)
+        .maybeSingle()
+        .then((r) => r.data)
+    }
+    const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
+    const includedHours = pricing?.included_hours ?? 2
+    const period = getSubscriptionPeriod(sub)
+    await supabaseAdmin.from('memberships').insert({
+      customer_id: customer.id,
+      tier,
+      stripe_subscription_id: sub.id,
+      status: 'active',
+      included_hours: includedHours,
+      used_hours: 0,
+      rollover_hours: 0,
+      current_period_start: period.currentPeriodStart,
+      current_period_end: period.currentPeriodEnd,
+    })
+    return { tier }
+  }
+
+  if (!membership && stripeCustomerId) {
     try {
-      const subs = await stripe.subscriptions.list({
-        customer: customer.stripe_customer_id,
-        status: 'all',
-        limit: 10,
-      })
-      const sub = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') ?? subs.data[0]
-      if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
-        const existing = await supabaseAdmin
-          .from('memberships')
-          .select('tier')
-          .eq('stripe_subscription_id', sub.id)
-          .maybeSingle()
-          .then((r) => r.data)
-        if (existing) {
-          membership = existing
-        } else {
-          const priceId = sub.items?.data?.[0]?.price?.id
-          const pricingId = sub.metadata?.pricing_id
-          let pricing = null
-          if (pricingId) {
-            pricing = await supabaseAdmin
-              .from('pricing')
-              .select('name, included_hours')
-              .eq('id', pricingId)
-              .eq('type', 'membership')
-              .maybeSingle()
-              .then((r) => r.data)
+      membership = await syncMembershipFromStripe(stripeCustomerId)
+    } catch (error) {
+      if (isMissingStripeCustomerError(error)) {
+        try {
+          stripeCustomerId = await recoverMissingStripeCustomer(
+            { ...customer, stripe_customer_id: stripeCustomerId },
+            stripeCustomerId
+          )
+          if (stripeCustomerId) {
+            membership = await syncMembershipFromStripe(stripeCustomerId)
           }
-          if (!pricing && priceId) {
-            pricing = await supabaseAdmin
-              .from('pricing')
-              .select('name, included_hours')
-              .eq('type', 'membership')
-              .or(`stripe_price_id.eq.${priceId},stripe_online_price_id.eq.${priceId}`)
-              .maybeSingle()
-              .then((r) => r.data)
-          }
-          const tier = pricing?.name?.replace(/\s*Membership$/i, '')?.toLowerCase() ?? 'starter'
-          const includedHours = pricing?.included_hours ?? 2
-          const period = getSubscriptionPeriod(sub)
-          await supabaseAdmin.from('memberships').insert({
-            customer_id: customer.id,
-            tier,
-            stripe_subscription_id: sub.id,
-            status: 'active',
-            included_hours: includedHours,
-            used_hours: 0,
-            rollover_hours: 0,
-            current_period_start: period.currentPeriodStart,
-            current_period_end: period.currentPeriodEnd,
-          })
-          membership = { tier }
+        } catch (recoveryError) {
+          reportError('billing:customer-recovery', recoveryError, { customerId: customer.id })
+          await flushReports()
         }
+      } else {
+        reportError('billing:subscription-sync', error, { customerId: customer.id })
+        await flushReports()
       }
-    } catch {
-      // Stripe API error - membership stays null
     }
   }
 
@@ -154,6 +176,6 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
     accountType: customer.account_type as AccountType | null,
     membershipTier,
     membership: fullMembership,
-    hasStripeCustomer: !!customer.stripe_customer_id,
+    hasStripeCustomer: Boolean(stripeCustomerId),
   }
 }
