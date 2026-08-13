@@ -3,6 +3,7 @@ import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { getCustomerMembership } from '@/lib/customer-membership'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { isAdminGoogleConnected } from '@/lib/google-admin'
+import type { AccountType } from '@/lib/account-type'
 
 export default async function DashboardLayout({
   children,
@@ -22,9 +23,11 @@ export default async function DashboardLayout({
   }
 
   let membershipTier: string | null = null
+  let accountType: AccountType | null = null
   if (profile.role === 'customer') {
     const result = await getCustomerMembership(user.id, user.email ?? null)
     membershipTier = result?.membershipTier ?? null
+    accountType = result?.accountType ?? null
   }
 
   let googleConnected: boolean | null = null
@@ -37,6 +40,7 @@ export default async function DashboardLayout({
       role={profile.role as 'admin' | 'tutor' | 'customer'}
       fullName={profile.full_name ?? null}
       membershipTier={membershipTier}
+      accountType={accountType}
       googleConnected={googleConnected}
     >
       {children}

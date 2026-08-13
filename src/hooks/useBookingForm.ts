@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import type { AvailabilityWindow } from '@/lib/availability-windows'
+import type { StudentCreditSummaryResponse } from '@/lib/student-contract'
 
 export interface BookingState {
+  /** The explicitly selected active managed student. Never inferred from owner data. */
+  studentId: string | null
   subjects: string[]
   // Every session is delivered online. In-person tutoring was withdrawn as a
   // service before launch, so this is a constant rather than a choice — it is
@@ -20,13 +23,13 @@ export interface BookingState {
     fullName: string
     email: string
     phone: string
-    studentGrade: string
     notes: string
   }
 }
 
 export const useBookingForm = () => {
   const [state, setState] = useState<BookingState>({
+    studentId: null,
     subjects: [],
     sessionType: 'online',
     availability: {
@@ -37,20 +40,23 @@ export const useBookingForm = () => {
       fullName: '',
       email: '',
       phone: '',
-      studentGrade: '',
       notes: ''
     }
   })
 
   const [revealed, setRevealed] = useState({
-    subjects: true,
+    student: true,
+    subjects: false,
     availability: false,
     contact: false,
     plan: false
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [memberStatus, setMemberStatus] = useState<any>(null)
+  const [memberStatus, setMemberStatus] = useState<StudentCreditSummaryResponse | null>(null)
+
+  const updateStudent = (studentId: string | null) => {
+    setState(prev => ({ ...prev, studentId }))
+  }
   
   const updateSubjects = (subjects: string[]) => {
     setState(prev => ({ ...prev, subjects }))
@@ -68,6 +74,7 @@ export const useBookingForm = () => {
   const revealNext = (currentSection: keyof typeof revealed) => {
     setRevealed(prev => {
       const next = { ...prev }
+      if (currentSection === 'student') next.subjects = true
       if (currentSection === 'subjects') next.availability = true
       if (currentSection === 'availability') next.contact = true
       if (currentSection === 'contact') next.plan = true
@@ -82,6 +89,7 @@ export const useBookingForm = () => {
     setRevealed,
     memberStatus,
     setMemberStatus,
+    updateStudent,
     updateSubjects,
     updateAvailability,
     updateContact,

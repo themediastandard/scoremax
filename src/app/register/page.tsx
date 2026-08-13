@@ -8,16 +8,27 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { siteImages } from '@/lib/site-images'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
-import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck } from 'lucide-react'
+import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck, UserRound, Users } from 'lucide-react'
+import type { AccountType } from '@/lib/account-type'
+import { GRADE_OPTIONS } from '@/lib/student-grades'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [accountType, setAccountType] = useState<AccountType | null>(null)
+  const [studentGrade, setStudentGrade] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -34,6 +45,14 @@ export default function RegisterPage() {
       setError('Passwords do not match')
       return
     }
+    if (!accountType) {
+      setError('Choose whether this is a parent/guardian or student account')
+      return
+    }
+    if (accountType === 'student' && !studentGrade) {
+      setError('Select your grade to continue')
+      return
+    }
     if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
       setError('Complete the security check to continue')
       return
@@ -47,7 +66,9 @@ export default function RegisterPage() {
       options: {
         ...(captchaToken && { captchaToken }),
         data: {
-          full_name: fullName
+          full_name: fullName,
+          account_type: accountType,
+          ...(accountType === 'student' && { student_grade: studentGrade }),
         }
       }
     })
@@ -178,7 +199,84 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <GoogleAuthButton mode="signup" />
+          <fieldset className="mb-6 space-y-3">
+            <legend className="text-sm font-medium text-gray-900">Who will use this account?</legend>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                {
+                  value: 'parent' as const,
+                  label: 'Parent/Guardian',
+                  description: 'Book and manage sessions for your children',
+                  icon: Users,
+                },
+                {
+                  value: 'student' as const,
+                  label: 'Student',
+                  description: 'Book and manage your own sessions',
+                  icon: UserRound,
+                },
+              ]).map((option) => {
+                const Icon = option.icon
+                const selected = accountType === option.value
+                return (
+                  <label
+                    key={option.value}
+                    className={`cursor-pointer border p-4 transition-colors focus-within:ring-2 focus-within:ring-[#b08a30] focus-within:ring-offset-2 ${
+                      selected
+                        ? 'border-[#b08a30] bg-[#b08a30]/5'
+                        : 'border-gray-200 hover:border-[#b08a30]/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="account-type"
+                      value={option.value}
+                      checked={selected}
+                      onChange={() => {
+                        setAccountType(option.value)
+                        if (option.value === 'parent') setStudentGrade('')
+                      }}
+                      className="sr-only"
+                    />
+                    <Icon className={`h-5 w-5 ${selected ? 'text-[#b08a30]' : 'text-gray-400'}`} aria-hidden="true" />
+                    <span className="mt-2 block text-sm font-semibold text-gray-900">{option.label}</span>
+                    <span className="mt-1 block text-xs leading-5 text-gray-500">{option.description}</span>
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
+
+          {accountType === 'student' && (
+            <div className="mb-6 space-y-2">
+              <Label htmlFor="signup-student-grade">Your Grade</Label>
+              <Select value={studentGrade || undefined} onValueChange={setStudentGrade}>
+                <SelectTrigger id="signup-student-grade" className="h-11 w-full" aria-required="true">
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GRADE_OPTIONS.map((grade) => (
+                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs leading-5 text-gray-500">
+                Your student profile will be created automatically using this account&apos;s name and email.
+              </p>
+            </div>
+          )}
+
+          <GoogleAuthButton
+            mode="signup"
+            signupAccountType={accountType}
+            studentGrade={studentGrade}
+          />
+
+          {!accountType && (
+            <p className="mt-2 text-center text-xs text-gray-500">
+              Choose an account type before continuing with Google.
+            </p>
+          )}
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">

@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { buildSubjectCatalog, resolveSubjectNames } from '@/lib/subject-catalog'
 import { readAvailabilityWindows } from '@/lib/availability-windows'
+import { formatPlanLabel } from '@/lib/order-format'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('session_id')
@@ -14,8 +15,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const [{ data: customer }, { data: profile }] = await Promise.all([
+      supabaseAdmin
+        .from('customers')
+        .select('id')
+        .eq('profile_id', user.id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ])
+    const isAdmin = profile?.role === 'admin'
+
     let bookingRequestId: string | null = null
-    let planInfo: { name: string; amountCents: number; type: string } | null = null
+    let planInfo: {
+      name: string
+      amountCents: number
+      type: string
+      paymentMethod: string | null
+    } | null = null
 
     if (sessionId) {
       let session
@@ -36,51 +62,52 @@ export async function GET(req: NextRequest) {
         name: product?.name ?? lineItem?.description ?? 'Membership / Package',
         amountCents: session.amount_total ?? 0,
         type: session.metadata?.plan_type ?? 'membership',
+        paymentMethod: 'credit_card',
       }
     } else if (bookingId) {
-      const supabase = await createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-
-      const { data: customer } = await supabaseAdmin
-        .from('customers')
-        .select('id')
-        .eq('profile_id', user.id)
-        .maybeSingle()
-
-      if (!customer) {
-        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-      }
-
       bookingRequestId = bookingId
-      planInfo = {
-        name: 'Credit Used',
-        amountCents: 0,
-        type: 'credit',
-      }
-
-      const { data: ownedBooking } = await supabaseAdmin
-        .from('booking_requests')
-        .select('id')
-        .eq('id', bookingRequestId)
-        .eq('customer_id', customer.id)
-        .maybeSingle()
-
-      if (!ownedBooking) {
-        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
-      }
     }
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from('booking_requests')
-      .select('subjects, available_days, available_time_start, available_time_end, available_windows, session_type, payment_type')
+      .select('customer_id, subjects, available_days, available_time_start, available_time_end, available_windows, session_type, payment_type, payment_method, amount_cents, pricing_id, student_id, students(id, full_name, email, grade)')
       .eq('id', bookingRequestId)
       .single()
 
     if (bookingError || !booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    }
+
+    if (!isAdmin && (!customer || booking.customer_id !== customer.id)) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    }
+
+    if (!sessionId && bookingId) {
+      let pricingName: string | null = null
+      if (booking.pricing_id) {
+        const { data: pricing } = await supabaseAdmin
+          .from('pricing')
+          .select('name')
+          .eq('id', booking.pricing_id)
+          .maybeSingle()
+        pricingName = pricing?.name ?? null
+      }
+
+      planInfo = {
+        name: pricingName ?? (
+          booking.payment_method === 'account_credit'
+            ? 'Credit Used'
+            : formatPlanLabel({
+                payment_type: booking.payment_type,
+                amount_cents: booking.amount_cents,
+              })
+        ),
+        amountCents: booking.amount_cents ?? 0,
+        type: booking.payment_type ?? 'booking',
+        paymentMethod: booking.payment_method ?? 'account_credit',
+      }
+    } else if (planInfo) {
+      planInfo.paymentMethod = booking.payment_method ?? 'credit_card'
     }
 
     let subjectNames: string[] = []
@@ -96,6 +123,8 @@ export async function GET(req: NextRequest) {
     const fmtTime = (t: string | null) =>
       t ? t.slice(0, 5) : null
 
+    const selectedStudent = Array.isArray(booking.students) ? booking.students[0] : booking.students
+
     return NextResponse.json({
       plan: planInfo,
       availability: {
@@ -110,6 +139,13 @@ export async function GET(req: NextRequest) {
       sessionType: booking.session_type ?? 'online',
       subjects: subjectNames,
       subjectIds: booking.subjects ?? [],
+      student: selectedStudent ? {
+        id: selectedStudent.id,
+        fullName: selectedStudent.full_name,
+        email: selectedStudent.email,
+        grade: selectedStudent.grade,
+      } : null,
+      legacyStudentUnassigned: !booking.student_id,
     })
   } catch (err) {
     console.error('Confirmation fetch error:', err)

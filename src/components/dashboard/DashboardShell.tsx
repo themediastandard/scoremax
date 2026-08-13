@@ -7,11 +7,13 @@ import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { siteImages } from '@/lib/site-images'
+import type { AccountType } from '@/lib/account-type'
 
 interface DashboardShellProps {
   role: 'admin' | 'tutor' | 'customer'
   fullName?: string | null
   membershipTier?: string | null
+  accountType?: AccountType | null
   googleConnected?: boolean | null
   children: React.ReactNode
 }
@@ -28,6 +30,7 @@ export function DashboardShell({
   role,
   fullName,
   membershipTier,
+  accountType,
   googleConnected,
   children,
 }: DashboardShellProps) {
@@ -58,6 +61,7 @@ export function DashboardShell({
       role={role}
       fullName={fullName}
       membershipTier={membershipTier}
+      accountType={accountType}
       googleConnected={googleConnected}
     />
   )

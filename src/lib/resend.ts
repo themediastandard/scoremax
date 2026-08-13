@@ -63,13 +63,21 @@ const paceSend = createPacer({ intervalMs: MIN_SEND_INTERVAL_MS })
  * (`RequireAtLeastOne` over html/text/react), and an `Omit<…, 'from'>` wrapper
  * would collapse it into a single non-discriminated object, losing the
  * guarantee that some content field is present.
+ *
+ * `idempotencyKey` is deliberately opt-in. Purchase routes can key a send to a
+ * committed payment or booking, while contact forms and session updates retain
+ * their existing ability to send again when a person performs the action again.
  */
 export async function sendEmail(
   payload: CreateEmailOptions,
-  context: string
+  context: string,
+  idempotencyKey?: string
 ): Promise<boolean> {
   try {
-    const { error } = await paceSend(() => resend.emails.send(payload))
+    const { error } = await paceSend(() => resend.emails.send(
+      payload,
+      idempotencyKey ? { idempotencyKey } : undefined
+    ))
     if (error) {
       reportIssue(`email:${groupingKey(context)}`, `Resend rejected the send: ${error.name}`, {
         emailContext: context,

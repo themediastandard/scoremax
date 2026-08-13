@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { ArrowRight, Search, Users, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, Users, X } from 'lucide-react'
+import { formatBusinessDateTime } from '@/lib/business-datetime'
+import { formatAccountType, type AccountType } from '@/lib/account-type'
 
 interface Customer {
   id: string
@@ -18,6 +21,7 @@ interface Customer {
   email: string
   phone: string | null
   student_grade: string | null
+  account_type: AccountType | null
   created_at: string
 }
 
@@ -29,12 +33,34 @@ interface Membership {
   rollover_hours: number
 }
 
+interface ManagedStudent {
+  id: string
+  full_name: string
+  email: string
+  grade: string
+  is_active: boolean
+}
+
+export interface CustomerNextSession {
+  status: 'pending_scheduling' | 'scheduled'
+  confirmed_start: string | null
+}
+
+interface PaymentApprovalState {
+  step_up: boolean
+  zelle: boolean
+}
+
 interface CustomersTableProps {
   customers: Customer[]
   membershipMap: Record<string, Membership>
   packageCreditsMap: Record<string, number>
+  courseCreditsMap: Record<string, number>
   orderCountMap: Record<string, number>
   sessionCountMap: Record<string, { completed: number; upcoming: number }>
+  nextSessionMap: Record<string, CustomerNextSession>
+  studentMap: Record<string, ManagedStudent[]>
+  paymentApprovalMap: Record<string, PaymentApprovalState>
 }
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'credits' | 'orders' | 'sessions'
@@ -42,33 +68,142 @@ type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'credits' | '
 function getCredits(
   customerId: string,
   membershipMap: Record<string, Membership>,
-  packageCreditsMap: Record<string, number>
+  packageCreditsMap: Record<string, number>,
+  courseCreditsMap: Record<string, number>
 ) {
-  const mem = membershipMap[customerId]
-  const memCredits = mem
-    ? mem.included_hours + mem.rollover_hours - mem.used_hours
+  const membership = membershipMap[customerId]
+  const membershipCredits = membership
+    ? membership.included_hours + membership.rollover_hours - membership.used_hours
     : 0
-  const pkgCredits = packageCreditsMap[customerId] ?? 0
-  return memCredits + pkgCredits
+  return (
+    Math.max(0, membershipCredits) +
+    (packageCreditsMap[customerId] ?? 0) +
+    (courseCreditsMap[customerId] ?? 0)
+  )
 }
 
 function getPlanType(
   customerId: string,
   membershipMap: Record<string, Membership>,
-  packageCreditsMap: Record<string, number>
+  packageCreditsMap: Record<string, number>,
+  courseCreditsMap: Record<string, number>
 ): string {
-  const mem = membershipMap[customerId]
-  if (mem) return mem.tier
+  const membership = membershipMap[customerId]
+  if (membership) return membership.tier
   if (packageCreditsMap[customerId] > 0) return 'package'
+  if (courseCreditsMap[customerId] > 0) return 'course'
   return 'none'
+}
+
+function CustomerPlan({
+  membership,
+  hasPackage,
+  hasCourse,
+}: {
+  membership?: Membership
+  hasPackage: boolean
+  hasCourse: boolean
+}) {
+  if (membership) {
+    return (
+      <Badge
+        variant="outline"
+        className={
+          membership.tier === 'core'
+            ? 'border-[#b08a30] text-[#b08a30]'
+            : membership.tier === 'premier'
+              ? 'border-purple-500 text-purple-600'
+              : 'border-[#517cad] text-[#4a729f]'
+        }
+      >
+        {membership.tier.charAt(0).toUpperCase() + membership.tier.slice(1)}
+      </Badge>
+    )
+  }
+
+  if (hasPackage) {
+    return <Badge variant="outline" className="border-gray-300 text-gray-600">Package</Badge>
+  }
+
+  if (hasCourse) {
+    return <Badge variant="outline" className="border-[#517cad] text-[#4a729f]">Course</Badge>
+  }
+
+  return <span className="text-xs text-gray-400">—</span>
+}
+
+function CompactStudents({ students }: { students: ManagedStudent[] }) {
+  if (students.length === 0) {
+    return <span className="text-xs font-medium text-amber-700">None</span>
+  }
+
+  const activeStudents = students.filter((student) => student.is_active)
+  const displayStudents = activeStudents.length > 0 ? activeStudents : students
+
+  if (displayStudents.length > 1) {
+    return (
+      <span className="text-sm font-medium text-[#1e293b]">
+        {displayStudents.length} students
+      </span>
+    )
+  }
+
+  const first = displayStudents[0]
+
+  return (
+    <div className={first.is_active ? '' : 'opacity-60'}>
+      <p className="text-sm font-medium text-[#1e293b]">{first.full_name}</p>
+      <p className="text-xs text-gray-400">
+        {first.grade}{first.is_active ? '' : ' · Inactive'}
+      </p>
+    </div>
+  )
+}
+
+function NextSession({ session }: { session?: CustomerNextSession }) {
+  if (!session) return <span className="text-xs text-gray-400">—</span>
+  if (session.status === 'pending_scheduling' || !session.confirmed_start) {
+    return <span className="text-xs font-medium text-amber-700">Pending scheduling</span>
+  }
+
+  return (
+    <span className="text-xs leading-5 text-gray-600">
+      {formatBusinessDateTime(session.confirmed_start)}
+    </span>
+  )
+}
+
+function PaymentAccess({ approvals }: { approvals?: PaymentApprovalState }) {
+  if (!approvals?.step_up && !approvals?.zelle) {
+    return <span className="text-xs text-gray-400">None</span>
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {approvals.step_up && (
+        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-1.5 py-0 text-[10px] font-medium text-emerald-700">
+          Step Up
+        </Badge>
+      )}
+      {approvals.zelle && (
+        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-1.5 py-0 text-[10px] font-medium text-emerald-700">
+          Zelle
+        </Badge>
+      )}
+    </div>
+  )
 }
 
 export function CustomersTable({
   customers,
   membershipMap,
   packageCreditsMap,
+  courseCreditsMap,
   orderCountMap,
   sessionCountMap,
+  nextSessionMap,
+  studentMap,
+  paymentApprovalMap = {},
 }: CustomersTableProps) {
   const [search, setSearch] = useState('')
   const [planFilter, setPlanFilter] = useState('all')
@@ -78,8 +213,8 @@ export function CustomersTable({
 
   const grades = useMemo(() => {
     const set = new Set<string>()
-    for (const c of customers) {
-      if (c.student_grade) set.add(c.student_grade)
+    for (const customer of customers) {
+      for (const student of studentMap[customer.id] ?? []) set.add(student.grade)
     }
     return Array.from(set).sort((a, b) => {
       const numA = parseInt(a)
@@ -87,34 +222,44 @@ export function CustomersTable({
       if (!isNaN(numA) && !isNaN(numB)) return numA - numB
       return a.localeCompare(b)
     })
-  }, [customers])
+  }, [customers, studentMap])
 
   const filtered = useMemo(() => {
     let result = [...customers]
 
     if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter((c) => {
-        const name = c.full_name?.toLowerCase() ?? ''
-        const email = c.email?.toLowerCase() ?? ''
-        const phone = c.phone?.toLowerCase() ?? ''
-        return name.includes(q) || email.includes(q) || phone.includes(q)
+      const query = search.toLowerCase()
+      result = result.filter((customer) => {
+        const studentMatches = (studentMap[customer.id] ?? []).some(
+          (student) =>
+            student.full_name.toLowerCase().includes(query) ||
+            student.email.toLowerCase().includes(query)
+        )
+        return (
+          (customer.full_name?.toLowerCase() ?? '').includes(query) ||
+          customer.email.toLowerCase().includes(query) ||
+          (customer.phone?.toLowerCase() ?? '').includes(query) ||
+          studentMatches
+        )
       })
     }
 
     if (planFilter !== 'all') {
       result = result.filter(
-        (c) => getPlanType(c.id, membershipMap, packageCreditsMap) === planFilter
+        (customer) =>
+          getPlanType(customer.id, membershipMap, packageCreditsMap, courseCreditsMap) === planFilter
       )
     }
 
     if (gradeFilter !== 'all') {
-      result = result.filter((c) => c.student_grade === gradeFilter)
+      result = result.filter((customer) =>
+        (studentMap[customer.id] ?? []).some((student) => student.grade === gradeFilter)
+      )
     }
 
     if (creditFilter !== 'all') {
-      result = result.filter((c) => {
-        const credits = getCredits(c.id, membershipMap, packageCreditsMap)
+      result = result.filter((customer) => {
+        const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
         return creditFilter === 'has' ? credits > 0 : credits === 0
       })
     }
@@ -131,25 +276,25 @@ export function CustomersTable({
           return (b.full_name ?? '').localeCompare(a.full_name ?? '')
         case 'credits':
           return (
-            getCredits(b.id, membershipMap, packageCreditsMap) -
-            getCredits(a.id, membershipMap, packageCreditsMap)
+            getCredits(b.id, membershipMap, packageCreditsMap, courseCreditsMap) -
+            getCredits(a.id, membershipMap, packageCreditsMap, courseCreditsMap)
           )
         case 'orders':
           return (orderCountMap[b.id] ?? 0) - (orderCountMap[a.id] ?? 0)
         case 'sessions': {
-          const sa = sessionCountMap[a.id] ?? { completed: 0, upcoming: 0 }
-          const sb = sessionCountMap[b.id] ?? { completed: 0, upcoming: 0 }
-          return sb.completed + sb.upcoming - (sa.completed + sa.upcoming)
+          const aSessions = sessionCountMap[a.id] ?? { completed: 0, upcoming: 0 }
+          const bSessions = sessionCountMap[b.id] ?? { completed: 0, upcoming: 0 }
+          return bSessions.completed + bSessions.upcoming - (aSessions.completed + aSessions.upcoming)
         }
-        default:
-          return 0
       }
     })
 
     return result
-  }, [customers, search, planFilter, gradeFilter, creditFilter, sortBy, membershipMap, packageCreditsMap, orderCountMap, sessionCountMap])
+  }, [customers, search, planFilter, gradeFilter, creditFilter, sortBy, membershipMap, packageCreditsMap, courseCreditsMap, orderCountMap, sessionCountMap, studentMap])
 
-  const hasFilters = search || planFilter !== 'all' || gradeFilter !== 'all' || creditFilter !== 'all'
+  const hasFilters = Boolean(
+    search || planFilter !== 'all' || gradeFilter !== 'all' || creditFilter !== 'all'
+  )
 
   const clearFilters = () => {
     setSearch('')
@@ -161,50 +306,41 @@ export function CustomersTable({
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="relative min-w-[200px] max-w-xs flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            placeholder="Search name, email, phone..."
+            placeholder="Search owner or student..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9"
+            onChange={(event) => setSearch(event.target.value)}
+            className="h-9 pl-9"
           />
         </div>
 
         <Select value={planFilter} onValueChange={setPlanFilter}>
-          <SelectTrigger className="w-[140px] h-9">
-            <SelectValue placeholder="Plan" />
-          </SelectTrigger>
+          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="Plan" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
             <SelectItem value="core">Core</SelectItem>
             <SelectItem value="premier">Premier</SelectItem>
             <SelectItem value="elite">Elite</SelectItem>
             <SelectItem value="package">Package</SelectItem>
+            <SelectItem value="course">Course</SelectItem>
             <SelectItem value="none">No Plan</SelectItem>
           </SelectContent>
         </Select>
 
         {grades.length > 0 && (
           <Select value={gradeFilter} onValueChange={setGradeFilter}>
-            <SelectTrigger className="w-[130px] h-9">
-              <SelectValue placeholder="Grade" />
-            </SelectTrigger>
+            <SelectTrigger className="h-9 w-[130px]"><SelectValue placeholder="Grade" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Grades</SelectItem>
-              {grades.map((g) => (
-                <SelectItem key={g} value={g}>
-                  Grade {g}
-                </SelectItem>
-              ))}
+              {grades.map((grade) => <SelectItem key={grade} value={grade}>Grade {grade}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
 
         <Select value={creditFilter} onValueChange={setCreditFilter}>
-          <SelectTrigger className="w-[140px] h-9">
-            <SelectValue placeholder="Credits" />
-          </SelectTrigger>
+          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="Credits" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Credits</SelectItem>
             <SelectItem value="has">Has Credits</SelectItem>
@@ -212,10 +348,8 @@ export function CustomersTable({
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-          <SelectTrigger className="w-[150px] h-9">
-            <SelectValue />
-          </SelectTrigger>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+          <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="oldest">Oldest First</SelectItem>
@@ -229,8 +363,9 @@ export function CustomersTable({
 
         {hasFilters && (
           <button
+            type="button"
             onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            className="flex items-center gap-1 text-xs text-gray-500 transition-colors hover:text-gray-700"
           >
             <X className="h-3 w-3" />
             Clear
@@ -239,131 +374,134 @@ export function CustomersTable({
       </div>
 
       {filtered.length > 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-gray-50/80">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Grade</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Credits</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Orders</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Sessions</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.map((customer) => {
-                const membership = membershipMap[customer.id]
-                const credits = getCredits(customer.id, membershipMap, packageCreditsMap)
-                const orderCount = orderCountMap[customer.id] ?? 0
-                const sessionStats = sessionCountMap[customer.id] ?? { completed: 0, upcoming: 0 }
+        <>
+          <div className="space-y-3 xl:hidden">
+            {filtered.map((customer) => {
+              const membership = membershipMap[customer.id]
+              const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
+              const managedStudents = studentMap[customer.id] ?? []
+              const detailsHref = `/dashboard/customers/${customer.id}`
 
-                return (
-                  <tr key={customer.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <p className="font-medium text-sm text-[#1e293b]">
+              return (
+                <article key={customer.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <Link href={detailsHref} className="font-semibold text-[#1e293b] hover:text-[#4a729f] hover:underline">
                         {customer.full_name || 'Unnamed'}
-                      </p>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <p className="text-sm text-gray-600">{customer.email}</p>
-                      {customer.phone && (
-                        <p className="text-xs text-gray-400 mt-0.5">{customer.phone}</p>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className="text-sm text-gray-600">
-                        {customer.student_grade || '—'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      {membership ? (
-                        <Badge
-                          variant="outline"
-                          className={
-                            membership.tier === 'core'
-                              ? 'border-[#b08a30] text-[#b08a30]'
-                              : membership.tier === 'premier'
-                                ? 'border-purple-500 text-purple-600'
-                                : 'border-[#517cad] text-[#4a729f]'
-                          }
-                        >
-                          {membership.tier.charAt(0).toUpperCase() + membership.tier.slice(1)}
-                        </Badge>
-                      ) : packageCreditsMap[customer.id] > 0 ? (
-                        <Badge variant="outline" className="border-gray-300 text-gray-600">
-                          Package
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      {credits > 0 ? (
-                        <span className="inline-flex items-center rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]">
+                      </Link>
+                      <p className="truncate text-sm text-gray-600">{customer.email}</p>
+                      {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
+                    </div>
+                    <CustomerPlan
+                      membership={membership}
+                      hasPackage={(packageCreditsMap[customer.id] ?? 0) > 0}
+                      hasCourse={(courseCreditsMap[customer.id] ?? 0) > 0}
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-gray-100 py-4 text-sm sm:grid-cols-3">
+                    <div><p className="text-xs text-gray-500">Students</p><CompactStudents students={managedStudents} /></div>
+                    <div><p className="text-xs text-gray-500">Account type</p><p className="mt-0.5 font-medium text-[#1e293b]">{formatAccountType(customer.account_type)}</p></div>
+                    <div><p className="text-xs text-gray-500">Payment access</p><div className="mt-1"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div></div>
+                    <div><p className="text-xs text-gray-500">Credits</p><p className="mt-0.5 font-medium text-[#1e293b]">{credits}</p></div>
+                    <div><p className="text-xs text-gray-500">Orders</p><p className="mt-0.5 font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0}</p></div>
+                    <div><p className="text-xs text-gray-500">Next session</p><NextSession session={nextSessionMap[customer.id]} /></div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-xs text-gray-400">
+                      Joined {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                    <Link href={detailsHref} className="inline-flex items-center gap-1 text-sm font-medium text-[#4a729f] hover:text-[#3b5c85]">
+                      View details <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm xl:block">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-gray-50/80">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Account Owner</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Students</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Payment Access</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Credits</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Orders</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Next Session</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Joined</th>
+                  <th className="w-12 px-4 py-3"><span className="sr-only">View customer details</span></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((customer) => {
+                  const membership = membershipMap[customer.id]
+                  const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
+                  const detailsHref = `/dashboard/customers/${customer.id}`
+
+                  return (
+                    <tr key={customer.id} className="transition-colors hover:bg-gray-50/60">
+                      <td className="px-4 py-3">
+                        <Link href={detailsHref} className="text-sm font-medium text-[#1e293b] hover:text-[#4a729f] hover:underline">
+                          {customer.full_name || 'Unnamed'}
+                        </Link>
+                      </td>
+                      <td className="max-w-[15rem] px-4 py-3">
+                        <p className="truncate text-sm text-gray-600">{customer.email}</p>
+                        {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
+                      </td>
+                      <td className="px-4 py-3"><CompactStudents students={studentMap[customer.id] ?? []} /></td>
+                      <td className="px-4 py-3">
+                        <span className={`whitespace-nowrap text-xs font-medium ${customer.account_type ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                          {formatAccountType(customer.account_type)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <CustomerPlan
+                          membership={membership}
+                          hasPackage={(packageCreditsMap[customer.id] ?? 0) > 0}
+                          hasCourse={(courseCreditsMap[customer.id] ?? 0) > 0}
+                        />
+                      </td>
+                      <td className="px-4 py-3"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={credits > 0 ? 'inline-flex rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]' : 'text-xs text-gray-400'}>
                           {credits}
                         </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">0</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <span className="text-sm text-gray-700">{orderCount}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {sessionStats.upcoming > 0 && (
-                          <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-                            {sessionStats.upcoming} upcoming
-                          </span>
-                        )}
-                        {sessionStats.completed > 0 && (
-                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                            {sessionStats.completed} done
-                          </span>
-                        )}
-                        {sessionStats.upcoming === 0 && sessionStats.completed === 0 && (
-                          <span className="text-xs text-gray-400">—</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <span className="text-xs text-gray-400">
-                        {new Date(customer.created_at).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-sm text-gray-700">{orderCountMap[customer.id] ?? 0}</td>
+                      <td className="max-w-[13rem] px-4 py-3"><NextSession session={nextSessionMap[customer.id]} /></td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right text-xs text-gray-400">
+                        {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link href={detailsHref} aria-label={`View details for ${customer.full_name || customer.email}`} className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]">
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : (
-        <div className="bg-white rounded-lg border border-dashed border-gray-200 py-16 text-center">
-          <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          {hasFilters ? (
-            <>
-              <p className="text-gray-500 font-medium">No matching customers</p>
-              <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
-            </>
-          ) : (
-            <>
-              <p className="text-gray-500 font-medium">No customers yet</p>
-              <p className="text-sm text-gray-400 mt-1">Customers will appear here after they sign up</p>
-            </>
-          )}
+        <div className="rounded-lg border border-dashed border-gray-200 bg-white py-16 text-center">
+          <Users className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+          <p className="font-medium text-gray-500">{hasFilters ? 'No matching customers' : 'No customers yet'}</p>
+          <p className="mt-1 text-sm text-gray-400">
+            {hasFilters ? 'Try adjusting your filters' : 'Customers will appear here after they sign up'}
+          </p>
         </div>
       )}
 
-      <p className="text-xs text-gray-400 text-right">
-        Showing {filtered.length} of {customers.length} customers
-      </p>
+      <p className="text-right text-xs text-gray-400">Showing {filtered.length} of {customers.length} customers</p>
     </>
   )
 }

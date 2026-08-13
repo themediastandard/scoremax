@@ -18,6 +18,7 @@ import { RequestedAvailability } from './RequestedAvailability'
 interface SessionFormProps {
   session: {
     id: string
+    student_id: string | null
     assigned_tutor_id: string | null
     confirmed_start: string | null
     confirmed_end: string | null
@@ -25,6 +26,7 @@ interface SessionFormProps {
     internal_notes: string | null
   }
   tutors: { id: string; full_name: string }[]
+  students: { id: string; full_name: string; email: string; grade: string }[]
   /**
    * The booking_requests row this session came from, joined through
    * sessions.order_id. Shown above the controls so the time below is picked
@@ -39,7 +41,7 @@ interface SessionFormProps {
   } | null
 }
 
-export function SessionForm({ session, tutors, requestedAvailability }: SessionFormProps) {
+export function SessionForm({ session, tutors, students, requestedAvailability }: SessionFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [feedback, setFeedback] = useState<{
@@ -48,6 +50,7 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
   } | null>(null)
 
   const [tutorId, setTutorId] = useState(session.assigned_tutor_id || '')
+  const [studentId, setStudentId] = useState(session.student_id || '')
   const [date, setDate] = useState(
     session.confirmed_start ? toLocalDateValue(session.confirmed_start) : ''
   )
@@ -68,6 +71,7 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
   const [internalNotes, setInternalNotes] = useState(session.internal_notes || '')
 
   const [initial, setInitial] = useState(() => ({
+    studentId: session.student_id || '',
     tutorId: session.assigned_tutor_id || '',
     date: session.confirmed_start ? toLocalDateValue(session.confirmed_start) : '',
     time: session.confirmed_start ? toLocalTimeValue(session.confirmed_start) : '',
@@ -84,6 +88,7 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
   }))
 
   const hasChanges =
+    studentId !== initial.studentId ||
     tutorId !== initial.tutorId ||
     date !== initial.date ||
     time !== initial.time ||
@@ -95,8 +100,12 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
     session.status === 'scheduled' &&
     status === 'scheduled' &&
     (date !== initial.date || time !== initial.time || duration !== initial.duration)
+  const studentChanged = studentId !== initial.studentId
+  const hasActiveStudents = students.length > 0
+  const needsStudent = !studentId
 
   const handleReset = () => {
+    setStudentId(initial.studentId)
     setTutorId(initial.tutorId)
     setDate(initial.date)
     setTime(initial.time)
@@ -126,6 +135,7 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          student_id: studentId || null,
           assigned_tutor_id: tutorId || null,
           confirmed_start: confirmedStart,
           confirmed_end: confirmedEnd,
@@ -139,7 +149,7 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
         setFeedback({ tone: 'error', message: err.error || 'Failed to update session' })
       } else {
         const result = await res.json()
-        setInitial({ tutorId, date, time, duration, status, internalNotes })
+        setInitial({ studentId, tutorId, date, time, duration, status, internalNotes })
         setFeedback(
           result.warning
             ? { tone: 'warning', message: result.warning }
@@ -149,7 +159,11 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
                   ? result.reschedule?.calendar_updated === false
                     ? 'Session rescheduled. Confirmations were sent to the student and tutor. This session did not have a linked Google Calendar event.'
                     : 'Session rescheduled. Google Calendar was updated and confirmations were sent to the student and tutor.'
-                  : 'Session saved successfully.',
+                  : studentChanged
+                    ? result.student_assignment?.calendar_updated
+                      ? 'Student assigned. The order and session now match, and Google Calendar was updated.'
+                      : 'Student assigned. The order and session now match.'
+                    : 'Session saved successfully.',
               }
         )
         router.refresh()
@@ -167,6 +181,32 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
       <RequestedAvailability booking={requestedAvailability} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Student</Label>
+          <Select value={studentId || undefined} onValueChange={setStudentId} disabled={!hasActiveStudents || loading}>
+            <SelectTrigger aria-label="Student">
+              <SelectValue placeholder="Student not assigned" />
+            </SelectTrigger>
+            <SelectContent>
+              {students.map((student) => (
+                <SelectItem key={student.id} value={student.id}>
+                  {student.full_name} · {student.grade}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {!initial.studentId && (
+            <p className="text-xs font-medium text-amber-700">
+              Legacy session: student not assigned. Choose an active student before saving.
+            </p>
+          )}
+          {!hasActiveStudents && (
+            <p className="text-xs text-red-700" role="alert">
+              This account has no active managed students. The account owner must add or reactivate a student first.
+            </p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label>Assign Tutor</Label>
           <Select value={tutorId} onValueChange={setTutorId}>
@@ -229,6 +269,23 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
         </div>
       )}
 
+      {studentChanged && status === 'scheduled' && (
+        <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            Saving will replace only the student on the existing calendar invitation. The account
+            owner, tutor, time, Meet link, and credit balance stay unchanged.
+          </p>
+        </div>
+      )}
+
+      {studentChanged && (session.status === 'completed' || session.status === 'cancelled') && (
+        <div className="flex gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>This historical correction updates ScoreMax records only. No live-session notice will be sent.</p>
+        </div>
+      )}
+
       {feedback && (
         <div
           role={feedback.tone === 'error' ? 'alert' : 'status'}
@@ -277,7 +334,11 @@ export function SessionForm({ session, tutors, requestedAvailability }: SessionF
                 Undo
               </Button>
             )}
-            <Button onClick={handleSave} disabled={loading} className="bg-[#1e293b]">
+            <Button
+              onClick={handleSave}
+              disabled={loading || !hasActiveStudents || needsStudent}
+              className="bg-[#1e293b]"
+            >
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : isReschedule ? (

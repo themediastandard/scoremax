@@ -5,28 +5,23 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Check } from 'lucide-react'
-import { GRADE_OPTIONS } from '@/lib/student-grades'
 
 interface ProfileFormProps {
   fullName: string
   email: string
   phone: string
-  studentGrade: string
-  role: string
 }
 
-export function ProfileForm({ fullName, email, phone, studentGrade, role }: ProfileFormProps) {
+export function ProfileForm({ fullName, email, phone }: ProfileFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
 
   const [name, setName] = useState(fullName)
   const [ph, setPh] = useState(phone)
-  const [grade, setGrade] = useState(studentGrade)
 
-  const hasChanges = name !== fullName || ph !== phone || grade !== studentGrade
+  const hasChanges = name !== fullName || ph !== phone
 
   const handleSave = async () => {
     setLoading(true)
@@ -38,7 +33,6 @@ export function ProfileForm({ fullName, email, phone, studentGrade, role }: Prof
         body: JSON.stringify({
           fullName: name,
           phone: ph,
-          studentGrade: grade,
         })
       })
       if (res.ok) {
@@ -72,26 +66,6 @@ export function ProfileForm({ fullName, email, phone, studentGrade, role }: Prof
           <Label>Phone Number</Label>
           <Input value={ph} onChange={(e) => setPh(e.target.value)} placeholder="(555) 123-4567" />
         </div>
-        {role === 'customer' && (
-          <div className="space-y-2">
-            <Label>Student Grade</Label>
-            <Select value={grade || undefined} onValueChange={setGrade}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select grade" />
-              </SelectTrigger>
-              <SelectContent>
-                {/* Keep a legacy free-typed value selectable so it still
-                    displays until the user picks a canonical grade. */}
-                {grade && !GRADE_OPTIONS.includes(grade) && (
-                  <SelectItem value={grade}>{grade}</SelectItem>
-                )}
-                {GRADE_OPTIONS.map((g) => (
-                  <SelectItem key={g} value={g}>{g}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
       <div className="flex items-center gap-3 pt-2">
         <Button onClick={handleSave} disabled={loading || !hasChanges} className="bg-[#1e293b]">

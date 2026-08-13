@@ -141,19 +141,21 @@ export function detailRowHtml(label: string, valueHtml: string): string {
  * buildReminderLocation() from escaped parts. Sender: /api/cron/session-reminders.
  */
 export function sessionReminderEmail(options: {
-  recipient: 'student' | 'tutor'
+  recipient: 'owner' | 'student' | 'tutor'
   /** The `sessions` row; only session_type, meet_url and confirmed_start are read. */
   session: ReminderSessionRow
   /** Who the email is addressed to. */
   recipientName?: string | null
   /** The other person on the session — the tutor for a student, the student for a tutor. */
   counterpartName?: string | null
+  studentName?: string | null
 }): { subject: string; html: string } {
   const { recipient, session } = options
   const recipientName = options.recipientName?.trim() || ''
   const counterpartName =
     options.counterpartName?.trim() ||
-    (recipient === 'student' ? 'Your ScoreMax tutor' : 'Your ScoreMax student')
+    (recipient === 'tutor' ? 'Your ScoreMax student' : 'Your ScoreMax tutor')
+  const studentName = options.studentName?.trim() || 'Student not assigned'
 
   const { locationHtml, joinUrl } = buildReminderLocation(session)
 
@@ -163,8 +165,9 @@ export function sessionReminderEmail(options: {
       title: 'Your Session Starts Soon',
       greeting: recipientName ? `Hi ${recipientName},` : 'Hi there,',
       body: [
-        `<p style="margin: 0 0 16px 0;">This is a reminder that your ScoreMax session starts in about an hour.</p>`,
-        detailRow(recipient === 'student' ? 'Tutor:' : 'Student:', counterpartName),
+        `<p style="margin: 0 0 16px 0;">This is a reminder that ${recipient === 'owner' ? `${escapeHtml(studentName)}’s` : 'your'} ScoreMax session starts in about an hour.</p>`,
+        ...(recipient === 'owner' ? [detailRow('Student:', studentName)] : []),
+        detailRow(recipient === 'tutor' ? 'Student:' : 'Tutor:', counterpartName),
         detailRow('Time:', formatSessionTime(session.confirmed_start)),
         detailRowHtml('Location:', locationHtml),
       ].join(''),
@@ -183,7 +186,7 @@ export function sessionReminderEmail(options: {
  * notification does not make the old and new times easy to compare.
  */
 export function sessionRescheduledEmail(options: {
-  recipient: 'student' | 'tutor'
+  recipient: 'owner' | 'student' | 'tutor'
   recipientName?: string | null
   counterpartName?: string | null
   previousStart?: string | Date | null
@@ -193,11 +196,13 @@ export function sessionRescheduledEmail(options: {
   sessionType?: string | null
   meetUrl?: string | null
   calendarUpdated: boolean
+  studentName?: string | null
 }): { subject: string; html: string } {
   const recipientName = options.recipientName?.trim() || ''
   const counterpartName =
     options.counterpartName?.trim() ||
-    (options.recipient === 'student' ? 'Your ScoreMax tutor' : 'Your ScoreMax student')
+    (options.recipient === 'tutor' ? 'Your ScoreMax student' : 'Your ScoreMax tutor')
+  const studentName = options.studentName?.trim() || 'Student not assigned'
   const isOnline = options.sessionType === 'online'
   const location = isOnline ? 'Online (Google Meet)' : 'Sawgrass, FL'
   const calendarLine = options.calendarUpdated
@@ -210,8 +215,9 @@ export function sessionRescheduledEmail(options: {
       title: 'Your Session Has Been Rescheduled',
       greeting: recipientName ? `Hi ${recipientName},` : 'Hi there,',
       body: [
-        `<p style="margin: 0 0 16px 0;">The date or time for your ScoreMax tutoring session has changed.${calendarLine}</p>`,
-        detailRow(options.recipient === 'student' ? 'Tutor:' : 'Student:', counterpartName),
+        `<p style="margin: 0 0 16px 0;">The date or time for ${options.recipient === 'owner' ? `${escapeHtml(studentName)}’s` : 'your'} ScoreMax tutoring session has changed.${calendarLine}</p>`,
+        ...(options.recipient === 'owner' ? [detailRow('Student:', studentName)] : []),
+        detailRow(options.recipient === 'tutor' ? 'Student:' : 'Tutor:', counterpartName),
         detailRow('Previous start:', formatSessionTime(options.previousStart)),
         detailRow('Previous end:', formatSessionTime(options.previousEnd)),
         detailRow('New start:', formatSessionTime(options.newStart)),

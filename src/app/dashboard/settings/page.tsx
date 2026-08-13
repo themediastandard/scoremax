@@ -21,7 +21,7 @@ export default async function SettingsPage() {
   if (profile?.role === 'customer') {
     const { data } = await supabaseAdmin
       .from('customers')
-      .select('full_name, phone, student_grade')
+      .select('full_name, phone')
       .eq('profile_id', user.id)
       .maybeSingle()
     customerData = data
@@ -53,8 +53,6 @@ export default async function SettingsPage() {
             fullName={customerData?.full_name || profile?.full_name || ''}
             email={profile?.email || user.email || ''}
             phone={customerData?.phone || ''}
-            studentGrade={customerData?.student_grade || ''}
-            role={profile?.role || 'customer'}
           />
         </CardContent>
       </Card>

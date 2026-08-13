@@ -4,10 +4,80 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { readEmailOtpType, readRelativeNextPath } from '@/lib/auth-email-link'
+import { isAccountType, type AccountType } from '@/lib/account-type'
+import { GRADE_OPTIONS } from '@/lib/student-grades'
 
 function destinationFor(type: EmailOtpType, next: string | null): string {
   if (type === 'recovery' || type === 'invite') return '/reset-password'
   return next ?? '/dashboard'
+}
+
+async function completeGoogleSignup(
+  user: {
+    id: string
+    email?: string
+    user_metadata?: Record<string, unknown>
+  },
+  accountType: AccountType | null,
+  studentGrade: string | null
+) {
+  if (!accountType) return
+  if (accountType === 'student' && (!studentGrade || !GRADE_OPTIONS.includes(studentGrade))) {
+    return
+  }
+
+  const { data: customer, error: updateError } = await supabaseAdmin
+    .from('customers')
+    .update({
+      account_type: accountType,
+      ...(accountType === 'student' && { student_grade: studentGrade }),
+    })
+    .eq('profile_id', user.id)
+    .is('account_type', null)
+    .select('id, full_name, email, account_type')
+    .maybeSingle()
+
+  if (updateError) {
+    console.error('Failed to record signup account type:', updateError.message)
+    return
+  }
+
+  // No row means this was an existing, already-classified account signing in
+  // through the signup page. Never overwrite that established classification.
+  if (!customer || customer.account_type !== 'student' || !studentGrade) return
+
+  const normalizedEmail = (customer.email || user.email || '').trim().toLowerCase()
+  if (!normalizedEmail) return
+
+  const { data: existingStudent, error: existingError } = await supabaseAdmin
+    .from('students')
+    .select('id')
+    .eq('customer_id', customer.id)
+    .ilike('email', normalizedEmail)
+    .maybeSingle()
+
+  if (existingError) {
+    console.error('Failed to check self-managed student:', existingError.message)
+    return
+  }
+  if (existingStudent) return
+
+  const metadataName =
+    typeof user.user_metadata?.full_name === 'string'
+      ? user.user_metadata.full_name
+      : typeof user.user_metadata?.name === 'string'
+        ? user.user_metadata.name
+        : null
+  const { error: studentError } = await supabaseAdmin.from('students').insert({
+    customer_id: customer.id,
+    full_name: customer.full_name || metadataName || 'Student',
+    email: normalizedEmail,
+    grade: studentGrade,
+  })
+
+  if (studentError && studentError.code !== '23505') {
+    console.error('Failed to create self-managed student:', studentError.message)
+  }
 }
 
 async function verifyToken(
@@ -35,6 +105,11 @@ export async function GET(request: NextRequest) {
   const type = readEmailOtpType(searchParams.get('type'))
   const next = readRelativeNextPath(searchParams.get('next'))
   const code = searchParams.get('code')
+  const accountTypeValue = searchParams.get('account_type')
+  const signupAccountType = isAccountType(accountTypeValue) ? accountTypeValue : null
+  const studentGradeValue = searchParams.get('student_grade')
+  const signupStudentGrade =
+    studentGradeValue && GRADE_OPTIONS.includes(studentGradeValue) ? studentGradeValue : null
 
   if (token_hash && type) {
     // Backward compatibility for links already issued before the scanner-safe
@@ -57,6 +132,11 @@ export async function GET(request: NextRequest) {
         if (recordError) {
           console.error('Failed to record Google login provider:', recordError.message)
         }
+        await completeGoogleSignup(
+          data.user,
+          signupAccountType,
+          signupStudentGrade
+        )
       }
       return NextResponse.redirect(new URL(next ?? '/dashboard', request.url))
     }

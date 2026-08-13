@@ -34,9 +34,9 @@ export function SessionMetrics({
       urgent: needsScheduling > 0,
     },
     {
-      label: 'Unassigned',
+      label: 'Tutor Unassigned',
       value: unassigned.toLocaleString(),
-      sub: unassigned > 0 ? 'need a tutor' : 'all assigned',
+      sub: unassigned > 0 ? 'need a tutor' : 'all tutors assigned',
       icon: <UserX className="h-4 w-4" />,
       accent: unassigned > 0 ? 'text-red-500 bg-red-50' : 'text-gray-400 bg-gray-50',
       urgent: unassigned > 0,

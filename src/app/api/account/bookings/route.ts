@@ -23,7 +23,7 @@ export async function GET() {
   
   const { data: bookings, error } = await supabaseAdmin
     .from('booking_requests')
-    .select('*')
+    .select('*, students(id, full_name, email, grade)')
     .eq('customer_id', customer.id)
     .order('created_at', { ascending: false })
     

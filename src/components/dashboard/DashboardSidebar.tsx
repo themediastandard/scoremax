@@ -13,21 +13,24 @@ import {
   LogOut, 
   BookOpen,
   CreditCard,
-  DollarSign
+  DollarSign,
+  GraduationCap,
 } from 'lucide-react'
 import { signOutAndRedirect } from '@/lib/sign-out'
 import { siteImages } from '@/lib/site-images'
 import { useEffect, useState } from 'react'
 import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
+import type { AccountType } from '@/lib/account-type'
 
 interface DashboardSidebarProps {
   role: 'admin' | 'tutor' | 'customer'
   fullName?: string | null
   membershipTier?: string | null
+  accountType?: AccountType | null
   googleConnected?: boolean | null
 }
 
-export function DashboardSidebar({ role, fullName, membershipTier: serverTier, googleConnected }: DashboardSidebarProps) {
+export function DashboardSidebar({ role, fullName, membershipTier: serverTier, accountType, googleConnected }: DashboardSidebarProps) {
   const pathname = usePathname()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
   const [credits, setCredits] = useState<number | null>(null)
@@ -70,6 +73,13 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
       href: '/dashboard/orders',
       icon: BookOpen,
       roles: ['customer']
+    },
+    {
+      label: 'My Students',
+      href: '/dashboard/students',
+      icon: GraduationCap,
+      roles: ['customer'],
+      parentOnly: true,
     },
     {
       label: 'My Subscription',
@@ -128,7 +138,9 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, g
     }
   ]
 
-  const filteredLinks = links.filter(link => link.roles.includes(role))
+  const filteredLinks = links.filter(
+    (link) => link.roles.includes(role) && (!link.parentOnly || accountType === 'parent')
+  )
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200 w-64">

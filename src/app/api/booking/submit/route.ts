@@ -9,6 +9,7 @@ import {
   legacyAvailabilityFromWindows,
   normalizeAvailabilityWindows,
 } from '@/lib/availability-windows'
+import { findAccountOwner, findOwnedStudent } from '@/lib/student-server'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -19,10 +20,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { subjects, available_days, available_time_start, available_time_end, available_windows, timezone, session_type, notes, use_credit, full_name, phone, student_grade } = body
+  const { subjects, available_days, available_time_start, available_time_end, available_windows, timezone, session_type, notes, use_credit, full_name, phone, student_id } = body
 
   if (!use_credit) {
     return NextResponse.json({ error: 'This endpoint is for credit usage only' }, { status: 400 })
+  }
+
+  const owner = await findAccountOwner(user.id)
+  if (!owner) return NextResponse.json({ error: 'Customer profile not found' }, { status: 404 })
+  if (typeof student_id !== 'string' || !(await findOwnedStudent(owner.id, student_id, { activeOnly: true }))) {
+    return NextResponse.json({ error: 'Select an active student on your account' }, { status: 400 })
   }
 
   // Validate the availability before it reaches Postgres. The per-day array is
@@ -51,6 +58,7 @@ export async function POST(req: NextRequest) {
   const { data: booking, error } = await supabaseAdmin
     .rpc('redeem_credit_and_create_booking', {
       p_profile_id: user.id,
+      p_student_id: student_id,
       p_subjects: subjects,
       p_available_days: legacy.days,
       p_available_time_start: legacy.startTime,
@@ -69,6 +77,9 @@ export async function POST(req: NextRequest) {
     if (error?.message?.includes('no_available_credits')) {
       return NextResponse.json({ error: 'No available credits' }, { status: 400 })
     }
+    if (error?.message?.includes('student_not_active_or_owned')) {
+      return NextResponse.json({ error: 'Select an active student on your account' }, { status: 403 })
+    }
     reportIssue('booking:credit-redemption', 'Credit redemption failed', { supabaseError: error?.message })
     return NextResponse.json({ error: 'Could not create booking' }, { status: 500 })
   }
@@ -83,9 +94,6 @@ export async function POST(req: NextRequest) {
   const contactUpdates: Record<string, string> = {}
   if (typeof full_name === 'string' && full_name.trim()) contactUpdates.full_name = full_name.trim()
   if (typeof phone === 'string' && phone.trim()) contactUpdates.phone = phone.trim()
-  if (typeof student_grade === 'string' && student_grade.trim()) {
-    contactUpdates.student_grade = student_grade.trim()
-  }
 
   if (Object.keys(contactUpdates).length > 0) {
     const { error: contactError } = await supabaseAdmin
@@ -109,6 +117,13 @@ export async function POST(req: NextRequest) {
   if (!customer) {
     return NextResponse.json(booking)
   }
+
+  const { data: selectedStudent } = await supabaseAdmin
+    .from('students')
+    .select('full_name, email')
+    .eq('id', student_id)
+    .eq('customer_id', customer.id)
+    .single()
 
   // 3. Notify Admin
   const { data: adminSettings } = await supabaseAdmin.from('admin_settings').select('value').eq('key', 'notification_emails').single()
@@ -139,6 +154,7 @@ export async function POST(req: NextRequest) {
           title: 'New Booking Request',
           body: [
             detailRow('Customer:', customer.full_name),
+            detailRow('Student:', selectedStudent?.full_name ?? 'Student not assigned'),
             detailRow('Payment:', `Credit Used (${creditSource})`),
             detailRow('Status:', 'Processing (Needs assignment)'),
           ].join(''),
@@ -154,7 +170,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 7. Notify Student
+  // The booking receipt/credit information belongs to the account owner. The
+  // selected student joins the scheduling messages once the time is confirmed.
   await sendEmail(
     {
       ...getEmailDefaults(),

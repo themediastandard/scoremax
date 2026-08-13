@@ -1,6 +1,7 @@
 import { stripe } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getSubscriptionPeriod } from '@/lib/stripe-subscription'
+import type { AccountType } from '@/lib/account-type'
 
 export interface MembershipRecord {
   id: string
@@ -16,6 +17,7 @@ export interface MembershipRecord {
 
 export interface CustomerWithMembership {
   customerId: string
+  accountType: AccountType | null
   membershipTier: string | null
   membership: MembershipRecord | null
   hasStripeCustomer: boolean
@@ -28,7 +30,7 @@ export interface CustomerWithMembership {
 export async function getCustomerMembership(userId: string, userEmail: string | null): Promise<CustomerWithMembership | null> {
   let customer = await supabaseAdmin
     .from('customers')
-    .select('id, stripe_customer_id, email')
+    .select('id, stripe_customer_id, email, account_type')
     .eq('profile_id', userId)
     .maybeSingle()
     .then((r) => r.data)
@@ -36,7 +38,7 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
   if (!customer) {
     customer = await supabaseAdmin
       .from('customers')
-      .select('id, stripe_customer_id, email')
+      .select('id, stripe_customer_id, email, account_type')
       .eq('email', userEmail ?? '')
       .maybeSingle()
       .then((r) => r.data)
@@ -149,6 +151,7 @@ export async function getCustomerMembership(userId: string, userEmail: string | 
 
   return {
     customerId: customer.id,
+    accountType: customer.account_type as AccountType | null,
     membershipTier,
     membership: fullMembership,
     hasStripeCustomer: !!customer.stripe_customer_id,

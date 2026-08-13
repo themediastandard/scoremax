@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { ChevronDown, ChevronRight, Calendar, User, Video, MapPin, BookOpen, Search, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Calendar, User, Video, MapPin, BookOpen, Search, X, GraduationCap } from 'lucide-react'
 import { SessionForm } from './SessionForm'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,7 @@ interface Session {
   id: string
   order_id: string
   customer_id: string
+  student_id: string | null
   assigned_tutor_id: string | null
   confirmed_start: string | null
   confirmed_end: string | null
@@ -23,6 +24,7 @@ interface Session {
   internal_notes: string | null
   tutors: { id: string; full_name: string } | null
   customers: { full_name: string; email: string } | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
   // Joined through sessions.order_id -> booking_requests.id so the admin can
   // see what the customer actually asked for while picking the time. Read
   // through the FK rather than copied onto sessions: a copy would drift, and
@@ -44,6 +46,14 @@ interface CustomerGroup {
   sessions: Session[]
 }
 
+interface ActiveStudent {
+  id: string
+  customer_id: string
+  full_name: string
+  email: string
+  grade: string
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending_scheduling: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
   scheduled: { label: 'Scheduled', className: 'bg-blue-100 text-blue-700' },
@@ -56,11 +66,13 @@ function SessionCard({
   tutors,
   subjectMap,
   isAdmin,
+  activeStudents,
 }: {
   session: Session
   tutors: { id: string; full_name: string }[]
   subjectMap: Map<string, string>
   isAdmin: boolean
+  activeStudents: ActiveStudent[]
 }) {
   const [expanded, setExpanded] = useState(false)
   const cfg = statusConfig[session.status] || statusConfig.pending_scheduling
@@ -78,6 +90,10 @@ function SessionCard({
             {cfg.label}
           </Badge>
           <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0">
+            <span className={`flex shrink-0 items-center gap-1.5 font-medium ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+              <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+              {session.student?.full_name ?? 'Student not assigned'}
+            </span>
             {session.subjects?.length > 0 && (
               <span className="truncate">
                 {session.subjects.map((id) => subjectMap.get(id) || id).join(', ')}
@@ -125,6 +141,7 @@ function SessionCard({
             <SessionForm
               session={session}
               tutors={tutors}
+              students={activeStudents}
               requestedAvailability={session.booking_requests ?? null}
             />
           ) : (
@@ -150,6 +167,16 @@ function SessionDetails({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex gap-3">
+          <GraduationCap className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Student</p>
+            <p className={`text-sm font-medium mt-0.5 ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+              {session.student?.full_name ?? 'Student not assigned'}
+            </p>
+            {session.student && <p className="text-xs text-gray-500">{session.student.grade}</p>}
+          </div>
+        </div>
         <div className="flex gap-3">
           <BookOpen className="h-4 w-4 text-[#4a729f] mt-0.5 shrink-0" />
           <div>
@@ -227,18 +254,38 @@ function SessionDetails({
 export function AdminSessionList({
   sessions,
   tutors,
+  activeStudents,
   subjectMap,
 }: {
   sessions: Session[]
   tutors: { id: string; full_name: string }[]
+  activeStudents: ActiveStudent[]
   subjectMap: Record<string, string>
 }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('active')
   const [tutorFilter, setTutorFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [studentFilter, setStudentFilter] = useState('all')
 
   const sMap = useMemo(() => new Map(Object.entries(subjectMap)), [subjectMap])
+  const studentsByCustomer = useMemo(() => {
+    const byCustomer = new Map<string, ActiveStudent[]>()
+    for (const student of activeStudents) {
+      const current = byCustomer.get(student.customer_id) ?? []
+      current.push(student)
+      byCustomer.set(student.customer_id, current)
+    }
+    return byCustomer
+  }, [activeStudents])
+  const studentOptions = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const session of sessions) {
+      if (session.student) byId.set(session.student.id, session.student.full_name)
+    }
+    return Array.from(byId, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [sessions])
+  const hasUnassigned = sessions.some((session) => !session.student)
 
   const { groups, filteredCount } = useMemo(() => {
     let result = [...sessions]
@@ -248,8 +295,16 @@ export function AdminSessionList({
       result = result.filter((s) => {
         const name = s.customers?.full_name?.toLowerCase() ?? ''
         const email = s.customers?.email?.toLowerCase() ?? ''
-        return name.includes(q) || email.includes(q)
+        const studentName = s.student?.full_name?.toLowerCase() ?? ''
+        const studentEmail = s.student?.email?.toLowerCase() ?? ''
+        return name.includes(q) || email.includes(q) || studentName.includes(q) || studentEmail.includes(q)
       })
+    }
+
+    if (studentFilter !== 'all') {
+      result = result.filter((session) => studentFilter === 'unassigned'
+        ? !session.student
+        : session.student?.id === studentFilter)
     }
 
     if (statusFilter !== 'all') {
@@ -287,7 +342,7 @@ export function AdminSessionList({
     }
 
     return { groups: Array.from(groupMap.values()), filteredCount: result.length }
-  }, [sessions, search, statusFilter, tutorFilter, typeFilter])
+  }, [sessions, search, statusFilter, tutorFilter, typeFilter, studentFilter])
 
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(
     () => new Set(sessions.map((s) => s.customer_id))
@@ -302,7 +357,7 @@ export function AdminSessionList({
     })
   }
 
-  const hasFilters = search || statusFilter !== 'active' || tutorFilter !== 'all' || typeFilter !== 'all'
+  const hasFilters = search || statusFilter !== 'active' || tutorFilter !== 'all' || typeFilter !== 'all' || studentFilter !== 'all'
 
   return (
     <>
@@ -310,12 +365,25 @@ export function AdminSessionList({
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search customer..."
+            placeholder="Search owner or student..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-9"
           />
         </div>
+
+        <Select value={studentFilter} onValueChange={setStudentFilter}>
+          <SelectTrigger className="w-[170px] h-9">
+            <SelectValue placeholder="Student" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Students</SelectItem>
+            {studentOptions.map((student) => (
+              <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
+            ))}
+            {hasUnassigned && <SelectItem value="unassigned">Student not assigned</SelectItem>}
+          </SelectContent>
+        </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[150px] h-9">
@@ -356,7 +424,7 @@ export function AdminSessionList({
 
         {hasFilters && (
           <button
-            onClick={() => { setSearch(''); setStatusFilter('active'); setTutorFilter('all'); setTypeFilter('all') }}
+            onClick={() => { setSearch(''); setStatusFilter('active'); setTutorFilter('all'); setTypeFilter('all'); setStudentFilter('all') }}
             className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="h-3 w-3" />
@@ -403,6 +471,7 @@ export function AdminSessionList({
                           <ChevronRight className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
                         )}
                         <div className="min-w-0">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Owner</p>
                           <p className="text-sm font-semibold text-[#1e293b]">{group.customerName}</p>
                           <p className="text-xs text-gray-400 mt-0.5">{group.customerEmail}</p>
                         </div>
@@ -463,6 +532,7 @@ export function AdminSessionList({
                         key={s.id}
                         session={s}
                         tutors={tutors}
+                        activeStudents={studentsByCustomer.get(s.customer_id) ?? []}
                         subjectMap={sMap}
                         isAdmin={true}
                       />
@@ -508,6 +578,21 @@ export function FlatSessionList({
   subjectMap: Map<string, string>
   isAdmin: boolean
 }) {
+  const [studentFilter, setStudentFilter] = useState('all')
+  const studentOptions = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const session of sessions) {
+      if (session.student) byId.set(session.student.id, session.student.full_name)
+    }
+    return Array.from(byId, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [sessions])
+  const hasUnassigned = sessions.some((session) => !session.student)
+  const filteredSessions = studentFilter === 'all'
+    ? sessions
+    : sessions.filter((session) => studentFilter === 'unassigned'
+      ? !session.student
+      : session.student?.id === studentFilter)
+
   if (sessions.length === 0) {
     return (
       <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 py-14 px-6 text-center">
@@ -531,16 +616,43 @@ export function FlatSessionList({
   }
 
   return (
-    <div className="space-y-3">
-      {sessions.map((s) => (
-        <SessionCard
-          key={s.id}
-          session={s}
-          tutors={tutors}
-          subjectMap={subjectMap}
-          isAdmin={isAdmin}
-        />
-      ))}
+    <div className="space-y-4">
+      {(studentOptions.length > 1 || hasUnassigned) && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-gray-600">Filter by student</p>
+          <Select value={studentFilter} onValueChange={setStudentFilter}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Student" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Students</SelectItem>
+              {studentOptions.map((student) => (
+                <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
+              ))}
+              {hasUnassigned && <SelectItem value="unassigned">Student not assigned</SelectItem>}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      {filteredSessions.length > 0 ? (
+        <div className="space-y-3">
+          {filteredSessions.map((s) => (
+            <SessionCard
+              key={s.id}
+              session={s}
+              tutors={tutors}
+              activeStudents={[]}
+              subjectMap={subjectMap}
+              isAdmin={isAdmin}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white px-6 py-10 text-center">
+          <p className="font-semibold text-[#1e293b]">No sessions for this student</p>
+          <p className="mt-1 text-sm text-gray-500">Choose another student or book a new session.</p>
+        </div>
+      )}
     </div>
   )
 }

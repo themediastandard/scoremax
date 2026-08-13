@@ -6,10 +6,9 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { emailLayout, detailRow } from '@/lib/email-templates'
 import { packageExpiresAt } from '@/lib/package-expiry'
-import { escapeLikePattern } from '@/lib/postgrest-escape'
 import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
-import { buildAuthContinueUrl } from '@/lib/auth-email-link'
 import { reportError, reportIssue, flushReports } from '@/lib/report-error'
+import { courseTypeFromPricingName } from '@/lib/course-plan-rules'
 import {
   getCheckoutPaymentIntentId,
   getInvoicePaymentIntentId,
@@ -89,12 +88,30 @@ export async function POST(req: Request) {
     const session = event.data.object as Stripe.Checkout.Session
     const metadata = session.metadata ?? {}
     const bookingId = metadata.booking_request_id
-    const planType = metadata.plan_type
     const planName = metadata.plan_name
-    const contactEmail = metadata.contact_email?.toLowerCase()
     const contactName = metadata.contact_name
     const contactPhone = metadata.contact_phone
     const studentGrade = metadata.student_grade
+    if (!bookingId) {
+      throw new Error(`Stripe checkout ${session.id} has no booking_request_id`)
+    }
+    const { data: authoritativeBooking, error: bookingLookupError } = await supabaseAdmin
+      .from('booking_requests')
+      .select('id, customer_id, student_id, pricing_id, purchase_key, payment_type, subjects, session_type')
+      .eq('id', bookingId)
+      .maybeSingle()
+    if (bookingLookupError || !authoritativeBooking?.customer_id) {
+      throw new Error(
+        `Stripe checkout ${session.id} could not resolve its authoritative booking: ` +
+        `${bookingLookupError?.message ?? bookingId}`
+      )
+    }
+    // The booking was written by the authenticated checkout route before the
+    // browser reached Stripe. Metadata is diagnostic only: payer and student
+    // are both loaded from that authoritative row before any mutation occurs.
+    const planType = authoritativeBooking.payment_type
+    const purchaseKey = authoritativeBooking.purchase_key
+    const bookingStudentId = authoritativeBooking?.student_id ?? null
     const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null
     let stripePaymentIntentId = getCheckoutPaymentIntentId(session)
     let membershipSubscription: Stripe.Subscription | null = null
@@ -109,22 +126,50 @@ export async function POST(req: Request) {
       stripePaymentIntentId ||= getInvoicePaymentIntentId(membershipSubscription.latest_invoice)
     }
 
-    // 1. Resolve Customer
-    let { data: customer } = await supabaseAdmin
-        .from('customers')
-        .select('*')
-        .eq('stripe_customer_id', stripeCustomerId)
-        .single()
+    // 1. Resolve Customer exclusively through booking_requests.customer_id.
+    // A Stripe customer id or contact email can never select which ScoreMax
+    // account receives payment records or credits.
+    const { data: authoritativeCustomer, error: customerLookupError } = await supabaseAdmin
+      .from('customers')
+      .select('*')
+      .eq('id', authoritativeBooking.customer_id)
+      .maybeSingle()
+    if (customerLookupError || !authoritativeCustomer) {
+      throw new Error(
+        `Stripe checkout ${session.id} could not resolve booking customer ${authoritativeBooking.customer_id}: ` +
+        `${customerLookupError?.message ?? 'row missing'}`
+      )
+    }
 
-    // A returning customer matched on stripe_customer_id skipped every branch
-    // below, so anything they typed into the booking form this time — a new
-    // phone number, an updated grade — was silently discarded. Only the
-    // by-email and guest paths refreshed it.
-    if (customer && (contactPhone || studentGrade || contactName)) {
+    let customer = authoritativeCustomer
+    if (stripeCustomerId) {
+      const { data: linkedStripeCustomer, error: stripeOwnerError } = await supabaseAdmin
+        .from('customers')
+        .select('id')
+        .eq('stripe_customer_id', stripeCustomerId)
+        .maybeSingle()
+      if (stripeOwnerError) {
+        throw new Error(`Could not verify Stripe customer ownership: ${stripeOwnerError.message}`)
+      }
+      if (linkedStripeCustomer && linkedStripeCustomer.id !== customer.id) {
+        throw new Error(`Stripe customer is already linked to a different ScoreMax account`)
+      }
+    }
+    if (
+      stripeCustomerId &&
+      customer.stripe_customer_id &&
+      customer.stripe_customer_id !== stripeCustomerId
+    ) {
+      throw new Error(`Stripe customer does not match booking customer ${customer.id}`)
+    }
+
+    const legacyStudentGrade = bookingStudentId ? null : studentGrade
+    if (stripeCustomerId || contactPhone || legacyStudentGrade || contactName) {
       const refreshed = {
+        ...(!customer.stripe_customer_id && stripeCustomerId && { stripe_customer_id: stripeCustomerId }),
         ...(contactName && { full_name: contactName }),
         ...(contactPhone && { phone: contactPhone }),
-        ...(studentGrade && { student_grade: studentGrade }),
+        ...(legacyStudentGrade && { student_grade: legacyStudentGrade }),
       }
       const { error: refreshError } = await supabaseAdmin
         .from('customers')
@@ -137,118 +182,11 @@ export async function POST(req: Request) {
       }
     }
 
-    let isGuestCheckout = false
-    let setPasswordUrl: string | null = null
-    if (!customer) {
-        // Check by Email
-        const { data: customerByEmail } = await supabaseAdmin
-            .from('customers')
-            .select('*')
-            .ilike('email', escapeLikePattern(contactEmail))
-            .single()
-
-        if (customerByEmail) {
-            // Link Stripe ID
-            await supabaseAdmin.from('customers').update({
-                stripe_customer_id: stripeCustomerId,
-                ...(contactName && { full_name: contactName }),
-                ...(contactPhone && { phone: contactPhone }),
-                ...(studentGrade && { student_grade: studentGrade }),
-            }).eq('id', customerByEmail.id)
-            customer = customerByEmail
-        } else {
-            isGuestCheckout = true
-
-            // Create the account without a password; the guest sets their own
-            // via the "set your password" link generated below.
-            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-                email: contactEmail,
-                email_confirm: true,
-                user_metadata: { full_name: contactName },
-                app_metadata: { role: 'customer' },
-            })
-
-            let profileId: string | null = null
-            if (authUser?.user) {
-                profileId = authUser.user.id
-            } else if (authError?.message?.toLowerCase().includes('already')) {
-                const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-                const existingUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === contactEmail)
-                if (existingUser) profileId = existingUser.id
-            }
-
-            // Generate a one-time link the guest uses to set their password and
-            // sign in. generateLink only returns the link — it sends no email —
-            // so this goes into the single confirmation email below. Works
-            // whether the account was just created or already existed.
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
-            const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-                type: 'recovery',
-                email: contactEmail,
-            })
-            const tokenHash = linkData?.properties?.hashed_token
-            if (tokenHash) {
-                setPasswordUrl = buildAuthContinueUrl(appUrl, tokenHash, 'recovery')
-            } else if (linkError) {
-                console.error('Failed to generate set-password link for guest checkout:', linkError.message)
-            }
-
-            const { data: triggerCreated } = await supabaseAdmin
-                .from('customers')
-                .select('*')
-                .ilike('email', escapeLikePattern(contactEmail))
-                .single()
-
-            if (triggerCreated) {
-                await supabaseAdmin.from('customers').update({
-                    stripe_customer_id: stripeCustomerId,
-                    full_name: contactName,
-                    ...(contactPhone && { phone: contactPhone }),
-                    ...(studentGrade && { student_grade: studentGrade }),
-                }).eq('id', triggerCreated.id)
-                customer = { ...triggerCreated, stripe_customer_id: stripeCustomerId }
-            } else {
-                if (!profileId) {
-                    // The purchase still goes through, but with no profile_id the
-                    // buyer cannot see it from their account. Worth knowing about.
-                    console.error(
-                        `Guest checkout for ${contactEmail} could not resolve an auth user; ` +
-                        `creating an unlinked customer record. Link it by hand.`
-                    )
-                }
-                const { data: newCustomer, error: insertError } = await supabaseAdmin
-                    .from('customers')
-                    .insert({
-                        full_name: contactName,
-                        email: contactEmail,
-                        stripe_customer_id: stripeCustomerId,
-                        ...(contactPhone && { phone: contactPhone }),
-                        ...(studentGrade && { student_grade: studentGrade }),
-                        ...(profileId && { profile_id: profileId }),
-                    })
-                    .select()
-                    .single()
-                // Throwing matters here. Every grant below is guarded by
-                // `if (customer)`, so swallowing this error let a paid checkout
-                // fall straight through to the processed_stripe_events marker:
-                // the customer was charged, received nothing, and Stripe never
-                // retried because the handler answered 200.
-                if (insertError || !newCustomer) {
-                    throw new Error(
-                        `Guest checkout could not create a customer for ${contactEmail}: ` +
-                        `${insertError?.message ?? 'insert returned no row'}`
-                    )
-                }
-                customer = newCustomer
-            }
-        }
-    }
-
     // 2. Update Booking Request
     if (bookingId && customer) {
         await supabaseAdmin.from('booking_requests').update({
-            customer_id: customer.id,
             status: 'paid',
+            payment_method: 'credit_card',
             stripe_payment_intent_id: stripePaymentIntentId,
         }).eq('id', bookingId).in('status', ['pending_payment', 'paid'])
     }
@@ -261,6 +199,8 @@ export async function POST(req: Request) {
             booking_request_id: bookingId,
             customer_id: customer.id,
             stripe_payment_intent_id: stripePaymentIntentId,
+            payment_method: 'credit_card',
+            purchase_key: purchaseKey,
             amount_cents: session.amount_total,
             currency: session.currency,
             payment_type: planType,
@@ -270,37 +210,57 @@ export async function POST(req: Request) {
 
     // 4. Create Package/Course/Membership Records
     if (planType === 'package' && customer) {
-        const metadataHours = Number(metadata.package_hours)
-        let hours = Number.isFinite(metadataHours) && metadataHours > 0 ? metadataHours : null
-        if (!hours && metadata.plan_id) {
+        let hours: number | null = null
+        if (authoritativeBooking.pricing_id) {
           const { data: packagePricing } = await supabaseAdmin
             .from('pricing')
             .select('included_hours')
-            .eq('id', metadata.plan_id)
+            .eq('id', authoritativeBooking.pricing_id)
             .eq('type', 'package')
             .single()
           hours = packagePricing?.included_hours ?? null
         }
         if (!hours) {
           hours = (session.amount_total ?? 0) >= 200000 ? 20 : 10
-          console.error(`Package hours could not be resolved from metadata or pricing for booking ${bookingId}; falling back to amount heuristic (${hours}h). Verify the package record.`)
+          console.error(`Package hours could not be resolved from authoritative pricing for booking ${bookingId}; falling back to amount heuristic (${hours}h). Verify the package record.`)
         }
         await supabaseAdmin.from('packages').upsert({
             customer_id: customer.id,
             total_hours: hours,
             remaining_hours: hours - 1,
             expires_at: packageExpiresAt(),
-            stripe_payment_intent_id: stripePaymentIntentId
+            stripe_payment_intent_id: stripePaymentIntentId,
+            purchase_key: purchaseKey,
         }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
     } else if (planType === 'course' && customer) {
-        const courseType = metadata.course_type || ''
-        const isCombined = courseType === 'sat-act-combined' || (session.amount_total ?? 0) > 300000
-        const isACT = courseType === 'act'
-        const totalSessions = isCombined ? 13 : isACT ? 12 : 10
+        if (!authoritativeBooking.pricing_id) {
+          throw new Error(`Paid course booking ${bookingId} has no authoritative pricing row`)
+        }
+        const { data: coursePricing, error: coursePricingError } = await supabaseAdmin
+          .from('pricing')
+          .select('id, name, included_hours')
+          .eq('id', authoritativeBooking.pricing_id)
+          .eq('type', 'course')
+          .maybeSingle()
+        const totalSessions = Number(coursePricing?.included_hours)
+        const courseType = courseTypeFromPricingName(coursePricing?.name)
+        if (
+          coursePricingError ||
+          !coursePricing ||
+          !courseType ||
+          !Number.isInteger(totalSessions) ||
+          totalSessions < 1
+        ) {
+          throw new Error(
+            `Paid course booking ${bookingId} has invalid authoritative pricing: ` +
+            `${coursePricingError?.message ?? authoritativeBooking.pricing_id}`
+          )
+        }
 
         await supabaseAdmin.from('course_enrollments').upsert({
             customer_id: customer.id,
-            course_type: isCombined ? 'sat-act-combined' : isACT ? 'act' : 'sat',
+            student_id: bookingStudentId,
+            course_type: courseType,
             total_sessions: totalSessions,
             // Minus the session this same checkout books below (step 5 inserts a
             // sessions row unconditionally). Packages and memberships already net
@@ -312,6 +272,7 @@ export async function POST(req: Request) {
             // Was never recorded, which left course enrollments with no
             // idempotency key and made them untraceable from a refund.
             stripe_payment_intent_id: stripePaymentIntentId,
+            purchase_key: purchaseKey,
             status: 'active'
         }, { onConflict: 'stripe_payment_intent_id', ignoreDuplicates: true })
     } else if (planType === 'membership' && customer && session.subscription) {
@@ -320,7 +281,7 @@ export async function POST(req: Request) {
         })
         const priceId = subscription.items?.data?.[0]?.price?.id
         const period = getSubscriptionPeriod(subscription)
-        const pricing = await findMembershipPricing(metadata.plan_id, priceId)
+        const pricing = await findMembershipPricing(authoritativeBooking.pricing_id, priceId)
         // If the lookup misses, the fallback silently grants a Starter allocation
         // — so a customer who paid $899 for Premier would receive 2 hours and
         // nobody would find out. The fallback stays, because refusing to grant
@@ -344,6 +305,7 @@ export async function POST(req: Request) {
             // enrollments have always carried it; memberships did not, which is
             // why a refunded membership kept its credit.
             stripe_payment_intent_id: stripePaymentIntentId,
+            purchase_key: purchaseKey,
             status: 'active',
             included_hours: includedHours,
             used_hours: 1,
@@ -355,19 +317,14 @@ export async function POST(req: Request) {
 
     // 5. Create Session Records
     if (bookingId && customer) {
-        const { data: order } = await supabaseAdmin
-            .from('booking_requests')
-            .select('subjects, session_type')
-            .eq('id', bookingId)
-            .single()
-
-        await supabaseAdmin.from('sessions').insert({
+        await supabaseAdmin.from('sessions').upsert({
             order_id: bookingId,
             customer_id: customer.id,
-            session_type: order?.session_type || 'online',
-            subjects: order?.subjects || [],
+            student_id: authoritativeBooking.student_id ?? null,
+            session_type: authoritativeBooking.session_type || 'online',
+            subjects: authoritativeBooking.subjects || [],
             status: 'pending_scheduling',
-        })
+        }, { onConflict: 'order_id', ignoreDuplicates: true })
     }
 
     // 6. Notify Admin
@@ -397,7 +354,7 @@ export async function POST(req: Request) {
             html: emailLayout({
               title: 'New Payment Received',
               body: [
-                detailRow('Customer:', contactName),
+                detailRow('Customer:', customer.full_name || customer.email || 'Unknown'),
                 detailRow('Amount:', `$${(session.amount_total ?? 0) / 100}`),
                 detailRow('Package:', planLabel),
               ].join(''),
@@ -410,40 +367,32 @@ export async function POST(req: Request) {
     }
 
     // 7. Notify Customer (post-payment confirmation)
-    if (contactEmail) {
+    if (customer.email) {
       const planLabel = planType === 'membership' ? 'membership' : planType === 'package' ? 'tutoring package' : 'course'
       const purchaseBody = `<p style="margin: 0 0 16px 0;">Your payment has been received. You've purchased a ${planLabel}.</p>`
 
       const nextSteps = '<p style="margin: 0 0 16px 0;">We will assign a tutor and confirm your session time shortly. You will receive another email once your booking is confirmed.</p>'
 
-      const accountBody = isGuestCheckout && setPasswordUrl
-        ? [
-            '<p style="margin: 0 0 16px 0;">We\'ve created an account for you. Set your password using the button below to sign in and view your dashboard.</p>',
-            `<p style="margin: 0 0 16px 0;"><strong style="color: #1e293b;">Email:</strong> ${contactEmail}</p>`,
-          ].join('')
-        : ''
-
       /*
        * Best effort for the same de-dupe reason as the admin notification
-       * above, but the consequence is worse and worth knowing about: on a
-       * guest checkout this email carries the set-password link, so losing it
-       * leaves someone who has already paid unable to reach their account.
-       * The log line is how that surfaces — it will not resend on retry.
+       * above. The buyer is already authenticated and the booking remains in
+       * their dashboard if mail fails; the log line is how the failed receipt
+       * surfaces because this webhook event will not resend it on retry.
        */
       await sendEmail(
         {
           ...getEmailDefaults(),
-          to: contactEmail,
+          to: customer.email,
           subject: 'Thank you for your purchase',
           html: emailLayout({
             title: 'Thank You for Your Purchase',
-            greeting: `Hi ${contactName || 'there'},`,
-            body: purchaseBody + nextSteps + accountBody,
-            ctaText: isGuestCheckout && setPasswordUrl ? 'Set Your Password & Sign In' : 'Sign In to Your Dashboard',
-            ctaUrl: isGuestCheckout && setPasswordUrl ? setPasswordUrl : `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+            greeting: `Hi ${customer.full_name || 'there'},`,
+            body: purchaseBody + nextSteps,
+            ctaText: 'Sign In to Your Dashboard',
+            ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
           }),
         },
-        `stripe:customer-purchase:${session.id}${isGuestCheckout ? ':guest-password-link' : ''}`
+        `stripe:customer-purchase:${session.id}`
       )
     }
   }

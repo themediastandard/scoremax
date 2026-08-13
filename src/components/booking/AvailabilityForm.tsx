@@ -13,6 +13,7 @@ interface AvailabilityValue {
 
 interface AvailabilityFormProps {
   value: AvailabilityValue
+  studentName: string
   onChange: (value: AvailabilityValue) => void
 }
 
@@ -63,7 +64,7 @@ function sortByWeekday(windows: AvailabilityWindow[]): AvailabilityWindow[] {
   return [...windows].sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day))
 }
 
-export function AvailabilityForm({ value, onChange }: AvailabilityFormProps) {
+export function AvailabilityForm({ value, studentName, onChange }: AvailabilityFormProps) {
   const windows = value.windows
   const selectedDays = new Set(windows.map((w) => w.day))
 
@@ -109,7 +110,7 @@ export function AvailabilityForm({ value, onChange }: AvailabilityFormProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h2 className="text-2xl font-serif text-[#1e293b]">When are you available?</h2>
+        <h2 className="text-2xl font-serif text-[#1e293b]">Choose a time for {studentName}</h2>
         <p className="text-gray-500 text-sm">Pick your days, then set the times that work for each one. We&apos;ll match you with a tutor and confirm the exact time.</p>
       </div>
 
