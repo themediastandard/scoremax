@@ -6,6 +6,7 @@ import {
   findAccountOwner,
   findOwnedStudent,
   normalizeStudentEmail,
+  normalizeStudentPhone,
   toStudentDto,
   type ManagedStudent,
 } from '@/lib/student-server'
@@ -13,6 +14,7 @@ import {
 const updateStudentSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200).optional(),
   email: z.string().trim().email().max(320).optional(),
+  phone: z.string().trim().max(50).optional(),
   grade: z.string().trim().min(1).max(100).optional(),
   isActive: z.boolean().optional(),
 }).refine((value) => Object.keys(value).length > 0)
@@ -49,9 +51,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Invalid student details', code: 'invalid_request' }, { status: 400 })
   }
 
-  const updates: Record<string, string | boolean> = {}
+  const updates: Record<string, string | boolean | null> = {}
   if (parsed.data.fullName !== undefined) updates.full_name = parsed.data.fullName
   if (parsed.data.email !== undefined) updates.email = normalizeStudentEmail(parsed.data.email)
+  if (parsed.data.phone !== undefined) updates.phone = normalizeStudentPhone(parsed.data.phone)
   if (parsed.data.grade !== undefined) updates.grade = parsed.data.grade
   if (parsed.data.isActive !== undefined) updates.is_active = parsed.data.isActive
 
@@ -60,7 +63,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .update(updates)
     .eq('id', id)
     .eq('customer_id', owner.id)
-    .select('id, customer_id, full_name, email, grade, is_active, created_at, updated_at')
+    .select('id, customer_id, full_name, email, phone, grade, is_active, created_at, updated_at')
     .single()
 
   if (error?.code === '23505') {

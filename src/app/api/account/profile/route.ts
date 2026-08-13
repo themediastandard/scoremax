@@ -65,14 +65,14 @@ export async function PATCH(req: NextRequest) {
   // user's email, or create the row outright.
   let { data: customer } = await supabaseAdmin
     .from('customers')
-    .select('id')
+    .select('id, email, account_type')
     .eq('profile_id', user.id)
     .maybeSingle()
 
   if (!customer && user.email) {
     const { data: byEmail } = await supabaseAdmin
       .from('customers')
-      .select('id')
+      .select('id, email, account_type')
       .eq('email', user.email)
       .is('profile_id', null)
       .maybeSingle()
@@ -90,6 +90,20 @@ export async function PATCH(req: NextRequest) {
         .eq('id', customer.id)
       if (error) {
         return NextResponse.json({ error: 'Could not save profile' }, { status: 500 })
+      }
+
+      // A student account's managed profile represents that same person. Keep
+      // its operational phone in sync with the account phone without touching
+      // parent-owned child records.
+      if (customer.account_type === 'student' && typeof phone === 'string') {
+        const { error: studentPhoneError } = await supabaseAdmin
+          .from('students')
+          .update({ phone: customerUpdates.phone ?? null })
+          .eq('customer_id', customer.id)
+          .ilike('email', customer.email)
+        if (studentPhoneError) {
+          return NextResponse.json({ error: 'Could not save student phone' }, { status: 500 })
+        }
       }
     }
   } else {

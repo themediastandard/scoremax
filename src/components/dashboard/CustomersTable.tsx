@@ -446,40 +446,40 @@ export function CustomersTable({
 
                   return (
                     <tr key={customer.id} className="transition-colors hover:bg-gray-50/60">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-5">
                         <Link href={detailsHref} className="text-sm font-medium text-[#1e293b] hover:text-[#4a729f] hover:underline">
                           {customer.full_name || 'Unnamed'}
                         </Link>
                       </td>
-                      <td className="max-w-[15rem] px-4 py-3">
+                      <td className="max-w-[15rem] px-4 py-5">
                         <p className="truncate text-sm text-gray-600">{customer.email}</p>
                         {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
                       </td>
-                      <td className="px-4 py-3"><CompactStudents students={studentMap[customer.id] ?? []} /></td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-5"><CompactStudents students={studentMap[customer.id] ?? []} /></td>
+                      <td className="px-4 py-5">
                         <span className={`whitespace-nowrap text-xs font-medium ${customer.account_type ? 'text-[#1e293b]' : 'text-amber-700'}`}>
                           {formatAccountType(customer.account_type)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-5">
                         <CustomerPlan
                           membership={membership}
                           hasPackage={(packageCreditsMap[customer.id] ?? 0) > 0}
                           hasCourse={(courseCreditsMap[customer.id] ?? 0) > 0}
                         />
                       </td>
-                      <td className="px-4 py-3"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-5"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></td>
+                      <td className="px-4 py-5 text-center">
                         <span className={credits > 0 ? 'inline-flex rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]' : 'text-xs text-gray-400'}>
                           {credits}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-sm text-gray-700">{orderCountMap[customer.id] ?? 0}</td>
-                      <td className="max-w-[13rem] px-4 py-3"><NextSession session={nextSessionMap[customer.id]} /></td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-xs text-gray-400">
+                      <td className="px-4 py-5 text-center text-sm text-gray-700">{orderCountMap[customer.id] ?? 0}</td>
+                      <td className="max-w-[13rem] px-4 py-5"><NextSession session={nextSessionMap[customer.id]} /></td>
+                      <td className="whitespace-nowrap px-4 py-5 text-right text-xs text-gray-400">
                         {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-5 text-right">
                         <Link href={detailsHref} aria-label={`View details for ${customer.full_name || customer.email}`} className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]">
                           <ArrowRight className="h-4 w-4" />
                         </Link>

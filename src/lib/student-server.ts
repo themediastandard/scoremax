@@ -17,6 +17,7 @@ export type ManagedStudent = {
   customer_id: string
   full_name: string
   email: string
+  phone: string | null
   grade: string
   is_active: boolean
   created_at: string
@@ -28,6 +29,7 @@ export function toStudentDto(student: ManagedStudent): StudentDto {
     id: student.id,
     fullName: student.full_name,
     email: student.email,
+    phone: student.phone,
     grade: student.grade,
     isActive: student.is_active,
     createdAt: student.created_at,
@@ -53,7 +55,7 @@ export async function findOwnedStudent(
 ): Promise<ManagedStudent | null> {
   let query = supabaseAdmin
     .from('students')
-    .select('id, customer_id, full_name, email, grade, is_active, created_at, updated_at')
+    .select('id, customer_id, full_name, email, phone, grade, is_active, created_at, updated_at')
     .eq('id', studentId)
     .eq('customer_id', customerId)
 
@@ -66,4 +68,8 @@ export async function findOwnedStudent(
 
 export function normalizeStudentEmail(email: string): string {
   return email.trim().toLowerCase()
+}
+
+export function normalizeStudentPhone(phone: string | undefined): string | null {
+  return phone?.trim() || null
 }

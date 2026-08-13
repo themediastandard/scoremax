@@ -16,6 +16,7 @@ export interface AdminCustomerDetail {
     id: string
     full_name: string
     email: string
+    phone: string | null
     grade: string
     is_active: boolean
   }>
@@ -97,7 +98,7 @@ export async function loadAdminCustomerDetail(
   ] = await Promise.all([
     supabaseAdmin
       .from('students')
-      .select('id, full_name, email, grade, is_active')
+      .select('id, full_name, email, phone, grade, is_active')
       .eq('customer_id', customerId)
       .order('is_active', { ascending: false })
       .order('full_name', { ascending: true }),

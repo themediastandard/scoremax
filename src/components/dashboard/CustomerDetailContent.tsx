@@ -113,6 +113,7 @@ export function CustomerDetailContent({ detail }: { detail: AdminCustomerDetail 
                         {!student.is_active && <Badge variant="secondary">Inactive</Badge>}
                       </div>
                       <p className="mt-0.5 break-all text-sm text-gray-500">{student.email}</p>
+                      <p className="mt-0.5 text-sm text-gray-500">{student.phone || 'Phone not provided'}</p>
                     </div>
                     <div className="flex items-center gap-4 sm:text-right">
                       <div>
