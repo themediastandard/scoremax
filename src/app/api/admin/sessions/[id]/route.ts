@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { type calendar_v3 } from 'googleapis'
+import { z } from 'zod'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import {
@@ -14,12 +15,17 @@ import {
   clearAdminGoogleConnection,
   isRevokedGoogleTokenError,
 } from '@/lib/google-admin'
-import { requireAdmin } from '@/lib/auth'
+import { getAuthUser, requireAdmin } from '@/lib/auth'
 import { reportError } from '@/lib/report-error'
 import {
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
 } from '@/lib/session-calendar'
+import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
+import {
+  replaceManagedStudentAttendee,
+  studentAssignmentPolicy,
+} from '@/lib/session-student-assignment'
 
 type SessionPerson = {
   id: string
@@ -36,9 +42,23 @@ type SessionRecord = {
   student_calendar_event_id?: string | null
   meet_url?: string | null
   customers: SessionPerson
+  students?: SessionPerson | null
   tutors: SessionPerson
   [key: string]: unknown
 }
+
+type AssignmentOrder = {
+  id: string
+  customer_id: string | null
+  student_id: string | null
+  payment_method: string | null
+  payment_type: string | null
+  course_enrollment_id: string | null
+  credit_source_id: string | null
+  purchase_key: string | null
+}
+
+const studentIdSchema = z.string().uuid()
 
 // Thrown when a session cannot be scheduled (e.g. online session with no
 // ScoreMax Google connection). Surfaces to the admin UI as a 400.
@@ -202,24 +222,30 @@ async function sendScheduleEmails(
    * Resend's 2-requests-per-second default; sendEmail now spaces them itself,
    * so this pair costs one extra ~550ms and no caller has to think about it.
    */
-  const customerOk = await sendEmail(
-    {
-      ...getEmailDefaults(),
-      to: session.customers.email,
-      subject: 'Session Confirmed: Your session is scheduled',
-      html: emailLayout({
-        title: 'Session Confirmed',
-        greeting: `Hi ${session.customers.full_name},`,
-        body: [
-          `<p style="margin: 0 0 16px 0;">Your tutoring session has been confirmed!${inviteLine}</p>`,
-          detailRow('Tutor:', session.tutors.full_name),
-          detailRow('Time:', startTime),
-          detailRow('Location:', locationText),
-        ].join(''),
-      }),
-    },
-    `admin:session-confirmed:customer:${session.id}`
-  )
+  const studentName = sessionStudentName(session)
+  let familyOk = true
+  for (const recipient of operationalRecipients(session.customers, session.students)) {
+    const owner = recipient.role === 'owner'
+    familyOk = (await sendEmail(
+      {
+        ...getEmailDefaults(),
+        to: recipient.email,
+        subject: 'Session Confirmed: Your session is scheduled',
+        html: emailLayout({
+          title: 'Session Confirmed',
+          greeting: `Hi ${recipient.full_name || 'there'},`,
+          body: [
+            `<p style="margin: 0 0 16px 0;">${owner ? 'The selected student’s' : 'Your'} tutoring session has been confirmed!${inviteLine}</p>`,
+            ...(owner ? [detailRow('Student:', studentName)] : []),
+            detailRow('Tutor:', session.tutors.full_name),
+            detailRow('Time:', startTime),
+            detailRow('Location:', locationText),
+          ].join(''),
+        }),
+      },
+      `admin:session-confirmed:${recipient.role}:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
+    )) && familyOk
+  }
 
   const tutorOk = await sendEmail(
     {
@@ -231,16 +257,16 @@ async function sendScheduleEmails(
         greeting: `Hi ${session.tutors.full_name},`,
         body: [
           `<p style="margin: 0 0 16px 0;">You have been assigned a new session.${inviteLine}</p>`,
-          detailRow('Student:', session.customers.full_name),
+          detailRow('Student:', studentName),
           detailRow('Time:', startTime),
           detailRow('Location:', locationText),
         ].join(''),
       }),
     },
-    `admin:session-confirmed:tutor:${session.id}`
+    `admin:session-confirmed:tutor:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
   )
 
-  return customerOk && tutorOk
+  return familyOk && tutorOk
 }
 
 /**
@@ -298,30 +324,75 @@ async function sendRescheduleEmails(options: {
     meetUrl: session.meet_url,
     calendarUpdated,
   }
-
-  const customerMessage = sessionRescheduledEmail({
-    ...shared,
-    recipient: 'student',
-    recipientName: session.customers.full_name,
-    counterpartName: session.tutors.full_name,
-  })
-  const customerOk = await sendEmail(
-    { ...getEmailDefaults(), to: session.customers.email, ...customerMessage },
-    `admin:session-rescheduled:customer:${session.id}`
-  )
+  const studentName = sessionStudentName(session)
+  let familyOk = true
+  for (const recipient of operationalRecipients(session.customers, session.students)) {
+    const message = sessionRescheduledEmail({
+      ...shared,
+      recipient: recipient.role,
+      recipientName: recipient.full_name,
+      counterpartName: session.tutors.full_name,
+      studentName,
+    })
+    familyOk = (await sendEmail(
+      { ...getEmailDefaults(), to: recipient.email, ...message },
+      `admin:session-rescheduled:${recipient.role}:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
+    )) && familyOk
+  }
 
   const tutorMessage = sessionRescheduledEmail({
     ...shared,
     recipient: 'tutor',
     recipientName: session.tutors.full_name,
-    counterpartName: session.customers.full_name,
+    counterpartName: studentName,
+    studentName,
   })
   const tutorOk = await sendEmail(
     { ...getEmailDefaults(), to: session.tutors.email, ...tutorMessage },
-    `admin:session-rescheduled:tutor:${session.id}`
+    `admin:session-rescheduled:tutor:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
   )
 
-  return customerOk && tutorOk
+  return familyOk && tutorOk
+}
+
+async function sendCancellationEmails(session: SessionRecord): Promise<boolean> {
+  const studentName = sessionStudentName(session)
+  const startTime = formatSessionTime(session.confirmed_start)
+  let delivered = true
+  for (const recipient of operationalRecipients(session.customers, session.students)) {
+    const owner = recipient.role === 'owner'
+    delivered = (await sendEmail({
+      ...getEmailDefaults(),
+      to: recipient.email,
+      subject: 'Session Cancelled',
+      html: emailLayout({
+        title: 'Session Cancelled',
+        greeting: `Hi ${recipient.full_name || 'there'},`,
+        body: [
+          `<p style="margin: 0 0 16px 0;">${owner ? 'The selected student’s' : 'Your'} ScoreMax session has been cancelled.</p>`,
+          ...(owner ? [detailRow('Student:', studentName)] : []),
+          detailRow('Time:', startTime),
+        ].join(''),
+      }),
+    }, `admin:session-cancelled:${recipient.role}:${session.id}:${session.confirmed_start ?? 'unscheduled'}`)) && delivered
+  }
+  if (session.tutors?.email) {
+    delivered = (await sendEmail({
+      ...getEmailDefaults(),
+      to: session.tutors.email,
+      subject: 'Session Cancelled',
+      html: emailLayout({
+        title: 'Session Cancelled',
+        greeting: `Hi ${session.tutors.full_name},`,
+        body: [
+          '<p style="margin: 0 0 16px 0;">This ScoreMax session has been cancelled and removed from your calendar.</p>',
+          detailRow('Student:', studentName),
+          detailRow('Time:', startTime),
+        ].join(''),
+      }),
+    }, `admin:session-cancelled:tutor:${session.id}:${session.confirmed_start ?? 'unscheduled'}`)) && delivered
+  }
+  return delivered
 }
 
 // Calendar work happens now (so a failure aborts the whole change with a 400
@@ -410,6 +481,158 @@ async function handleReassign(
     },
     sendEmails: () => sendScheduleEmails(session, session.meet_url ?? null, true),
   }
+}
+
+type StudentAssignmentCalendarOutcome = {
+  updates: Record<string, string | null>
+  rollbackCalendar: (() => Promise<void>) | null
+  calendarUpdated: boolean
+}
+
+/**
+ * Update only the student-facing parts of an already-scheduled event. Google
+ * sends the added/removed attendee notices; sending a second custom email here
+ * would duplicate the same session information.
+ */
+async function handleScheduledStudentAssignment(
+  session: SessionRecord,
+  previousSession: SessionRecord
+): Promise<StudentAssignmentCalendarOutcome> {
+  const adminAuth = await getAdminGoogleAuth()
+  if (!adminAuth) {
+    throw new SchedulingError(
+      'Google Calendar is not connected, so the student could not be changed. Reconnect it in Settings → Integrations, then try again.'
+    )
+  }
+
+  const eventId = session.tutor_calendar_event_id
+  if (!eventId) {
+    // A few legacy in-person sessions may have been scheduled without an
+    // event. Create one now so the newly assigned student still receives the
+    // session information and the account is no longer externally inconsistent.
+    const updates = await createSessionEvent(session)
+    const createdEventId = updates.tutor_calendar_event_id
+    if (!createdEventId) {
+      throw new SchedulingError(
+        'This scheduled session has no linked Google Calendar event, so the student could not be changed.'
+      )
+    }
+    return {
+      updates,
+      calendarUpdated: true,
+      rollbackCalendar: async () => {
+        await calendar.events.delete({
+          auth: adminAuth,
+          calendarId: 'primary',
+          eventId: createdEventId,
+          sendUpdates: 'all',
+        })
+      },
+    }
+  }
+
+  let existingEvent: calendar_v3.Schema$Event
+  try {
+    const event = await calendar.events.get({
+      auth: adminAuth,
+      calendarId: 'primary',
+      eventId,
+    })
+    existingEvent = event.data
+  } catch (error) {
+    reportError('schedule:calendar-student-load', error, { sessionId: session.id })
+    if (isRevokedGoogleTokenError(error)) {
+      await clearAdminGoogleConnection()
+      throw new SchedulingError(
+        'The ScoreMax Google connection has expired, so no changes were saved. Reconnect it in Settings → Integrations, then try again.'
+      )
+    }
+    throw new SchedulingError(
+      'Google Calendar could not load this session, so the student was not changed. Please try again.'
+    )
+  }
+
+  const nextPlan = buildSessionCalendarPlan(session)
+  const nextAttendees = replaceManagedStudentAttendee(
+    existingEvent.attendees,
+    previousSession.students,
+    session.students!,
+    session.customers,
+    session.tutors
+  )
+  const previousEventFields: calendar_v3.Schema$Event = {
+    attendees: existingEvent.attendees ?? [],
+    summary: existingEvent.summary ?? null,
+    description: existingEvent.description ?? null,
+  }
+  const patchEvent = (requestBody: calendar_v3.Schema$Event) =>
+    calendar.events.patch({
+      auth: adminAuth,
+      calendarId: 'primary',
+      eventId,
+      sendUpdates: 'all',
+      requestBody,
+    })
+
+  try {
+    await patchEvent({
+      attendees: nextAttendees,
+      // Keep the subject and tutor while replacing the student name wherever
+      // it appears. Omitting time/conference fields preserves them exactly.
+      summary: nextPlan.requestBody.summary,
+      description: nextPlan.requestBody.description,
+    })
+  } catch (error) {
+    reportError('schedule:calendar-student-change', error, { sessionId: session.id })
+    if (isRevokedGoogleTokenError(error)) {
+      await clearAdminGoogleConnection()
+      throw new SchedulingError(
+        'The ScoreMax Google connection has expired, so no changes were saved. Reconnect it in Settings → Integrations, then try again.'
+      )
+    }
+    throw new SchedulingError(
+      'Google Calendar could not update the student, so no changes were saved. Please try again.'
+    )
+  }
+
+  return {
+    updates: {},
+    calendarUpdated: true,
+    rollbackCalendar: async () => {
+      await patchEvent(previousEventFields)
+    },
+  }
+}
+
+async function resolveBoundStudentId(order: AssignmentOrder): Promise<string | null> {
+  if (order.course_enrollment_id) {
+    const { data } = await supabaseAdmin
+      .from('course_enrollments')
+      .select('student_id')
+      .eq('id', order.course_enrollment_id)
+      .maybeSingle()
+    return data?.student_id ?? null
+  }
+
+  if (order.payment_type === 'package' && order.credit_source_id) {
+    const { data } = await supabaseAdmin
+      .from('packages')
+      .select('student_id')
+      .eq('id', order.credit_source_id)
+      .maybeSingle()
+    return data?.student_id ?? null
+  }
+
+  if (order.payment_method === 'step_up' && order.purchase_key) {
+    const { data } = await supabaseAdmin
+      .from('packages')
+      .select('student_id')
+      .eq('purchase_key', order.purchase_key)
+      .maybeSingle()
+    return data?.student_id ?? null
+  }
+
+  return null
 }
 
 async function sendCompletionEmail(session: SessionRecord) {
@@ -583,6 +806,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .select(`
       *,
       customers (id, email, full_name),
+      students (id, email, full_name),
       tutors (id, email, full_name),
       booking_requests!sessions_order_id_fkey (
         available_windows, available_days, available_time_start,
@@ -604,22 +828,100 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const authError = await requireAdmin()
   if (authError) return authError
 
+  const adminUser = await getAuthUser()
+  if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { id } = await params
   const body = await req.json()
   const { assigned_tutor_id, confirmed_start, confirmed_end, status, internal_notes } = body
+  const hasStudentUpdate = Object.prototype.hasOwnProperty.call(body, 'student_id')
+  const parsedStudentId = hasStudentUpdate && body.student_id !== null
+    ? studentIdSchema.safeParse(body.student_id)
+    : null
+  if (parsedStudentId && !parsedStudentId.success) {
+    return NextResponse.json({ error: 'Invalid student selection' }, { status: 400 })
+  }
+  const requestedStudentId = hasStudentUpdate
+    ? parsedStudentId?.success ? parsedStudentId.data : null
+    : undefined
 
   const { data: currentSession, error: fetchError } = await supabaseAdmin
     .from('sessions')
     .select(`
       *,
       customers (id, email, full_name),
-      tutors (id, email, full_name)
+      students (id, email, full_name),
+      tutors (id, email, full_name),
+      booking_requests!sessions_order_id_fkey (
+        id, customer_id, student_id, payment_method, payment_type,
+        course_enrollment_id, credit_source_id, purchase_key
+      )
     `)
     .eq('id', id)
     .single()
 
   if (fetchError || !currentSession) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 })
+  }
+
+  const currentStudentId = currentSession.student_id as string | null
+  const studentChanged = hasStudentUpdate && requestedStudentId !== currentStudentId
+  let nextStudent = currentSession.students as SessionPerson | null
+  const assignmentOrder = currentSession.booking_requests as unknown as AssignmentOrder | null
+
+  if (studentChanged) {
+    if (!requestedStudentId) {
+      return NextResponse.json(
+        { error: 'A student assignment cannot be cleared. Choose another active student instead.' },
+        { status: 400 }
+      )
+    }
+    if (!assignmentOrder || !currentSession.order_id) {
+      return NextResponse.json(
+        { error: 'This session has no linked order, so its student cannot be changed safely.' },
+        { status: 400 }
+      )
+    }
+    if (
+      assignmentOrder.customer_id !== currentSession.customer_id ||
+      assignmentOrder.student_id !== currentStudentId
+    ) {
+      return NextResponse.json(
+        { error: 'The session and order do not currently match. Repair their identity before assigning a student.' },
+        { status: 409 }
+      )
+    }
+
+    const { data: ownedStudent, error: studentError } = await supabaseAdmin
+      .from('students')
+      .select('id, customer_id, email, full_name, grade, is_active')
+      .eq('id', requestedStudentId)
+      .eq('customer_id', currentSession.customer_id)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (studentError) {
+      return NextResponse.json({ error: 'Could not verify the selected student' }, { status: 500 })
+    }
+    if (!ownedStudent) {
+      return NextResponse.json(
+        { error: 'Choose an active student belonging to this account.' },
+        { status: 400 }
+      )
+    }
+
+    const boundStudentId = await resolveBoundStudentId(assignmentOrder)
+    const policy = studentAssignmentPolicy({
+      currentStudentId,
+      nextStudentId: requestedStudentId,
+      paymentMethod: assignmentOrder.payment_method,
+      paymentType: assignmentOrder.payment_type,
+      courseEnrollmentId: assignmentOrder.course_enrollment_id,
+      boundStudentId,
+    })
+    if (!policy.allowed) {
+      return NextResponse.json({ error: policy.message, code: policy.code }, { status: 409 })
+    }
+    nextStudent = ownedStudent
   }
 
   // Attached once, here, so every scheduling path below inherits it — including
@@ -636,11 +938,31 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const newStatus = status
   const oldStatus = currentSession.status
+  const statusUnchanged = !newStatus || newStatus === oldStatus
+  const timesChanged =
+    (confirmed_start !== undefined && confirmed_start !== currentSession.confirmed_start) ||
+    (confirmed_end !== undefined && confirmed_end !== currentSession.confirmed_end)
+  const tutorChanged =
+    assigned_tutor_id !== undefined && assigned_tutor_id !== currentSession.assigned_tutor_id
+
+  // A scheduled attendee change is externally sensitive. Keep it as one clear
+  // operation so its Google rollback maps to one atomic identity transaction.
+  if (
+    studentChanged &&
+    oldStatus === 'scheduled' &&
+    (!statusUnchanged || tutorChanged || timesChanged)
+  ) {
+    return NextResponse.json(
+      { error: 'Save the student change first, then update the tutor, time, or status in a separate save.' },
+      { status: 400 }
+    )
+  }
 
   // Queued until the database write succeeds — see ScheduleOutcome.
   let pendingEmails: (() => Promise<void | boolean>) | null = null
   let rollbackExternalChange: (() => Promise<void>) | null = null
   let rescheduleCalendarUpdated: boolean | null = null
+  let studentAssignmentCalendarUpdated: boolean | null = studentChanged ? false : null
 
   try {
     if (newStatus && newStatus !== oldStatus) {
@@ -656,7 +978,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           )
         }
 
-        const merged = { ...currentSession, ...updates }
+        const merged = {
+          ...currentSession,
+          ...updates,
+          ...(studentChanged ? { students: nextStudent } : {}),
+        }
         if (updates.assigned_tutor_id !== currentSession.assigned_tutor_id) {
           const { data: newTutor } = await supabaseAdmin
             .from('tutors')
@@ -670,28 +996,35 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         updates = { ...updates, ...outcome.updates }
         rollbackExternalChange = outcome.rollbackCalendar
         pendingEmails = outcome.sendEmails
+        if (studentChanged) studentAssignmentCalendarUpdated = Boolean(outcome.updates.tutor_calendar_event_id)
       }
 
       if (newStatus === 'completed') {
         const completed = { ...currentSession, ...updates }
-        pendingEmails = () => sendCompletionEmail(completed)
+        if (!studentChanged) pendingEmails = () => sendCompletionEmail(completed)
       }
 
       if (newStatus === 'cancelled') {
         const cancelUpdates = await handleCancel(currentSession)
         updates = { ...updates, ...cancelUpdates }
+        if (!studentChanged) pendingEmails = () => sendCancellationEmails(currentSession)
       }
     }
 
-    const statusUnchanged = !newStatus || newStatus === oldStatus
-    const timesChanged =
-      (confirmed_start && confirmed_start !== currentSession.confirmed_start) ||
-      (confirmed_end && confirmed_end !== currentSession.confirmed_end)
-    const tutorChanged =
-      assigned_tutor_id &&
-      assigned_tutor_id !== currentSession.assigned_tutor_id
-
-    if (statusUnchanged && oldStatus === 'scheduled' && tutorChanged) {
+    if (statusUnchanged && oldStatus === 'scheduled' && studentChanged) {
+      const merged = {
+        ...currentSession,
+        ...updates,
+        students: nextStudent,
+      }
+      const outcome = await handleScheduledStudentAssignment(merged, currentSession)
+      updates = { ...updates, ...outcome.updates }
+      rollbackExternalChange = outcome.rollbackCalendar
+      studentAssignmentCalendarUpdated = outcome.calendarUpdated
+      // Google sendUpdates=all provides the incoming invitation and removes
+      // the former student. Do not send a duplicate custom confirmation.
+      pendingEmails = null
+    } else if (statusUnchanged && oldStatus === 'scheduled' && tutorChanged) {
       const merged = {
         ...currentSession,
         ...updates,
@@ -736,7 +1069,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           delivered =
             (await sendUnassignedEmail({
               tutor: notifyOutgoing,
-              studentName: (currentSession.customers as SessionPerson | null)?.full_name,
+              studentName: sessionStudentName(currentSession),
               startsAt: previousStart,
               sessionId: id,
             })) && delivered
@@ -769,12 +1102,49 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     throw error
   }
 
-  const { data, error } = await supabaseAdmin
-    .from('sessions')
+  const persisted = studentChanged
+    ? await supabaseAdmin
+        .rpc('assign_admin_session_student', {
+          p_session_id: id,
+          p_expected_student_id: currentStudentId,
+          p_new_student_id: requestedStudentId!,
+          p_admin_profile_id: adminUser.id,
+          p_assigned_tutor_id:
+            updates.assigned_tutor_id === undefined
+              ? currentSession.assigned_tutor_id
+              : updates.assigned_tutor_id,
+          p_confirmed_start:
+            updates.confirmed_start === undefined
+              ? currentSession.confirmed_start
+              : updates.confirmed_start,
+          p_confirmed_end:
+            updates.confirmed_end === undefined
+              ? currentSession.confirmed_end
+              : updates.confirmed_end,
+          p_status: updates.status === undefined ? currentSession.status : updates.status,
+          p_internal_notes:
+            updates.internal_notes === undefined
+              ? currentSession.internal_notes
+              : updates.internal_notes,
+          p_tutor_calendar_event_id:
+            updates.tutor_calendar_event_id === undefined
+              ? currentSession.tutor_calendar_event_id
+              : updates.tutor_calendar_event_id,
+          p_student_calendar_event_id:
+            updates.student_calendar_event_id === undefined
+              ? currentSession.student_calendar_event_id
+              : updates.student_calendar_event_id,
+          p_meet_url: updates.meet_url === undefined ? currentSession.meet_url : updates.meet_url,
+        })
+        .single()
+    : await supabaseAdmin
+        .from('sessions')
     .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
+        .eq('id', id)
+        .select()
+        .single()
+
+  const { data, error } = persisted
 
   if (error) {
     console.error(`Failed to persist session ${id}:`, error.message)
@@ -792,7 +1162,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         )
       }
     }
-    return NextResponse.json({ error: 'Could not save the session' }, { status: 500 })
+    const knownAssignmentErrors: Record<string, string> = {
+      session_assignment_conflict:
+        'This session changed while you were editing it. Refresh and try again.',
+      student_not_active_or_owned:
+        'Choose an active student belonging to this account.',
+      step_up_student_reassignment_blocked:
+        'This Step Up session is tied to the original student. Contact support before moving it to another child.',
+      course_student_reassignment_blocked:
+        'This course session is tied to the enrolled student. Change the enrollment before moving this session.',
+      course_assignment_missing_enrollment:
+        'This course order is missing its enrollment link. Repair the enrollment before assigning a student.',
+      step_up_package_grant_missing:
+        'This Step Up package is missing its student credit record. Repair the package before assigning a student.',
+      student_bound_credit_reassignment_blocked:
+        'This session used student-specific credits. It can only remain assigned to the student who owns those credits.',
+      session_order_identity_mismatch:
+        'The session and order do not currently match. Repair their identity before assigning a student.',
+    }
+    const assignmentMessage = Object.entries(knownAssignmentErrors)
+      .find(([code]) => error.message.includes(code))?.[1]
+    return NextResponse.json(
+      { error: assignmentMessage ?? 'Could not save the session' },
+      { status: assignmentMessage ? 409 : 500 }
+    )
   }
 
   // Only now that the change is durable. A failure here is logged rather than
@@ -817,6 +1210,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({
     ...data,
+    ...(studentAssignmentCalendarUpdated !== null
+      ? {
+          student_assignment: {
+            calendar_updated: studentAssignmentCalendarUpdated,
+            notifications: studentAssignmentCalendarUpdated ? 'google_calendar' : 'none',
+          },
+        }
+      : {}),
     ...(rescheduleCalendarUpdated !== null
       ? {
           reschedule: {

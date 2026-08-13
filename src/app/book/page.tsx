@@ -5,12 +5,44 @@ import { SubjectSelect } from '@/components/booking/SubjectSelect'
 import { AvailabilityForm, isAvailabilityReady } from '@/components/booking/AvailabilityForm'
 import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
+import { StudentSelection } from '@/components/booking/StudentSelection'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, ReactNode } from 'react'
-import Link from 'next/link'
+import { useState, useEffect, useRef, useCallback, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Check, Loader2, LogIn } from 'lucide-react'
+import { normalizeAvailabilityWindows } from '@/lib/availability-windows'
+import { Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import type { OfflinePaymentMethod } from '@/lib/payment-method'
+import type { StudentCreditSummaryResponse, StudentDto, StudentsResponse } from '@/lib/student-contract'
+import type { AccountType } from '@/lib/account-type'
+
+const OFFLINE_PURCHASE_KEY_STORAGE = 'scoremax:offline-purchase-keys:v1'
+
+function readOfflinePurchaseKeys(): Map<string, string> {
+  if (typeof window === 'undefined') return new Map()
+  try {
+    const stored = JSON.parse(window.sessionStorage.getItem(OFFLINE_PURCHASE_KEY_STORAGE) ?? '{}')
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return new Map()
+    return new Map(
+      Object.entries(stored).filter(
+        (entry): entry is [string, string] => typeof entry[1] === 'string'
+      )
+    )
+  } catch {
+    return new Map()
+  }
+}
+
+function persistOfflinePurchaseKeys(keys: Map<string, string>) {
+  try {
+    window.sessionStorage.setItem(
+      OFFLINE_PURCHASE_KEY_STORAGE,
+      JSON.stringify(Object.fromEntries(keys))
+    )
+  } catch {
+    // The in-memory map still gives same-page retries an exact operation key.
+  }
+}
 
 // Types for Subject Data
 interface Subject {
@@ -97,13 +129,27 @@ export default function BookPage() {
     setRevealed, 
     memberStatus, 
     setMemberStatus,
+    updateStudent,
     updateSubjects,
     updateAvailability,
     updateContact,
   } = useBookingForm()
   
   const [processing, setProcessing] = useState(false)
-  const [activeSection, setActiveSection] = useState<'subjects' | 'availability' | 'contact' | 'plan'>('subjects')
+  const [authoritativeBlockedMethod, setAuthoritativeBlockedMethod] = useState<OfflinePaymentMethod | null>(null)
+  const [activeSection, setActiveSection] = useState<'student' | 'subjects' | 'availability' | 'contact' | 'plan'>('student')
+  const [students, setStudents] = useState<StudentDto[]>([])
+  const [accountType, setAccountType] = useState<AccountType | null>(null)
+  const [selfStudentId, setSelfStudentId] = useState<string | null>(null)
+  const [studentStatus, setStudentStatus] = useState<'loading' | 'signed_out' | 'ready' | 'error'>('loading')
+  const [creditSummaryLoading, setCreditSummaryLoading] = useState(false)
+  const [creditSummaryError, setCreditSummaryError] = useState<string | null>(null)
+  // A retry of the exact same offline purchase must reuse its key. Keeping a
+  // key per request payload also prevents a changed plan or booking form from
+  // accidentally reusing the previous operation's identity. sessionStorage
+  // survives a reload after a committed response is lost; acknowledged success
+  // removes the key so a later intentional identical booking is new work.
+  const offlineIdempotencyKeys = useRef<Map<string, string> | null>(null)
   
   // Subjects Data
   const [subjectsData, setSubjectsData] = useState<Record<string, Subject[]>>({})
@@ -133,6 +179,35 @@ export default function BookPage() {
   // which shows the address rather than asking for it again.
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null)
 
+  const loadStudents = useCallback(async () => {
+    setStudentStatus('loading')
+    try {
+      const response = await fetch('/api/account/students', { cache: 'no-store' })
+      if (response.status === 401) {
+        setStudents([])
+        setAccountType(null)
+        setSelfStudentId(null)
+        setStudentStatus('signed_out')
+        return
+      }
+      if (!response.ok) {
+        setStudentStatus('error')
+        return
+      }
+      const body = await response.json() as StudentsResponse
+      setStudents(body.students)
+      setAccountType(body.accountType)
+      setSelfStudentId(body.selfStudentId)
+      setStudentStatus('ready')
+    } catch {
+      setStudentStatus('error')
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadStudents()
+  }, [loadStudents])
+
   useEffect(() => {
     if (prefilled) return
     async function prefillContact() {
@@ -145,6 +220,7 @@ export default function BookPage() {
         // cookie server-side and answers 401 when genuinely signed out.
         const res = await fetch('/api/account/profile')
         if (!res.ok) {
+          if (res.status === 401) setStudentStatus('signed_out')
           setPrefilled(true)
           return
         }
@@ -161,21 +237,11 @@ export default function BookPage() {
             fullName: data.fullName || prev.contact.fullName,
             email: data.email || prev.contact.email,
             phone: data.phone || prev.contact.phone,
-            studentGrade: data.studentGrade || prev.contact.studentGrade,
             notes: prev.contact.notes
           }
         }))
         setPrefilled(true)
 
-        const checkRes = await fetch('/api/customer/check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: data.email }),
-        })
-        if (checkRes.ok) {
-          const memberData = await checkRes.json()
-          setMemberStatus(memberData)
-        }
       } catch {
         // Not signed in or API error
       }
@@ -184,32 +250,77 @@ export default function BookPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Re-check member status when entering Plan section (ensures we have current credits for the entered email)
+  // Eligibility is student-specific. Clear the prior summary before loading
+  // the next one so a sibling-bound Step Up or course credit never remains
+  // visible while another child is selected.
   useEffect(() => {
-    if (activeSection !== 'plan') return
     const email = state.contact.email?.trim()
-    if (!email?.includes('@')) return
+    if (!state.studentId || !email?.includes('@')) {
+      setMemberStatus(null)
+      setCreditSummaryError(null)
+      return
+    }
 
     let cancelled = false
+    setMemberStatus(null)
+    setCreditSummaryError(null)
+    setCreditSummaryLoading(true)
     fetch('/api/customer/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, student_id: state.studentId }),
     })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled && data) setMemberStatus(data)
+      .then(async (res) => {
+        if (!res.ok) throw new Error('credit_summary_failed')
+        return res.json() as Promise<StudentCreditSummaryResponse>
       })
-      .catch(() => {})
+      .then((data) => {
+        if (!cancelled) setMemberStatus(data)
+      })
+      .catch(() => {
+        if (!cancelled) setCreditSummaryError('We could not verify credits for this student.')
+      })
+      .finally(() => {
+        if (!cancelled) setCreditSummaryLoading(false)
+      })
     return () => { cancelled = true }
-  }, [activeSection, state.contact.email, setMemberStatus])
+  }, [state.studentId, state.contact.email, setMemberStatus])
 
   // Derived state for summaries
   const selectedSubjectNames = state.subjects.map(id => subjectMap[id]?.name).filter(Boolean).join(', ')
+  const selectedStudent = students.find((student) => student.id === state.studentId && student.isActive) ?? null
+  const selfStudent = accountType === 'student' && selfStudentId
+    ? students.find((student) => student.id === selfStudentId && student.isActive) ?? null
+    : null
+  const isStudentAccount = accountType === 'student'
+
+  // Student accounts always book for their own server-identified profile. The
+  // recipient picker is a parent workflow and should never make a self-booking
+  // student choose themselves before every session.
+  useEffect(() => {
+    if (studentStatus !== 'ready' || !selfStudent) return
+
+    setState((previous) => previous.studentId === selfStudent.id
+      ? previous
+      : { ...previous, studentId: selfStudent.id })
+    setRevealed((previous) => (
+      previous.subjects ? previous : { ...previous, subjects: true }
+    ))
+    setActiveSection((previous) => previous === 'student' ? 'subjects' : previous)
+  }, [selfStudent, studentStatus, setRevealed, setState])
+
+  const subjectStep = isStudentAccount ? 1 : 2
+  const availabilityStep = isStudentAccount ? 2 : 3
+  const contactStep = isStudentAccount ? 3 : 4
+  const planStep = isStudentAccount ? 4 : 5
 
   // Navigation Handler
   const handleNext = (current: string) => {
-    if (current === 'subjects') {
+    if (current === 'student') {
+      if (!selectedStudent) return
+      setRevealed(prev => ({ ...prev, subjects: true }))
+      setActiveSection('subjects')
+    } else if (current === 'subjects') {
       setRevealed(prev => ({ ...prev, availability: true }))
       setActiveSection('availability')
     } else if (current === 'availability') {
@@ -221,14 +332,10 @@ export default function BookPage() {
       // the Stripe webhook write these too, but only once a purchase lands —
       // this makes the sync immediate, and survives an abandoned booking.
       // Fire-and-forget: a failure here must never block the booking.
-      // Name is deliberately not synced: the booking form asks for the student
-      // OR parent name, so a booking made for someone else would rename the
-      // account. Only non-empty values are sent, so leaving a box blank here
-      // cannot clear what Settings already holds.
+      // Student identity and grade come only from the managed-student profile.
       if (signedInEmail) {
         const sync: Record<string, string> = {}
         if (state.contact.phone?.trim()) sync.phone = state.contact.phone.trim()
-        if (state.contact.studentGrade?.trim()) sync.studentGrade = state.contact.studentGrade.trim()
         if (Object.keys(sync).length > 0) {
           fetch('/api/account/profile', {
             method: 'PATCH',
@@ -244,6 +351,10 @@ export default function BookPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePlanSelect = async (plan: any) => {
+    if (!state.studentId || !selectedStudent) {
+      setActiveSection('student')
+      return
+    }
     setProcessing(true)
     
     // 1. If using credit (member)
@@ -263,6 +374,7 @@ export default function BookPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
              use_credit: true,
+             student_id: state.studentId,
              subjects: state.subjects,
              // The per-day shape is what the server stores; it derives the
              // legacy available_days/start/end envelope itself, so there is no
@@ -275,8 +387,7 @@ export default function BookPage() {
              // them, so an admin looking at a credit order saw "—" for both.
              // The paid path has always passed them through Stripe metadata.
              full_name: state.contact.fullName,
-             phone: state.contact.phone,
-             student_grade: state.contact.studentGrade
+             phone: state.contact.phone
           })
         })
         
@@ -295,8 +406,70 @@ export default function BookPage() {
       }
       return
     }
+
+    // 2. Approved Step Up and Zelle purchases are recorded immediately. The
+    // server resolves the trusted plan and price; the browser sends only the
+    // selected plan identity and booking details.
+    if (plan.paymentMethod === 'step_up' || plan.paymentMethod === 'zelle') {
+      const requestWithoutKey = {
+        student_id: state.studentId,
+        payment_method: plan.paymentMethod,
+        plan_type: plan.type,
+        plan_id: plan.id ?? null,
+        courseType: plan.courseType ?? null,
+        booking_details: {
+          subjects: state.subjects,
+          available_windows: normalizeAvailabilityWindows(state.availability.windows),
+          timezone: state.availability.timezone,
+          session_type: state.sessionType,
+          full_name: state.contact.fullName,
+          phone: state.contact.phone,
+          notes: state.contact.notes,
+        },
+      }
+      const requestFingerprint = JSON.stringify(requestWithoutKey)
+      const idempotencyKeys = offlineIdempotencyKeys.current ?? readOfflinePurchaseKeys()
+      offlineIdempotencyKeys.current = idempotencyKeys
+      let idempotencyKey = idempotencyKeys.get(requestFingerprint)
+      if (!idempotencyKey) {
+        idempotencyKey = crypto.randomUUID()
+        idempotencyKeys.set(requestFingerprint, idempotencyKey)
+        persistOfflinePurchaseKeys(idempotencyKeys)
+      }
+
+      try {
+        const res = await fetch('/api/offline-purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...requestWithoutKey,
+            idempotency_key: idempotencyKey,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+
+        if (res.ok && data?.booking_id) {
+          idempotencyKeys.delete(requestFingerprint)
+          persistOfflinePurchaseKeys(idempotencyKeys)
+          router.push(`/book/confirmation?booking_id=${data.booking_id}`)
+        } else if (res.status === 401 || (res.status === 403 && data?.code === 'account_not_approved')) {
+          // The server rechecks both authentication and exact-method approval
+          // inside the purchase transaction. Surface that authoritative result
+          // with the same exact copy and actions as the selector gate.
+          setAuthoritativeBlockedMethod(plan.paymentMethod)
+        } else {
+          alert(data?.error || 'Failed to submit purchase')
+        }
+      } catch (err) {
+        console.error(err)
+        alert('An error occurred. Please try again.')
+      } finally {
+        setProcessing(false)
+      }
+      return
+    }
     
-    // 2. If paying (Stripe)
+    // 3. Credit-card purchases continue through Stripe.
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -308,6 +481,7 @@ export default function BookPage() {
            price_id: plan.priceId,
            courseType: plan.courseType,
            booking_details: {
+             student_id: state.studentId,
              subjects: state.subjects,
              available_windows: state.availability.windows,
              timezone: state.availability.timezone,
@@ -315,7 +489,6 @@ export default function BookPage() {
              full_name: state.contact.fullName,
              email: state.contact.email,
              phone: state.contact.phone,
-             student_grade: state.contact.studentGrade,
              notes: state.contact.notes,
              course_type: plan.courseType
            }
@@ -349,43 +522,47 @@ export default function BookPage() {
           <p className="text-gray-600">Tell us what you need, and we&apos;ll match you with the perfect tutor.</p>
         </div>
 
-        {/*
-          Returning customers arriving signed out would otherwise reach the
-          payment step with no sign of the credit already on their account, and
-          pay for it twice. The contact step catches this too, once an email is
-          entered; this catches it before they have typed anything.
-        */}
-        {!signedInEmail && (
-          <div className="mb-8 overflow-hidden rounded-xl border-2 border-[#b08a30]/45 bg-gradient-to-r from-amber-50 to-white shadow-sm">
-            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#b08a30]/15 text-[#8a6a25]">
-                  <LogIn className="size-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-[#1e293b]">Returning customer?</p>
-                  <p className="mt-1 max-w-xl text-sm leading-6 text-gray-600">
-                    Sign in before booking to use your existing session credits and avoid paying again.
-                    New to ScoreMax? Continue with Step 1 below.
-                  </p>
-                </div>
-              </div>
-              <Button asChild className="w-full shrink-0 bg-[#1e293b] hover:bg-[#334155] sm:w-auto">
-                <Link href={`/login?next=${encodeURIComponent('/book')}`}>
-                  <LogIn className="size-4" aria-hidden="true" />
-                  Sign In to Use Credits
-                </Link>
-              </Button>
-            </div>
+        {/* Parents choose a managed child. Student accounts are assigned to
+            their own active profile server-side and begin with subjects. */}
+        {!isStudentAccount && (
+          <BookingSection
+            step={1}
+            title="Who is this session for?"
+            isOpen={activeSection === 'student'}
+            isCompleted={revealed.subjects && Boolean(selectedStudent)}
+            summary={selectedStudent?.fullName}
+            onEdit={() => setActiveSection('student')}
+          >
+            <StudentSelection
+              students={students}
+              selectedStudentId={state.studentId}
+              status={studentStatus}
+              onSelect={(student) => {
+                updateStudent(student.id)
+                setAuthoritativeBlockedMethod(null)
+              }}
+              onContinue={() => handleNext('student')}
+              onRetry={() => void loadStudents()}
+            />
+          </BookingSection>
+        )}
+
+        {isStudentAccount && studentStatus === 'ready' && !selfStudent && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5" role="alert">
+            <p className="font-semibold text-red-900">We couldn&apos;t load your student profile</p>
+            <p className="mt-1 text-sm leading-6 text-red-700">
+              Your account is set up as a student, but its booking profile is unavailable. Contact ScoreMax before continuing.
+            </p>
           </div>
         )}
 
-        {/* 1. Subjects */}
+        {/* 2. Subjects */}
         <BookingSection
-          step={1}
+          step={subjectStep}
           title="Select Subject" 
           isOpen={activeSection === 'subjects'}
           isCompleted={revealed.availability}
+          disabled={!revealed.subjects}
           summary={selectedSubjectNames}
           onEdit={() => setActiveSection('subjects')}
         >
@@ -397,9 +574,9 @@ export default function BookPage() {
            />
         </BookingSection>
 
-        {/* 2. Availability */}
+        {/* 3. Availability */}
         <BookingSection
-          step={2}
+          step={availabilityStep}
           title="Availability"
           isOpen={activeSection === 'availability'}
           isCompleted={revealed.contact}
@@ -409,6 +586,7 @@ export default function BookPage() {
         >
               <AvailabilityForm
                 value={state.availability}
+                studentName={selectedStudent?.fullName ?? 'this student'}
                 onChange={(avail) => updateAvailability(avail)}
               />
               <div className="flex justify-end pt-4">
@@ -422,23 +600,25 @@ export default function BookPage() {
               </div>
         </BookingSection>
 
-        {/* 3. Contact */}
+        {/* 4. Account owner contact */}
         <BookingSection
-          step={3}
-          title="Contact Information"
+          step={contactStep}
+          title="Account Owner Contact"
           isOpen={activeSection === 'contact'}
           isCompleted={revealed.plan}
           disabled={!revealed.contact}
           summary={state.contact.email}
           onEdit={() => setActiveSection('contact')}
         >
-              <ContactForm
-                value={state.contact}
-                onChange={(contact) => updateContact(contact)}
-                onMemberCheck={(status) => setMemberStatus(status)}
-                externalMemberStatus={memberStatus}
-                signedInEmail={signedInEmail}
-              />
+              {selectedStudent && (
+                <ContactForm
+                  value={state.contact}
+                  onChange={(contact) => updateContact(contact)}
+                  signedInEmail={signedInEmail}
+                  selectedStudent={selectedStudent}
+                  isStudentAccount={isStudentAccount}
+                />
+              )}
               <div className="flex justify-end pt-4">
                 <Button 
                   onClick={() => handleNext('contact')} 
@@ -450,9 +630,9 @@ export default function BookPage() {
               </div>
         </BookingSection>
 
-        {/* 4. Plan Selection */}
+        {/* 5. Plan Selection */}
         <BookingSection
-          step={4}
+          step={planStep}
           title="Choose Package"
           isOpen={activeSection === 'plan'}
           isCompleted={false} // Final step
@@ -463,8 +643,13 @@ export default function BookPage() {
               <PlanSelection 
                 subjects={state.subjects}
                 memberStatus={memberStatus}
+                selectedStudentName={selectedStudent?.fullName ?? 'this student'}
+                creditSummaryLoading={creditSummaryLoading}
+                creditSummaryError={creditSummaryError}
                 onSelect={handlePlanSelect}
                 loading={processing}
+                authoritativeBlockedMethod={authoritativeBlockedMethod}
+                onAuthoritativeBlockDismiss={() => setAuthoritativeBlockedMethod(null)}
               />
         </BookingSection>
       </div>

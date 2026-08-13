@@ -22,6 +22,7 @@ interface Session {
   status: string
   meet_url: string | null
   customers: { full_name: string; email: string } | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
 }
 
 interface TutorSessionsTableProps {
@@ -47,8 +48,8 @@ export function TutorSessionsTable({ sessions, subjectMap }: TutorSessionsTableP
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter((s) => {
-        const name = s.customers?.full_name?.toLowerCase() ?? ''
-        const email = s.customers?.email?.toLowerCase() ?? ''
+        const name = s.student?.full_name?.toLowerCase() ?? ''
+        const email = s.student?.email?.toLowerCase() ?? ''
         const subs = s.subjects?.map((id) => subjectMap[id]?.toLowerCase() ?? '').join(' ')
         return name.includes(q) || email.includes(q) || subs.includes(q)
       })
@@ -183,11 +184,13 @@ export function TutorSessionsTable({ sessions, subjectMap }: TutorSessionsTableP
                     </td>
                     <td className="px-5 py-3.5">
                       <p className="text-sm font-medium text-[#1e293b]">
-                        {session.customers?.full_name ?? 'Unknown'}
+                        {session.student?.full_name ?? 'Student not assigned'}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {session.customers?.email}
-                      </p>
+                      {session.student && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {session.student.email} · {session.student.grade}
+                        </p>
+                      )}
                     </td>
                     <td className="px-5 py-3.5">
                       <span className="text-sm text-gray-600">

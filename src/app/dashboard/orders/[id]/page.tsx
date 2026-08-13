@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatDateTime, formatPlanLabel } from '@/lib/order-format'
 import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
-import { ArrowLeft, BookOpen, Video, CreditCard, Calendar, User, MapPin } from 'lucide-react'
+import { ArrowLeft, BookOpen, Video, CreditCard, Calendar, User, MapPin, GraduationCap } from 'lucide-react'
 import { RequestedAvailability } from '@/components/dashboard/RequestedAvailability'
 import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrderRefundForm } from '@/components/dashboard/OrderRefundForm'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
+import { formatPaymentMethod, isOfflinePaymentMethod } from '@/lib/payment-method'
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser()
@@ -24,7 +25,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     .select(`
       *,
       customers (full_name, email, phone, student_grade, notes, packages(total_hours, stripe_payment_intent_id)),
-      payments (amount_cents)
+      student:students(id, full_name, email, grade),
+      payments (amount_cents, payment_method)
     `)
     .eq('id', (await params).id)
     .single()
@@ -134,7 +136,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     refunded: { label: 'Refunded', className: 'bg-red-100 text-red-700' },
   }
 
-  const orderStatus = orderStatusConfig[order.status] || orderStatusConfig.paid
+  const rawOrderStatus = order.status ?? 'unknown'
+  const orderStatus = orderStatusConfig[rawOrderStatus] ?? {
+    label: rawOrderStatus === 'unknown'
+      ? 'Unknown'
+      : rawOrderStatus.split('_').map((part: string) => part.charAt(0).toUpperCase() + part.slice(1)).join(' '),
+    className: 'bg-gray-100 text-gray-700',
+  }
+  const paymentMethod = order.payment_method ?? order.payments?.[0]?.payment_method
+  const isOfflinePayment = isOfflinePaymentMethod(paymentMethod)
 
   return (
     <div className="space-y-8">
@@ -169,7 +179,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <User className="h-5 w-5 text-[#b08a30]" />
-              Customer
+              Account Owner
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -186,11 +196,36 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</p>
                 <p className="mt-1">{order.customers?.phone || '—'}</p>
               </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</p>
-                <p className="mt-1">{order.customers?.student_grade || '—'}</p>
-              </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-gray-100 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-[#4a729f]" />
+              Student
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {order.student ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Name</p>
+                  <p className="mt-1 font-medium">{order.student.full_name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Email</p>
+                  <p className="mt-1 break-all text-[#4a729f]">{order.student.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Grade</p>
+                  <p className="mt-1">{order.student.grade}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="font-medium text-amber-700">Student not assigned</p>
+            )}
           </CardContent>
         </Card>
 
@@ -245,7 +280,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</p>
                 <p className="font-medium mt-1">{planLabel}</p>
@@ -255,21 +290,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <p className="font-bold text-lg mt-1">{formatOrderAmount(order)}</p>
               </div>
               <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</p>
+                <p className="font-medium mt-1">{formatPaymentMethod(paymentMethod)}</p>
+              </div>
+              <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
-                <span
-                  className={`inline-flex px-3 py-1 mt-1 rounded-full text-sm font-semibold ${
-                    order.status === 'refunded'
-                      ? 'bg-red-50 text-red-700'
-                      : order.stripe_payment_intent_id || order.payment_type === 'membership'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-amber-50 text-amber-700'
-                  }`}
-                >
-                  {order.status === 'refunded' ? 'Refunded' : (order.stripe_payment_intent_id || order.payment_type === 'membership') ? 'Paid' : 'Pending'}
+                <span className={`inline-flex px-3 py-1 mt-1 rounded-full text-sm font-semibold ${orderStatus.className}`}>
+                  {orderStatus.label}
                 </span>
               </div>
             </div>
-            {order.stripe_payment_intent_id && (
+            {order.stripe_payment_intent_id && !isOfflinePayment && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <ReceiptButton bookingId={order.id} />
               </div>
@@ -336,7 +367,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           </Card>
         )}
 
-        {profile?.role === 'admin' && order.status !== 'refunded' && (
+        {profile?.role === 'admin' && order.status !== 'refunded' && !isOfflinePayment && (
           <OrderRefundForm orderId={order.id} />
         )}
       </div>

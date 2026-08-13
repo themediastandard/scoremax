@@ -134,6 +134,7 @@ test('online calendar plan builds one ScoreMax-owned event inviting tutor and st
     confirmed_start: '2026-03-01T15:00:00.000Z',
     confirmed_end: '2026-03-01T16:00:00.000Z',
     customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    students: { full_name: 'Ada Student', email: 'ada@example.com' },
     tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
   })
 
@@ -157,6 +158,7 @@ test('calendar plan puts resolved subject names in the event title', () => {
     confirmed_start: '2026-03-01T15:00:00.000Z',
     confirmed_end: '2026-03-01T16:00:00.000Z',
     customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    students: { full_name: 'Ada Student', email: 'ada@example.com' },
     tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
   }
 
@@ -192,6 +194,7 @@ test('calendar plan keeps the title short when a session has many subjects', () 
     confirmed_start: '2026-03-01T15:00:00.000Z',
     confirmed_end: '2026-03-01T16:00:00.000Z',
     customers: { full_name: 'Ada Student', email: 'ada@example.com' },
+    students: { full_name: 'Ada Student', email: 'ada@example.com' },
     tutors: { full_name: 'Grace Tutor', email: 'grace@example.com' },
   }
   const many = ['SAT Math', 'ACT Science', 'AP Chemistry', 'AP Biology', 'AP Physics C']

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, GraduationCap, X } from 'lucide-react'
+import { ArrowRight, Search, GraduationCap, X } from 'lucide-react'
 import { TutorForm } from '@/components/dashboard/TutorForm'
 
 interface Tutor {
@@ -36,6 +37,30 @@ interface TutorsTableProps {
 }
 
 type SortOption = 'name-asc' | 'name-desc' | 'sessions' | 'upcoming'
+
+function tutorInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 'T'
+  return `${parts[0][0] ?? ''}${parts.length > 1 ? parts[parts.length - 1][0] ?? '' : ''}`.toUpperCase()
+}
+
+function TutorAvatar({ tutor }: { tutor: Pick<Tutor, 'full_name' | 'photo_url'> }) {
+  return (
+    <span aria-hidden="true" className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#517cad]/10 text-xs font-semibold text-[#4a729f]">
+      {tutorInitials(tutor.full_name)}
+      {tutor.photo_url && (
+        // Decorative because the adjacent linked name already announces the tutor.
+        // eslint-disable-next-line @next/next/no-img-element -- admin-managed tutor photo with an initials fallback beneath it.
+        <img
+          src={tutor.photo_url}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(event) => { event.currentTarget.style.display = 'none' }}
+        />
+      )}
+    </span>
+  )
+}
 
 export function TutorsTable({ tutors, sessionMap, allSubjects }: TutorsTableProps) {
   const [search, setSearch] = useState('')
@@ -179,11 +204,17 @@ export function TutorsTable({ tutors, sessionMap, allSubjects }: TutorsTableProp
             <tbody className="divide-y divide-gray-100">
               {filtered.map((tutor) => {
                 const stats = sessionMap[tutor.id] ?? { completed: 0, upcoming: 0 }
+                const detailsHref = `/dashboard/tutors/${tutor.id}`
 
                 return (
                   <tr key={tutor.id} className="hover:bg-gray-50/60 transition-colors">
                     <td className="px-5 py-3.5">
-                      <p className="font-medium text-sm text-[#1e293b]">{tutor.full_name}</p>
+                      <div className="flex items-center gap-3">
+                        <TutorAvatar tutor={tutor} />
+                        <Link href={detailsHref} className="font-medium text-sm text-[#1e293b] hover:text-[#4a729f] hover:underline">
+                          {tutor.full_name}
+                        </Link>
+                      </div>
                     </td>
                     <td className="px-5 py-3.5">
                       <p className="text-sm text-gray-600">{tutor.email}</p>
@@ -237,7 +268,16 @@ export function TutorsTable({ tutors, sessionMap, allSubjects }: TutorsTableProp
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <TutorForm tutor={tutor} />
+                      <div className="inline-flex items-center gap-1">
+                        <TutorForm tutor={tutor} />
+                        <Link
+                          href={detailsHref}
+                          aria-label={`View details for ${tutor.full_name}`}
+                          className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]"
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )

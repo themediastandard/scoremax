@@ -25,6 +25,7 @@ export default async function SessionsPage() {
         .select(`
           *,
           customers (full_name, email),
+          student:students(id, full_name, email, grade),
           tutors (id, full_name),
           booking_requests!sessions_order_id_fkey (
             available_windows, available_days, available_time_start,
@@ -40,6 +41,17 @@ export default async function SessionsPage() {
     ])
 
     const sessions = allSessions ?? []
+    const customerIds = Array.from(new Set(
+      sessions.map((session) => session.customer_id).filter((id): id is string => Boolean(id))
+    ))
+    const { data: activeStudents } = customerIds.length
+      ? await supabaseAdmin
+          .from('students')
+          .select('id, customer_id, full_name, email, grade')
+          .in('customer_id', customerIds)
+          .eq('is_active', true)
+          .order('full_name', { ascending: true })
+      : { data: [] }
     const now = new Date()
     const weekEnd = new Date(now)
     weekEnd.setDate(weekEnd.getDate() + 7)
@@ -73,6 +85,7 @@ export default async function SessionsPage() {
         <AdminSessionList
           sessions={sessions ?? []}
           tutors={tutors || []}
+          activeStudents={activeStudents ?? []}
           subjectMap={subjectMapObj}
         />
       </div>
@@ -91,6 +104,7 @@ export default async function SessionsPage() {
       .select(`
         *,
         customers (full_name, email),
+        student:students(id, full_name, email, grade),
         tutors (id, full_name)
       `)
       .eq('assigned_tutor_id', tutor?.id)
@@ -109,7 +123,9 @@ export default async function SessionsPage() {
       const start = new Date(s.confirmed_start)
       return start >= now && start <= weekEnd
     })
-    const uniqueStudents = new Set(allSessions.map((s) => s.customer_id)).size
+    const uniqueStudents = new Set(
+      allSessions.map((s) => s.student_id).filter((id): id is string => Boolean(id))
+    ).size
 
     const metrics = [
       {
@@ -185,6 +201,7 @@ export default async function SessionsPage() {
       .select(`
         *,
         customers (full_name, email),
+        student:students(id, full_name, email, grade),
         tutors (id, full_name)
       `)
       .eq('customer_id', customer?.id)

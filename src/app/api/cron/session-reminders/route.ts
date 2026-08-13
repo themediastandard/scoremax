@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmail, getEmailDefaults } from '@/lib/resend'
 import { sessionReminderEmail } from '@/lib/email-templates'
 import {
   isReminderDue,
-  isReminderStillDue,
   reminderWindow,
 } from '@/lib/session-reminders'
 import { flushReports, reportIssue } from '@/lib/report-error'
+import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
 
 // node:crypto and Buffer, so not the edge runtime. Node is already the default
 // for route handlers; stated here because the timing-safe comparison below
@@ -80,6 +80,7 @@ type ReminderCandidate = {
   meet_url: string | null
   reminder_sent_for: string | null
   customers: ReminderParty | null
+  students: ReminderParty | null
   tutors: ReminderParty | null
 }
 
@@ -87,6 +88,7 @@ type SendOutcome = 'sent' | 'failed' | 'no-address'
 
 type SessionResult = {
   id: string
+  owner: SendOutcome
   student: SendOutcome
   tutor: SendOutcome
   stamped: boolean
@@ -100,6 +102,7 @@ const CANDIDATE_COLUMNS = `
   meet_url,
   reminder_sent_for,
   customers ( email, full_name ),
+  students ( email, full_name ),
   tutors ( email, full_name )
 `
 
@@ -216,7 +219,8 @@ export async function POST(req: NextRequest) {
         sessionType: session.session_type,
         hasMeetUrl: Boolean(session.meet_url),
         alreadyRemindedFor: session.reminder_sent_for,
-        studentEmail: session.customers?.email ?? null,
+        ownerEmail: session.customers?.email ?? null,
+        studentEmail: session.students?.email ?? null,
         tutorEmail: session.tutors?.email ?? null,
       })),
       deferred: due.length - batch.length,
@@ -249,34 +253,10 @@ export async function POST(req: NextRequest) {
       continue
     }
 
-    // Re-read immediately before sending. A session cancelled, completed or
-    // rescheduled since the poll must not be reminded, and a concurrent run — a
-    // manual curl landing on top of the cron — must not send a second copy.
-    const { data: fresh, error: freshError } = await supabaseAdmin
-      .from('sessions')
-      .select('id, status, confirmed_start, reminder_sent_for')
-      .eq('id', candidate.id)
-      .single()
-
-    if (freshError || !fresh) {
-      reportIssue(
-        'cron:session-reminders',
-        `Could not re-read session before sending its reminder: ${freshError?.message ?? 'row missing'}`,
-        { sessionId: candidate.id }
-      )
-      skippedUnreadable += 1
-      continue
-    }
-
-    if (!isReminderStillDue(fresh, confirmedStart)) {
-      skippedNoLongerDue += 1
-      continue
-    }
-
-    const studentEmail = candidate.customers?.email?.trim() || null
     const tutorEmail = candidate.tutors?.email?.trim() || null
+    const familyRecipients = operationalRecipients(candidate.customers, candidate.students)
 
-    if (!studentEmail && !tutorEmail) {
+    if (familyRecipients.length === 0 && !tutorEmail) {
       reportIssue(
         'cron:session-reminders',
         'A session due a reminder has neither a student nor a tutor email address.',
@@ -286,21 +266,52 @@ export async function POST(req: NextRequest) {
       continue
     }
 
+    // Atomically claim this exact session/start before sending. A read followed
+    // by an update is not a concurrency guard: two overlapping invocations can
+    // both read the unstamped row before either writes. The database RPC changes
+    // that into one conditional UPDATE, so only one caller receives true. Its
+    // lease allows recovery if the process dies before it finishes the claim.
+    const claimToken = randomUUID()
+    const { data: claimed, error: claimError } = await supabaseAdmin.rpc('claim_session_reminder', {
+      p_session_id: candidate.id,
+      p_confirmed_start: confirmedStart,
+      p_claim_token: claimToken,
+      p_lease_seconds: 120,
+    })
+    if (claimError) {
+      reportIssue(
+        'cron:session-reminders',
+        `Could not claim session reminder: ${claimError.message}`,
+        { sessionId: candidate.id, confirmedStart }
+      )
+      skippedUnreadable += 1
+      continue
+    }
+    if (!claimed) {
+      skippedNoLongerDue += 1
+      continue
+    }
+
+    let ownerOutcome: SendOutcome = 'no-address'
     let studentOutcome: SendOutcome = 'no-address'
     let tutorOutcome: SendOutcome = 'no-address'
 
-    if (studentEmail) {
+    const studentName = sessionStudentName(candidate)
+    for (const recipient of familyRecipients) {
       const { subject, html } = sessionReminderEmail({
-        recipient: 'student',
+        recipient: recipient.role,
         session: candidate,
-        recipientName: candidate.customers?.full_name,
+        recipientName: recipient.full_name,
         counterpartName: candidate.tutors?.full_name,
+        studentName,
       })
       const ok = await sendEmail(
-        { ...getEmailDefaults(), to: studentEmail, subject, html },
-        `cron:session-reminder:student:${candidate.id}`
+        { ...getEmailDefaults(), to: recipient.email, subject, html },
+        `cron:session-reminder:${recipient.role}:${candidate.id}:${confirmedStart}`,
+        `session-reminder-${recipient.role}-${candidate.id}-${confirmedStart}`
       )
-      studentOutcome = ok ? 'sent' : 'failed'
+      if (recipient.role === 'owner') ownerOutcome = ok ? 'sent' : 'failed'
+      else studentOutcome = ok ? 'sent' : 'failed'
     }
 
     if (tutorEmail) {
@@ -308,16 +319,18 @@ export async function POST(req: NextRequest) {
         recipient: 'tutor',
         session: candidate,
         recipientName: candidate.tutors?.full_name,
-        counterpartName: candidate.customers?.full_name,
+        counterpartName: studentName,
+        studentName,
       })
       const ok = await sendEmail(
         { ...getEmailDefaults(), to: tutorEmail, subject, html },
-        `cron:session-reminder:tutor:${candidate.id}`
+        `cron:session-reminder:tutor:${candidate.id}:${confirmedStart}`,
+        `session-reminder-tutor-${candidate.id}-${confirmedStart}`
       )
       tutorOutcome = ok ? 'sent' : 'failed'
     }
 
-    const anySent = studentOutcome === 'sent' || tutorOutcome === 'sent'
+    const anySent = ownerOutcome === 'sent' || studentOutcome === 'sent' || tutorOutcome === 'sent'
 
     /*
      * Partial failure — one send landed, the other did not.
@@ -338,34 +351,46 @@ export async function POST(req: NextRequest) {
      * attempt, which is why the failure is reported rather than left to chance.
      */
     if (!anySent) {
+      const { error: releaseError } = await supabaseAdmin.rpc('finish_session_reminder_claim', {
+        p_session_id: candidate.id,
+        p_confirmed_start: confirmedStart,
+        p_claim_token: claimToken,
+        p_sent: false,
+      })
       reportIssue(
         'cron:session-reminders',
         'Every reminder send for this session failed; it was not marked as reminded.',
-        { sessionId: candidate.id, studentOutcome, tutorOutcome }
+        {
+          sessionId: candidate.id,
+          ownerOutcome,
+          studentOutcome,
+          tutorOutcome,
+          claimReleaseError: releaseError?.message,
+        }
       )
-      results.push({ id: candidate.id, student: studentOutcome, tutor: tutorOutcome, stamped: false })
+      results.push({ id: candidate.id, owner: ownerOutcome, student: studentOutcome, tutor: tutorOutcome, stamped: false })
       continue
     }
 
-    if (studentOutcome === 'failed' || tutorOutcome === 'failed') {
+    if (ownerOutcome === 'failed' || studentOutcome === 'failed' || tutorOutcome === 'failed') {
       reportIssue(
         'cron:session-reminders',
-        'One of the two reminder emails failed. It will NOT be retried, because retrying would send the other recipient a duplicate.',
-        { sessionId: candidate.id, studentOutcome, tutorOutcome }
+        'One or more reminder emails failed. They will NOT be retried, because retrying would duplicate recipients whose sends succeeded.',
+        { sessionId: candidate.id, ownerOutcome, studentOutcome, tutorOutcome }
       )
     }
 
-    // Stamped with the exact start the emails quoted, and guarded on that start
-    // still being current: a reschedule that slipped in during the sends must
-    // not have the new time marked as already reminded.
-    const { data: stamped, error: stampError } = await supabaseAdmin
-      .from('sessions')
-      .update({ reminder_sent_for: confirmedStart })
-      .eq('id', candidate.id)
-      .eq('confirmed_start', confirmedStart)
-      .select('id')
-
-    const didStamp = !stampError && (stamped?.length ?? 0) > 0
+    // Finish only the claim token this invocation owns and only while the exact
+    // scheduled time it emailed is still current.
+    const { data: didStamp, error: stampError } = await supabaseAdmin.rpc(
+      'finish_session_reminder_claim',
+      {
+        p_session_id: candidate.id,
+        p_confirmed_start: confirmedStart,
+        p_claim_token: claimToken,
+        p_sent: true,
+      }
+    )
     if (!didStamp) {
       // The emails are already gone. Without the marker the next tick could send
       // them again, so this is the one failure here that can produce a duplicate.
@@ -378,9 +403,10 @@ export async function POST(req: NextRequest) {
 
     results.push({
       id: candidate.id,
+      owner: ownerOutcome,
       student: studentOutcome,
       tutor: tutorOutcome,
-      stamped: didStamp,
+      stamped: Boolean(didStamp),
     })
   }
 

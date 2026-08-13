@@ -9,22 +9,43 @@ import type { SubjectCatalogEntry } from '@/lib/subject-catalog'
 import { PACKAGE_VALIDITY_MONTHS } from '@/lib/package-expiry'
 import { canPurchaseMembershipForSubjects, getSatActSelection } from '@/lib/booking-plan-rules'
 import { getOnlinePriceCents } from '@/lib/online-price'
+import {
+  PaymentMethodSelection,
+  type PaymentMethod,
+} from '@/components/booking/PaymentMethodSelection'
+import type { OfflinePaymentMethod } from '@/lib/payment-method'
+import type { StudentCreditSummaryResponse } from '@/lib/student-contract'
 
 interface PlanSelectionProps {
   subjects: string[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  memberStatus: any
+  memberStatus: StudentCreditSummaryResponse | null
+  selectedStudentName: string
+  creditSummaryLoading?: boolean
+  creditSummaryError?: string | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSelect: (plan: any) => void
   loading?: boolean
+  authoritativeBlockedMethod?: OfflinePaymentMethod | null
+  onAuthoritativeBlockDismiss?: () => void
 }
 
-export function PlanSelection({ subjects, memberStatus, onSelect, loading: processing }: PlanSelectionProps) {
+export function PlanSelection({
+  subjects,
+  memberStatus,
+  selectedStudentName,
+  creditSummaryLoading = false,
+  creditSummaryError = null,
+  onSelect,
+  loading: processing,
+  authoritativeBlockedMethod = null,
+  onAuthoritativeBlockDismiss,
+}: PlanSelectionProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pricing, setPricing] = useState<any[]>([])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [subjectMap, setSubjectMap] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -48,24 +69,35 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
     })
   }, [])
 
-  const getSingleRateCents = () => {
+  // The POST route is authoritative. If a session expires or an approval is
+  // revoked after the selector's initial check, reset the choice while the same
+  // accessible approval dialog explains what happened.
+  useEffect(() => {
+    if (authoritativeBlockedMethod) setPaymentMethod(null)
+  }, [authoritativeBlockedMethod])
+
+  const getSingleBaseRateCents = () => {
     if (subjects.length === 0) return 0
     let maxRate = 0
     subjects.forEach(id => {
       const s = subjectMap[id]
       if (s && s.hourly_rate_cents > maxRate) maxRate = s.hourly_rate_cents
     })
-    return maxRate > 0 ? getOnlinePriceCents(maxRate) : 0
+    return maxRate
   }
 
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
 
   const { isSAT, isACT } = getSatActSelection(subjects, subjectMap)
-  const showMemberships = canPurchaseMembershipForSubjects(subjects, subjectMap)
-  const singleRateCents = getSingleRateCents()
+  const isCreditCard = paymentMethod === 'credit_card'
+  const showMemberships = isCreditCard && canPurchaseMembershipForSubjects(subjects, subjectMap)
+  const singleBaseRateCents = getSingleBaseRateCents()
+  const singleRateCents = isCreditCard ? getOnlinePriceCents(singleBaseRateCents) : singleBaseRateCents
   const singleRate = singleRateCents / 100
   const onlinePriceFor = (row: { price_cents: number; online_price_cents?: number | null }) =>
     getOnlinePriceCents(row.price_cents, row.online_price_cents)
+  const selectedPriceFor = (row: { price_cents: number; online_price_cents?: number | null }) =>
+    isCreditCard ? onlinePriceFor(row) : row.price_cents
 
   // Course prices come from the same `pricing` rows checkout charges from,
   // matched by the same sat/act name keywords — the cards can never quote a
@@ -80,20 +112,34 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
       if (courseType === 'act') return hasAct && !hasSat
       return hasSat && !hasAct
     })
-  const combinedCourse = findCourse('sat-act-combined') ?? { price_cents: 325000, online_price_cents: 335000, included_hours: 13 }
-  const satCourse = findCourse('sat') ?? { price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
-  const actCourse = findCourse('act') ?? { price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
+  const combinedCourse = findCourse('sat-act-combined') ?? { id: null, price_cents: 325000, online_price_cents: 335000, included_hours: 13 }
+  const satCourse = findCourse('sat') ?? { id: null, price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
+  const actCourse = findCourse('act') ?? { id: null, price_cents: 250000, online_price_cents: 257500, included_hours: 10 }
   const dollars = (cents: number) => `$${(cents / 100).toLocaleString()}`
 
   const packageList = pricing.filter(p => p.type === 'package').map(pkg => {
-    const onlinePriceCents = onlinePriceFor(pkg)
-    const packageHourlyCents = onlinePriceCents / pkg.included_hours
+    const selectedPriceCents = selectedPriceFor(pkg)
+    const packageHourlyCents = selectedPriceCents / pkg.included_hours
     const savingsPercent = singleRateCents > 0 ? Math.round(((singleRateCents - packageHourlyCents) / singleRateCents) * 100) : null
-    return { pkg, onlinePriceCents, savingsPercent }
+    return { pkg, selectedPriceCents, savingsPercent }
   })
 
-  // Existing Credits View
-  if (memberStatus?.hasCredits && !processing) {
+  if (creditSummaryLoading) {
+    return (
+      <div className="flex min-h-32 items-center justify-center gap-2 text-sm text-gray-500" role="status">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        Checking credits for {selectedStudentName}…
+      </div>
+    )
+  }
+
+  // Existing credits remain ahead of every purchase method, but eligibility is
+  // calculated for the explicitly selected child. Account-wide card/Zelle
+  // credits can appear here for any sibling; Step Up and courses cannot.
+  if ((memberStatus?.eligibleCredits ?? 0) > 0 && !processing) {
+    const selectedStudentCredits = memberStatus?.studentCredits.find(
+      (entry) => entry.studentId === memberStatus.selectedStudentId
+    )?.credits ?? 0
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-serif text-[#1e293b]">How would you like to pay?</h2>
@@ -106,32 +152,20 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg">You have <span className="font-bold">{memberStatus.totalCredits} credits</span> remaining.</p>
-            <p className="text-sm text-gray-500 mt-2">Use 1 credit to book this session now.</p>
-            {memberStatus.totalCourseSessions > 0 && (
-               <p className="text-xs text-blue-600 mt-1">Including {memberStatus.totalCourseSessions} course sessions.</p>
-            )}
+            <p className="text-lg">
+              <span className="font-bold">{memberStatus?.eligibleCredits ?? 0} credits</span> are eligible for {selectedStudentName}.
+            </p>
+            <p className="mt-2 text-sm text-gray-500">Use 1 eligible credit to book this session now.</p>
+            <p className="mt-2 text-xs text-gray-500">
+              {memberStatus?.familyCredits ?? 0} family-wide
+              {selectedStudentCredits > 0 ? ` · ${selectedStudentCredits} assigned to ${selectedStudentName}` : ''}
+            </p>
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full bg-[#1e293b] hover:bg-[#334155] text-white"
               onClick={() => {
-                let creditSource = 'membership'
-                let id = memberStatus.membership?.id
-                let courseId = null
-                
-                if (memberStatus.courseEnrollments?.length > 0) {
-                   creditSource = 'course'
-                   courseId = memberStatus.courseEnrollments[0].id
-                } else if (memberStatus.membership?.included_hours - memberStatus.membership?.used_hours + memberStatus.membership?.rollover_hours > 0) {
-                   creditSource = 'membership'
-                   id = memberStatus.membership.id
-                } else if (memberStatus.packages?.length > 0) {
-                   creditSource = 'package'
-                   id = memberStatus.packages[0].id
-                }
-                
-                onSelect({ type: 'credit', creditSource, id, courseEnrollmentId: courseId })
+                onSelect({ type: 'credit' })
               }}
               disabled={processing}
             >
@@ -160,26 +194,51 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg border border-[#b08a30]/30 bg-amber-50/30 px-4 py-3">
-        <p className="text-center font-medium text-[#1e293b]">
-          Choose <span className="font-bold">one</span> plan below. Pick the option that works best for you.
-        </p>
-        <p className="mt-1 text-center text-sm text-gray-600">
-          Prices shown are standard online payment prices. Paying by Zelle? Contact ScoreMax for the discounted price.
-        </p>
-      </div>
+      {creditSummaryError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+          {creditSummaryError} Existing credits are hidden until the account can be checked safely.
+        </div>
+      )}
+      {(memberStatus?.totalCredits ?? 0) > 0 && (memberStatus?.eligibleCredits ?? 0) === 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+          <p className="font-semibold">No existing credits are eligible for {selectedStudentName}.</p>
+          <p className="mt-1 leading-6 text-amber-800">
+            Family-wide card and Zelle credits can be shared. Step Up credits and course sessions stay with the student they were purchased for.
+          </p>
+        </div>
+      )}
+      <PaymentMethodSelection
+        value={paymentMethod}
+        onChange={setPaymentMethod}
+        disabled={processing}
+        authoritativeBlockedMethod={authoritativeBlockedMethod}
+        onAuthoritativeBlockDismiss={onAuthoritativeBlockDismiss}
+      />
 
-      {/* Academic memberships are not priced for SAT/ACT tutoring. */}
-      {showMemberships && (
-        <OptionSection
-          optionNum={1}
-          title="Monthly Membership"
-          description="Best for ongoing support. Cancel anytime, no commitment."
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pricing.filter(p => p.type === 'membership').map(plan => {
-            const onlinePriceCents = onlinePriceFor(plan)
-            const membershipHourlyCents = onlinePriceCents / plan.included_hours
+      {paymentMethod && (
+        <>
+          <div className="rounded-lg border border-[#b08a30]/30 bg-amber-50/30 px-4 py-3">
+            <p className="text-center font-medium text-[#1e293b]">
+              Choose <span className="font-bold">one</span> plan below. Pick the option that works best for you.
+            </p>
+            <p className="mt-1 text-center text-sm text-gray-600">
+              {isCreditCard
+                ? 'Prices shown are standard online payment prices.'
+                : `Prices shown are base prices for ${paymentMethod === 'step_up' ? 'Step Up' : 'Zelle'}.`}
+            </p>
+          </div>
+
+          {/* Memberships are available only for eligible credit-card purchases. */}
+          {showMemberships && (
+            <OptionSection
+              optionNum={1}
+              title="Monthly Membership"
+              description="Best for ongoing support. Cancel anytime, no commitment."
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {pricing.filter(p => p.type === 'membership').map(plan => {
+            const selectedPriceCents = selectedPriceFor(plan)
+            const membershipHourlyCents = selectedPriceCents / plan.included_hours
             const savingsPercent = singleRateCents > 0
               ? Math.round(((singleRateCents - membershipHourlyCents) / singleRateCents) * 100)
               : null
@@ -190,7 +249,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold">${onlinePriceCents / 100}</span>
+                  <span className="text-3xl font-bold">${selectedPriceCents / 100}</span>
                   <span className="text-gray-500 text-sm">/mo</span>
                 </div>
                 <p className="text-sm text-[#4a729f] font-medium">{plan.included_hours} hours included per month</p>
@@ -217,7 +276,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <CardFooter>
                 <Button 
                   className={`w-full ${plan.tier === 'core' ? 'bg-[#b08a30] hover:bg-[#b58b2a]' : ''}`}
-                  onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_online_price_id, name: plan.name })}
+                  onClick={() => onSelect({ type: 'membership', id: plan.id, priceId: plan.stripe_online_price_id, name: plan.name, paymentMethod })}
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Join & Book'}
@@ -225,9 +284,9 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               </CardFooter>
             </Card>
             )})}
-          </div>
-        </OptionSection>
-      )}
+              </div>
+            </OptionSection>
+          )}
 
       {/* The exam-prep package becomes the first option when memberships are hidden. */}
       <OptionSection
@@ -243,7 +302,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Best Value</div>
               <CardHeader>
                 <CardTitle>Combined SAT + ACT Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(combinedCourse))}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(selectedPriceFor(combinedCourse))}</span></div>
                 <p className="text-sm text-gray-500">{combinedCourse.included_hours} Sessions • Full Prep for Both Exams</p>
               </CardHeader>
               <CardContent>
@@ -253,7 +312,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat-act-combined', price: onlinePriceFor(combinedCourse), name: 'Combined SAT + ACT Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', id: combinedCourse.id, courseType: 'sat-act-combined', name: 'Combined SAT + ACT Package', paymentMethod })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -264,7 +323,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
               <CardHeader>
                 <CardTitle>SAT Prep Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(satCourse))}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(selectedPriceFor(satCourse))}</span></div>
                 <p className="text-sm text-gray-500">{satCourse.included_hours} Sessions • Complete Prep</p>
               </CardHeader>
               <CardContent>
@@ -275,7 +334,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'sat', price: onlinePriceFor(satCourse), name: 'SAT Prep Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', id: satCourse.id, courseType: 'sat', name: 'SAT Prep Package', paymentMethod })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -286,7 +345,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
               <div className="absolute top-0 right-0 bg-[#517cad] text-white text-xs px-3 py-1 uppercase font-bold tracking-wider">Recommended</div>
               <CardHeader>
                 <CardTitle>ACT Prep Package</CardTitle>
-                <div className="mt-2"><span className="text-3xl font-bold">{dollars(onlinePriceFor(actCourse))}</span></div>
+                <div className="mt-2"><span className="text-3xl font-bold">{dollars(selectedPriceFor(actCourse))}</span></div>
                 <p className="text-sm text-gray-500">{actCourse.included_hours} Sessions • Complete Prep</p>
               </CardHeader>
               <CardContent>
@@ -296,22 +355,22 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', courseType: 'act', price: onlinePriceFor(actCourse), name: 'ACT Prep Package' })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85]" onClick={() => onSelect({ type: 'course', id: actCourse.id, courseType: 'act', name: 'ACT Prep Package', paymentMethod })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
             </Card>
           )}
-          {!isSAT && !isACT && packageList.map(({ pkg, onlinePriceCents, savingsPercent }) => (
+          {!isSAT && !isACT && packageList.map(({ pkg, selectedPriceCents, savingsPercent }) => (
             <Card key={pkg.id} className="border-gray-200 bg-white hover:border-[#517cad]/50 hover:shadow-lg transition-all">
               <CardHeader>
                 <CardTitle className="text-xl">{pkg.name}</CardTitle>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-[#1e293b]">${onlinePriceCents / 100}</span>
+                  <span className="text-3xl font-bold text-[#1e293b]">${selectedPriceCents / 100}</span>
                   <span className="text-gray-500 text-sm">for {pkg.included_hours} hours</span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#4a729f]">${(onlinePriceCents / pkg.included_hours / 100).toFixed(0)}/hr</span>
+                  <span className="text-sm font-medium text-[#4a729f]">${(selectedPriceCents / pkg.included_hours / 100).toFixed(0)}/hr</span>
                   {savingsPercent != null && savingsPercent > 0 && (
                     <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 text-xs font-semibold">
                       Save {savingsPercent}%
@@ -328,7 +387,7 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, price: onlinePriceCents, name: pkg.name })} disabled={processing}>
+                <Button className="w-full bg-[#517cad] hover:bg-[#3b5c85] text-white" onClick={() => onSelect({ type: 'package', id: pkg.id, name: pkg.name, paymentMethod })} disabled={processing}>
                   {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Select Package'}
                 </Button>
               </CardFooter>
@@ -359,12 +418,14 @@ export function PlanSelection({ subjects, memberStatus, onSelect, loading: proce
             </ul>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', price: singleRateCents, name: 'Single Session' })} disabled={processing}>
+            <Button variant="outline" className="w-full border-[#1e293b] text-[#1e293b] hover:bg-[#1e293b] hover:text-white" size="lg" onClick={() => onSelect({ type: 'single', name: 'Single Session', paymentMethod })} disabled={processing}>
               {processing ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : `Book Single Session for $${singleRate}`}
             </Button>
           </CardFooter>
         </Card>
-      </OptionSection>
+          </OptionSection>
+        </>
+      )}
     </div>
   )
 }

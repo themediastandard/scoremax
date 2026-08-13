@@ -2,7 +2,9 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Calendar, Video, CreditCard } from 'lucide-react'
+import { CheckCircle2, Calendar, Video, CreditCard, GraduationCap } from 'lucide-react'
+import { formatPaymentMethod } from '@/lib/payment-method'
+import type { BookingStudentDto } from '@/lib/student-contract'
 
 function formatTime24To12(time24: string) {
   const [h, m] = (time24 || '').split(':').map(Number)
@@ -13,7 +15,12 @@ function formatTime24To12(time24: string) {
 }
 
 export interface BookingDetails {
-  plan?: { name: string; amountCents: number; type: string } | null
+  plan?: {
+    name: string
+    amountCents: number
+    type: string
+    paymentMethod?: string | null
+  } | null
   availability?: {
     /** Per-day ranges. Empty for bookings taken before this shape existed. */
     windows?: { day: string; start: string; end: string }[] | null
@@ -24,6 +31,8 @@ export interface BookingDetails {
   sessionType?: string | null
   subjects?: string[] | null
   subjectIds?: string[] | null
+  student?: BookingStudentDto | null
+  legacyStudentUnassigned?: boolean
 }
 
 interface ConfirmationViewProps {
@@ -75,9 +84,31 @@ export function ConfirmationView({ bookingDetails, onBookAnother }: Confirmation
                     </span>
                   )}
                 </p>
+                {bookingDetails.plan.paymentMethod && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    Payment method:{' '}
+                    <span className="font-medium text-gray-700">
+                      {formatPaymentMethod(bookingDetails.plan.paymentMethod)}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           )}
+          <div className="flex items-start space-x-3 rounded-lg border border-gray-200 p-3">
+            <GraduationCap className="mt-0.5 h-5 w-5 shrink-0 text-[#4a729f]" aria-hidden="true" />
+            <div>
+              <p className="font-medium">Student</p>
+              {bookingDetails?.student ? (
+                <>
+                  <p className="font-semibold text-[#1e293b]">{bookingDetails.student.fullName}</p>
+                  <p className="text-sm text-gray-500">{bookingDetails.student.grade}</p>
+                </>
+              ) : (
+                <p className="text-sm font-medium text-amber-700">Student not assigned</p>
+              )}
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Days and times used to be two separate cells, which only worked
                 while one range covered every day. Each day now carries its own

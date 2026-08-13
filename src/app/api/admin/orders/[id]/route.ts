@@ -6,6 +6,7 @@ import { stripe } from '@/lib/stripe'
 import { requireAdmin } from '@/lib/auth'
 import { isPaymentIntentId } from '@/lib/stripe-subscription'
 import { reportError, reportIssue } from '@/lib/report-error'
+import { cancelCalendarEventsForBookings } from '@/lib/session-calendar-cleanup'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin()
@@ -63,9 +64,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   // Previously these could not be refunded at all: the route demanded a payment
   // intent that credit bookings never have.
   const isCreditFunded =
-    (currentBooking.amount_cents ?? 0) === 0 && !currentBooking.stripe_payment_intent_id
+    currentBooking.payment_method === 'account_credit' || (
+      !currentBooking.payment_method &&
+      (currentBooking.amount_cents ?? 0) === 0 &&
+      !currentBooking.stripe_payment_intent_id
+    )
 
-  if (!isCreditFunded) {
+  const isStripeFunded = currentBooking.payment_method === 'credit_card' || (
+    !currentBooking.payment_method && !isCreditFunded
+  )
+
+  if (!isStripeFunded && !isCreditFunded) {
+    return NextResponse.json(
+      { error: `${currentBooking.payment_method === 'step_up' ? 'Step Up' : 'Zelle'} purchases must be reversed outside Stripe. Contact the customer and record the reversal through the approved offline process.` },
+      { status: 400 }
+    )
+  }
+
+  if (isStripeFunded) {
     if (!isPaymentIntentId(currentBooking.stripe_payment_intent_id)) {
       return NextResponse.json(
         { error: 'No refundable Stripe payment intent found for this order' },
@@ -105,6 +121,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (creditAction === 'unknown_source_not_restored' || creditAction === 'source_row_missing') {
     reportIssue('refund:credit-not-restored', 'Refunded but could not restore credit — adjust the balance by hand', { bookingId: id, creditAction })
   }
+
+  await cancelCalendarEventsForBookings([id])
 
   if (currentBooking.customers?.email) {
     /*

@@ -30,7 +30,11 @@ function getChargedCents(order) {
 
 /** Paid with hours rather than money: no charge and no Stripe payment intent. */
 function isCreditFundedOrder(order) {
-  return getChargedCents(order) === 0 && !order?.stripe_payment_intent_id
+  return order?.payment_method === 'account_credit' || (
+    !order?.payment_method &&
+    getChargedCents(order) === 0 &&
+    !order?.stripe_payment_intent_id
+  )
 }
 
 /** Human-readable amount for the admin dashboard. */

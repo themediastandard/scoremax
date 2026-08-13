@@ -6,6 +6,9 @@ const IN_PERSON_LOCATION =
 // short enough that "with <tutor>" survives; the description carries the full
 // list either way.
 const MAX_SUBJECT_LABEL = 40
+// This utility is intentionally CommonJS because the Node test harness imports it directly.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { calendarAttendees, sessionStudentName } = require('./session-recipients.js')
 
 /**
  * Render resolved subject names for the event title.
@@ -61,13 +64,8 @@ function buildSessionCalendarPlan(session) {
 
   const isOnline = session.session_type === 'online'
   /** @type {Array<{ email: string, displayName?: string }>} */
-  const attendees = []
-  if (session.tutors?.email) {
-    attendees.push({ email: session.tutors.email, displayName: session.tutors.full_name || undefined })
-  }
-  if (session.customers?.email) {
-    attendees.push({ email: session.customers.email, displayName: session.customers.full_name || undefined })
-  }
+  const attendees = calendarAttendees(session.tutors, session.customers, session.students)
+  const studentName = sessionStudentName(session)
 
   /*
    * The subject goes in the title so a tutor with several students in one day
@@ -89,10 +87,10 @@ function buildSessionCalendarPlan(session) {
     shouldCreateMeet: isOnline,
     requestBody: {
       summary: subjectLabel
-        ? `ScoreMax ${subjectLabel}: ${session.customers.full_name} with ${session.tutors.full_name}`
-        : `ScoreMax Session: ${session.customers.full_name} with ${session.tutors.full_name}`,
+        ? `ScoreMax ${subjectLabel}: ${studentName} with ${session.tutors.full_name}`
+        : `ScoreMax Session: ${studentName} with ${session.tutors.full_name}`,
       description: [
-        `Student: ${session.customers.full_name}`,
+        `Student: ${studentName}`,
         `Tutor: ${session.tutors.full_name}`,
         // Full list, untruncated — the title is the constrained surface, not this.
         ...(subjectNames.length

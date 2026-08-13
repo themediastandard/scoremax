@@ -11,6 +11,7 @@ import { formatPlanLabel } from '@/lib/order-format'
 import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
 import { unexpiredPackagesClause } from '@/lib/package-expiry'
+import { formatPaymentMethod } from '@/lib/payment-method'
 
 // supabase-js without generated DB types infers to-one joins as arrays,
 // but FK joins return single objects at runtime — cast results to the runtime shape.
@@ -23,6 +24,7 @@ type AdminOrderRow = {
   created_at: string
   status: string | null
   payment_type: string | null
+  payment_method: string | null
   amount_cents: number | null
   subjects: string[] | null
   session_type: string | null
@@ -32,7 +34,8 @@ type AdminOrderRow = {
     packages: Array<{ total_hours: number | null; stripe_payment_intent_id: string | null }> | null
     memberships: Array<{ tier: string | null; status: string | null }> | null
   } | null
-  payments: Array<{ amount_cents: number | null }> | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
+  payments: Array<{ amount_cents: number | null; payment_method: string | null }> | null
 }
 
 type AdminSessionRow = {
@@ -43,6 +46,7 @@ type AdminSessionRow = {
   session_type: string | null
   subjects: string[] | null
   customers: { full_name: string | null } | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
   tutors: { full_name: string | null } | null
 }
 
@@ -53,6 +57,7 @@ type TutorSessionRow = {
   session_type: string | null
   subjects: string[] | null
   customers: { full_name: string | null; email: string | null } | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
 }
 
 type CustomerSessionRow = {
@@ -64,6 +69,7 @@ type CustomerSessionRow = {
   subjects: string[] | null
   meet_url: string | null
   tutors: { full_name: string | null } | null
+  student: { id: string; full_name: string; email: string; grade: string } | null
 }
 
 export default async function DashboardHome() {
@@ -102,13 +108,13 @@ export default async function DashboardHome() {
         .select('*', { count: 'exact', head: true }),
       supabase
         .from('booking_requests')
-        .select('id, created_at, status, payment_type, amount_cents, subjects, session_type, stripe_payment_intent_id, customers(full_name, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)), payments(amount_cents)')
+        .select('id, created_at, status, payment_type, payment_method, amount_cents, subjects, session_type, stripe_payment_intent_id, customers(full_name, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)), student:students(id, full_name, email, grade), payments(amount_cents, payment_method)')
         .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(10),
       supabase
         .from('sessions')
-        .select('id, status, confirmed_start, confirmed_end, session_type, subjects, customers(full_name), tutors(full_name)')
+        .select('id, status, confirmed_start, confirmed_end, session_type, subjects, customers(full_name), student:students(id, full_name, email, grade), tutors(full_name)')
         .eq('status', 'scheduled')
         .order('confirmed_start', { ascending: true })
         .limit(10),
@@ -205,11 +211,15 @@ export default async function DashboardHome() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
-                              <p className="font-medium text-[#1e293b]">{order.customers?.full_name || 'Unknown'}</p>
+                              <p className="font-medium text-[#1e293b]">{order.student?.full_name || 'Student not assigned'}</p>
+                              <span className="text-xs text-gray-400">Owner: {order.customers?.full_name || 'Unknown'}</span>
                               <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
                                 {resolvePlanLabel(order)}
                               </span>
                               <span className="text-xs font-bold text-[#1e293b]">{amountLabel}</span>
+                              <span className="text-xs font-medium text-gray-500">
+                                {formatPaymentMethod(order.payment_method ?? order.payments?.[0]?.payment_method)}
+                              </span>
                             </div>
                             <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                               {resolveSubjects(order.subjects) && (
@@ -269,7 +279,8 @@ export default async function DashboardHome() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <p className="font-medium text-[#1e293b]">{session.customers?.full_name || 'Unknown'}</p>
+                            <p className="font-medium text-[#1e293b]">{session.student?.full_name || 'Student not assigned'}</p>
+                            <span className="text-xs text-gray-400">Owner: {session.customers?.full_name || 'Unknown'}</span>
                             {session.tutors?.full_name && (
                               <span className="flex items-center gap-1 text-xs text-gray-500">
                                 <Users className="h-3 w-3 shrink-0" />
@@ -356,7 +367,7 @@ export default async function DashboardHome() {
     const [{ data: upcomingSessions }, { count: totalUpcoming }, { count: totalCompleted }] = await Promise.all([
       supabaseAdmin
         .from('sessions')
-        .select('*, customers (full_name, email)')
+        .select('*, customers (full_name, email), student:students(id, full_name, email, grade)')
         .eq('assigned_tutor_id', tutor?.id)
         .eq('status', 'scheduled')
         .gte('confirmed_start', new Date().toISOString())
@@ -427,7 +438,7 @@ export default async function DashboardHome() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-lg font-bold text-[#1e293b]">
-                    {nextSession.customers?.full_name ?? 'Unknown Student'}
+                    {nextSession.student?.full_name ?? 'Student not assigned'}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     {nextSession.subjects?.map((id: string) => subjectMap.get(id) ?? id).join(', ') || 'No subjects'}
@@ -494,7 +505,7 @@ export default async function DashboardHome() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#1e293b]">{s.customers?.full_name ?? 'Unknown'}</p>
+                      <p className="text-sm font-medium text-[#1e293b]">{s.student?.full_name ?? 'Student not assigned'}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {new Date(s.confirmed_start).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                         {' · '}
@@ -526,7 +537,7 @@ export default async function DashboardHome() {
   const [{ data: sessionsData }, { data: subjects }, { data: membership }, { data: packages }, { count: completedCount }] = await Promise.all([
     supabase
       .from('sessions')
-      .select('id, status, confirmed_start, confirmed_end, session_type, subjects, meet_url, tutors(full_name)')
+      .select('id, status, confirmed_start, confirmed_end, session_type, subjects, meet_url, tutors(full_name), student:students(id, full_name, email, grade)')
       .eq('customer_id', customerId)
       .in('status', ['pending_scheduling', 'scheduled'])
       .order('confirmed_start', { ascending: true, nullsFirst: true })
@@ -610,7 +621,7 @@ export default async function DashboardHome() {
                     : `Your next session is in ${Math.round(hoursUntilNext)} hours`}
               </p>
               <p className="text-sm opacity-80">
-                {(nextSession.subjects ?? []).map((id: string) => subjectMap.get(id)).filter(Boolean).join(', ')}
+                {nextSession.student?.full_name ?? 'Student not assigned'} · {(nextSession.subjects ?? []).map((id: string) => subjectMap.get(id)).filter(Boolean).join(', ')}
                 {nextSessionTutor?.full_name && ` with ${nextSessionTutor.full_name}`}
               </p>
             </div>
@@ -759,6 +770,10 @@ export default async function DashboardHome() {
                           {session.session_type === 'in-person' ? 'In Person' : session.session_type}
                         </span>
                       </div>
+
+                      <p className={`font-semibold ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                        Student: {session.student?.full_name ?? 'Student not assigned'}
+                      </p>
 
                       {subjectNames && (
                         <p className="font-medium text-[#1e293b]">{subjectNames}</p>

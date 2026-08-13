@@ -18,7 +18,8 @@ export default async function OrdersPage() {
   let query = supabase.from('booking_requests').select(`
     *,
     customers (full_name, email, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)),
-    payments (amount_cents)
+    student:students(id, full_name, email, grade),
+    payments (amount_cents, payment_method)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
   if (profile?.role === 'customer') {
