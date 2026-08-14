@@ -5,8 +5,9 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { AdminSessionList, FlatSessionList } from '@/components/dashboard/SessionList'
 import { SessionMetrics } from '@/components/dashboard/SessionMetrics'
 import { TutorSessionsTable } from '@/components/dashboard/TutorSessionsTable'
+import { AdminCreateSessionDialog } from '@/components/dashboard/AdminCreateSessionDialog'
 import { CalendarCheck, Users, CheckCircle2, CalendarClock } from 'lucide-react'
-import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
+import { buildSubjectCatalog, flattenSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function SessionsPage() {
   const user = await getAuthUser()
@@ -19,8 +20,13 @@ export default async function SessionsPage() {
   const subjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(subjects ?? []))))
 
   if (profile?.role === 'admin') {
-    const [{ data: allSessions }, { data: tutors }] = await Promise.all([
-      supabase
+    const [
+      { data: allSessions },
+      { data: tutors },
+      { data: bookingAccounts },
+      { data: bookingStudents },
+    ] = await Promise.all([
+      supabaseAdmin
         .from('sessions')
         .select(`
           *,
@@ -30,6 +36,9 @@ export default async function SessionsPage() {
           booking_requests!sessions_order_id_fkey (
             available_windows, available_days, available_time_start,
             available_time_end, timezone
+          ),
+          admin_session_booking_delivery (
+            status, calendar_status, email_status, last_error
           )
         `)
         .in('status', ['pending_scheduling', 'scheduled', 'completed'])
@@ -38,6 +47,15 @@ export default async function SessionsPage() {
         .from('tutors')
         .select('id, full_name')
         .eq('is_active', true),
+      supabaseAdmin
+        .from('customers')
+        .select('id, full_name, email, account_type')
+        .order('full_name', { ascending: true }),
+      supabaseAdmin
+        .from('students')
+        .select('id, customer_id, full_name, email, grade')
+        .eq('is_active', true)
+        .order('full_name', { ascending: true }),
     ])
 
     const sessions = allSessions ?? []
@@ -68,12 +86,30 @@ export default async function SessionsPage() {
     }).length
 
     const subjectMapObj = Object.fromEntries(subjectMap)
+    const bookingCustomerIds = new Set(
+      (bookingStudents ?? []).map((student) => student.customer_id)
+    )
+    const bookingSubjects = flattenSubjectCatalog(buildSubjectCatalog(
+      (subjects ?? []).filter((subject) => subject.is_active === true)
+    )).filter((subject) => !subject.is_virtual)
 
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
-          <p className="mt-1 text-gray-500">{active.length} active · {totalCompleted} completed</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1e293b]">Sessions</h1>
+            <p className="mt-1 text-gray-500">{active.length} active · {totalCompleted} completed</p>
+          </div>
+          <AdminCreateSessionDialog
+            accounts={(bookingAccounts ?? []).filter((account) => bookingCustomerIds.has(account.id))}
+            students={bookingStudents ?? []}
+            tutors={tutors ?? []}
+            subjects={bookingSubjects.map((subject) => ({
+              id: subject.id,
+              name: subject.name,
+              category: subject.category,
+            }))}
+          />
         </div>
         <SessionMetrics
           needsScheduling={needsScheduling}

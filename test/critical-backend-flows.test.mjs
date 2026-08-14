@@ -13,7 +13,20 @@ const {
   isRenewalInvoice,
 } = require('../src/lib/stripe-subscription.js')
 const { sanitizeCustomerCreditSummary } = require('../src/lib/customer-credit-summary.js')
-const { buildSessionCalendarPlan } = require('../src/lib/session-calendar.js')
+const { buildSessionCalendarPlan, sameSessionInstant } = require('../src/lib/session-calendar.js')
+
+test('equivalent Postgres and browser timestamps are the same session instant', () => {
+  assert.equal(
+    sameSessionInstant('2026-08-17 11:00:00+00', '2026-08-17T11:00:00.000Z'),
+    true
+  )
+  assert.equal(
+    sameSessionInstant('2026-08-17T11:00:00.000Z', '2026-08-17T11:01:00.000Z'),
+    false
+  )
+  assert.equal(sameSessionInstant(null, null), true)
+  assert.equal(sameSessionInstant(null, '2026-08-17T11:00:00.000Z'), false)
+})
 
 test('uses subscription item periods for Stripe subscription date ranges', () => {
   const period = getSubscriptionPeriod({

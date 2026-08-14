@@ -20,6 +20,7 @@ import { reportError } from '@/lib/report-error'
 import {
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
+  sameSessionInstant,
 } from '@/lib/session-calendar'
 import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
 import {
@@ -203,9 +204,7 @@ async function sendScheduleEmails(
 ): Promise<boolean> {
   const startTime = formatSessionTime(session.confirmed_start)
   const isOnline = session.session_type === 'online'
-  const locationText = isOnline
-    ? `Online (Google Meet)${meetUrl ? ` - <a href="${meetUrl}">Join Meeting</a>` : ''}`
-    : 'Sawgrass, FL'
+  const locationText = isOnline ? 'Online (Google Meet)' : 'Sawgrass, FL'
 
   // Only promise an invite when one was actually created. An in-person session
   // scheduled while the ScoreMax Google account is disconnected gets no
@@ -241,6 +240,9 @@ async function sendScheduleEmails(
             detailRow('Time:', startTime),
             detailRow('Location:', locationText),
           ].join(''),
+          ...(isOnline && meetUrl
+            ? { ctaText: 'Open Google Meet', ctaUrl: meetUrl }
+            : {}),
         }),
       },
       `admin:session-confirmed:${recipient.role}:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
@@ -261,6 +263,9 @@ async function sendScheduleEmails(
           detailRow('Time:', startTime),
           detailRow('Location:', locationText),
         ].join(''),
+        ...(isOnline && meetUrl
+          ? { ctaText: 'Open Google Meet', ctaUrl: meetUrl }
+          : {}),
       }),
     },
     `admin:session-confirmed:tutor:${session.id}:${session.confirmed_start ?? 'unscheduled'}`
@@ -940,8 +945,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const oldStatus = currentSession.status
   const statusUnchanged = !newStatus || newStatus === oldStatus
   const timesChanged =
-    (confirmed_start !== undefined && confirmed_start !== currentSession.confirmed_start) ||
-    (confirmed_end !== undefined && confirmed_end !== currentSession.confirmed_end)
+    (confirmed_start !== undefined &&
+      !sameSessionInstant(confirmed_start, currentSession.confirmed_start)) ||
+    (confirmed_end !== undefined &&
+      !sameSessionInstant(confirmed_end, currentSession.confirmed_end))
   const tutorChanged =
     assigned_tutor_id !== undefined && assigned_tutor_id !== currentSession.assigned_tutor_id
 

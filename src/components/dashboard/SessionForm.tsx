@@ -336,7 +336,7 @@ export function SessionForm({ session, tutors, students, requestedAvailability }
             )}
             <Button
               onClick={handleSave}
-              disabled={loading || !hasActiveStudents || needsStudent}
+              disabled={loading || !hasChanges || !hasActiveStudents || needsStudent}
               className="bg-[#1e293b]"
             >
               {loading ? (
