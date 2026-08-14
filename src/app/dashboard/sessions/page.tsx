@@ -46,7 +46,8 @@ export default async function SessionsPage() {
       supabase
         .from('tutors')
         .select('id, full_name')
-        .eq('is_active', true),
+        .eq('is_active', true)
+        .order('full_name', { ascending: true, nullsFirst: false }),
       supabaseAdmin
         .from('customers')
         .select('id, full_name, email, account_type')
