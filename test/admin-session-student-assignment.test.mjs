@@ -127,7 +127,7 @@ test('admin UI loads active students once, scopes them by account, and keeps cus
   assert.match(form, /placeholder="Student not assigned"/)
   assert.match(form, /Legacy session: student not assigned/)
   assert.match(form, /This account has no active managed students/)
-  assert.match(form, /disabled=\{loading \|\| !hasActiveStudents \|\| needsStudent\}/)
+  assert.match(form, /disabled=\{loading \|\| !hasChanges \|\| !hasActiveStudents \|\| needsStudent\}/)
   assert.match(metrics, /label: 'Tutor Unassigned'/)
 
   const adminBranch = list.indexOf('isAdmin ? (')

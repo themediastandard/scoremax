@@ -14,20 +14,30 @@ export async function GET() {
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('full_name')
+    .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle()
 
-  const { data: customer } = await supabaseAdmin
-    .from('customers')
-    .select('full_name, email, phone, student_grade')
-    .eq('profile_id', user.id)
-    .maybeSingle()
+  const { data: customer } = profile?.role === 'customer'
+    ? await supabaseAdmin
+        .from('customers')
+        .select('full_name, email, phone, student_grade')
+        .eq('profile_id', user.id)
+        .maybeSingle()
+    : { data: null }
+
+  const { data: tutor } = profile?.role === 'tutor'
+    ? await supabaseAdmin
+        .from('tutors')
+        .select('full_name, email, phone')
+        .eq('profile_id', user.id)
+        .maybeSingle()
+    : { data: null }
 
   return NextResponse.json({
-    fullName: customer?.full_name || profile?.full_name || '',
-    email: customer?.email || user.email || '',
-    phone: customer?.phone || '',
+    fullName: customer?.full_name || tutor?.full_name || profile?.full_name || '',
+    email: customer?.email || tutor?.email || user.email || '',
+    phone: customer?.phone || tutor?.phone || '',
     studentGrade: customer?.student_grade || '',
   })
 }
@@ -41,6 +51,16 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { fullName, phone, studentGrade } = await req.json()
+
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profileError || !profile) {
+    return NextResponse.json({ error: 'Could not load profile' }, { status: 500 })
+  }
 
   // Partial update: a field the caller omits is left alone, a field sent as ''
   // is cleared. The booking form syncs only the fields it collects, so treating
@@ -57,6 +77,31 @@ export async function PATCH(req: NextRequest) {
       .from('profiles')
       .update({ full_name: customerUpdates.full_name })
       .eq('id', user.id)
+  }
+
+  // Tutor and admin identities are not customer accounts. Tutor profile edits
+  // belong on the tutor row; admins have no customer-specific phone/grade
+  // record. Returning before the customer adoption/create path prevents a
+  // settings save from silently turning either role into a customer.
+  if (profile.role === 'tutor') {
+    const tutorUpdates: Record<string, string | null> = {}
+    if (customerUpdates.full_name) tutorUpdates.full_name = customerUpdates.full_name
+    if (typeof phone === 'string') tutorUpdates.phone = customerUpdates.phone ?? null
+
+    if (Object.keys(tutorUpdates).length > 0) {
+      const { error: tutorError } = await supabaseAdmin
+        .from('tutors')
+        .update(tutorUpdates)
+        .eq('profile_id', user.id)
+      if (tutorError) {
+        return NextResponse.json({ error: 'Could not save tutor profile' }, { status: 500 })
+      }
+    }
+    return NextResponse.json({ success: true })
+  }
+
+  if (profile.role !== 'customer') {
+    return NextResponse.json({ success: true })
   }
 
   // The signup trigger is supposed to create the customers row, but accounts

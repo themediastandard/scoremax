@@ -101,6 +101,8 @@ test('the admin route fails closed, compensates a failed database write, and ema
   assert.match(source, /await rollbackExternalChange\(\)/)
   assert.match(source, /reportError\('schedule:calendar-rollback'/)
   assert.match(source, /handleReassign\(merged, currentSession\)/)
+  assert.match(source, /sameSessionInstant\(confirmed_start, currentSession\.confirmed_start\)/)
+  assert.match(source, /sameSessionInstant\(confirmed_end, currentSession\.confirmed_end\)/)
   assert.match(source, /const previousPlan = buildSessionCalendarPlan\(previousSession\)/)
   assert.match(source, /await patchEvent\(previousPlan\.requestBody\)/)
 
@@ -131,4 +133,15 @@ test('customers remain read-only while admins receive the reschedule controls', 
   const readOnlyDetails = sessionList.indexOf('<SessionDetails', editForm)
   assert.ok(adminBranch > 0 && editForm > adminBranch && readOnlyDetails > editForm)
   assert.match(sessionForm, /'Reschedule Session'/)
+  assert.match(sessionForm, /disabled=\{loading \|\| !hasChanges \|\| !hasActiveStudents \|\| needsStudent\}/)
+})
+
+test('initial scheduling email renders a working Meet button instead of escaped link markup', () => {
+  const source = readFileSync(
+    new URL('src/app/api/admin/sessions/[id]/route.ts', REPO),
+    'utf8'
+  )
+
+  assert.doesNotMatch(source, /locationText[\s\S]*<a href=/)
+  assert.match(source, /ctaText: 'Open Google Meet', ctaUrl: meetUrl/)
 })

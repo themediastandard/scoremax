@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { JoinClassButton } from './JoinClassButton'
+import { AdminBookingDeliveryStatus, type AdminBookingDelivery } from './AdminBookingDeliveryStatus'
 
 interface Session {
   id: string
@@ -37,6 +38,7 @@ interface Session {
     available_time_end?: string | null
     timezone?: string | null
   } | null
+  admin_session_booking_delivery?: AdminBookingDelivery | null
 }
 
 interface CustomerGroup {
@@ -89,6 +91,11 @@ function SessionCard({
           <Badge variant="secondary" className={cfg.className}>
             {cfg.label}
           </Badge>
+          {isAdmin && session.admin_session_booking_delivery?.status === 'attention' && (
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+              Setup attention
+            </Badge>
+          )}
           <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0">
             <span className={`flex shrink-0 items-center gap-1.5 font-medium ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
               <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
@@ -137,6 +144,14 @@ function SessionCard({
       </button>
       {expanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50/40">
+          {isAdmin && session.admin_session_booking_delivery && (
+            <div className="mb-4">
+              <AdminBookingDeliveryStatus
+                sessionId={session.id}
+                delivery={session.admin_session_booking_delivery}
+              />
+            </div>
+          )}
           {isAdmin ? (
             <SessionForm
               session={session}

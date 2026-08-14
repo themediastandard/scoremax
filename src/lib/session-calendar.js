@@ -42,6 +42,7 @@ function buildSubjectLabel(names) {
  *   confirmed_end?: string | null,
  *   subjectNames?: string[] | null,
  *   customers: { full_name?: string | null, email?: string | null },
+ *   students?: { full_name?: string | null, email?: string | null } | null,
  *   tutors: { full_name?: string | null, email?: string | null },
  * }} session
  */
@@ -123,8 +124,25 @@ function getMeetConferenceRequest(sessionId) {
   }
 }
 
+/**
+ * Compare stored and submitted timestamps by the instant they represent.
+ * Postgres commonly returns `+00:00` while the browser submits `.000Z`; those
+ * strings describe the same moment and must not trigger a reschedule notice.
+ * Invalid values stay unequal unless the raw values are exactly the same.
+ * @param {string | null | undefined} left
+ * @param {string | null | undefined} right
+ */
+function sameSessionInstant(left, right) {
+  if (left === right) return true
+  if (!left || !right) return false
+  const leftTime = new Date(left).getTime()
+  const rightTime = new Date(right).getTime()
+  return !Number.isNaN(leftTime) && !Number.isNaN(rightTime) && leftTime === rightTime
+}
+
 module.exports = {
   IN_PERSON_LOCATION,
   buildSessionCalendarPlan,
   getMeetConferenceRequest,
+  sameSessionInstant,
 }
