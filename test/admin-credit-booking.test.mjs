@@ -116,6 +116,19 @@ test('admin create session uses one account dropdown and online sessions only', 
   assert.match(sql, /if p_session_type<>'online' then/)
 })
 
+test('admin create session resets after closing and lists tutors alphabetically', () => {
+  const page = read('src/app/dashboard/sessions/page.tsx')
+  const dialog = read('src/components/dashboard/AdminCreateSessionDialog.tsx')
+
+  assert.match(dialog, /const closeAndReset = \(\) => \{\s*reset\(\)\s*setOpen\(false\)\s*\}/)
+  assert.match(dialog, /onClick=\{closeAndReset\}>Done/)
+  assert.match(dialog, /onClick=\{closeAndReset\} disabled=\{submitting\}>Cancel/)
+  assert.match(
+    page,
+    /\.from\('tutors'\)[\s\S]*?\.eq\('is_active', true\)\s*\.order\('full_name', \{ ascending: true, nullsFirst: false \}\)/,
+  )
+})
+
 test('schema contract protects audit, idempotency, credit scoping, overlap, and delivery claims', () => {
   const sql = read('test/fixtures/admin-credit-booking-schema.sql')
   assert.match(sql, /enable row level security/i)

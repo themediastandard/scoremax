@@ -170,6 +170,11 @@ export function AdminCreateSessionDialog({
     setSuccess(null)
   }
 
+  const closeAndReset = () => {
+    reset()
+    setOpen(false)
+  }
+
   const toggleSubject = (id: string, checked: boolean) => {
     setSubjectIds((current) => checked ? [...current, id] : current.filter((value) => value !== id))
   }
@@ -282,7 +287,7 @@ export function AdminCreateSessionDialog({
                   Retry calendar & emails
                 </Button>
               )}
-              <Button type="button" onClick={() => setOpen(false)}>Done</Button>
+              <Button type="button" onClick={closeAndReset}>Done</Button>
             </DialogFooter>
           </div>
         ) : (
@@ -402,7 +407,7 @@ export function AdminCreateSessionDialog({
 
             {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>}
             <DialogFooter className="border-t border-gray-100 pt-5">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={submitting}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={closeAndReset} disabled={submitting}>Cancel</Button>
               <Button type="submit" disabled={!canSubmit} className="bg-[#1e293b] hover:bg-[#334155]">
                 {submitting && <Loader2 className="animate-spin" />}
                 Book Session & Use 1 Credit
