@@ -102,6 +102,10 @@ function buildSessionCalendarPlan(session) {
       start: { dateTime: start.toISOString() },
       end: { dateTime: end.toISOString() },
       attendees,
+      // ScoreMax remains the organizer, but attendees can customize the event
+      // title and notes for lesson tracking without the organizer joining.
+      // Google applies this to every attendee; it is not tutor-only.
+      guestsCanModify: true,
       ...(isOnline ? {} : { location: IN_PERSON_LOCATION }),
     },
   }

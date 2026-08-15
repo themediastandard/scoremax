@@ -157,6 +157,11 @@ test('online calendar plan builds one ScoreMax-owned event inviting tutor and st
     plan.requestBody.attendees.map((a) => a.email),
     ['grace@example.com', 'ada@example.com']
   )
+  assert.equal(plan.requestBody.guestsCanModify, true)
+  assert.equal(
+    plan.requestBody.attendees.some((attendee) => attendee.email === 'taimir.scoremax@gmail.com'),
+    false
+  )
   assert.equal(plan.requestBody.location, undefined)
   assert.equal(plan.requestBody.start.dateTime, '2026-03-01T15:00:00.000Z')
   assert.equal(plan.requestBody.end.dateTime, '2026-03-01T16:00:00.000Z')
