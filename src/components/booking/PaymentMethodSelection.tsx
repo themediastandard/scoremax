@@ -69,6 +69,23 @@ const EMPTY_APPROVALS: PaymentMethodApprovals = {
   approvals: { step_up: false, zelle: false },
 }
 
+async function fetchPaymentApprovals(signal?: AbortSignal): Promise<PaymentMethodApprovals> {
+  const response = await fetch('/api/account/payment-methods', {
+    cache: 'no-store',
+    signal,
+  })
+  if (!response.ok) throw new Error('Unable to check payment method approval')
+
+  const data = await response.json() as Partial<PaymentMethodApprovals>
+  return {
+    signedIn: data.signedIn === true,
+    approvals: {
+      step_up: data.approvals?.step_up === true,
+      zelle: data.approvals?.zelle === true,
+    },
+  }
+}
+
 export function PaymentMethodSelection({
   value,
   onChange,
@@ -80,23 +97,16 @@ export function PaymentMethodSelection({
   const [checkingApproval, setCheckingApproval] = useState(true)
   const [approvalCheckFailed, setApprovalCheckFailed] = useState(false)
   const [blockedMethod, setBlockedMethod] = useState<OfflinePaymentMethod | null>(null)
+  const [recheckingApproval, setRecheckingApproval] = useState(false)
+  const [recheckMessage, setRecheckMessage] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function loadApprovals() {
       try {
-        const response = await fetch('/api/account/payment-methods', { signal: controller.signal })
-        if (!response.ok) throw new Error('Unable to check payment method approval')
-
-        const data = await response.json() as Partial<PaymentMethodApprovals>
-        setApprovalStatus({
-          signedIn: data.signedIn === true,
-          approvals: {
-            step_up: data.approvals?.step_up === true,
-            zelle: data.approvals?.zelle === true,
-          },
-        })
+        setApprovalStatus(await fetchPaymentApprovals(controller.signal))
+        setApprovalCheckFailed(false)
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return
         // Offline methods fail closed when approval cannot be verified.
@@ -130,7 +140,35 @@ export function PaymentMethodSelection({
 
   const closeBlockedDialog = () => {
     setBlockedMethod(null)
+    setRecheckMessage('')
     if (authoritativeBlockedMethod) onAuthoritativeBlockDismiss?.()
+  }
+
+  const recheckBlockedMethod = async () => {
+    const method = effectiveBlockedMethod
+    if (!method) return
+    setRecheckingApproval(true)
+    setRecheckMessage('')
+    try {
+      const status = await fetchPaymentApprovals()
+      setApprovalStatus(status)
+      setApprovalCheckFailed(false)
+      if (status.signedIn && status.approvals[method]) {
+        setBlockedMethod(null)
+        if (authoritativeBlockedMethod) onAuthoritativeBlockDismiss?.()
+        onChange(method)
+      } else {
+        setRecheckMessage(status.signedIn
+          ? `Your ${method === 'step_up' ? 'Step Up' : 'Zelle'} approval is still pending. Contact ScoreMax if you need help.`
+          : 'Please sign in again before checking your approval.')
+      }
+    } catch {
+      setApprovalStatus(EMPTY_APPROVALS)
+      setApprovalCheckFailed(true)
+      setRecheckMessage('We could not check your approval. Please try again.')
+    } finally {
+      setRecheckingApproval(false)
+    }
   }
 
   return (
@@ -206,8 +244,16 @@ export function PaymentMethodSelection({
               {effectiveBlockedMethod ? paymentApprovalMessage(effectiveBlockedMethod) : ''}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button asChild className="bg-[#1e293b] hover:bg-[#334155]">
+          <p className="text-sm leading-6 text-gray-600">
+            Already approved? Check again to continue without restarting your booking.
+          </p>
+          {recheckMessage && <p className="text-sm font-medium text-amber-800" role="status">{recheckMessage}</p>}
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button type="button" onClick={recheckBlockedMethod} disabled={recheckingApproval} className="bg-[#1e293b] hover:bg-[#334155]">
+              {recheckingApproval && <Loader2 className="animate-spin" aria-hidden="true" />}
+              Check Approval Again
+            </Button>
+            <Button asChild variant="outline">
               <Link href="/contact">Contact ScoreMax</Link>
             </Button>
             <DialogClose asChild>

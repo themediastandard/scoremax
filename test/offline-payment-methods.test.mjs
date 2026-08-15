@@ -36,6 +36,9 @@ const customersTable = readSource('src/components/dashboard/CustomersTable.tsx')
 const customerDetail = readSource('src/components/dashboard/CustomerDetailContent.tsx')
 const customerDetailLoader = readSource('src/lib/admin-customer-detail.ts')
 const approvalControls = readSource('src/components/dashboard/PaymentApprovalControls.tsx')
+const profileRoute = readSource('src/app/api/account/profile/route.ts')
+const bookingDraft = readSource('src/lib/booking-draft.ts')
+const confirmationViewSource = readSource('src/components/booking/ConfirmationView.tsx')
 
 function sourceBetween(source, start, end) {
   const startIndex = source.indexOf(start)
@@ -74,7 +77,20 @@ test('unapproved Step Up and Zelle choices use the exact fail-closed copy and ac
   assert.match(paymentSelector, /<DialogTitle>Account Not Approved<\/DialogTitle>/)
   assert.match(paymentSelector, /<Link href="\/contact">Contact ScoreMax<\/Link>/)
   assert.match(paymentSelector, />Choose Another Payment Method<\/Button>/)
+  assert.match(paymentSelector, /Check Approval Again\s*<\/Button>/)
+  assert.match(paymentSelector, /cache: 'no-store'/)
+  assert.match(paymentSelector, /status\.signedIn && status\.approvals\[method\]/)
+  assert.match(paymentSelector, /onChange\(method\)/)
   assert.match(paymentSelector, /paymentApprovalMessage\(effectiveBlockedMethod\)/)
+})
+
+test('an interrupted approval flow restores completed booking steps and clears them only after confirmation', () => {
+  assert.match(profileRoute, /profileId: user\.id/)
+  assert.match(bookingPage, /readBookingDraft\(window\.sessionStorage, data\.profileId\)/)
+  assert.match(bookingPage, /writeBookingDraft\(window\.sessionStorage, draftProfileId/)
+  assert.match(bookingPage, /We restored your booking details\. Continue where you left off\./)
+  assert.doesNotMatch(bookingDraft, /fullName|phone|notes/)
+  assert.match(confirmationViewSource, /if \(bookingDetails\) clearBookingDrafts\(window\.sessionStorage\)/)
 })
 
 test('signed-out, missing-customer, unapproved, and approval-check-error states fail closed', () => {

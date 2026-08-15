@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Search, Calendar, Video, MapPin, X } from 'lucide-react'
 import { JoinClassButton } from './JoinClassButton'
+import { formatBusinessDate, formatBusinessTime } from '@/lib/business-datetime'
 
 interface Session {
   id: string
@@ -160,20 +161,16 @@ export function TutorSessionsTable({ sessions, subjectMap }: TutorSessionsTableP
                       {session.confirmed_start ? (
                         <div>
                           <p className="text-sm font-medium text-[#1e293b]">
-                            {new Date(session.confirmed_start).toLocaleDateString(undefined, {
+                            {formatBusinessDate(session.confirmed_start, {
                               weekday: 'short', month: 'short', day: 'numeric',
                             })}
                           </p>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            {new Date(session.confirmed_start).toLocaleTimeString(undefined, {
-                              hour: 'numeric', minute: '2-digit',
-                            })}
+                            {formatBusinessTime(session.confirmed_start)}
                             {session.confirmed_end && (
                               <span>
                                 {' – '}
-                                {new Date(session.confirmed_end).toLocaleTimeString(undefined, {
-                                  hour: 'numeric', minute: '2-digit',
-                                })}
+                                {formatBusinessTime(session.confirmed_end)}
                               </span>
                             )}
                           </p>

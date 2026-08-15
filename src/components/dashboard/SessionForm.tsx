@@ -8,11 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { CalendarClock, CheckCircle2, Loader2, TriangleAlert } from 'lucide-react'
-import {
-  toLocalDateValue,
-  toLocalTimeValue,
-  fromLocalDateTimeValues,
-} from '@/lib/local-datetime'
+import { businessDateTimeInputValues } from '@/lib/business-datetime'
+import { businessLocalDateTimeToIso } from '@/lib/admin-session-booking'
 import { RequestedAvailability } from './RequestedAvailability'
 
 interface SessionFormProps {
@@ -43,6 +40,7 @@ interface SessionFormProps {
 
 export function SessionForm({ session, tutors, students, requestedAvailability }: SessionFormProps) {
   const router = useRouter()
+  const sessionStartInput = businessDateTimeInputValues(session.confirmed_start)
   const [loading, setLoading] = useState(false)
   const [feedback, setFeedback] = useState<{
     tone: 'success' | 'warning' | 'error'
@@ -51,12 +49,8 @@ export function SessionForm({ session, tutors, students, requestedAvailability }
 
   const [tutorId, setTutorId] = useState(session.assigned_tutor_id || '')
   const [studentId, setStudentId] = useState(session.student_id || '')
-  const [date, setDate] = useState(
-    session.confirmed_start ? toLocalDateValue(session.confirmed_start) : ''
-  )
-  const [time, setTime] = useState(
-    session.confirmed_start ? toLocalTimeValue(session.confirmed_start) : ''
-  )
+  const [date, setDate] = useState(sessionStartInput.date)
+  const [time, setTime] = useState(sessionStartInput.time)
   const [duration, setDuration] = useState(() => {
     if (session.confirmed_start && session.confirmed_end) {
       const diff =
@@ -73,8 +67,8 @@ export function SessionForm({ session, tutors, students, requestedAvailability }
   const [initial, setInitial] = useState(() => ({
     studentId: session.student_id || '',
     tutorId: session.assigned_tutor_id || '',
-    date: session.confirmed_start ? toLocalDateValue(session.confirmed_start) : '',
-    time: session.confirmed_start ? toLocalTimeValue(session.confirmed_start) : '',
+    date: sessionStartInput.date,
+    time: sessionStartInput.time,
     duration:
       session.confirmed_start && session.confirmed_end
         ? String(
@@ -122,11 +116,25 @@ export function SessionForm({ session, tutors, students, requestedAvailability }
     let confirmedStart = null
     let confirmedEnd = null
 
-    const start = fromLocalDateTimeValues(date, time)
-    if (start) {
-      confirmedStart = start.toISOString()
+    if (date || time) {
+      const start = businessLocalDateTimeToIso(date, time)
+      if (!start.ok) {
+        const daylightSavingIssue =
+          start.code === 'nonexistent_business_datetime' ||
+          start.code === 'ambiguous_business_datetime'
+        setFeedback({
+          tone: 'error',
+          message: daylightSavingIssue
+            ? 'That Eastern time falls during the daylight-saving change. Choose another time.'
+            : 'Choose a valid Eastern date and time.',
+        })
+        setLoading(false)
+        return
+      }
+
+      confirmedStart = start.iso
       confirmedEnd = new Date(
-        start.getTime() + Number(duration) * 60 * 1000
+        new Date(start.iso).getTime() + Number(duration) * 60 * 1000
       ).toISOString()
     }
 
@@ -229,7 +237,7 @@ export function SessionForm({ session, tutors, students, requestedAvailability }
         </div>
 
         <div className="space-y-2">
-          <Label>Time</Label>
+          <Label>Time (Eastern)</Label>
           <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
 

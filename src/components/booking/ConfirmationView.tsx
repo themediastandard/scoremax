@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2, Calendar, Video, CreditCard, GraduationCap } from 'lucide-react'
 import { formatPaymentMethod } from '@/lib/payment-method'
 import type { BookingStudentDto } from '@/lib/student-contract'
+import { clearBookingDrafts } from '@/lib/booking-draft'
 
 function formatTime24To12(time24: string) {
   const [h, m] = (time24 || '').split(':').map(Number)
@@ -41,6 +43,10 @@ interface ConfirmationViewProps {
 }
 
 export function ConfirmationView({ bookingDetails, onBookAnother }: ConfirmationViewProps) {
+  useEffect(() => {
+    if (bookingDetails) clearBookingDrafts(window.sessionStorage)
+  }, [bookingDetails])
+
   // The API returns per-day windows and, for rows predating them, rebuilds the
   // same shape from the flat triple — so this only has to fall back when an
   // older cached bundle of the API response is in play.

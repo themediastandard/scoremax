@@ -35,6 +35,7 @@ export async function GET() {
     : { data: null }
 
   return NextResponse.json({
+    profileId: user.id,
     fullName: customer?.full_name || tutor?.full_name || profile?.full_name || '',
     email: customer?.email || tutor?.email || user.email || '',
     phone: customer?.phone || tutor?.phone || '',

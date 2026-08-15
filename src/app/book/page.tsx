@@ -15,6 +15,11 @@ import { Button } from '@/components/ui/button'
 import type { OfflinePaymentMethod } from '@/lib/payment-method'
 import type { StudentCreditSummaryResponse, StudentDto, StudentsResponse } from '@/lib/student-contract'
 import type { AccountType } from '@/lib/account-type'
+import {
+  readBookingDraft,
+  writeBookingDraft,
+  type BookingDraftSection,
+} from '@/lib/booking-draft'
 
 const OFFLINE_PURCHASE_KEY_STORAGE = 'scoremax:offline-purchase-keys:v1'
 
@@ -137,7 +142,10 @@ export default function BookPage() {
   
   const [processing, setProcessing] = useState(false)
   const [authoritativeBlockedMethod, setAuthoritativeBlockedMethod] = useState<OfflinePaymentMethod | null>(null)
-  const [activeSection, setActiveSection] = useState<'student' | 'subjects' | 'availability' | 'contact' | 'plan'>('student')
+  const [activeSection, setActiveSection] = useState<BookingDraftSection>('student')
+  const [draftProfileId, setDraftProfileId] = useState<string | null>(null)
+  const [draftReady, setDraftReady] = useState(false)
+  const [draftRestored, setDraftRestored] = useState(false)
   const [students, setStudents] = useState<StudentDto[]>([])
   const [accountType, setAccountType] = useState<AccountType | null>(null)
   const [selfStudentId, setSelfStudentId] = useState<string | null>(null)
@@ -230,9 +238,15 @@ export default function BookPage() {
           return
         }
         setSignedInEmail(data.email)
+        const savedDraft = typeof data.profileId === 'string'
+          ? readBookingDraft(window.sessionStorage, data.profileId)
+          : null
 
         setState(prev => ({
           ...prev,
+          studentId: savedDraft?.studentId ?? prev.studentId,
+          subjects: savedDraft?.subjects ?? prev.subjects,
+          availability: savedDraft?.availability ?? prev.availability,
           contact: {
             fullName: data.fullName || prev.contact.fullName,
             email: data.email || prev.contact.email,
@@ -240,6 +254,13 @@ export default function BookPage() {
             notes: prev.contact.notes
           }
         }))
+        if (savedDraft) {
+          setRevealed(savedDraft.revealed)
+          setActiveSection(savedDraft.activeSection)
+          setDraftRestored(true)
+        }
+        if (typeof data.profileId === 'string') setDraftProfileId(data.profileId)
+        setDraftReady(true)
         setPrefilled(true)
 
       } catch {
@@ -249,6 +270,21 @@ export default function BookPage() {
     prefillContact()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Keep completed steps available through a refresh while the account waits
+  // for Step Up or Zelle approval. The draft is scoped to this authenticated
+  // profile and this browser tab, and contains no contact details.
+  useEffect(() => {
+    if (!draftReady || !draftProfileId) return
+    writeBookingDraft(window.sessionStorage, draftProfileId, {
+      version: 1,
+      studentId: state.studentId,
+      subjects: state.subjects,
+      availability: state.availability,
+      revealed,
+      activeSection,
+    })
+  }, [activeSection, draftProfileId, draftReady, revealed, state.availability, state.studentId, state.subjects])
 
   // Eligibility is student-specific. Clear the prior summary before loading
   // the next one so a sibling-bound Step Up or course credit never remains
@@ -521,6 +557,12 @@ export default function BookPage() {
           <h1 className="text-4xl font-serif text-[#1e293b] mb-4">Book a Session</h1>
           <p className="text-gray-600">Tell us what you need, and we&apos;ll match you with the perfect tutor.</p>
         </div>
+
+        {draftRestored && (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900" role="status">
+            We restored your booking details. Continue where you left off.
+          </div>
+        )}
 
         {/* Parents choose a managed child. Student accounts are assigned to
             their own active profile server-side and begin with subjects. */}

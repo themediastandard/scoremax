@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { JoinClassButton } from './JoinClassButton'
 import { AdminBookingDeliveryStatus, type AdminBookingDelivery } from './AdminBookingDeliveryStatus'
+import { formatBusinessDate, formatBusinessTime } from '@/lib/business-datetime'
 
 interface Session {
   id: string
@@ -112,15 +113,12 @@ function SessionCard({
           {session.confirmed_start && (
             <span className="flex items-center gap-1.5 text-sm text-gray-500">
               <Calendar className="h-3.5 w-3.5" />
-              {new Date(session.confirmed_start).toLocaleDateString(undefined, {
+              {formatBusinessDate(session.confirmed_start, {
                 month: 'short',
                 day: 'numeric',
               })}
               {', '}
-              {new Date(session.confirmed_start).toLocaleTimeString(undefined, {
-                hour: 'numeric',
-                minute: '2-digit',
-              })}
+              {formatBusinessTime(session.confirmed_start)}
             </span>
           )}
           {session.tutors?.full_name && (
@@ -227,23 +225,17 @@ function SessionDetails({
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</p>
             {session.confirmed_start ? (
               <p className="text-sm font-medium text-[#1e293b] mt-0.5">
-                {new Date(session.confirmed_start).toLocaleDateString(undefined, {
+                {formatBusinessDate(session.confirmed_start, {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',
                 })}
                 {', '}
-                {new Date(session.confirmed_start).toLocaleTimeString(undefined, {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
+                {formatBusinessTime(session.confirmed_start)}
                 {session.confirmed_end && (
                   <span className="text-gray-500">
                     {' – '}
-                    {new Date(session.confirmed_end).toLocaleTimeString(undefined, {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
+                    {formatBusinessTime(session.confirmed_end)}
                   </span>
                 )}
               </p>
@@ -496,11 +488,9 @@ export function AdminSessionList({
                         {nextSession && (
                           <span className="flex items-center gap-1.5 text-sm font-medium text-[#1e293b]">
                             <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                            Next: {new Date(nextSession.confirmed_start!).toLocaleDateString(undefined, {
+                            Next: {formatBusinessDate(nextSession.confirmed_start!, {
                               month: 'short', day: 'numeric',
-                            })}, {new Date(nextSession.confirmed_start!).toLocaleTimeString(undefined, {
-                              hour: 'numeric', minute: '2-digit',
-                            })}
+                            })}, {formatBusinessTime(nextSession.confirmed_start!)}
                           </span>
                         )}
                         {tutorNames.length > 0 && (

@@ -12,6 +12,7 @@ import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 import { getChargedCents, formatOrderAmount } from '@/lib/order-amount'
 import { unexpiredPackagesClause } from '@/lib/package-expiry'
 import { formatPaymentMethod } from '@/lib/payment-method'
+import { formatBusinessDate, formatBusinessTime } from '@/lib/business-datetime'
 
 // supabase-js without generated DB types infers to-one joins as arrays,
 // but FK joins return single objects at runtime — cast results to the runtime shape.
@@ -308,12 +309,12 @@ export default async function DashboardHome() {
                             <div className="text-right">
                               <span className="flex items-center gap-1.5">
                                 <Calendar className="h-3.5 w-3.5 shrink-0" />
-                                {new Date(session.confirmed_start).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                {formatBusinessDate(session.confirmed_start, { weekday: 'short', month: 'short', day: 'numeric' })}
                               </span>
                               <span className="text-xs text-gray-400">
-                                {new Date(session.confirmed_start).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                {formatBusinessTime(session.confirmed_start)}
                                 {session.confirmed_end && (
-                                  <> – {new Date(session.confirmed_end).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</>
+                                  <> – {formatBusinessTime(session.confirmed_end)}</>
                                 )}
                               </span>
                             </div>
@@ -446,20 +447,16 @@ export default async function DashboardHome() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-semibold text-[#1e293b]">
-                    {new Date(nextSession.confirmed_start).toLocaleDateString(undefined, {
+                    {formatBusinessDate(nextSession.confirmed_start, {
                       weekday: 'long', month: 'short', day: 'numeric',
                     })}
                   </p>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {new Date(nextSession.confirmed_start).toLocaleTimeString(undefined, {
-                      hour: 'numeric', minute: '2-digit',
-                    })}
+                    {formatBusinessTime(nextSession.confirmed_start)}
                     {nextSession.confirmed_end && (
                       <span>
                         {' – '}
-                        {new Date(nextSession.confirmed_end).toLocaleTimeString(undefined, {
-                          hour: 'numeric', minute: '2-digit',
-                        })}
+                        {formatBusinessTime(nextSession.confirmed_end)}
                       </span>
                     )}
                   </p>
@@ -498,16 +495,16 @@ export default async function DashboardHome() {
                   <div className="flex items-center gap-4">
                     <div className="text-center shrink-0 w-12">
                       <p className="text-xs font-medium text-gray-500 uppercase">
-                        {new Date(s.confirmed_start).toLocaleDateString(undefined, { month: 'short' })}
+                        {formatBusinessDate(s.confirmed_start, { month: 'short' })}
                       </p>
                       <p className="text-lg font-bold text-[#1e293b] -mt-0.5">
-                        {new Date(s.confirmed_start).getDate()}
+                        {formatBusinessDate(s.confirmed_start, { day: 'numeric' })}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-[#1e293b]">{s.student?.full_name ?? 'Student not assigned'}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(s.confirmed_start).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                        {formatBusinessTime(s.confirmed_start)}
                         {' · '}
                         {s.subjects?.map((id: string) => subjectMap.get(id) ?? id).join(', ') || '—'}
                       </p>
@@ -783,23 +780,17 @@ export default async function DashboardHome() {
                         {session.confirmed_start ? (
                           <span className="flex items-center gap-1.5">
                             <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
-                            {new Date(session.confirmed_start).toLocaleDateString(undefined, {
+                            {formatBusinessDate(session.confirmed_start, {
                               weekday: 'short',
                               month: 'short',
                               day: 'numeric',
                             })}
                             {', '}
-                            {new Date(session.confirmed_start).toLocaleTimeString(undefined, {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                            })}
+                            {formatBusinessTime(session.confirmed_start)}
                             {session.confirmed_end && (
                               <span className="text-gray-400">
                                 {' – '}
-                                {new Date(session.confirmed_end).toLocaleTimeString(undefined, {
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                })}
+                                {formatBusinessTime(session.confirmed_end)}
                               </span>
                             )}
                           </span>
