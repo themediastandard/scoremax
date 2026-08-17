@@ -157,6 +157,7 @@ test('email confirmation and Google OAuth preserve only the safe booking continu
   assert.doesNotMatch(google, /searchParams\.set\('student_grade'/)
   assert.match(hook, /readBookContinuationFromRedirect/)
   assert.match(continuePage, /type === 'signup'[\s\S]*readBookContinuation/)
+  assert.match(continuePage, /button: 'Confirm Email & Start Booking'/)
   assert.match(callback, /type === 'signup'[\s\S]*readBookContinuation/)
   assert.doesNotMatch(google, /searchParams\.set\('student_(email|name|phone)'/)
 })

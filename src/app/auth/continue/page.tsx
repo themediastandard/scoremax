@@ -31,7 +31,7 @@ const COPY = {
   signup: {
     title: 'Confirm your email',
     body: 'Continue to confirm your email address and finish creating your account.',
-    button: 'Continue to confirm email',
+    button: 'Confirm Email & Start Booking',
   },
   magiclink: {
     title: 'Sign in to ScoreMax',
