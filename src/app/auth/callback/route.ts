@@ -46,11 +46,19 @@ function createCallbackClient(request: NextRequest) {
 
 function destinationFor(type: EmailOtpType, next: string | null): string {
   if (type === 'recovery' || type === 'invite') return '/reset-password'
+  if (type === 'signup') return '/book'
   return next ?? '/dashboard'
 }
 
 function publicUrl(path: string): URL {
   return new URL(path, APP_URL)
+}
+
+function authErrorUrl(type: EmailOtpType | null, next: string | null): URL {
+  const url = publicUrl('/auth/auth-code-error')
+  if (type) url.searchParams.set('type', type)
+  if (type === 'signup') url.searchParams.set('next', next ?? '/book')
+  return url
 }
 
 async function authorizeGoogleSignup(
@@ -88,13 +96,13 @@ async function verifyToken(
   next: string | null
 ) {
   if (!tokenHash || !type) {
-    return NextResponse.redirect(publicUrl('/auth/auth-code-error'), 303)
+    return NextResponse.redirect(authErrorUrl(type, next), 303)
   }
 
   const { supabase, redirectWithSessionCookies } = createCallbackClient(request)
   const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
   if (error) {
-    return NextResponse.redirect(publicUrl('/auth/auth-code-error'), 303)
+    return NextResponse.redirect(authErrorUrl(type, next), 303)
   }
 
   return redirectWithSessionCookies(publicUrl(destinationFor(type, next)), 303)
@@ -154,8 +162,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // return the user to an error page with some instructions
-  return NextResponse.redirect(publicUrl('/auth/auth-code-error'))
+  // Preserve the email action when it is available so the recovery page can
+  // offer the matching replacement link (signup confirmation vs. password reset).
+  return NextResponse.redirect(authErrorUrl(type, next))
 }
 
 export async function POST(request: NextRequest) {
