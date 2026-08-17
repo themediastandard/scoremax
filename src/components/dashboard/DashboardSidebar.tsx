@@ -82,7 +82,7 @@ export function DashboardSidebar({
       label: 'Overview',
       href: '/dashboard',
       icon: LayoutDashboard,
-      roles: ['tutor', 'customer']
+      roles: ['customer']
     },
     {
       label: 'My Orders',

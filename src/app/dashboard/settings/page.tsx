@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProfileForm } from '@/components/dashboard/ProfileForm'
+import { TutorPublicProfileForm } from '@/components/dashboard/TutorPublicProfileForm'
 import { GoogleConnectionBadge } from '@/components/dashboard/GoogleConnectionBadge'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getAuthUser, getProfile } from '@/lib/auth'
@@ -27,6 +28,16 @@ export default async function SettingsPage() {
     customerData = data
   }
 
+  let tutorData = null
+  if (profile?.role === 'tutor') {
+    const { data } = await supabaseAdmin
+      .from('tutors')
+      .select('full_name, email, phone, photo_url, bio, specialties')
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    tutorData = data
+  }
+
   const isAdmin = profile?.role === 'admin'
   let googleConnected = false
   let googleConnectedAt: string | null = null
@@ -50,12 +61,31 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <ProfileForm
-            fullName={customerData?.full_name || profile?.full_name || ''}
-            email={profile?.email || user.email || ''}
-            phone={customerData?.phone || ''}
+            fullName={customerData?.full_name || tutorData?.full_name || profile?.full_name || ''}
+            email={tutorData?.email || profile?.email || user.email || ''}
+            phone={customerData?.phone || tutorData?.phone || ''}
           />
         </CardContent>
       </Card>
+
+      {profile?.role === 'tutor' && tutorData && (
+        <Card className="border-gray-100 shadow-sm">
+          <CardHeader>
+            <CardTitle>Public Tutor Profile</CardTitle>
+            <p className="text-sm text-gray-600">
+              Manage the photo, bio, and subjects families see on the ScoreMax tutors page.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <TutorPublicProfileForm
+              fullName={tutorData.full_name || profile.full_name || ''}
+              bio={tutorData.bio || ''}
+              photoUrl={tutorData.photo_url || null}
+              specialties={tutorData.specialties || []}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {isAdmin && (
         <Card className="border-gray-100 shadow-sm">

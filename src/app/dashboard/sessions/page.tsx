@@ -2,10 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { AdminSessionList, FlatSessionList } from '@/components/dashboard/SessionList'
-import { TutorSessionsTable } from '@/components/dashboard/TutorSessionsTable'
+import { AdminSessionList, FlatSessionList, TutorSessionList } from '@/components/dashboard/SessionList'
 import { AdminCreateSessionDialog } from '@/components/dashboard/AdminCreateSessionDialog'
-import { CalendarCheck, Users, CheckCircle2, CalendarClock } from 'lucide-react'
 import { buildSubjectCatalog, flattenSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function SessionsPage() {
@@ -129,51 +127,8 @@ export default async function SessionsPage() {
       .order('confirmed_start', { ascending: true })
 
     const allSessions = sessions ?? []
-    const now = new Date()
-    const weekEnd = new Date(now)
-    weekEnd.setDate(weekEnd.getDate() + 7)
-
     const upcoming = allSessions.filter((s) => s.status === 'scheduled')
     const completed = allSessions.filter((s) => s.status === 'completed')
-    const thisWeek = upcoming.filter((s) => {
-      if (!s.confirmed_start) return false
-      const start = new Date(s.confirmed_start)
-      return start >= now && start <= weekEnd
-    })
-    const uniqueStudents = new Set(
-      allSessions.map((s) => s.student_id).filter((id): id is string => Boolean(id))
-    ).size
-
-    const metrics = [
-      {
-        label: 'This Week',
-        value: thisWeek.length.toString(),
-        sub: 'upcoming sessions',
-        icon: <CalendarClock className="h-4 w-4" />,
-        accent: thisWeek.length > 0 ? 'text-[#4a729f] bg-[#517cad]/10' : 'text-gray-400 bg-gray-50',
-      },
-      {
-        label: 'Total Upcoming',
-        value: upcoming.length.toString(),
-        sub: 'scheduled sessions',
-        icon: <CalendarCheck className="h-4 w-4" />,
-        accent: 'text-amber-600 bg-amber-50',
-      },
-      {
-        label: 'Completed',
-        value: completed.length.toString(),
-        sub: 'all time',
-        icon: <CheckCircle2 className="h-4 w-4" />,
-        accent: 'text-emerald-600 bg-emerald-50',
-      },
-      {
-        label: 'Students',
-        value: uniqueStudents.toString(),
-        sub: 'unique students',
-        icon: <Users className="h-4 w-4" />,
-        accent: 'text-violet-600 bg-violet-50',
-      },
-    ]
 
     return (
       <div className="space-y-6">
@@ -182,23 +137,7 @@ export default async function SessionsPage() {
           <p className="mt-1 text-gray-500">{upcoming.length} upcoming · {completed.length} completed</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {metrics.map((m) => (
-            <div
-              key={m.label}
-              className="bg-white rounded-lg border border-gray-200 shadow-sm px-5 py-4 flex flex-col gap-1"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{m.label}</span>
-                <span className={`rounded-md p-1.5 ${m.accent}`}>{m.icon}</span>
-              </div>
-              <p className="text-2xl font-bold text-[#1e293b] tracking-tight">{m.value}</p>
-              <p className="text-xs text-gray-400">{m.sub}</p>
-            </div>
-          ))}
-        </div>
-
-        <TutorSessionsTable
+        <TutorSessionList
           sessions={allSessions}
           subjectMap={Object.fromEntries(subjectMap)}
         />

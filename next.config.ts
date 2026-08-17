@@ -61,6 +61,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'fceekjlispfjduetumrf.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/tutor-photos/**',
+      },
     ],
   },
   async headers() {

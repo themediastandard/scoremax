@@ -64,12 +64,14 @@ function SessionCard({
   subjectMap,
   isAdmin,
   activeStudents,
+  dateGrouped = false,
 }: {
   session: Session
   tutors: { id: string; full_name: string }[]
   subjectMap: Map<string, string>
   isAdmin: boolean
   activeStudents: ActiveStudent[]
+  dateGrouped?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const cfg = statusConfig[session.status] || statusConfig.pending_scheduling
@@ -147,6 +149,55 @@ function SessionCard({
               {expanded
                 ? <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
                 : <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />}
+            </div>
+          </div>
+        ) : dateGrouped ? (
+          <div className="grid w-full gap-3 sm:grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1fr)_auto] sm:items-center">
+            <div className="min-w-0">
+              {session.confirmed_start ? (
+                <>
+                  <p className="text-base font-semibold text-[#1e293b]">{formatBusinessTime(session.confirmed_start)}</p>
+                  {session.confirmed_end && (
+                    <p className="mt-0.5 text-xs text-gray-500">Until {formatBusinessTime(session.confirmed_end)}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm font-medium text-amber-700">Time not set</p>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <p className={`flex items-center gap-1.5 truncate text-sm font-semibold ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                <GraduationCap className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {session.student?.full_name ?? 'Student not assigned'}
+              </p>
+              {session.student && (
+                <p className="mt-0.5 truncate text-xs text-gray-500">{session.student.grade}</p>
+              )}
+            </div>
+
+            <div className="min-w-0 space-y-1">
+              <p className="flex items-center gap-1.5 truncate text-sm text-gray-600">
+                <BookOpen className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                {session.subjects?.length > 0
+                  ? session.subjects.map((id) => subjectMap.get(id) || id).join(', ')
+                  : 'No subject'}
+              </p>
+              <p className="flex items-center gap-1.5 text-xs capitalize text-gray-500">
+                {session.session_type === 'online'
+                  ? <Video className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  : <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                {session.session_type === 'in-person' ? 'In Person' : session.session_type}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <Badge variant="secondary" className={cfg.className}>
+                {cfg.label}
+              </Badge>
+              {expanded
+                ? <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+                : <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />}
             </div>
           </div>
         ) : (
@@ -603,6 +654,199 @@ export function AdminSessionList({
       <p className="text-right text-xs text-gray-400">
         Showing {filteredSessions.length} of {sessions.length} sessions
       </p>
+    </>
+  )
+}
+
+export function TutorSessionList({
+  sessions,
+  subjectMap,
+}: {
+  sessions: Session[]
+  subjectMap: Record<string, string>
+}) {
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [studentFilter, setStudentFilter] = useState('all')
+  const sMap = useMemo(() => new Map(Object.entries(subjectMap)), [subjectMap])
+  const studentOptions = useMemo(() => {
+    const byId = new Map<string, string>()
+    for (const session of sessions) {
+      if (session.student) byId.set(session.student.id, session.student.full_name)
+    }
+    return Array.from(byId, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [sessions])
+
+  const filteredSessions = useMemo(() => {
+    let result = [...sessions]
+
+    if (search.trim()) {
+      const query = search.trim().toLowerCase()
+      result = result.filter((session) => {
+        const studentName = session.student?.full_name?.toLowerCase() ?? ''
+        const studentEmail = session.student?.email?.toLowerCase() ?? ''
+        const ownerName = session.customers?.full_name?.toLowerCase() ?? ''
+        const subjects = session.subjects
+          ?.map((id) => subjectMap[id]?.toLowerCase() ?? id.toLowerCase())
+          .join(' ') ?? ''
+        return studentName.includes(query) || studentEmail.includes(query) || ownerName.includes(query) || subjects.includes(query)
+      })
+    }
+
+    if (statusFilter !== 'all') {
+      result = result.filter((session) => session.status === statusFilter)
+    }
+
+    if (studentFilter !== 'all') {
+      result = result.filter((session) => session.student?.id === studentFilter)
+    }
+
+    return result
+  }, [sessions, search, statusFilter, studentFilter, subjectMap])
+
+  const { upcoming, completed } = useMemo(() => ({
+    upcoming: filteredSessions
+      .filter((session) => session.status === 'scheduled')
+      .sort((a, b) => timestamp(a.confirmed_start, Number.MAX_SAFE_INTEGER) - timestamp(b.confirmed_start, Number.MAX_SAFE_INTEGER)),
+    completed: filteredSessions
+      .filter((session) => session.status === 'completed')
+      .sort((a, b) => timestamp(b.confirmed_start, Number.MIN_SAFE_INTEGER) - timestamp(a.confirmed_start, Number.MIN_SAFE_INTEGER)),
+  }), [filteredSessions])
+
+  const upcomingDateGroups = useMemo(() => groupSessionsByBusinessDate(upcoming), [upcoming])
+  const completedDateGroups = useMemo(() => groupSessionsByBusinessDate(completed), [completed])
+  const showUpcoming = statusFilter === 'all' || statusFilter === 'scheduled'
+  const showCompleted = statusFilter === 'all' || statusFilter === 'completed'
+  const hasFilters = Boolean(search) || statusFilter !== 'all' || studentFilter !== 'all'
+
+  const renderSession = (session: Session) => (
+    <SessionCard
+      key={session.id}
+      session={session}
+      tutors={[]}
+      activeStudents={[]}
+      subjectMap={sMap}
+      isAdmin={false}
+      dateGrouped={true}
+    />
+  )
+
+  const renderDateGroups = (groups: SessionDateGroup[], section: 'upcoming' | 'completed') => (
+    <div className="space-y-6">
+      {groups.map((group) => {
+        const headingId = `tutor-${section}-session-date-${group.key}`
+        return (
+          <section key={group.key} aria-labelledby={headingId} className="space-y-2.5">
+            <div className="flex items-center justify-between gap-4 border-b border-gray-200 pb-2">
+              <h3 id={headingId} className="flex items-center gap-2 text-sm font-semibold text-[#1e293b]">
+                <Calendar className="h-4 w-4 text-[#4a729f]" aria-hidden="true" />
+                {group.label}
+              </h3>
+              <span className="text-xs font-medium text-gray-500">
+                {group.sessions.length} {group.sessions.length === 1 ? 'session' : 'sessions'}
+              </span>
+            </div>
+            <div className="space-y-2">{group.sessions.map(renderSession)}</div>
+          </section>
+        )
+      })}
+    </div>
+  )
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[200px] max-w-xs flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+          <Input
+            aria-label="Search tutor sessions"
+            placeholder="Search student or subject..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="h-9 pl-9"
+          />
+        </div>
+
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger aria-label="Filter tutor sessions by status" className="h-9 w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sessions</SelectItem>
+            <SelectItem value="scheduled">Upcoming</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {studentOptions.length > 1 && (
+          <Select value={studentFilter} onValueChange={setStudentFilter}>
+            <SelectTrigger aria-label="Filter tutor sessions by student" className="h-9 w-[180px]">
+              <SelectValue placeholder="Student" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Students</SelectItem>
+              {studentOptions.map((student) => (
+                <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('')
+              setStatusFilter('all')
+              setStudentFilter('all')
+            }}
+            className="flex items-center gap-1 text-xs text-gray-500 transition-colors hover:text-gray-700"
+          >
+            <X className="h-3 w-3" aria-hidden="true" />
+            Clear
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-10">
+        {showUpcoming && (
+          <section aria-labelledby="tutor-upcoming-sessions-heading" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="tutor-upcoming-sessions-heading" className="text-xl font-serif font-bold text-[#1e293b]">Upcoming Sessions</h2>
+                <p className="mt-0.5 text-sm text-gray-500">Soonest dates first</p>
+              </div>
+              <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">{upcoming.length}</span>
+            </div>
+            {upcomingDateGroups.length > 0 ? renderDateGroups(upcomingDateGroups, 'upcoming') : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white py-8 text-center">
+                <p className="text-sm font-medium text-gray-500">No upcoming sessions</p>
+                <p className="mt-1 text-xs text-gray-500">New assignments will appear here by date.</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {showCompleted && (
+          <section aria-labelledby="tutor-completed-sessions-heading" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="tutor-completed-sessions-heading" className="text-xl font-serif font-bold text-[#1e293b]">Completed Sessions</h2>
+                <p className="mt-0.5 text-sm text-gray-500">Most recently completed first</p>
+              </div>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">{completed.length}</span>
+            </div>
+            {completedDateGroups.length > 0 ? renderDateGroups(completedDateGroups, 'completed') : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white py-8 text-center">
+                <p className="text-sm font-medium text-gray-500">No completed sessions</p>
+                <p className="mt-1 text-xs text-gray-500">Completed sessions will appear here by date.</p>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+
+      <p className="text-right text-xs text-gray-500">Showing {filteredSessions.length} of {sessions.length} sessions</p>
     </>
   )
 }

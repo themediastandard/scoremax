@@ -98,7 +98,7 @@ export default async function DashboardHome() {
   const profile = await getProfile(user.id)
   if (!profile) return <div>Profile not found</div>
 
-  if (profile.role === 'admin') redirect('/dashboard/sessions')
+  if (profile.role === 'admin' || profile.role === 'tutor') redirect('/dashboard/sessions')
 
   const supabase = await createClient()
 

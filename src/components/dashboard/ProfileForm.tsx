@@ -54,17 +54,29 @@ export function ProfileForm({ fullName, email, phone }: ProfileFormProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Full Name</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Label htmlFor="account-full-name">Full Name</Label>
+          <Input id="account-full-name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label>Email</Label>
-          <Input value={email} readOnly className="bg-gray-50 text-gray-500" />
-          <p className="text-xs text-gray-400">Email cannot be changed</p>
+          <Label htmlFor="account-email">Email</Label>
+          <Input
+            id="account-email"
+            value={email}
+            readOnly
+            aria-describedby="account-email-help"
+            className="bg-gray-50 text-gray-600"
+          />
+          <p id="account-email-help" className="text-xs text-gray-600">Email cannot be changed</p>
         </div>
         <div className="space-y-2">
-          <Label>Phone Number</Label>
-          <Input value={ph} onChange={(e) => setPh(e.target.value)} placeholder="(555) 123-4567" />
+          <Label htmlFor="account-phone">Phone Number</Label>
+          <Input
+            id="account-phone"
+            type="tel"
+            value={ph}
+            onChange={(e) => setPh(e.target.value)}
+            placeholder="(555) 123-4567"
+          />
         </div>
       </div>
       <div className="flex items-center gap-3 pt-2">

@@ -40,7 +40,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
-  const homeHref = role === 'admin' ? '/dashboard/sessions' : '/dashboard'
+  const homeHref = role === 'admin' || role === 'tutor' ? '/dashboard/sessions' : '/dashboard'
 
   // Navigating (link tap in the drawer) should dismiss it.
   useEffect(() => {
