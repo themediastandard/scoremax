@@ -6,7 +6,10 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { readEmailOtpType, readRelativeNextPath } from '@/lib/auth-email-link'
 import { readBookContinuation } from '@/lib/auth-continuation'
 import { isAccountType, type AccountType } from '@/lib/account-type'
-import { SIGNUP_ONBOARDING_GATE_KEY } from '@/lib/signup-onboarding'
+import {
+  SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY,
+  SIGNUP_ONBOARDING_GATE_KEY,
+} from '@/lib/signup-onboarding'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
 
@@ -151,6 +154,7 @@ export async function GET(request: NextRequest) {
             app_metadata: {
               ...data.user.app_metadata,
               [SIGNUP_ONBOARDING_GATE_KEY]: signup.accountType,
+              [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: true,
             },
           })
           if (gateError) {

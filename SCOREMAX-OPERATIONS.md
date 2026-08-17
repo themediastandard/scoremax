@@ -2,6 +2,79 @@
 
 This document captures all client-provided information about how ScoreMax operates, including pricing, team, services, workflows, and technical decisions for the booking system build.
 
+## Recent Implementation Log — Agent Read-First
+
+This section records durable implementation decisions and operating boundaries from recent commits. Read it before material work. The repository remains the source of truth; when an older MVP description elsewhere in this document conflicts with a dated entry below, follow the current code and this log.
+
+### Previous recorded release baseline
+
+- Previous recorded head: `cc1f6b8` (`Refine tutor sessions and profiles`), pushed to `main` on 2026-08-17.
+- Pushing `main` to GitHub automatically starts the Netlify production deployment. A successful push does not by itself prove that the deployment reached `ready`; verify the exact deployed commit separately when live status matters.
+- Current validation at `cc1f6b8`: full test suite 307/307, `npx tsc --noEmit`, relevant ESLint, `git diff --check`, and an isolated production build passed.
+- If the canonical checkout's development server is using port 3000, do not stop it or build against its shared `.next`. Run production builds from an isolated `/tmp` rsync copy with the canonical `node_modules` symlinked, then move the temporary copy to Trash.
+- Production Supabase project reference: `fceekjlispfjduetumrf`. Verify it from repository configuration before database work. Never infer permission to mutate live data, Auth, Storage, Stripe, Google Calendar, or production settings from read access alone.
+
+### 2026-08-17 — Confirmed signup notification
+
+- After a new customer finishes confirmed signup classification and student creation, the app emails every address in `admin_settings.notification_emails` with the owner, account type, contact details, student summary, and a direct customer-dashboard link.
+- Notification state is armed only for a newly classified account and stored in trusted Auth app metadata. Existing customers are never backfilled as new signups. Failed sends remain pending for a later `/book` retry; successful sends use a stable Resend idempotency key and record a sent timestamp.
+- The admin email is best effort because the customer and student records are already durable. An email-provider failure is reported but does not tell the customer that their completed signup failed.
+- A read-only check against the verified Score Max project on 2026-08-17 confirmed that `admin_settings.notification_emails` is configured with three recipients; addresses were not copied into source or logs.
+- Local validation passed: focused auth/email tests 59/59, full suite 310/310, TypeScript, relevant ESLint, `git diff --check`, and an isolated production build.
+
+### 2026-08-17 — Tutor portal and self-service profile (`cc1f6b8`)
+
+- Tutors no longer have an Overview page. Tutor `/dashboard`, the portal logo, and account-menu dashboard links lead to `/dashboard/sessions`.
+- Tutor sessions use the shared date-sectioned timeline: Upcoming first from soonest to latest, then Completed from newest to oldest. Cards lead with time, remain read-only, and retain search plus status/student filters.
+- Tutor Settings loads the authoritative `tutors` row and supports editing public bio and subjects/specialties, plus uploading, replacing, or removing a profile photo.
+- Tutor profile writes are authenticated and scoped by the signed-in user's `profile_id`; the client never supplies tutor ownership. Bio and specialties are bounded, normalized, and whitelisted.
+- Tutor photos are limited to 5MB JPEG/PNG/WebP/AVIF, decoded and re-encoded with Sharp, capped at 25 megapixels and 1600px output, stored under a user-owned unique path, and cleaned up only after ownership is proven. Public `/tutors` cache invalidation runs after successful profile changes.
+- Automated behavior is covered, but an authenticated real Storage upload/replacement/removal and manual desktop/mobile visual pass were not recorded as verified at this commit.
+
+### 2026-08-17 — Parent onboarding and admin control room (`a7a8d92`, with `ae7e129` and preceding signup fixes)
+
+- Parent signup requires at least one complete student; student phone is required during signup, Add First Student recovery, and parent-portal student create/edit.
+- Booking reloads the signup student authoritatively. Selecting a student no longer auto-advances; the parent sees the selection and presses Continue. Signed-out booking places the auth prompt above a disabled first step.
+- Confirmation uses the scanner-safe `/auth/continue` flow and canonical public host. Expired signup links resend signup confirmation rather than starting password recovery.
+- Admin `/dashboard` redirects to `/dashboard/sessions`; Overview is hidden for admins, Sessions is first in navigation, and the sidebar shows separate amber awaiting-scheduling and blue scheduled counts.
+- Admin Sessions removed top summary tiles and the type filter. Needs Scheduling appears first, oldest request first; Upcoming is grouped under full date headings from soonest forward; Completed is available by filter, newest first.
+- Orders became a compact owner/student/plan/payment/scheduled/amount/date directory. Customers became a compact operational directory with owner contact, students, plan, payment access, credits available, order/spend summary, and a combined attention filter. Rows/cards remain fully clickable and keyboard accessible.
+
+### 2026-08-16 to 2026-08-17 — Account-first signup and booking continuity (`286d2de` through `5c021cc`)
+
+- Booking requires an authenticated account before customer details or student data can enter the purchase flow.
+- Email and Google signup preserve only the safe `/book` continuation. Parent Google-signup student drafts remain same-tab and untrusted until server finalization.
+- Student accounts create and use their self student profile. Zero-student parents recover inside booking with Add First Student.
+- Internal Netlify auth/booking hosts redirect to the configured public ScoreMax origin so confirmation cookies and continuation remain on the canonical domain.
+
+### 2026-08-15 — Booking recovery, Eastern Time, and Calendar behavior (`6602b65`, `aded600`)
+
+- Booking progress persists across interrupted approval/payment flows and clears only after confirmed success.
+- Customer, admin, tutor, order, email, and calendar session times use the ScoreMax business timezone (`America/New_York`) and reject invalid/epoch-like values.
+- Online sessions use the single ScoreMax-owned Google Calendar event with the existing Meet link and owner/student/tutor attendees. In-person sessions have no Meet request.
+- `guestsCanModify: true` is the accepted fast Calendar workaround for future events. This grants broad edit access to every guest; it is not tutor-only or title-only permission.
+
+### 2026-08-13 to 2026-08-14 — Offline payments, student ownership, and admin scheduling (`c9c2a74` through `2016086`, plus follow-ups)
+
+- Payment method is separate from product type. Supported operational methods include credit card, account credit, Step Up, and Zelle; offline access requires explicit method-specific account approval.
+- Offline purchases remain server-priced and use the established atomic order/payment/session/credit path. Do not model Step Up as a Stripe discount or create orphan manual calendar/session rows.
+- Parent accounts own managed students; account type is explicit. Student assignment on an order is limited to active students belonging to that account and keeps linked order/session identity synchronized.
+- Admin credit booking is account-first, requires an active student and sufficient credits, prevents tutor/session overlap, and uses atomic credit redemption. Calendar/email delivery is idempotent and recoverable after partial external delivery failure.
+- Stale Stripe customer IDs are repaired safely for checkout, billing portal, and membership lookup without overwriting a newer customer reference.
+
+### 2026-08-12 — Booking plans and pricing (`e105208` through `3af438e`)
+
+- SAT and ACT selections use their dedicated exam-prep packages and do not offer monthly memberships. Academic/unknown subjects may use generic prepaid packages.
+- Online prices displayed to customers and charged by Stripe come from validated server/database-backed pricing and are rounded to whole-dollar amounts as implemented.
+- Package/order labels use authoritative included hours rather than guessing from price. Customer-facing session dates and times render in Eastern Time.
+
+### 2026-08-10 to 2026-08-11 — Conversion, authentication, and rescheduling (`8425f0f`, `cf5b25c`, `42d4318`)
+
+- Tutoring landing pages share booking/contact/pricing calls to action through the reusable CTA components.
+- Turnstile protects email/password signup, sign-in, and password recovery; the public site key belongs in the browser while the secret remains in Supabase Auth settings.
+- Auth confirmation uses a scanner-safe explicit action before consuming a one-time token. Password recovery and signup confirmation remain distinct flows.
+- Admin rescheduling updates Google Calendar before persistence, compensates Calendar if the database write fails, preserves the existing Meet link where possible, and emails only after the database save succeeds.
+
 ---
 
 ## Team / Tutors

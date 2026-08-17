@@ -4,10 +4,12 @@ import { isAccountType, type AccountType } from '@/lib/account-type'
 import { GRADE_OPTIONS } from '@/lib/student-grades'
 import {
   PENDING_STUDENTS_METADATA_KEY,
+  SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY,
   SIGNUP_ONBOARDING_GATE_KEY,
   parseSignupStudentDrafts,
   type SignupStudentDraft,
 } from '@/lib/signup-onboarding'
+import { notifyAdminsOfSignup } from '@/lib/signup-admin-notification'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { normalizeStudentEmail, toStudentDto, type ManagedStudent } from '@/lib/student-server'
@@ -141,6 +143,9 @@ export async function POST(request: NextRequest) {
       ? user.app_metadata[SIGNUP_ONBOARDING_GATE_KEY]
       : null
     let onboardingAuthorized = onboardingGate === 'parent'
+    let signupNotificationPending = (
+      user.app_metadata?.[SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY] === true
+    )
 
     if (!customer.account_type) {
       const requestedAccountType = metadataAccountType ?? onboardingGate
@@ -155,14 +160,21 @@ export async function POST(request: NextRequest) {
         if (!requestedStudentGrade) {
           return NextResponse.json({ error: 'Choose a valid student grade' }, { status: 409 })
         }
-      } else {
-        const { error: gateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
-          app_metadata: {
-            ...user.app_metadata,
-            [SIGNUP_ONBOARDING_GATE_KEY]: 'parent',
-          },
-        })
-        if (gateError) throw gateError
+      }
+
+      // Arm the trusted, retryable notification before classification. If the
+      // request stops after the database write, the next /book load can still
+      // deliver the admin email. Existing classified accounts never get armed.
+      const { error: gateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        app_metadata: {
+          ...user.app_metadata,
+          ...(requestedAccountType === 'parent' && { [SIGNUP_ONBOARDING_GATE_KEY]: 'parent' }),
+          [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: true,
+        },
+      })
+      if (gateError) throw gateError
+      signupNotificationPending = true
+      if (requestedAccountType === 'parent') {
         onboardingAuthorized = true
       }
 
@@ -190,6 +202,7 @@ export async function POST(request: NextRequest) {
           app_metadata: {
             ...user.app_metadata,
             [SIGNUP_ONBOARDING_GATE_KEY]: null,
+            [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: signupNotificationPending || null,
           },
         })
         if (clearError) throw clearError
@@ -221,6 +234,7 @@ export async function POST(request: NextRequest) {
           app_metadata: {
             ...user.app_metadata,
             [SIGNUP_ONBOARDING_GATE_KEY]: null,
+            [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: signupNotificationPending || null,
           },
         })
         if (clearError) throw clearError
@@ -242,6 +256,7 @@ export async function POST(request: NextRequest) {
           app_metadata: {
             ...user.app_metadata,
             [SIGNUP_ONBOARDING_GATE_KEY]: null,
+            [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: signupNotificationPending || null,
           },
         })
         if (clearError) throw clearError
@@ -254,6 +269,13 @@ export async function POST(request: NextRequest) {
           student.is_active && normalizeStudentEmail(student.email) === ownerEmail
         ))?.id ?? null
       : null
+
+    await notifyAdminsOfSignup({
+      userId: user.id,
+      customer,
+      students,
+      notificationPending: signupNotificationPending,
+    })
 
     return NextResponse.json({
       students: students.map(toStudentDto),

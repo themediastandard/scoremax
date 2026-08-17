@@ -4,6 +4,8 @@ import { GRADE_OPTIONS } from '@/lib/student-grades'
 
 export const PENDING_STUDENTS_METADATA_KEY = 'scoremax_pending_students_v1'
 export const SIGNUP_ONBOARDING_GATE_KEY = 'scoremax_signup_onboarding_v1'
+export const SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY = 'scoremax_admin_signup_notification_pending_v1'
+export const SIGNUP_ADMIN_NOTIFICATION_SENT_KEY = 'scoremax_admin_signup_notification_sent_v1'
 export const GOOGLE_SIGNUP_STORAGE_KEY = 'scoremax:signup-onboarding:v1'
 export const MAX_SIGNUP_STUDENTS = 10
 

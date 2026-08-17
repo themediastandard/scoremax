@@ -6,6 +6,7 @@ Web app: Next.js App Router, React, TypeScript, Tailwind CSS v4, shadcn/Radix UI
 
 ## Working Rules
 
+- Before material work, read the **Recent Implementation Log** in `SCOREMAX-OPERATIONS.md` for current behavior, release boundaries, and recent decisions. The implementation log supersedes older MVP descriptions when they conflict with the current code.
 - Follow the existing Next.js App Router structure under `src/app`.
 - Keep route pages thin and move reusable UI into `src/components`.
 - Use `src/components/ui` for UI primitives, `src/lib` for integrations/utilities, and `src/hooks` for shared client hooks.
@@ -24,4 +25,5 @@ Web app: Next.js App Router, React, TypeScript, Tailwind CSS v4, shadcn/Radix UI
 ## Known Project Notes
 
 - `CLAUDE.md` and `README.md` still describe a mostly fresh starter app and may be stale.
+- `SCOREMAX-OPERATIONS.md` contains both original business/MVP reference material and the current agent-facing implementation log; treat the dated implementation log and the repository as authoritative for shipped behavior.
 - `supabase/config.toml` is the current local source for the linked Supabase project identity.
