@@ -29,12 +29,20 @@ export function emailLayout(options: {
   body: string
   ctaText?: string
   ctaUrl?: string
+  secondaryCtaText?: string
+  secondaryCtaUrl?: string
   greeting?: string
 }): string {
   const { body } = options
   const title = escapeHtml(options.title)
   const ctaText = options.ctaText ? escapeHtml(options.ctaText) : options.ctaText
   const ctaUrl = options.ctaUrl ? escapeHtml(options.ctaUrl) : options.ctaUrl
+  const secondaryCtaText = options.secondaryCtaText
+    ? escapeHtml(options.secondaryCtaText)
+    : options.secondaryCtaText
+  const secondaryCtaUrl = options.secondaryCtaUrl
+    ? escapeHtml(options.secondaryCtaUrl)
+    : options.secondaryCtaUrl
   const greeting = options.greeting ? escapeHtml(options.greeting) : options.greeting
   const baseUrl = getBaseUrl()
 
@@ -49,6 +57,16 @@ export function emailLayout(options: {
           </td>
         </tr>
       </table>
+    `
+    : ''
+
+  const secondaryCta = secondaryCtaText && secondaryCtaUrl
+    ? `
+      <p style="margin: 16px 0 0 0; text-align: center; font-size: 14px;">
+        <a href="${secondaryCtaUrl}" style="color: ${GOLD}; font-weight: 600; text-decoration: underline;">
+          ${secondaryCtaText}
+        </a>
+      </p>
     `
     : ''
 
@@ -84,6 +102,7 @@ export function emailLayout(options: {
                 ${body}
               </div>
               ${ctaButton}
+              ${secondaryCta}
             </td>
           </tr>
           <!-- Footer -->

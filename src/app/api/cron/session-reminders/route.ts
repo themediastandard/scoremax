@@ -10,6 +10,7 @@ import {
 } from '@/lib/session-reminders'
 import { flushReports, reportIssue } from '@/lib/report-error'
 import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
+import { sendSessionCompletionEmail } from '@/lib/session-completion-email'
 
 // node:crypto and Buffer, so not the edge runtime. Node is already the default
 // for route handlers; stated here because the timing-safe comparison below
@@ -17,8 +18,9 @@ import { operationalRecipients, sessionStudentName } from '@/lib/session-recipie
 export const runtime = 'nodejs'
 
 /**
- * Sends the one-hour-before session reminder to the student and the assigned
- * tutor. Driven by netlify/functions/session-reminders.mts on a 10-minute cron;
+ * Completes ended sessions and sends the one-hour-before session reminder to
+ * the family and assigned tutor. Driven by netlify/functions/session-reminders.mts
+ * on a 15-minute cron;
  * see that file for why the schedule and the window in session-reminders.js have
  * to stay in step.
  *
@@ -26,8 +28,7 @@ export const runtime = 'nodejs'
  * sits outside src/, where the `@/*` path alias does not reliably resolve inside
  * Netlify's function bundler. Here it reuses supabaseAdmin, sendEmail,
  * emailLayout and reportError exactly as the rest of the app does — and can be
- * driven by hand with curl, which is the only way this gets verified before it
- * matters (`sessions` is empty in production today).
+ * driven by hand with curl for a non-mutating dry run before it matters.
  */
 
 /** Header carrying the shared secret. Set by the Netlify scheduled function. */
@@ -57,6 +58,15 @@ const RUN_DEADLINE_MS = 8_000
  * cannot size is a cap you cannot act on.
  */
 const MAX_CANDIDATES_FETCHED = 100
+
+/**
+ * Newly auto-completed sessions receive the completion/review email even when
+ * they were overdue before this feature shipped. Already-completed sessions are
+ * retried only inside this recent window, so the first production tick cannot
+ * send mail for unrelated historical completions. Thirty minutes is twice the
+ * cron cadence; the stable Resend idempotency key prevents duplicate delivery.
+ */
+const COMPLETION_EMAIL_WINDOW_MS = 30 * 60 * 1000
 
 const RequestBody = z.strictObject({
   /**
@@ -94,6 +104,12 @@ type SessionResult = {
   stamped: boolean
 }
 
+type CompletionEmailCandidate = {
+  id: string
+  confirmed_end: string | null
+  customers: ReminderParty | null
+}
+
 const CANDIDATE_COLUMNS = `
   id,
   status,
@@ -104,6 +120,12 @@ const CANDIDATE_COLUMNS = `
   customers ( email, full_name ),
   students ( email, full_name ),
   tutors ( email, full_name )
+`
+
+const COMPLETION_EMAIL_COLUMNS = `
+  id,
+  confirmed_end,
+  customers ( email, full_name )
 `
 
 /**
@@ -173,7 +195,87 @@ export async function POST(req: NextRequest) {
 
   const startedAt = Date.now()
   const now = new Date()
+  const nowIso = now.toISOString()
   const pollWindow = reminderWindow(now)
+
+  const completionEmailWindowStart = new Date(
+    now.getTime() - COMPLETION_EMAIL_WINDOW_MS
+  ).toISOString()
+
+  let newlyCompletedSessions: CompletionEmailCandidate[] = []
+  let automaticallyCompleted = 0
+  if (dryRun) {
+    const { data: endedRows, error: completionLoadError } = await supabaseAdmin
+      .from('sessions')
+      .select(COMPLETION_EMAIL_COLUMNS)
+      .eq('status', 'scheduled')
+      .not('confirmed_end', 'is', null)
+      .lte('confirmed_end', nowIso)
+      .order('confirmed_end', { ascending: true })
+
+    if (completionLoadError) {
+      reportIssue(
+        'cron:session-completion',
+        `Could not load ended sessions: ${completionLoadError.message}`
+      )
+      await flushReports()
+      return NextResponse.json({ error: 'Could not load ended sessions' }, { status: 500 })
+    }
+    newlyCompletedSessions = (endedRows ?? []) as unknown as CompletionEmailCandidate[]
+    automaticallyCompleted = newlyCompletedSessions.length
+  } else {
+    // One conditional UPDATE is the concurrency guard. Overlapping cron runs
+    // cannot both claim the same row because the first changes its status away
+    // from scheduled before the second can return it.
+    const { data: completedRows, error: completionError } = await supabaseAdmin
+      .from('sessions')
+      .update({ status: 'completed' })
+      .eq('status', 'scheduled')
+      .not('confirmed_end', 'is', null)
+      .lte('confirmed_end', nowIso)
+      .select(COMPLETION_EMAIL_COLUMNS)
+
+    if (completionError) {
+      reportIssue(
+        'cron:session-completion',
+        `Could not complete ended sessions: ${completionError.message}`
+      )
+      await flushReports()
+      return NextResponse.json({ error: 'Could not complete ended sessions' }, { status: 500 })
+    }
+    newlyCompletedSessions = (completedRows ?? []) as unknown as CompletionEmailCandidate[]
+    automaticallyCompleted = newlyCompletedSessions.length
+  }
+
+  // Query recent completed rows rather than only the rows returned by the
+  // UPDATE. This lets the next tick retry a provider failure. Resend receives a
+  // stable per-session idempotency key, so a successful first send is not
+  // delivered twice when the same row appears in the next tick.
+  const { data: recentCompletedRows, error: recentCompletedError } = await supabaseAdmin
+    .from('sessions')
+    .select(COMPLETION_EMAIL_COLUMNS)
+    .eq('status', 'completed')
+    .not('confirmed_end', 'is', null)
+    .gte('confirmed_end', completionEmailWindowStart)
+    .lte('confirmed_end', nowIso)
+    .order('confirmed_end', { ascending: true })
+
+  if (recentCompletedError) {
+    reportIssue(
+      'cron:session-completion',
+      `Could not load recent completed sessions: ${recentCompletedError.message}`
+    )
+    await flushReports()
+    return NextResponse.json({ error: 'Could not load recent completed sessions' }, { status: 500 })
+  }
+
+  const recentCompletionEmailCandidates = (recentCompletedRows ?? []) as unknown as CompletionEmailCandidate[]
+  const completionEmailCandidates = Array.from(
+    new Map(
+      [...newlyCompletedSessions, ...recentCompletionEmailCandidates]
+        .map((session) => [session.id, session])
+    ).values()
+  )
 
   // supabaseAdmin bypasses every RLS policy, so the scope has to be explicit:
   // only sessions that are still scheduled, and only those inside this tick's
@@ -210,6 +312,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       dryRun: true,
       checkedAt: now.toISOString(),
+      wouldComplete: automaticallyCompleted,
+      wouldSendCompletionEmail: completionEmailCandidates.map((session) => ({
+        id: session.id,
+        confirmedEnd: session.confirmed_end,
+        ownerEmail: session.customers?.email ?? null,
+      })),
       window: pollWindow,
       inWindow: candidates.length,
       due: due.length,
@@ -225,6 +333,31 @@ export async function POST(req: NextRequest) {
       })),
       deferred: due.length - batch.length,
     })
+  }
+
+  let completionEmailsSent = 0
+  let completionEmailsFailed = 0
+  for (const session of completionEmailCandidates) {
+    const email = session.customers?.email?.trim()
+    if (!email) {
+      reportIssue(
+        'cron:session-completion',
+        'A recently completed session has no account-owner email for its follow-up.',
+        { sessionId: session.id }
+      )
+      completionEmailsFailed += 1
+      continue
+    }
+
+    const sent = await sendSessionCompletionEmail({
+      id: session.id,
+      customer: {
+        email,
+        full_name: session.customers?.full_name?.trim() || 'there',
+      },
+    })
+    if (sent) completionEmailsSent += 1
+    else completionEmailsFailed += 1
   }
 
   // This loop used to pace its own sends under Resend's 2-per-second limit. That
@@ -424,6 +557,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     dryRun: false,
     checkedAt: now.toISOString(),
+    automaticallyCompleted,
+    completionEmailsSent,
+    completionEmailsFailed,
     window: pollWindow,
     inWindow: candidates.length,
     due: due.length,

@@ -1,5 +1,5 @@
 /**
- * Scheduled trigger for the one-hour-before session reminder.
+ * Scheduled trigger for session completion and the one-hour-before reminder.
  *
  * Deliberately thin: its entire job is one authenticated POST to
  * /api/cron/session-reminders, which does the real work. The logic is not in

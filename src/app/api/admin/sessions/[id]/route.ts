@@ -23,6 +23,7 @@ import {
   sameSessionInstant,
 } from '@/lib/session-calendar'
 import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
+import { sendSessionCompletionEmail } from '@/lib/session-completion-email'
 import {
   replaceManagedStudentAttendee,
   studentAssignmentPolicy,
@@ -640,26 +641,6 @@ async function resolveBoundStudentId(order: AssignmentOrder): Promise<string | n
   return null
 }
 
-async function sendCompletionEmail(session: SessionRecord) {
-  // Purely a review prompt, so the mildest failure of the set — but it was also
-  // the only send with no error handling of any kind, not even a try/catch.
-  await sendEmail(
-    {
-      ...getEmailDefaults(),
-      to: session.customers.email,
-      subject: 'Thank you for choosing ScoreMax',
-      html: emailLayout({
-        title: 'Session Completed',
-        greeting: `Hi ${session.customers.full_name},`,
-        body: '<p style="margin: 0;">We hope you had a great session! Please leave us a review.</p>',
-        ctaText: 'Book Another Session',
-        ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book`,
-      }),
-    },
-    `admin:session-completed:${session.id}`
-  )
-}
-
 async function handleCancel(session: SessionRecord) {
   const adminAuth = await getAdminGoogleAuth()
   const eventId = session.tutor_calendar_event_id
@@ -1008,7 +989,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
       if (newStatus === 'completed') {
         const completed = { ...currentSession, ...updates }
-        if (!studentChanged) pendingEmails = () => sendCompletionEmail(completed)
+        if (!studentChanged) {
+          pendingEmails = () => sendSessionCompletionEmail({
+            id: completed.id,
+            customer: completed.customers,
+          })
+        }
       }
 
       if (newStatus === 'cancelled') {

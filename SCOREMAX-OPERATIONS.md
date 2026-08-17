@@ -22,6 +22,13 @@ This section records durable implementation decisions and operating boundaries f
 - A read-only check against the verified Score Max project on 2026-08-17 confirmed that `admin_settings.notification_emails` is configured with three recipients; addresses were not copied into source or logs.
 - Local validation passed: focused auth/email tests 59/59, full suite 310/310, TypeScript, relevant ESLint, `git diff --check`, and an isolated production build.
 
+### 2026-08-17 — Automatic session completion and review follow-up
+
+- The existing 15-minute authenticated session job marks scheduled sessions completed after `confirmed_end`; the status change therefore occurs on the first job tick after the end time, normally within 15 minutes.
+- Manual and automatic completion share the same idempotent customer follow-up. The branded email intentionally asks for a Google review using the client-provided ScoreMax review link, with Book Another Session retained as a secondary action.
+- Every session newly changed from scheduled to completed receives the follow-up, including a session that was already overdue when the feature shipped. Already-completed sessions are retried only during the preceding 30 minutes, preventing the first production run from emailing unrelated historical completions while giving normal sessions two scheduled-job opportunities for a provider retry.
+- Completion does not send tutor or admin email. Dry runs report what would be completed and emailed without writing or sending.
+
 ### 2026-08-17 — Tutor portal and self-service profile (`cc1f6b8`)
 
 - Tutors no longer have an Overview page. Tutor `/dashboard`, the portal logo, and account-menu dashboard links lead to `/dashboard/sessions`.
