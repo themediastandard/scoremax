@@ -2,12 +2,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 const LEGACY_PRODUCTION_HOST = 'scoremaxtutor.netlify.app'
+const NETLIFY_DEPLOY_HOST_SUFFIX = '--scoremaxtutor.netlify.app'
 const CANONICAL_PRODUCTION_HOST = 'www.scoremaxtutoring.com'
 const SESSION_PATHS = new Set([
   '/login',
   '/register',
   '/reset-password',
   '/forgot-password',
+])
+const CANONICAL_AUTH_PATHS = new Set([
+  ...SESSION_PATHS,
+  '/book',
+  '/auth/continue',
+  '/auth/callback',
 ])
 
 function requestHost(request: NextRequest): string {
@@ -30,14 +37,27 @@ function needsSessionRefresh(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const host = requestHost(request)
   if (
-    requestHost(request) === LEGACY_PRODUCTION_HOST &&
+    host === LEGACY_PRODUCTION_HOST &&
     request.nextUrl.pathname !== '/api/auth/send-email'
   ) {
     const canonical = request.nextUrl.clone()
     canonical.protocol = 'https:'
     canonical.host = CANONICAL_PRODUCTION_HOST
     return NextResponse.redirect(canonical, 308)
+  }
+
+  if (
+    host.endsWith(NETLIFY_DEPLOY_HOST_SUFFIX) &&
+    CANONICAL_AUTH_PATHS.has(request.nextUrl.pathname)
+  ) {
+    const canonical = request.nextUrl.clone()
+    canonical.protocol = 'https:'
+    canonical.host = CANONICAL_PRODUCTION_HOST
+    // Preserve callback POST bodies while avoiding a permanent cache entry
+    // for an immutable Netlify deploy hostname.
+    return NextResponse.redirect(canonical, 307)
   }
 
   if (needsSessionRefresh(request.nextUrl.pathname)) {

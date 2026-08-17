@@ -1,16 +1,56 @@
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { readEmailOtpType, readRelativeNextPath } from '@/lib/auth-email-link'
 import { readBookContinuation } from '@/lib/auth-continuation'
 import { isAccountType, type AccountType } from '@/lib/account-type'
 import { SIGNUP_ONBOARDING_GATE_KEY } from '@/lib/signup-onboarding'
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
+
+type PendingCookie = {
+  name: string
+  value: string
+  options: CookieOptions
+}
+
+function createCallbackClient(request: NextRequest) {
+  const pendingCookies: PendingCookie[] = []
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          pendingCookies.push(...cookiesToSet)
+        },
+      },
+    }
+  )
+
+  function redirectWithSessionCookies(destination: URL, status?: number) {
+    const response = NextResponse.redirect(destination, status)
+    pendingCookies.forEach(({ name, value, options }) =>
+      response.cookies.set(name, value, options)
+    )
+    return response
+  }
+
+  return { supabase, redirectWithSessionCookies }
+}
+
 function destinationFor(type: EmailOtpType, next: string | null): string {
   if (type === 'recovery' || type === 'invite') return '/reset-password'
   return next ?? '/dashboard'
+}
+
+function publicUrl(path: string): URL {
+  return new URL(path, APP_URL)
 }
 
 async function authorizeGoogleSignup(
@@ -48,16 +88,16 @@ async function verifyToken(
   next: string | null
 ) {
   if (!tokenHash || !type) {
-    return NextResponse.redirect(new URL('/auth/auth-code-error', request.url), 303)
+    return NextResponse.redirect(publicUrl('/auth/auth-code-error'), 303)
   }
 
-  const supabase = await createClient()
+  const { supabase, redirectWithSessionCookies } = createCallbackClient(request)
   const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
   if (error) {
-    return NextResponse.redirect(new URL('/auth/auth-code-error', request.url), 303)
+    return NextResponse.redirect(publicUrl('/auth/auth-code-error'), 303)
   }
 
-  return NextResponse.redirect(new URL(destinationFor(type, next), request.url), 303)
+  return redirectWithSessionCookies(publicUrl(destinationFor(type, next)), 303)
 }
 
 export async function GET(request: NextRequest) {
@@ -78,7 +118,7 @@ export async function GET(request: NextRequest) {
     // interstitial shipped. New emails POST the token after an explicit click.
     return verifyToken(request, token_hash, type, next)
   } else if (code) {
-    const supabase = await createClient()
+    const { supabase, redirectWithSessionCookies } = createCallbackClient(request)
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       // This branch is the OAuth return leg, so the user just signed in with
@@ -110,12 +150,12 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-      return NextResponse.redirect(new URL(next ?? '/dashboard', request.url))
+      return redirectWithSessionCookies(publicUrl(next ?? '/dashboard'))
     }
   }
 
   // return the user to an error page with some instructions
-  return NextResponse.redirect(new URL('/auth/auth-code-error', request.url))
+  return NextResponse.redirect(publicUrl('/auth/auth-code-error'))
 }
 
 export async function POST(request: NextRequest) {

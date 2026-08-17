@@ -29,6 +29,22 @@ test('the interstitial consumes a token only after an explicit POST', () => {
   assert.match(callback, /supabase\.auth\.verifyOtp/)
 })
 
+test('successful auth callbacks attach the new session cookies to their redirect', () => {
+  assert.match(callback, /getAll\(\) \{[\s\S]*request\.cookies\.getAll\(\)/)
+  assert.match(callback, /setAll\(cookiesToSet\) \{[\s\S]*pendingCookies\.push/)
+  assert.match(callback, /response\.cookies\.set\(name, value, options\)/)
+  assert.match(callback, /verifyOtp[\s\S]*return redirectWithSessionCookies/)
+  assert.match(callback, /exchangeCodeForSession[\s\S]*return redirectWithSessionCookies/)
+})
+
+test('auth callbacks redirect to the public ScoreMax origin instead of Netlify internal request URLs', () => {
+  assert.match(callback, /const APP_URL = process\.env\.NEXT_PUBLIC_APP_URL \|\| 'https:\/\/www\.scoremaxtutoring\.com'/)
+  assert.match(callback, /function publicUrl\(path: string\): URL/)
+  assert.match(callback, /new URL\(path, APP_URL\)/)
+  assert.match(callback, /redirectWithSessionCookies\(publicUrl\(destinationFor\(type, next\)\), 303\)/)
+  assert.doesNotMatch(callback, /new URL\(destinationFor\(type, next\), request\.url\)/)
+})
+
 test('password recovery checks the session on the server without an indefinite client spinner', () => {
   assert.match(resetPasswordPage, /export const dynamic = 'force-dynamic'/)
   assert.match(resetPasswordPage, /supabase\.auth\.getUser\(\)/)
@@ -51,4 +67,14 @@ test('the legacy Netlify production hostname redirects to the canonical host', (
   assert.match(middleware, /CANONICAL_PRODUCTION_HOST = 'www\.scoremaxtutoring\.com'/)
   assert.match(middleware, /NextResponse\.redirect\(canonical, 308\)/)
   assert.match(middleware, /request\.nextUrl\.pathname !== '\/api\/auth\/send-email'/)
+})
+
+test('Netlify deploy hostnames cannot retain customers inside the auth and booking journey', () => {
+  assert.match(middleware, /NETLIFY_DEPLOY_HOST_SUFFIX = '--scoremaxtutor\.netlify\.app'/)
+  assert.match(middleware, /'\/auth\/continue'/)
+  assert.match(middleware, /'\/auth\/callback'/)
+  assert.match(middleware, /'\/book'/)
+  assert.match(middleware, /host\.endsWith\(NETLIFY_DEPLOY_HOST_SUFFIX\)/)
+  assert.match(middleware, /CANONICAL_AUTH_PATHS\.has\(request\.nextUrl\.pathname\)/)
+  assert.match(middleware, /NextResponse\.redirect\(canonical, 307\)/)
 })
