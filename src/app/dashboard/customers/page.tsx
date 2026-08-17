@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { CustomersTable } from '@/components/dashboard/CustomersTable'
-import { CustomerMetrics } from '@/components/dashboard/CustomerMetrics'
 import { unexpiredPackagesClause } from '@/lib/package-expiry'
 import { getChargedCents } from '@/lib/order-amount'
 
@@ -132,47 +131,12 @@ export default async function CustomersPage() {
     }
   }
 
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const newThisMonth = (customers ?? []).filter(
-    (c) => new Date(c.created_at) >= monthStart
-  ).length
-
-  const membershipBreakdown = { core: 0, premier: 0, elite: 0 }
-  for (const m of memberships ?? []) {
-    if (m.tier in membershipBreakdown) {
-      membershipBreakdown[m.tier as keyof typeof membershipBreakdown]++
-    }
-  }
-
-  let totalCreditsOutstanding = 0
-  for (const cid of Object.keys(membershipMap)) {
-    const m = membershipMap[cid]
-    totalCreditsOutstanding += Math.max(0, m.included_hours + m.rollover_hours - m.used_hours)
-  }
-  for (const hrs of Object.values(packageCreditsMap)) {
-    totalCreditsOutstanding += hrs
-  }
-  for (const sessionsRemaining of Object.values(courseCreditsMap)) {
-    totalCreditsOutstanding += sessionsRemaining
-  }
-
-  const withUpcoming = Object.values(sessionCountMap).filter((s) => s.upcoming > 0).length
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-serif font-bold text-[#1e293b]">Customers</h1>
         <p className="mt-1 text-gray-500">{customers?.length ?? 0} total</p>
       </div>
-
-      <CustomerMetrics
-        totalCustomers={customers?.length ?? 0}
-        newThisMonth={newThisMonth}
-        activeMemberships={(memberships ?? []).length}
-        membershipBreakdown={membershipBreakdown}
-        withUpcoming={withUpcoming}
-        totalCreditsOutstanding={totalCreditsOutstanding}
-      />
 
       <CustomersTable
         customers={customers ?? []}

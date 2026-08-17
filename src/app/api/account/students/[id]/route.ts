@@ -14,7 +14,7 @@ import {
 const updateStudentSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200).optional(),
   email: z.string().trim().email().max(320).optional(),
-  phone: z.string().trim().max(50).optional(),
+  phone: z.string().trim().min(1).max(50).optional(),
   grade: z.string().trim().min(1).max(100).optional(),
   isActive: z.boolean().optional(),
 }).refine((value) => Object.keys(value).length > 0)

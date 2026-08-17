@@ -5,7 +5,6 @@ import { formatPlanLabel } from '@/lib/order-format'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { OrdersTable } from '@/components/dashboard/OrdersTable'
 import { OrderMetrics } from '@/components/dashboard/OrderMetrics'
-import { buildSubjectCatalog, getSubjectNameMap } from '@/lib/subject-catalog'
 
 export default async function OrdersPage() {
   const user = await getAuthUser()
@@ -19,7 +18,8 @@ export default async function OrdersPage() {
     *,
     customers (full_name, email, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)),
     student:students(id, full_name, email, grade),
-    payments (amount_cents, payment_method)
+    payments (amount_cents, payment_method),
+    sessions (status, confirmed_start)
   `).neq('status', 'pending_payment').order('created_at', { ascending: false })
 
   if (profile?.role === 'customer') {
@@ -31,12 +31,7 @@ export default async function OrdersPage() {
     }
   }
 
-  const [{ data: orders }, { data: subjects }] = await Promise.all([
-    query,
-    supabase.from('subjects').select('*'),
-  ])
-
-  const subjectMap = getSubjectNameMap(buildSubjectCatalog(subjects ?? []))
+  const { data: orders } = await query
 
   const planLabels: Record<string, string> = {}
   for (const order of orders ?? []) {
@@ -115,7 +110,6 @@ export default async function OrdersPage() {
       <OrdersTable
         orders={orders ?? []}
         isAdmin={isAdmin}
-        subjectMap={subjectMap}
         planLabels={planLabels}
       />
     </div>

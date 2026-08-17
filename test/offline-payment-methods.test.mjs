@@ -269,7 +269,7 @@ test('paid Step Up and Zelle orders keep dollar amounts instead of masquerading 
 test('admin and customer order surfaces display the method and hide Stripe-only actions offline', () => {
   assert.match(ordersPage, /payments \(amount_cents, payment_method\)/)
   assert.match(ordersTable, /formatPaymentMethod\(paymentMethod\)/)
-  assert.match(ordersTable, /!isOfflinePaymentMethod\(paymentMethod\)/)
+  assert.doesNotMatch(ordersTable, /ReceiptButton/)
   assert.match(ordersTable, /<SelectItem value="step_up">Step Up<\/SelectItem>/)
   assert.match(ordersTable, /<SelectItem value="zelle">Zelle<\/SelectItem>/)
 

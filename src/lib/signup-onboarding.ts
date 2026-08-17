@@ -10,7 +10,7 @@ export const MAX_SIGNUP_STUDENTS = 10
 const studentDraftSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320).transform((email) => email.toLowerCase()),
-  phone: z.string().trim().max(50).default(''),
+  phone: z.string().trim().min(1).max(50),
   grade: z.string().trim().refine((grade) => GRADE_OPTIONS.includes(grade), 'Select a valid grade'),
 })
 
@@ -44,7 +44,7 @@ export function signupStudentDraftError(value: unknown): string | null {
   if (parsed.success) return null
   const issue = parsed.error.issues[0]
   if (issue?.message === 'Each student needs a different email address') return issue.message
-  return 'Enter a name, valid email, and grade for every student.'
+  return 'Enter a name, valid email, phone number, and grade for every student.'
 }
 
 type PendingGoogleSignup =

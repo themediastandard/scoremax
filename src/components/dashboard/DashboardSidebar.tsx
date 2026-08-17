@@ -28,9 +28,19 @@ interface DashboardSidebarProps {
   membershipTier?: string | null
   accountType?: AccountType | null
   googleConnected?: boolean | null
+  pendingSessionCount?: number | null
+  scheduledSessionCount?: number | null
 }
 
-export function DashboardSidebar({ role, fullName, membershipTier: serverTier, accountType, googleConnected }: DashboardSidebarProps) {
+export function DashboardSidebar({
+  role,
+  fullName,
+  membershipTier: serverTier,
+  accountType,
+  googleConnected,
+  pendingSessionCount,
+  scheduledSessionCount,
+}: DashboardSidebarProps) {
   const pathname = usePathname()
   const [tier, setTier] = useState<string | null>(serverTier ?? null)
   const [credits, setCredits] = useState<number | null>(null)
@@ -63,10 +73,16 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, a
 
   const links = [
     {
+      label: 'Sessions',
+      href: '/dashboard/sessions',
+      icon: Calendar,
+      roles: ['admin', 'tutor']
+    },
+    {
       label: 'Overview',
       href: '/dashboard',
       icon: LayoutDashboard,
-      roles: ['admin', 'tutor', 'customer']
+      roles: ['tutor', 'customer']
     },
     {
       label: 'My Orders',
@@ -88,7 +104,7 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, a
       roles: ['customer']
     },
     {
-      label: 'All Orders',
+      label: 'Orders',
       href: '/dashboard/orders',
       icon: BookOpen,
       roles: ['admin']
@@ -98,12 +114,6 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, a
       href: '/dashboard/sessions',
       icon: Calendar,
       roles: ['customer']
-    },
-    {
-      label: 'Sessions',
-      href: '/dashboard/sessions',
-      icon: Calendar,
-      roles: ['admin', 'tutor']
     },
     {
       label: 'Customers',
@@ -206,7 +216,29 @@ export function DashboardSidebar({ role, fullName, membershipTier: serverTier, a
               )}
             >
               <Icon className={cn("mr-3 h-5 w-5", isActive ? "text-[#4a729f]" : "text-gray-400")} />
-              {link.label}
+              <span className="flex-1">{link.label}</span>
+              {role === 'admin' && link.href === '/dashboard/sessions' && (
+                <span className="ml-3 flex items-center gap-1.5">
+                  {pendingSessionCount != null && (
+                    <span
+                      aria-label={`${pendingSessionCount} sessions awaiting scheduling`}
+                      title="Sessions awaiting scheduling"
+                      className="inline-flex min-w-6 items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-800"
+                    >
+                      {pendingSessionCount}
+                    </span>
+                  )}
+                  {scheduledSessionCount != null && (
+                    <span
+                      aria-label={`${scheduledSessionCount} scheduled sessions`}
+                      title="Scheduled sessions"
+                      className="inline-flex min-w-6 items-center justify-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-blue-800"
+                    >
+                      {scheduledSessionCount}
+                    </span>
+                  )}
+                </span>
+              )}
             </Link>
           )
         })}

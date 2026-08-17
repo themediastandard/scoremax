@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { ArrowRight, Search, Users, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState, type KeyboardEvent } from 'react'
+import { Search, Users, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,8 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { formatBusinessDateTime } from '@/lib/business-datetime'
-import { formatAccountType, type AccountType } from '@/lib/account-type'
+import type { AccountType } from '@/lib/account-type'
+import { formatPhoneForDisplay } from '@/lib/phone-display'
 
 interface Customer {
   id: string
@@ -65,6 +66,7 @@ interface CustomersTableProps {
 }
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'credits' | 'orders' | 'sessions'
+type AttentionFilter = 'all' | 'needs-attention' | 'no-student' | 'type-not-specified' | 'missing-phone'
 
 function getCredits(
   customerId: string,
@@ -130,7 +132,7 @@ function CustomerPlan({
     return <Badge variant="outline" className="border-[#517cad] text-[#4a729f]">Course</Badge>
   }
 
-  return <span className="text-xs text-gray-400">—</span>
+  return <span className="text-xs text-gray-500">—</span>
 }
 
 function CompactStudents({ students }: { students: ManagedStudent[] }) {
@@ -154,29 +156,16 @@ function CompactStudents({ students }: { students: ManagedStudent[] }) {
   return (
     <div className={first.is_active ? '' : 'opacity-60'}>
       <p className="text-sm font-medium text-[#1e293b]">{first.full_name}</p>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-500">
         {first.grade}{first.is_active ? '' : ' · Inactive'}
       </p>
     </div>
   )
 }
 
-function NextSession({ session }: { session?: CustomerNextSession }) {
-  if (!session) return <span className="text-xs text-gray-400">—</span>
-  if (session.status === 'pending_scheduling' || !session.confirmed_start) {
-    return <span className="text-xs font-medium text-amber-700">Pending scheduling</span>
-  }
-
-  return (
-    <span className="text-xs leading-5 text-gray-600">
-      {formatBusinessDateTime(session.confirmed_start)}
-    </span>
-  )
-}
-
 function PaymentAccess({ approvals }: { approvals?: PaymentApprovalState }) {
   if (!approvals?.step_up && !approvals?.zelle) {
-    return <span className="text-xs text-gray-400">None</span>
+    return <span className="text-xs text-gray-500">None</span>
   }
 
   return (
@@ -211,15 +200,16 @@ export function CustomersTable({
   courseCreditsMap,
   orderCountMap,
   sessionCountMap,
-  nextSessionMap,
   studentMap,
   paymentApprovalMap = {},
   totalSpentMap = {},
 }: CustomersTableProps) {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [planFilter, setPlanFilter] = useState('all')
   const [gradeFilter, setGradeFilter] = useState('all')
   const [creditFilter, setCreditFilter] = useState('all')
+  const [attentionFilter, setAttentionFilter] = useState<AttentionFilter>('all')
   const [sortBy, setSortBy] = useState<SortOption>('newest')
 
   const grades = useMemo(() => {
@@ -275,6 +265,25 @@ export function CustomersTable({
       })
     }
 
+    if (attentionFilter !== 'all') {
+      result = result.filter((customer) => {
+        const noStudent = (studentMap[customer.id] ?? []).length === 0
+        const typeNotSpecified = !customer.account_type
+        const missingPhone = !customer.phone?.trim()
+
+        switch (attentionFilter) {
+          case 'needs-attention':
+            return noStudent || typeNotSpecified || missingPhone
+          case 'no-student':
+            return noStudent
+          case 'type-not-specified':
+            return typeNotSpecified
+          case 'missing-phone':
+            return missingPhone
+        }
+      })
+    }
+
     result.sort((a, b) => {
       switch (sortBy) {
         case 'newest':
@@ -301,10 +310,10 @@ export function CustomersTable({
     })
 
     return result
-  }, [customers, search, planFilter, gradeFilter, creditFilter, sortBy, membershipMap, packageCreditsMap, courseCreditsMap, orderCountMap, sessionCountMap, studentMap])
+  }, [customers, search, planFilter, gradeFilter, creditFilter, attentionFilter, sortBy, membershipMap, packageCreditsMap, courseCreditsMap, orderCountMap, sessionCountMap, studentMap])
 
   const hasFilters = Boolean(
-    search || planFilter !== 'all' || gradeFilter !== 'all' || creditFilter !== 'all'
+    search || planFilter !== 'all' || gradeFilter !== 'all' || creditFilter !== 'all' || attentionFilter !== 'all'
   )
 
   const clearFilters = () => {
@@ -312,6 +321,14 @@ export function CustomersTable({
     setPlanFilter('all')
     setGradeFilter('all')
     setCreditFilter('all')
+    setAttentionFilter('all')
+  }
+
+  const openCustomer = (customerId: string) => router.push(`/dashboard/customers/${customerId}`)
+  const openCustomerFromKeyboard = (event: KeyboardEvent<HTMLTableRowElement>, customerId: string) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    openCustomer(customerId)
   }
 
   return (
@@ -320,6 +337,7 @@ export function CustomersTable({
         <div className="relative min-w-[200px] max-w-xs flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
+            aria-label="Search customers"
             placeholder="Search owner or student..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -328,7 +346,7 @@ export function CustomersTable({
         </div>
 
         <Select value={planFilter} onValueChange={setPlanFilter}>
-          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="Plan" /></SelectTrigger>
+          <SelectTrigger aria-label="Filter customers by plan" className="h-9 w-[140px]"><SelectValue placeholder="Plan" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
             <SelectItem value="core">Core</SelectItem>
@@ -342,7 +360,7 @@ export function CustomersTable({
 
         {grades.length > 0 && (
           <Select value={gradeFilter} onValueChange={setGradeFilter}>
-            <SelectTrigger className="h-9 w-[130px]"><SelectValue placeholder="Grade" /></SelectTrigger>
+            <SelectTrigger aria-label="Filter customers by student grade" className="h-9 w-[130px]"><SelectValue placeholder="Grade" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Grades</SelectItem>
               {grades.map((grade) => <SelectItem key={grade} value={grade}>Grade {grade}</SelectItem>)}
@@ -351,7 +369,7 @@ export function CustomersTable({
         )}
 
         <Select value={creditFilter} onValueChange={setCreditFilter}>
-          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="Credits" /></SelectTrigger>
+          <SelectTrigger aria-label="Filter customers by available credits" className="h-9 w-[160px]"><SelectValue placeholder="Credits Available" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Credits</SelectItem>
             <SelectItem value="has">Has Credits</SelectItem>
@@ -359,8 +377,19 @@ export function CustomersTable({
           </SelectContent>
         </Select>
 
+        <Select value={attentionFilter} onValueChange={(value) => setAttentionFilter(value as AttentionFilter)}>
+          <SelectTrigger aria-label="Filter customers needing attention" className="h-9 w-[170px]"><SelectValue placeholder="Attention" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Customers</SelectItem>
+            <SelectItem value="needs-attention">Needs Attention</SelectItem>
+            <SelectItem value="no-student">No Student</SelectItem>
+            <SelectItem value="type-not-specified">Type Not Specified</SelectItem>
+            <SelectItem value="missing-phone">Missing Phone</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-          <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label="Sort customers" className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="oldest">Oldest First</SelectItem>
@@ -378,7 +407,7 @@ export function CustomersTable({
             onClick={clearFilters}
             className="flex items-center gap-1 text-xs text-gray-500 transition-colors hover:text-gray-700"
           >
-            <X className="h-3 w-3" />
+            <X className="h-3 w-3" aria-hidden="true" />
             Clear
           </button>
         )}
@@ -386,7 +415,7 @@ export function CustomersTable({
 
       {filtered.length > 0 ? (
         <>
-          <div className="space-y-3 xl:hidden">
+          <div className="space-y-3 md:hidden">
             {filtered.map((customer) => {
               const membership = membershipMap[customer.id]
               const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
@@ -394,14 +423,20 @@ export function CustomersTable({
               const detailsHref = `/dashboard/customers/${customer.id}`
 
               return (
-                <article key={customer.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <Link
+                  key={customer.id}
+                  href={detailsHref}
+                  className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]/40"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <Link href={detailsHref} className="font-semibold text-[#1e293b] hover:text-[#4a729f] hover:underline">
+                      <p className="truncate font-semibold text-[#1e293b]">
                         {customer.full_name || 'Unnamed'}
-                      </Link>
+                      </p>
                       <p className="truncate text-sm text-gray-600">{customer.email}</p>
-                      {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
+                      <p className={`mt-0.5 text-xs ${customer.phone ? 'text-gray-600' : 'font-medium text-amber-700'}`}>
+                        {customer.phone ? formatPhoneForDisplay(customer.phone) : 'Missing phone'}
+                      </p>
                     </div>
                     <CustomerPlan
                       membership={membership}
@@ -410,130 +445,91 @@ export function CustomersTable({
                     />
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-gray-100 py-4 text-sm sm:grid-cols-3">
-                    <div><p className="text-xs text-gray-500">Students</p><CompactStudents students={managedStudents} /></div>
-                    <div><p className="text-xs text-gray-500">Account type</p><p className="mt-0.5 font-medium text-[#1e293b]">{formatAccountType(customer.account_type)}</p></div>
-                    <div><p className="text-xs text-gray-500">Payment access</p><div className="mt-1"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div></div>
-                    <div><p className="text-xs text-gray-500">Total spent</p><p className="mt-0.5 font-medium text-[#1e293b]">{formatTotalSpent(totalSpentMap[customer.id] ?? 0)}</p></div>
-                    <div><p className="text-xs text-gray-500">Credits</p><p className="mt-0.5 font-medium text-[#1e293b]">{credits}</p></div>
-                    <div><p className="text-xs text-gray-500">Orders</p><p className="mt-0.5 font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0}</p></div>
-                    <div><p className="text-xs text-gray-500">Next session</p><NextSession session={nextSessionMap[customer.id]} /></div>
+                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-gray-100 pt-3 text-sm">
+                    <div><p className="text-[10px] font-semibold uppercase tracking-wider text-gray-600">Students</p><div className="mt-1"><CompactStudents students={managedStudents} /></div></div>
+                    <div><p className="text-[10px] font-semibold uppercase tracking-wider text-gray-600">Payment access</p><div className="mt-1"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div></div>
+                    <div><p className="text-[10px] font-semibold uppercase tracking-wider text-gray-600">Credits Available</p><p className="mt-1 font-semibold text-[#1e293b]">{credits}</p></div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-600">Orders / Total spent</p>
+                      <p className="mt-1 font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0} / {formatTotalSpent(totalSpentMap[customer.id] ?? 0)}</p>
+                    </div>
                   </div>
-
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="text-xs text-gray-400">
-                      Joined {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                    <Link href={detailsHref} className="inline-flex items-center gap-1 text-sm font-medium text-[#4a729f] hover:text-[#3b5c85]">
-                      View details <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </article>
+                </Link>
               )
             })}
           </div>
 
-          <div className="hidden space-y-4 xl:block">
-            {filtered.map((customer) => {
-              const membership = membershipMap[customer.id]
-              const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
-              const managedStudents = studentMap[customer.id] ?? []
-              const detailsHref = `/dashboard/customers/${customer.id}`
-              const customerNameId = `customer-${customer.id}-name`
+          <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm md:block">
+            <table className="min-w-[1120px] w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-gray-50/80">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Owner</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Students</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Plan</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Payment Access</th>
+                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">Credits Available</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">Orders / Total Spent</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((customer) => {
+                  const membership = membershipMap[customer.id]
+                  const credits = getCredits(customer.id, membershipMap, packageCreditsMap, courseCreditsMap)
+                  const managedStudents = studentMap[customer.id] ?? []
 
-              return (
-                <article
-                  key={customer.id}
-                  aria-labelledby={customerNameId}
-                  className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-[#517cad]/35"
-                >
-                  <div className="grid grid-cols-12 items-start gap-x-5 gap-y-4 px-6 py-5">
-                    <div className="col-span-3 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account owner</p>
-                      <Link id={customerNameId} href={detailsHref} className="mt-1 block truncate text-base font-semibold text-[#1e293b] hover:text-[#4a729f] hover:underline">
-                        {customer.full_name || 'Unnamed'}
-                      </Link>
-                    </div>
-                    <div className="col-span-3 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Contact</p>
-                      <p className="mt-1 truncate text-sm text-gray-600">{customer.email}</p>
-                      {customer.phone && <p className="mt-0.5 text-xs text-gray-400">{customer.phone}</p>}
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Type</p>
-                      <p className={`mt-1 whitespace-nowrap text-sm font-medium ${customer.account_type ? 'text-[#1e293b]' : 'text-amber-700'}`}>
-                        {formatAccountType(customer.account_type)}
-                      </p>
-                    </div>
-                    <div className="col-span-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Plan</p>
-                      <div className="mt-1.5">
+                  return (
+                    <tr
+                      key={customer.id}
+                      role="link"
+                      tabIndex={0}
+                      aria-label={`Open customer ${customer.full_name || customer.email}`}
+                      onClick={() => openCustomer(customer.id)}
+                      onKeyDown={(event) => openCustomerFromKeyboard(event, customer.id)}
+                      className="cursor-pointer transition-colors hover:bg-gray-50/60 focus-visible:bg-[#517cad]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#517cad]/40"
+                    >
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm font-semibold text-[#1e293b]">{customer.full_name || 'Unnamed'}</p>
+                        <p className="mt-0.5 max-w-[240px] truncate text-xs text-gray-600">{customer.email}</p>
+                        <p className={`mt-0.5 text-xs ${customer.phone ? 'text-gray-600' : 'font-medium text-amber-700'}`}>
+                          {customer.phone ? formatPhoneForDisplay(customer.phone) : 'Missing phone'}
+                        </p>
+                      </td>
+                      <td className="px-5 py-3.5"><CompactStudents students={managedStudents} /></td>
+                      <td className="px-5 py-3.5">
                         <CustomerPlan
                           membership={membership}
                           hasPackage={(packageCreditsMap[customer.id] ?? 0) > 0}
                           hasCourse={(courseCreditsMap[customer.id] ?? 0) > 0}
                         />
-                      </div>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Payment access</p>
-                      <div className="mt-1.5"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></div>
-                    </div>
-                    <div className="col-span-1 flex justify-end">
-                      <Link href={detailsHref} aria-label={`View details for ${customer.full_name || customer.email}`} className="inline-flex rounded-md p-2 text-gray-400 hover:bg-[#517cad]/10 hover:text-[#4a729f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]">
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-12 items-center gap-x-5 gap-y-4 border-t border-gray-100 bg-slate-50/60 px-6 py-4">
-                    <div className="col-span-3 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Students</p>
-                      <div className="mt-1"><CompactStudents students={managedStudents} /></div>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Total spent</p>
-                      <p className="mt-1 text-sm font-semibold text-[#1e293b]">
-                        {formatTotalSpent(totalSpentMap[customer.id] ?? 0)}
-                      </p>
-                    </div>
-                    <div className="col-span-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Credits</p>
-                      <span className={credits > 0 ? 'mt-1 inline-flex rounded-full bg-[#517cad]/10 px-2.5 py-0.5 text-xs font-semibold text-[#4a729f]' : 'mt-1 block text-sm text-gray-400'}>
-                        {credits}
-                      </span>
-                    </div>
-                    <div className="col-span-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Orders</p>
-                      <p className="mt-1 text-sm font-medium text-[#1e293b]">{orderCountMap[customer.id] ?? 0}</p>
-                    </div>
-                    <div className="col-span-3 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Next session</p>
-                      <div className="mt-1"><NextSession session={nextSessionMap[customer.id]} /></div>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Joined</p>
-                      <p className="mt-1 whitespace-nowrap text-xs text-gray-500">
-                        {new Date(customer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              )
-            })}
+                      </td>
+                      <td className="px-5 py-3.5"><PaymentAccess approvals={paymentApprovalMap[customer.id]} /></td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={credits > 0 ? 'inline-flex min-w-8 justify-center rounded-full bg-[#517cad]/10 px-2 py-1 text-xs font-semibold text-[#4a729f]' : 'text-sm font-medium text-gray-500'}>
+                          {credits}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <p className="text-sm font-semibold text-[#1e293b]">{orderCountMap[customer.id] ?? 0} orders</p>
+                        <p className="mt-0.5 text-xs font-medium text-gray-600">{formatTotalSpent(totalSpentMap[customer.id] ?? 0)}</p>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </>
       ) : (
         <div className="rounded-lg border border-dashed border-gray-200 bg-white py-16 text-center">
-          <Users className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+          <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" aria-hidden="true" />
           <p className="font-medium text-gray-500">{hasFilters ? 'No matching customers' : 'No customers yet'}</p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             {hasFilters ? 'Try adjusting your filters' : 'Customers will appear here after they sign up'}
           </p>
         </div>
       )}
 
-      <p className="text-right text-xs text-gray-400">Showing {filtered.length} of {customers.length} customers</p>
+      <p className="text-right text-xs text-gray-500">Showing {filtered.length} of {customers.length} customers</p>
     </>
   )
 }

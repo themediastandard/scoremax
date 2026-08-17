@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, type KeyboardEvent } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BookOpen, Search, X } from 'lucide-react'
-import { ReceiptButton } from '@/components/dashboard/ReceiptButton'
 import { formatOrderAmount } from '@/lib/order-amount'
-import { formatPaymentMethod, isOfflinePaymentMethod } from '@/lib/payment-method'
+import { formatPaymentMethod } from '@/lib/payment-method'
 
 export interface OrderRow {
   id: string
@@ -23,12 +23,15 @@ export interface OrderRow {
   payments?: Array<{ amount_cents?: number | null; payment_method?: string | null }> | null
   customers?: { full_name?: string | null; email?: string | null } | null
   student?: { id: string; full_name: string; email: string; grade: string } | null
+  sessions?:
+    | { status?: string | null; confirmed_start?: string | null }
+    | Array<{ status?: string | null; confirmed_start?: string | null }>
+    | null
 }
 
 interface OrdersTableProps {
   orders: OrderRow[]
   isAdmin: boolean
-  subjectMap: Record<string, string>
   planLabels: Record<string, string>
 }
 
@@ -36,18 +39,28 @@ function getOrderPaymentMethod(order: OrderRow): string | null | undefined {
   return order.payment_method ?? order.payments?.[0]?.payment_method
 }
 
-export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersTableProps) {
+function isOrderScheduled(order: OrderRow): boolean {
+  const sessions = Array.isArray(order.sessions)
+    ? order.sessions
+    : order.sessions
+      ? [order.sessions]
+      : []
+
+  return sessions.some((session) =>
+    Boolean(session.confirmed_start) &&
+    (session.status === 'scheduled' || session.status === 'completed')
+  )
+}
+
+export function OrdersTable({ orders, isAdmin, planLabels }: OrdersTableProps) {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [planFilter, setPlanFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
   const [methodFilter, setMethodFilter] = useState('all')
   const [studentFilter, setStudentFilter] = useState('all')
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
 
-  const sMap = new Map(Object.entries(subjectMap))
-  const getSubjectNames = (ids: string[] | null | undefined) =>
-    (ids ?? []).map((id) => sMap.get(id)).filter(Boolean).join(', ') || '—'
   const studentOptions = useMemo(() => {
     const byId = new Map<string, string>()
     for (const order of orders) {
@@ -85,10 +98,6 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
       result = result.filter((o) => o.payment_type === planFilter)
     }
 
-    if (typeFilter !== 'all') {
-      result = result.filter((o) => o.session_type === typeFilter)
-    }
-
     if (methodFilter !== 'all') {
       result = result.filter((o) => getOrderPaymentMethod(o) === methodFilter)
     }
@@ -100,9 +109,15 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
     })
 
     return result
-  }, [orders, search, statusFilter, planFilter, typeFilter, methodFilter, studentFilter, sortDir])
+  }, [orders, search, statusFilter, planFilter, methodFilter, studentFilter, sortDir])
 
-  const hasFilters = search || statusFilter !== 'all' || planFilter !== 'all' || typeFilter !== 'all' || methodFilter !== 'all' || studentFilter !== 'all'
+  const hasFilters = search || statusFilter !== 'all' || planFilter !== 'all' || methodFilter !== 'all' || studentFilter !== 'all'
+  const openOrder = (orderId: string) => router.push(`/dashboard/orders/${orderId}`)
+  const openOrderFromKeyboard = (event: KeyboardEvent<HTMLTableRowElement>, orderId: string) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    openOrder(orderId)
+  }
 
   return (
     <>
@@ -153,16 +168,6 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
               <SelectItem value="course">Course</SelectItem>
             </SelectContent>
           </Select>}
-          {isAdmin && <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="in-person">In Person</SelectItem>
-            </SelectContent>
-          </Select>}
           {isAdmin && <Select value={methodFilter} onValueChange={setMethodFilter}>
             <SelectTrigger className="w-[155px] h-9">
               <SelectValue placeholder="Payment" />
@@ -186,7 +191,7 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
           </Select>}
           {hasFilters && (
             <button
-              onClick={() => { setSearch(''); setStatusFilter('all'); setPlanFilter('all'); setTypeFilter('all'); setMethodFilter('all'); setStudentFilter('all') }}
+              onClick={() => { setSearch(''); setStatusFilter('all'); setPlanFilter('all'); setMethodFilter('all'); setStudentFilter('all') }}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
             >
               <X className="h-3 w-3" />
@@ -202,9 +207,14 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
         <div className="md:hidden space-y-3">
           {filtered.map((order) => {
             const paymentMethod = getOrderPaymentMethod(order)
+            const scheduled = isOrderScheduled(order)
 
             return (
-            <div key={order.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <Link
+              key={order.id}
+              href={`/dashboard/orders/${order.id}`}
+              className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#517cad]/40"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   {isAdmin && (
@@ -218,48 +228,28 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
                   <Badge variant="secondary" className={`font-medium bg-slate-100 text-slate-600 ${isAdmin ? 'mt-1' : ''}`}>
                     {planLabels[order.id] || order.payment_type}
                   </Badge>
-                  {getSubjectNames(order.subjects) !== '—' && (
-                    <p className="text-xs text-gray-500 mt-1.5">{getSubjectNames(order.subjects)}</p>
-                  )}
                   <p className="mt-1.5 text-xs font-medium text-gray-500">
                     {formatPaymentMethod(paymentMethod)}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-semibold text-[#1e293b]">{formatOrderAmount(order)}</p>
-                  <span
-                    className={`mt-1 inline-flex px-2 py-0.5 text-xs font-semibold rounded-full capitalize ${
-                      order.status === 'paid'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : order.status === 'refunded'
-                          ? 'bg-red-50 text-red-700'
-                          : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {order.status}
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Scheduled</p>
+                  <span className={`mt-0.5 inline-flex min-w-10 justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    scheduled
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {scheduled ? 'Yes' : 'No'}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <div className="mt-3 border-t border-gray-100 pt-3">
                 <span className="text-xs text-gray-500">
                   {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  {order.session_type && (
-                    <span className="capitalize"> · {order.session_type === 'in-person' ? 'In Person' : order.session_type}</span>
-                  )}
                 </span>
-                <div className="flex items-center gap-3">
-                  {order.stripe_payment_intent_id && !isOfflinePaymentMethod(paymentMethod) && (
-                    <ReceiptButton bookingId={order.id} compact />
-                  )}
-                  <Link
-                    href={`/dashboard/orders/${order.id}`}
-                    className="text-sm text-[#4a729f] hover:text-[#3b5c85] font-medium transition-colors"
-                  >
-                    View
-                  </Link>
-                </div>
               </div>
-            </div>
+            </Link>
             )
           })}
         </div>
@@ -268,36 +258,33 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gray-50/80">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                 {isAdmin && (
                   <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Account Owner</th>
                 )}
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Subjects</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
+                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider"></th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.map((order) => {
                 const amountLabel = formatOrderAmount(order)
                 const paymentMethod = getOrderPaymentMethod(order)
+                const scheduled = isOrderScheduled(order)
 
                 return (
-                  <tr key={order.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <span className="text-sm text-gray-600">
-                        {new Date(order.created_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </td>
+                  <tr
+                    key={order.id}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={`Open order for ${order.customers?.full_name || order.student?.full_name || 'customer'}`}
+                    onClick={() => openOrder(order.id)}
+                    onKeyDown={(event) => openOrderFromKeyboard(event, order.id)}
+                    className="cursor-pointer transition-colors hover:bg-gray-50/60 focus-visible:bg-[#517cad]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#517cad]/40"
+                  >
                     {isAdmin && (
                       <td className="px-5 py-3.5">
                         <p className="text-sm font-medium text-[#1e293b]">{order.customers?.full_name ?? '—'}</p>
@@ -320,16 +307,20 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
                       </Badge>
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className="text-sm text-gray-600">{getSubjectNames(order.subjects)}</span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className="text-sm text-gray-600 capitalize">
-                        {order.session_type === 'in-person' ? 'In Person' : order.session_type || '—'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
                       <span className="whitespace-nowrap text-sm font-medium text-gray-600">
                         {formatPaymentMethod(paymentMethod)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-center">
+                      <span
+                        aria-label={`Scheduled: ${scheduled ? 'Yes' : 'No'}`}
+                        className={`inline-flex min-w-10 justify-center rounded-full px-2 py-1 text-xs font-semibold ${
+                          scheduled
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
+                        {scheduled ? 'Yes' : 'No'}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -337,31 +328,14 @@ export function OrdersTable({ orders, isAdmin, subjectMap, planLabels }: OrdersT
                         {amountLabel}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize ${
-                          order.status === 'paid'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : order.status === 'refunded'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
                     <td className="px-5 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {order.stripe_payment_intent_id && !isOfflinePaymentMethod(paymentMethod) && (
-                          <ReceiptButton bookingId={order.id} compact />
-                        )}
-                        <Link
-                          href={`/dashboard/orders/${order.id}`}
-                          className="text-sm text-[#4a729f] hover:text-[#3b5c85] font-medium transition-colors"
-                        >
-                          View
-                        </Link>
-                      </div>
+                      <span className="text-sm text-gray-600">
+                        {new Date(order.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
                     </td>
                   </tr>
                 )

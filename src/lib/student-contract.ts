@@ -37,7 +37,7 @@ export interface SignupCompletionResponse extends StudentsResponse {
 export interface CreateStudentRequest {
   fullName: string
   email: string
-  phone?: string
+  phone: string
   grade: string
 }
 

@@ -13,7 +13,7 @@ import {
 const createStudentSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320),
-  phone: z.string().trim().max(50).optional().default(''),
+  phone: z.string().trim().min(1).max(50),
   grade: z.string().trim().min(1).max(100),
 })
 
@@ -69,7 +69,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request', code: 'invalid_request' }, { status: 400 })
   }
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid student details', code: 'invalid_request' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Name, email, phone, and grade are required', code: 'invalid_request' },
+      { status: 400 }
+    )
   }
 
   const { data, error } = await supabaseAdmin

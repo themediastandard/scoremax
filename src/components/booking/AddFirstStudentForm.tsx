@@ -20,8 +20,8 @@ export function AddFirstStudentForm({ onCreated }: { onCreated: (studentId: stri
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (!fullName.trim() || !email.trim() || !grade) {
-      setError('Name, email, and grade are required.')
+    if (!fullName.trim() || !email.trim() || !phone.trim() || !grade) {
+      setError('Name, email, phone, and grade are required.')
       return
     }
     setSaving(true)
@@ -67,8 +67,8 @@ export function AddFirstStudentForm({ onCreated }: { onCreated: (studentId: stri
           <p className="text-xs leading-5 text-gray-500">Receives schedules and reminders. This does not create a login.</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="booking-first-student-phone">Student Phone <span className="font-normal text-gray-500">(Optional)</span></Label>
-          <Input id="booking-first-student-phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={50} />
+          <Label htmlFor="booking-first-student-phone">Student Phone</Label>
+          <Input id="booking-first-student-phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={50} required />
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="booking-first-student-grade">Grade</Label>

@@ -76,7 +76,7 @@ function StudentFields({
         <p id={helperId} className="text-xs leading-5 text-gray-500">{STUDENT_EMAIL_HELPER}</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-phone`}>Student Phone <span className="font-normal text-gray-500">(Optional)</span></Label>
+        <Label htmlFor={`${idPrefix}-phone`}>Student Phone</Label>
         <Input
           id={`${idPrefix}-phone`}
           type="tel"
@@ -85,6 +85,7 @@ function StudentFields({
           placeholder="(555) 123-4567"
           autoComplete="tel"
           maxLength={50}
+          required
           disabled={disabled}
         />
       </div>
@@ -161,8 +162,8 @@ function StudentCard({
 
   const saveDetails = async (event: FormEvent) => {
     event.preventDefault()
-    if (!draft.fullName.trim() || !draft.email.trim() || !draft.grade) {
-      setError('Name, email, and grade are required.')
+    if (!draft.fullName.trim() || !draft.email.trim() || !draft.phone.trim() || !draft.grade) {
+      setError('Name, email, phone, and grade are required.')
       return
     }
     const saved = await patchStudent({
@@ -277,8 +278,8 @@ export function StudentsManager() {
     event.preventDefault()
     setError(null)
     setNotice(null)
-    if (!draft.fullName.trim() || !draft.email.trim() || !draft.grade) {
-      setError('Name, email, and grade are required.')
+    if (!draft.fullName.trim() || !draft.email.trim() || !draft.phone.trim() || !draft.grade) {
+      setError('Name, email, phone, and grade are required.')
       return
     }
 

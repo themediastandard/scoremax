@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { getAuthUser, getProfile } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { AdminSessionList, FlatSessionList } from '@/components/dashboard/SessionList'
-import { SessionMetrics } from '@/components/dashboard/SessionMetrics'
 import { TutorSessionsTable } from '@/components/dashboard/TutorSessionsTable'
 import { AdminCreateSessionDialog } from '@/components/dashboard/AdminCreateSessionDialog'
 import { CalendarCheck, Users, CheckCircle2, CalendarClock } from 'lucide-react'
@@ -71,20 +70,8 @@ export default async function SessionsPage() {
           .eq('is_active', true)
           .order('full_name', { ascending: true })
       : { data: [] }
-    const now = new Date()
-    const weekEnd = new Date(now)
-    weekEnd.setDate(weekEnd.getDate() + 7)
-
     const active = sessions.filter((s) => s.status !== 'completed')
-    const needsScheduling = sessions.filter((s) => s.status === 'pending_scheduling').length
-    const unassigned = active.filter((s) => !s.assigned_tutor_id).length
-    const scheduled = sessions.filter((s) => s.status === 'scheduled').length
     const totalCompleted = sessions.filter((s) => s.status === 'completed').length
-    const upcomingThisWeek = sessions.filter((s) => {
-      if (s.status !== 'scheduled' || !s.confirmed_start) return false
-      const start = new Date(s.confirmed_start)
-      return start >= now && start <= weekEnd
-    }).length
 
     const subjectMapObj = Object.fromEntries(subjectMap)
     const bookingCustomerIds = new Set(
@@ -112,13 +99,6 @@ export default async function SessionsPage() {
             }))}
           />
         </div>
-        <SessionMetrics
-          needsScheduling={needsScheduling}
-          unassigned={unassigned}
-          upcomingThisWeek={upcomingThisWeek}
-          totalCompleted={totalCompleted}
-          totalActive={scheduled}
-        />
         <AdminSessionList
           sessions={sessions ?? []}
           tutors={tutors || []}

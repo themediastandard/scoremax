@@ -85,7 +85,7 @@ export function HeaderUserMenu() {
               </>
             )}
             <DropdownMenuItem asChild>
-              <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+              <Link href={role === 'admin' ? '/dashboard/sessions' : '/dashboard'} className="flex items-center gap-2 cursor-pointer">
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
               </Link>

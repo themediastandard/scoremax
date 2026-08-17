@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Student details.</strong> The student&rsquo;s name, email address,
-            optional phone number, grade level, the subjects they need help with, and
+            phone number, grade level, the subjects they need help with, and
             any notes you choose to give us.
           </li>
           <li>

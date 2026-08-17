@@ -485,9 +485,7 @@ export default function RegisterPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`signup-student-${index}-phone`}>
-                          Student Phone <span className="font-normal text-gray-500">(Optional)</span>
-                        </Label>
+                        <Label htmlFor={`signup-student-${index}-phone`}>Student Phone</Label>
                         <Input
                           id={`signup-student-${index}-phone`}
                           type="tel"
@@ -495,6 +493,7 @@ export default function RegisterPage() {
                           onChange={(event) => updateStudent(index, { phone: event.target.value })}
                           maxLength={50}
                           autoComplete="tel"
+                          required
                           className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
                         />
                       </div>

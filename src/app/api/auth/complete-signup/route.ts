@@ -57,7 +57,7 @@ async function insertParentStudents(customerId: string, drafts: SignupStudentDra
       customer_id: customerId,
       full_name: draft.fullName,
       email: draft.email,
-      phone: draft.phone || null,
+      phone: draft.phone,
       grade: draft.grade,
     })))
 

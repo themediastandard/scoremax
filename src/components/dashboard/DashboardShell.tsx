@@ -15,6 +15,8 @@ interface DashboardShellProps {
   membershipTier?: string | null
   accountType?: AccountType | null
   googleConnected?: boolean | null
+  pendingSessionCount?: number | null
+  scheduledSessionCount?: number | null
   children: React.ReactNode
 }
 
@@ -32,10 +34,13 @@ export function DashboardShell({
   membershipTier,
   accountType,
   googleConnected,
+  pendingSessionCount,
+  scheduledSessionCount,
   children,
 }: DashboardShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
+  const homeHref = role === 'admin' ? '/dashboard/sessions' : '/dashboard'
 
   // Navigating (link tap in the drawer) should dismiss it.
   useEffect(() => {
@@ -63,6 +68,8 @@ export function DashboardShell({
       membershipTier={membershipTier}
       accountType={accountType}
       googleConnected={googleConnected}
+      pendingSessionCount={pendingSessionCount}
+      scheduledSessionCount={scheduledSessionCount}
     />
   )
 
@@ -70,7 +77,7 @@ export function DashboardShell({
     <div className="flex h-dvh flex-col lg:flex-row bg-slate-50">
       {/* Mobile top bar */}
       <header className="lg:hidden flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-        <Link href="/dashboard" className="flex items-center">
+        <Link href={homeHref} className="flex items-center">
           <Image src={siteImages.logoWide} alt="ScoreMax" width={140} height={32} priority className="h-6 w-auto max-w-none" />
         </Link>
         <button

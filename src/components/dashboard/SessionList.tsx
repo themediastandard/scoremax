@@ -13,6 +13,7 @@ import { formatBusinessDate, formatBusinessTime } from '@/lib/business-datetime'
 
 interface Session {
   id: string
+  created_at: string
   order_id: string
   customer_id: string
   student_id: string | null
@@ -40,13 +41,6 @@ interface Session {
     timezone?: string | null
   } | null
   admin_session_booking_delivery?: AdminBookingDelivery | null
-}
-
-interface CustomerGroup {
-  customerId: string
-  customerName: string
-  customerEmail: string
-  sessions: Session[]
 }
 
 interface ActiveStudent {
@@ -86,59 +80,119 @@ function SessionCard({
           phone-width row. */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 text-left flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 hover:bg-gray-50/60 cursor-pointer"
+        aria-expanded={expanded}
+        className="w-full cursor-pointer p-4 text-left hover:bg-gray-50/60"
       >
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <Badge variant="secondary" className={cfg.className}>
-            {cfg.label}
-          </Badge>
-          {isAdmin && session.admin_session_booking_delivery?.status === 'attention' && (
-            <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-              Setup attention
-            </Badge>
-          )}
-          <div className="flex items-center gap-3 text-sm text-gray-600 min-w-0">
-            <span className={`flex shrink-0 items-center gap-1.5 font-medium ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
-              <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
-              {session.student?.full_name ?? 'Student not assigned'}
-            </span>
-            {session.subjects?.length > 0 && (
-              <span className="truncate">
-                {session.subjects.map((id) => subjectMap.get(id) || id).join(', ')}
-              </span>
-            )}
+        {isAdmin ? (
+          <div className="grid w-full gap-3 md:grid-cols-[8.75rem_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,.85fr)_auto] md:items-center">
+            <div className="min-w-0">
+              {session.status === 'pending_scheduling' ? (
+                <>
+                  <p className="text-sm font-semibold text-amber-700">Needs a date</p>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    Waiting since {formatBusinessDate(session.created_at, { month: 'short', day: 'numeric' })}
+                  </p>
+                </>
+              ) : session.confirmed_start ? (
+                <>
+                  <p className="text-base font-semibold text-[#1e293b]">{formatBusinessTime(session.confirmed_start)}</p>
+                  {session.confirmed_end && (
+                    <p className="mt-0.5 text-xs text-gray-400">Until {formatBusinessTime(session.confirmed_end)}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm font-medium text-amber-700">Time not set</p>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <p className={`flex items-center gap-1.5 truncate text-sm font-semibold ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                <GraduationCap className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {session.student?.full_name ?? 'Student not assigned'}
+              </p>
+              <p className="mt-0.5 truncate text-xs text-gray-500">
+                Owner: {session.customers?.full_name || 'Unknown customer'}
+              </p>
+            </div>
+
+            <div className="min-w-0 space-y-1">
+              <p className="flex items-center gap-1.5 truncate text-sm text-gray-600">
+                <BookOpen className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                {session.subjects?.length > 0
+                  ? session.subjects.map((id) => subjectMap.get(id) || id).join(', ')
+                  : 'No subject'}
+              </p>
+              <p className="flex items-center gap-1.5 text-xs capitalize text-gray-400">
+                {session.session_type === 'online'
+                  ? <Video className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  : <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                {session.session_type === 'in-person' ? 'In Person' : session.session_type}
+              </p>
+            </div>
+
+            <p className={`flex items-center gap-1.5 truncate text-sm ${session.tutors?.full_name ? 'text-gray-600' : 'font-medium text-amber-700'}`}>
+              <User className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {session.tutors?.full_name || 'Tutor not assigned'}
+            </p>
+
+            <div className="flex items-center justify-end gap-2">
+              {session.admin_session_booking_delivery?.status === 'attention' && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  Setup attention
+                </Badge>
+              )}
+              <Badge variant="secondary" className={cfg.className}>
+                {cfg.label}
+              </Badge>
+              {expanded
+                ? <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
+                : <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center flex-wrap gap-x-4 gap-y-1 sm:shrink-0 pl-0.5">
-          {session.confirmed_start && (
-            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-              <Calendar className="h-3.5 w-3.5" />
-              {formatBusinessDate(session.confirmed_start, {
-                month: 'short',
-                day: 'numeric',
-              })}
-              {', '}
-              {formatBusinessTime(session.confirmed_start)}
-            </span>
-          )}
-          {session.tutors?.full_name && (
-            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-              <User className="h-3.5 w-3.5" />
-              {session.tutors.full_name}
-            </span>
-          )}
-          <span className="flex items-center gap-1 text-sm text-gray-400">
-            {session.session_type === 'online' ? (
-              <Video className="h-3.5 w-3.5" />
-            ) : (
-              <MapPin className="h-3.5 w-3.5" />
-            )}
-          </span>
-          {expanded
-            ? <ChevronDown className="h-4 w-4 text-gray-400" />
-            : <ChevronRight className="h-4 w-4 text-gray-400" />
-          }
-        </div>
+        ) : (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+              <Badge variant="secondary" className={cfg.className}>
+                {cfg.label}
+              </Badge>
+              <div className="flex min-w-0 items-center gap-3 text-sm text-gray-600">
+                <span className={`flex shrink-0 items-center gap-1.5 font-medium ${session.student ? 'text-[#1e293b]' : 'text-amber-700'}`}>
+                  <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
+                  {session.student?.full_name ?? 'Student not assigned'}
+                </span>
+                {session.subjects?.length > 0 && (
+                  <span className="truncate">
+                    {session.subjects.map((id) => subjectMap.get(id) || id).join(', ')}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-0.5 sm:shrink-0">
+              {session.confirmed_start && (
+                <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {formatBusinessDate(session.confirmed_start, { month: 'short', day: 'numeric' })}
+                  {', '}
+                  {formatBusinessTime(session.confirmed_start)}
+                </span>
+              )}
+              {session.tutors?.full_name && (
+                <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                  <User className="h-3.5 w-3.5" />
+                  {session.tutors.full_name}
+                </span>
+              )}
+              <span className="flex items-center gap-1 text-sm text-gray-400">
+                {session.session_type === 'online'
+                  ? <Video className="h-3.5 w-3.5" />
+                  : <MapPin className="h-3.5 w-3.5" />}
+              </span>
+              {expanded
+                ? <ChevronDown className="h-4 w-4 text-gray-400" />
+                : <ChevronRight className="h-4 w-4 text-gray-400" />}
+            </div>
+          </div>
+        )}
       </button>
       {expanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50/40">
@@ -258,6 +312,42 @@ function SessionDetails({
   )
 }
 
+type SessionDateGroup = {
+  key: string
+  label: string
+  sessions: Session[]
+}
+
+function timestamp(value: string | null | undefined, fallback: number): number {
+  const parsed = value ? new Date(value).getTime() : Number.NaN
+  return Number.isNaN(parsed) ? fallback : parsed
+}
+
+function groupSessionsByBusinessDate(sessions: Session[]): SessionDateGroup[] {
+  const groups = new Map<string, SessionDateGroup>()
+
+  for (const session of sessions) {
+    const dateKey = formatBusinessDate(session.confirmed_start, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    const key = dateKey?.replaceAll('/', '-') ?? `date-not-set-${session.id}`
+    const label = formatBusinessDate(session.confirmed_start, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }) ?? 'Date not set'
+    const existing = groups.get(key)
+
+    if (existing) existing.sessions.push(session)
+    else groups.set(key, { key, label, sessions: [session] })
+  }
+
+  return Array.from(groups.values())
+}
+
 export function AdminSessionList({
   sessions,
   tutors,
@@ -272,7 +362,6 @@ export function AdminSessionList({
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('active')
   const [tutorFilter, setTutorFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
   const [studentFilter, setStudentFilter] = useState('all')
 
   const sMap = useMemo(() => new Map(Object.entries(subjectMap)), [subjectMap])
@@ -294,17 +383,17 @@ export function AdminSessionList({
   }, [sessions])
   const hasUnassigned = sessions.some((session) => !session.student)
 
-  const { groups, filteredCount } = useMemo(() => {
+  const filteredSessions = useMemo(() => {
     let result = [...sessions]
 
     if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter((s) => {
-        const name = s.customers?.full_name?.toLowerCase() ?? ''
-        const email = s.customers?.email?.toLowerCase() ?? ''
-        const studentName = s.student?.full_name?.toLowerCase() ?? ''
-        const studentEmail = s.student?.email?.toLowerCase() ?? ''
-        return name.includes(q) || email.includes(q) || studentName.includes(q) || studentEmail.includes(q)
+      const query = search.toLowerCase()
+      result = result.filter((session) => {
+        const ownerName = session.customers?.full_name?.toLowerCase() ?? ''
+        const ownerEmail = session.customers?.email?.toLowerCase() ?? ''
+        const studentName = session.student?.full_name?.toLowerCase() ?? ''
+        const studentEmail = session.student?.email?.toLowerCase() ?? ''
+        return ownerName.includes(query) || ownerEmail.includes(query) || studentName.includes(query) || studentEmail.includes(query)
       })
     }
 
@@ -314,73 +403,98 @@ export function AdminSessionList({
         : session.student?.id === studentFilter)
     }
 
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'active') {
-        result = result.filter((s) => s.status !== 'completed')
-      } else {
-        result = result.filter((s) => s.status === statusFilter)
-      }
+    if (statusFilter === 'active') {
+      result = result.filter((session) => session.status === 'pending_scheduling' || session.status === 'scheduled')
+    } else if (statusFilter !== 'all') {
+      result = result.filter((session) => session.status === statusFilter)
     }
 
     if (tutorFilter !== 'all') {
-      if (tutorFilter === 'unassigned') {
-        result = result.filter((s) => !s.assigned_tutor_id)
-      } else {
-        result = result.filter((s) => s.assigned_tutor_id === tutorFilter)
-      }
+      result = result.filter((session) => tutorFilter === 'unassigned'
+        ? !session.assigned_tutor_id
+        : session.assigned_tutor_id === tutorFilter)
     }
 
-    if (typeFilter !== 'all') {
-      result = result.filter((s) => s.session_type === typeFilter)
-    }
+    return result
+  }, [sessions, search, statusFilter, tutorFilter, studentFilter])
 
-    const groupMap = new Map<string, CustomerGroup>()
-    for (const s of result) {
-      const cid = s.customer_id || 'unknown'
-      if (!groupMap.has(cid)) {
-        groupMap.set(cid, {
-          customerId: cid,
-          customerName: s.customers?.full_name || 'Unknown Customer',
-          customerEmail: s.customers?.email || '',
-          sessions: [],
-        })
-      }
-      groupMap.get(cid)!.sessions.push(s)
-    }
+  const { needsScheduling, upcoming, completed } = useMemo(() => ({
+    needsScheduling: filteredSessions
+      .filter((session) => session.status === 'pending_scheduling')
+      .sort((a, b) => timestamp(a.created_at, Number.MAX_SAFE_INTEGER) - timestamp(b.created_at, Number.MAX_SAFE_INTEGER)),
+    upcoming: filteredSessions
+      .filter((session) => session.status === 'scheduled')
+      .sort((a, b) => timestamp(a.confirmed_start, Number.MAX_SAFE_INTEGER) - timestamp(b.confirmed_start, Number.MAX_SAFE_INTEGER)),
+    completed: filteredSessions
+      .filter((session) => session.status === 'completed')
+      .sort((a, b) => timestamp(b.confirmed_start, Number.MIN_SAFE_INTEGER) - timestamp(a.confirmed_start, Number.MIN_SAFE_INTEGER)),
+  }), [filteredSessions])
 
-    return { groups: Array.from(groupMap.values()), filteredCount: result.length }
-  }, [sessions, search, statusFilter, tutorFilter, typeFilter, studentFilter])
+  const upcomingDateGroups = useMemo(() => groupSessionsByBusinessDate(upcoming), [upcoming])
+  const completedDateGroups = useMemo(() => groupSessionsByBusinessDate(completed), [completed])
+  const hasFilters = Boolean(search) || statusFilter !== 'active' || tutorFilter !== 'all' || studentFilter !== 'all'
+  const showNeedsScheduling = statusFilter === 'active' || statusFilter === 'all' || statusFilter === 'pending_scheduling'
+  const showUpcoming = statusFilter === 'active' || statusFilter === 'all' || statusFilter === 'scheduled'
+  const showCompleted = statusFilter === 'all' || statusFilter === 'completed'
 
-  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(
-    () => new Set(sessions.map((s) => s.customer_id))
+  const renderSession = (session: Session) => (
+    <SessionCard
+      key={session.id}
+      session={session}
+      tutors={tutors}
+      activeStudents={studentsByCustomer.get(session.customer_id) ?? []}
+      subjectMap={sMap}
+      isAdmin={true}
+    />
   )
 
-  const toggleCustomer = (id: string) => {
-    setExpandedCustomers((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const hasFilters = search || statusFilter !== 'active' || tutorFilter !== 'all' || typeFilter !== 'all' || studentFilter !== 'all'
+  const renderDateGroups = (groups: SessionDateGroup[]) => (
+    <div className="space-y-6">
+      {groups.map((group) => (
+        <section key={group.key} aria-labelledby={`session-date-${group.key}`} className="space-y-2.5">
+          <div className="flex items-center justify-between gap-4 border-b border-gray-200 pb-2">
+            <h3 id={`session-date-${group.key}`} className="flex items-center gap-2 text-sm font-semibold text-[#1e293b]">
+              <Calendar className="h-4 w-4 text-[#4a729f]" aria-hidden="true" />
+              {group.label}
+            </h3>
+            <span className="text-xs font-medium text-gray-400">
+              {group.sessions.length} {group.sessions.length === 1 ? 'session' : 'sessions'}
+            </span>
+          </div>
+          <div className="space-y-2">{group.sessions.map(renderSession)}</div>
+        </section>
+      ))}
+    </div>
+  )
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="relative min-w-[200px] max-w-xs flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             placeholder="Search owner or student..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9"
+            onChange={(event) => setSearch(event.target.value)}
+            className="h-9 pl-9"
           />
         </div>
 
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-9 w-[170px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Active Sessions</SelectItem>
+            <SelectItem value="pending_scheduling">Needs Scheduling</SelectItem>
+            <SelectItem value="scheduled">Upcoming</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="all">All Sessions</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={studentFilter} onValueChange={setStudentFilter}>
-          <SelectTrigger className="w-[170px] h-9">
+          <SelectTrigger className="h-9 w-[170px]">
             <SelectValue placeholder="Student" />
           </SelectTrigger>
           <SelectContent>
@@ -392,47 +506,29 @@ export function AdminSessionList({
           </SelectContent>
         </Select>
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px] h-9">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active Only</SelectItem>
-            <SelectItem value="pending_scheduling">Needs Scheduling</SelectItem>
-            <SelectItem value="scheduled">Scheduled</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
-
         <Select value={tutorFilter} onValueChange={setTutorFilter}>
-          <SelectTrigger className="w-[150px] h-9">
+          <SelectTrigger className="h-9 w-[150px]">
             <SelectValue placeholder="Tutor" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Tutors</SelectItem>
             <SelectItem value="unassigned">Unassigned</SelectItem>
-            {tutors.map((t) => (
-              <SelectItem key={t.id} value={t.id}>{t.full_name}</SelectItem>
+            {tutors.map((tutor) => (
+              <SelectItem key={tutor.id} value={tutor.id}>{tutor.full_name}</SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[130px] h-9">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="online">Online</SelectItem>
-            <SelectItem value="in-person">In Person</SelectItem>
           </SelectContent>
         </Select>
 
         {hasFilters && (
           <button
-            onClick={() => { setSearch(''); setStatusFilter('active'); setTutorFilter('all'); setTypeFilter('all'); setStudentFilter('all') }}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            type="button"
+            onClick={() => {
+              setSearch('')
+              setStatusFilter('active')
+              setTutorFilter('all')
+              setStudentFilter('all')
+            }}
+            className="flex items-center gap-1 text-xs text-gray-500 transition-colors hover:text-gray-700"
           >
             <X className="h-3 w-3" />
             Clear
@@ -440,133 +536,72 @@ export function AdminSessionList({
         )}
       </div>
 
-      {groups.length > 0 ? (
-        <div className="space-y-4">
-          {groups.map((group) => {
-            const isOpen = expandedCustomers.has(group.customerId)
-            const pending = group.sessions.filter((s) => s.status === 'pending_scheduling').length
-            const needsTutor = group.sessions.filter((s) => s.status === 'scheduled' && !s.assigned_tutor_id).length
-            const ready = group.sessions.filter((s) => s.status === 'scheduled' && !!s.assigned_tutor_id).length
-            const completed = group.sessions.filter((s) => s.status === 'completed').length
-            const hasPending = pending > 0 || needsTutor > 0
-
-            const nextSession = group.sessions
-              .filter((s) => s.status === 'scheduled' && s.confirmed_start)
-              .sort((a, b) => new Date(a.confirmed_start!).getTime() - new Date(b.confirmed_start!).getTime())[0]
-
-            const tutorNames = Array.from(new Set(
-              group.sessions.map((s) => s.tutors?.full_name).filter(Boolean)
-            ))
-
-            return (
-              <div
-                key={group.customerId}
-                className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
-                  hasPending ? 'border-l-amber-400 border-l-[3px] border-gray-200' : 'border-gray-200'
-                }`}
-              >
-                <button
-                  onClick={() => toggleCustomer(group.customerId)}
-                  className="w-full text-left hover:bg-gray-50/60 transition-colors cursor-pointer"
-                >
-                  <div className="px-5 py-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3 min-w-0">
-                        {isOpen ? (
-                          <ChevronDown className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
-                        ) : (
-                          <ChevronRight className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Account Owner</p>
-                          <p className="text-sm font-semibold text-[#1e293b]">{group.customerName}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{group.customerEmail}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        {nextSession && (
-                          <span className="flex items-center gap-1.5 text-sm font-medium text-[#1e293b]">
-                            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                            Next: {formatBusinessDate(nextSession.confirmed_start!, {
-                              month: 'short', day: 'numeric',
-                            })}, {formatBusinessTime(nextSession.confirmed_start!)}
-                          </span>
-                        )}
-                        {tutorNames.length > 0 && (
-                          <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                            <User className="h-3 w-3" />
-                            {tutorNames.join(', ')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-2.5 ml-8 text-xs">
-                      {pending > 0 && (
-                        <span className="flex items-center gap-1.5 font-medium text-amber-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                          {pending} need{pending === 1 ? 's' : ''} scheduling
-                        </span>
-                      )}
-                      {needsTutor > 0 && (
-                        <span className="flex items-center gap-1.5 font-medium text-red-500">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                          {needsTutor} need{needsTutor === 1 ? 's' : ''} tutor
-                        </span>
-                      )}
-                      {ready > 0 && (
-                        <span className="flex items-center gap-1.5 text-gray-500">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          {ready} ready
-                        </span>
-                      )}
-                      {completed > 0 && (
-                        <span className="flex items-center gap-1.5 text-gray-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-gray-300" />
-                          {completed} completed
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-                {isOpen && (
-                  <div className="border-t border-gray-100 px-5 pb-4 pt-2 space-y-2">
-                    {group.sessions.map((s) => (
-                      <SessionCard
-                        key={s.id}
-                        session={s}
-                        tutors={tutors}
-                        activeStudents={studentsByCustomer.get(s.customer_id) ?? []}
-                        subjectMap={sMap}
-                        isAdmin={true}
-                      />
-                    ))}
-                  </div>
-                )}
+      <div className="space-y-10">
+        {showNeedsScheduling && (
+          <section aria-labelledby="needs-scheduling-heading" className="space-y-3">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="needs-scheduling-heading" className="text-xl font-serif font-bold text-[#1e293b]">Needs Scheduling</h2>
+                <p className="mt-0.5 text-sm text-gray-500">Oldest requests first</p>
               </div>
-            )
-          })}
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg border border-dashed border-gray-200 py-16 text-center">
-          <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          {hasFilters ? (
-            <>
-              <p className="text-gray-500 font-medium">No matching sessions</p>
-              <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
-            </>
-          ) : (
-            <>
-              <p className="text-gray-500 font-medium">No sessions yet</p>
-              <p className="text-sm text-gray-400 mt-1">Sessions will appear here after customers book</p>
-            </>
-          )}
-        </div>
-      )}
+              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                {needsScheduling.length}
+              </span>
+            </div>
+            {needsScheduling.length > 0 ? (
+              <div className="space-y-2">{needsScheduling.map(renderSession)}</div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white py-8 text-center">
+                <p className="text-sm font-medium text-gray-500">No sessions need scheduling</p>
+                <p className="mt-1 text-xs text-gray-400">New unscheduled bookings will appear here.</p>
+              </div>
+            )}
+          </section>
+        )}
 
-      <p className="text-xs text-gray-400 text-right">
-        Showing {filteredCount} of {sessions.length} sessions
+        {showUpcoming && (
+          <section aria-labelledby="upcoming-sessions-heading" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="upcoming-sessions-heading" className="text-xl font-serif font-bold text-[#1e293b]">Upcoming Sessions</h2>
+                <p className="mt-0.5 text-sm text-gray-500">Soonest dates first</p>
+              </div>
+              <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                {upcoming.length}
+              </span>
+            </div>
+            {upcomingDateGroups.length > 0 ? renderDateGroups(upcomingDateGroups) : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white py-8 text-center">
+                <p className="text-sm font-medium text-gray-500">No upcoming sessions</p>
+                <p className="mt-1 text-xs text-gray-400">Scheduled sessions will appear here by date.</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {showCompleted && (
+          <section aria-labelledby="completed-sessions-heading" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="completed-sessions-heading" className="text-xl font-serif font-bold text-[#1e293b]">Completed Sessions</h2>
+                <p className="mt-0.5 text-sm text-gray-500">Most recently completed first</p>
+              </div>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                {completed.length}
+              </span>
+            </div>
+            {completedDateGroups.length > 0 ? renderDateGroups(completedDateGroups) : (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white py-8 text-center">
+                <p className="text-sm font-medium text-gray-500">No completed sessions</p>
+                <p className="mt-1 text-xs text-gray-400">Completed sessions will appear here by date.</p>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+
+      <p className="text-right text-xs text-gray-400">
+        Showing {filteredSessions.length} of {sessions.length} sessions
       </p>
     </>
   )

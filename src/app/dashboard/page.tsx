@@ -37,12 +37,30 @@ type AdminOrderRow = {
   } | null
   student: { id: string; full_name: string; email: string; grade: string } | null
   payments: Array<{ amount_cents: number | null; payment_method: string | null }> | null
+  sessions?:
+    | { status: string | null; confirmed_start: string | null }
+    | Array<{ status: string | null; confirmed_start: string | null }>
+    | null
+}
+
+function isOrderScheduled(order: AdminOrderRow): boolean {
+  const sessions = Array.isArray(order.sessions)
+    ? order.sessions
+    : order.sessions
+      ? [order.sessions]
+      : []
+
+  return sessions.some((session) =>
+    Boolean(session.confirmed_start) &&
+    (session.status === 'scheduled' || session.status === 'completed')
+  )
 }
 
 type AdminSessionRow = {
   id: string
   status: string | null
-  confirmed_start: string
+  created_at: string
+  confirmed_start: string | null
   confirmed_end: string | null
   session_type: string | null
   subjects: string[] | null
@@ -80,6 +98,8 @@ export default async function DashboardHome() {
   const profile = await getProfile(user.id)
   if (!profile) return <div>Profile not found</div>
 
+  if (profile.role === 'admin') redirect('/dashboard/sessions')
+
   const supabase = await createClient()
 
   if (profile.role === 'admin') {
@@ -90,6 +110,7 @@ export default async function DashboardHome() {
       { count: customerCount },
       { data: recentOrdersData },
       { data: upcomingSessionsData },
+      { data: needsSchedulingData },
       { data: adminSubjects },
     ] = await Promise.all([
       supabase
@@ -109,21 +130,28 @@ export default async function DashboardHome() {
         .select('*', { count: 'exact', head: true }),
       supabase
         .from('booking_requests')
-        .select('id, created_at, status, payment_type, payment_method, amount_cents, subjects, session_type, stripe_payment_intent_id, customers(full_name, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)), student:students(id, full_name, email, grade), payments(amount_cents, payment_method)')
+        .select('id, created_at, status, payment_type, payment_method, amount_cents, subjects, session_type, stripe_payment_intent_id, customers(full_name, packages(total_hours, stripe_payment_intent_id), memberships(tier, status)), student:students(id, full_name, email, grade), payments(amount_cents, payment_method), sessions(status, confirmed_start)')
         .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(10),
       supabase
         .from('sessions')
-        .select('id, status, confirmed_start, confirmed_end, session_type, subjects, customers(full_name), student:students(id, full_name, email, grade), tutors(full_name)')
+        .select('id, status, created_at, confirmed_start, confirmed_end, session_type, subjects, customers(full_name), student:students(id, full_name, email, grade), tutors(full_name)')
         .eq('status', 'scheduled')
         .order('confirmed_start', { ascending: true })
+        .limit(10),
+      supabase
+        .from('sessions')
+        .select('id, status, created_at, confirmed_start, confirmed_end, session_type, subjects, customers(full_name), student:students(id, full_name, email, grade), tutors(full_name)')
+        .eq('status', 'pending_scheduling')
+        .order('created_at', { ascending: true })
         .limit(10),
       supabase.from('subjects').select('*'),
     ])
 
     const recentOrders = toRows<AdminOrderRow>(recentOrdersData)
     const upcomingSessions = toRows<AdminSessionRow>(upcomingSessionsData)
+    const needsScheduling = toRows<AdminSessionRow>(needsSchedulingData)
 
     const adminSubjectMap = new Map(Object.entries(getSubjectNameMap(buildSubjectCatalog(adminSubjects ?? []))))
     const resolveSubjects = (ids: string[] | null) =>
@@ -185,8 +213,7 @@ export default async function DashboardHome() {
           ))}
         </div>
 
-        <div className="space-y-6">
-          <Card>
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-[#b08a30]" />
@@ -198,65 +225,189 @@ export default async function DashboardHome() {
                 </Button>
               </Link>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0">
               {recentOrders && recentOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {recentOrders.map((order) => {
-                    const amountLabel = formatOrderAmount(order)
-                    return (
-                      <Link
-                        key={order.id}
-                        href={`/dashboard/orders/${order.id}`}
-                        className="block rounded-lg border border-gray-100 p-4 hover:bg-gray-50/40 hover:border-gray-300 transition-colors"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2.5 flex-wrap">
-                              <p className="font-medium text-[#1e293b]">{order.student?.full_name || 'Student not assigned'}</p>
-                              <span className="text-xs text-gray-400">Owner: {order.customers?.full_name || 'Unknown'}</span>
-                              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
+                <div
+                  className="max-h-[22rem] overflow-auto overscroll-contain"
+                  role="region"
+                  aria-label="Recent orders"
+                  tabIndex={0}
+                >
+                  <table className="w-full min-w-[940px] text-left">
+                    <thead className="sticky top-0 z-10 border-y border-gray-100 bg-slate-50/95 backdrop-blur-sm">
+                      <tr>
+                        <th className="px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Account Owner</th>
+                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Student</th>
+                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</th>
+                        <th className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500">Payment</th>
+                        <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Scheduled</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
+                        <th className="px-6 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {recentOrders.map((order) => {
+                        const orderHref = `/dashboard/orders/${order.id}`
+                        const ownerName = order.customers?.full_name || 'Unknown customer'
+                        const studentName = order.student?.full_name || 'Student not assigned'
+                        const paymentLabel = formatPaymentMethod(order.payment_method ?? order.payments?.[0]?.payment_method)
+                        const scheduled = isOrderScheduled(order)
+                        return (
+                          <tr key={order.id} className="transition-colors hover:bg-gray-50/70">
+                            <td className="p-0">
+                              <Link href={orderHref} className="block truncate px-6 py-3 text-sm font-semibold text-[#1e293b]">
+                                {ownerName}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link href={orderHref} className="block truncate px-4 py-3 text-sm text-gray-600">
+                                {studentName}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link href={orderHref} className="block truncate px-4 py-3 text-sm text-gray-600">
                                 {resolvePlanLabel(order)}
-                              </span>
-                              <span className="text-xs font-bold text-[#1e293b]">{amountLabel}</span>
-                              <span className="text-xs font-medium text-gray-500">
-                                {formatPaymentMethod(order.payment_method ?? order.payments?.[0]?.payment_method)}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                              {resolveSubjects(order.subjects) && (
-                                <span className="flex items-center gap-1">
-                                  <BookOpen className="h-3 w-3 shrink-0" />
-                                  {resolveSubjects(order.subjects)}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link href={orderHref} className="block px-4 py-3 text-sm font-medium text-[#87691f]">
+                                {paymentLabel}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link
+                                href={orderHref}
+                                aria-label={`Scheduled: ${scheduled ? 'Yes' : 'No'}`}
+                                className="flex items-center justify-center px-4 py-3"
+                              >
+                                <span className={`inline-flex min-w-10 justify-center rounded-full px-2 py-1 text-xs font-semibold ${
+                                  scheduled
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {scheduled ? 'Yes' : 'No'}
                                 </span>
-                              )}
-                              <span className="flex items-center gap-1 capitalize">
-                                {order.session_type === 'online'
-                                  ? <Video className="h-3 w-3 shrink-0" />
-                                  : <MapPin className="h-3 w-3 shrink-0" />}
-                                {order.session_type === 'in-person' ? 'In Person' : order.session_type}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
-                            <span>{new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link href={orderHref} className="block px-4 py-3 text-right text-sm font-semibold text-[#1e293b]">
+                                {formatOrderAmount(order)}
+                              </Link>
+                            </td>
+                            <td className="p-0">
+                              <Link href={orderHref} className="block px-6 py-3 text-right text-sm text-gray-500">
+                                {new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </Link>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               ) : (
-                <div className="py-8 text-center">
+                <div className="px-6 py-8 text-center">
                   <CreditCard className="h-8 w-8 text-gray-300 mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-500">No orders yet</p>
                   <p className="text-xs text-gray-400 mt-0.5">Paid bookings will show up here</p>
                 </div>
               )}
             </CardContent>
+        </Card>
+
+        <div className="grid gap-6 xl:grid-cols-2 xl:items-stretch">
+
+          <Card className="flex h-full flex-col">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-600" />
+                Needs Scheduling
+              </CardTitle>
+              <Link href="/dashboard/sessions">
+                <Button variant="ghost" size="sm" className="text-[#4a729f]">
+                  View all <ChevronRight className="h-4 w-4 ml-0.5" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col">
+              {needsScheduling.length > 0 ? (
+                <div
+                  className="max-h-[34rem] space-y-3 overflow-y-auto overscroll-contain pr-1 xl:h-[34rem]"
+                  role="region"
+                  aria-label="Sessions needing scheduling"
+                  tabIndex={0}
+                >
+                  {needsScheduling.map((session) => {
+                    const subjectsLabel = resolveSubjects(session.subjects)
+                    const sessionTypeLabel = session.session_type === 'in-person'
+                      ? 'In Person'
+                      : session.session_type
+                    return (
+                      <Link
+                        key={session.id}
+                        href="/dashboard/sessions"
+                        className="block rounded-lg border border-amber-100 p-4 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold text-[#1e293b]">
+                              {session.student?.full_name || 'Student not assigned'}
+                            </p>
+                            <p className="mt-0.5 truncate text-xs text-gray-500">
+                              Owner: {session.customers?.full_name || 'Unknown customer'}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-start gap-2 text-right">
+                            <div>
+                              <p className="text-xs font-medium text-amber-700">Awaiting schedule</p>
+                              <p className="mt-0.5 text-xs text-gray-400">
+                                Since {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              </p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {session.tutors?.full_name ? (
+                            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+                              <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+                              {session.tutors.full_name}
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                              Tutor not assigned
+                            </span>
+                          )}
+                          {sessionTypeLabel && (
+                            <span className="flex items-center gap-1 rounded-full bg-[#517cad]/10 px-2 py-1 text-xs font-medium text-[#4a729f]">
+                              {session.session_type === 'online'
+                                ? <Video className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                : <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />}
+                              {sessionTypeLabel}
+                            </span>
+                          )}
+                        </div>
+                        {subjectsLabel && (
+                          <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-gray-500">
+                            <BookOpen className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                            <span>{subjectsLabel}</span>
+                          </p>
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center py-8 text-center xl:min-h-[34rem]">
+                  <CheckCircle className="mb-2 h-8 w-8 text-emerald-300" aria-hidden="true" />
+                  <p className="text-sm font-medium text-gray-500">Everything is scheduled</p>
+                  <p className="mt-0.5 text-xs text-gray-400">New unscheduled sessions will show up here</p>
+                </div>
+              )}
+            </CardContent>
           </Card>
 
-          <Card>
+          <Card className="flex h-full flex-col">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
@@ -268,89 +419,91 @@ export default async function DashboardHome() {
                 </Button>
               </Link>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-1 flex-col">
               {upcomingSessions && upcomingSessions.length > 0 ? (
-                <div className="space-y-3">
-                  {upcomingSessions.map((session) => (
-                    <Link
-                      key={session.id}
-                      href="/dashboard/sessions"
-                      className="block rounded-lg border border-emerald-100 p-4 hover:bg-emerald-50/40 hover:border-emerald-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <p className="font-medium text-[#1e293b]">{session.student?.full_name || 'Student not assigned'}</p>
-                            <span className="text-xs text-gray-400">Owner: {session.customers?.full_name || 'Unknown'}</span>
-                            {session.tutors?.full_name && (
-                              <span className="flex items-center gap-1 text-xs text-gray-500">
-                                <Users className="h-3 w-3 shrink-0" />
-                                {session.tutors.full_name}
-                              </span>
+                <div
+                  className="max-h-[34rem] space-y-3 overflow-y-auto overscroll-contain pr-1 xl:h-[34rem]"
+                  role="region"
+                  aria-label="Upcoming sessions"
+                  tabIndex={0}
+                >
+                  {upcomingSessions.map((session) => {
+                    const subjectsLabel = resolveSubjects(session.subjects)
+                    const sessionTypeLabel = session.session_type === 'in-person'
+                      ? 'In Person'
+                      : session.session_type
+                    return (
+                      <Link
+                        key={session.id}
+                        href="/dashboard/sessions"
+                        className="block rounded-lg border border-emerald-100 p-4 transition-colors hover:border-emerald-300 hover:bg-emerald-50/40"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-semibold text-[#1e293b]">
+                              {session.student?.full_name || 'Student not assigned'}
+                            </p>
+                            <p className="mt-0.5 truncate text-xs text-gray-500">
+                              Owner: {session.customers?.full_name || 'Unknown customer'}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-start gap-2 text-sm text-gray-500">
+                            {session.confirmed_start ? (
+                              <div className="text-right">
+                                <span className="flex items-center justify-end gap-1.5 font-medium text-gray-600">
+                                  <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                  {formatBusinessDate(session.confirmed_start, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {formatBusinessTime(session.confirmed_start)}
+                                  {session.confirmed_end && (
+                                    <> – {formatBusinessTime(session.confirmed_end)}</>
+                                  )}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs italic">Not scheduled</span>
                             )}
-                            <span className="flex items-center gap-1 text-xs text-gray-400 capitalize">
-                              {session.session_type === 'online'
-                                ? <Video className="h-3 w-3 shrink-0" />
-                                : <MapPin className="h-3 w-3 shrink-0" />}
-                              {session.session_type === 'in-person' ? 'In Person' : session.session_type}
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {session.tutors?.full_name && (
+                            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+                              <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+                              {session.tutors.full_name}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                            {resolveSubjects(session.subjects) && (
-                              <span className="flex items-center gap-1">
-                                <BookOpen className="h-3 w-3 shrink-0" />
-                                {resolveSubjects(session.subjects)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
-                          {session.confirmed_start ? (
-                            <div className="text-right">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar className="h-3.5 w-3.5 shrink-0" />
-                                {formatBusinessDate(session.confirmed_start, { weekday: 'short', month: 'short', day: 'numeric' })}
-                              </span>
-                              <span className="text-xs text-gray-400">
-                                {formatBusinessTime(session.confirmed_start)}
-                                {session.confirmed_end && (
-                                  <> – {formatBusinessTime(session.confirmed_end)}</>
-                                )}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="italic text-xs">Not scheduled</span>
                           )}
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                          {sessionTypeLabel && (
+                            <span className="flex items-center gap-1 rounded-full bg-[#517cad]/10 px-2 py-1 text-xs font-medium text-[#4a729f]">
+                              {session.session_type === 'online'
+                                ? <Video className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                : <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />}
+                              {sessionTypeLabel}
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                        {subjectsLabel && (
+                          <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-gray-500">
+                            <BookOpen className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                            <span>{subjectsLabel}</span>
+                          </p>
+                        )}
+                      </Link>
+                    )
+                  })}
                 </div>
               ) : (
-                <div className="py-8 text-center">
-                  <Calendar className="h-8 w-8 text-gray-300 mx-auto mb-2" aria-hidden="true" />
+                <div className="flex flex-1 flex-col items-center justify-center py-8 text-center xl:min-h-[34rem]">
+                  <Calendar className="mb-2 h-8 w-8 text-gray-300" aria-hidden="true" />
                   <p className="text-sm font-medium text-gray-500">No upcoming sessions</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Scheduled sessions will show up here</p>
+                  <p className="mt-0.5 text-xs text-gray-400">Scheduled sessions will show up here</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Stacked full-width on phones — a fixed row of three overflowed the
-            viewport sideways. */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild>
-            <Link href="/dashboard/orders">Manage Orders</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/sessions">Manage Sessions</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/tutors">Manage Tutors</Link>
-          </Button>
-        </div>
       </div>
     )
   }
