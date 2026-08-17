@@ -6,7 +6,6 @@ import { Check, CreditCard, Landmark, Loader2, WalletCards } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -256,9 +255,6 @@ export function PaymentMethodSelection({
             <Button asChild variant="outline">
               <Link href="/contact">Contact ScoreMax</Link>
             </Button>
-            <DialogClose asChild>
-              <Button variant="outline">Choose Another Payment Method</Button>
-            </DialogClose>
           </div>
         </DialogContent>
       </Dialog>

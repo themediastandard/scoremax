@@ -6,11 +6,12 @@ import { AvailabilityForm, isAvailabilityReady } from '@/components/booking/Avai
 import { ContactForm } from '@/components/booking/ContactForm'
 import { PlanSelection } from '@/components/booking/PlanSelection'
 import { StudentSelection } from '@/components/booking/StudentSelection'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef, useCallback, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { normalizeAvailabilityWindows } from '@/lib/availability-windows'
-import { Check, Loader2 } from 'lucide-react'
+import { Check, Loader2, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { OfflinePaymentMethod } from '@/lib/payment-method'
 import type { SignupCompletionResponse, StudentCreditSummaryResponse, StudentDto } from '@/lib/student-contract'
@@ -188,7 +189,10 @@ export default function BookPage() {
   // which shows the address rather than asking for it again.
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null)
 
-  const loadStudents = useCallback(async (preferredStudentId?: string) => {
+  const loadStudents = useCallback(async (
+    preferredStudentId?: string,
+    advanceAfterSelection = false
+  ) => {
     setStudentStatus('loading')
     try {
       const pendingGoogleSignup = readPendingGoogleSignup(window.sessionStorage)
@@ -228,6 +232,8 @@ export default function BookPage() {
         : null
       if (preferredStudent) {
         setState((previous) => ({ ...previous, studentId: preferredStudent.id }))
+      }
+      if (preferredStudent && advanceAfterSelection) {
         setRevealed((previous) => ({ ...previous, subjects: true }))
         setActiveSection('subjects')
       }
@@ -589,29 +595,54 @@ export default function BookPage() {
           </div>
         )}
 
+        {studentStatus === 'signed_out' && (
+          <div className="rounded-xl border border-[#b08a30]/35 bg-amber-50/50 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <LogIn className="mt-0.5 h-5 w-5 shrink-0 text-[#8a6a25]" aria-hidden="true" />
+              <div>
+                <p className="font-semibold text-[#1e293b]">Create an account or sign in before booking</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  At ScoreMax, we save all your orders and sessions in your portal. Creating an account or signing in before booking helps us keep everything organized.
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <Button asChild className="bg-[#1e293b] hover:bg-[#334155]">
+                    <Link href={`/register?next=${encodeURIComponent('/book')}`}>Create Account</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href={`/login?next=${encodeURIComponent('/book')}`}>Sign In</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Parents choose a managed child. Student accounts are assigned to
             their own active profile server-side and begin with subjects. */}
         {!isStudentAccount && (
           <BookingSection
             step={1}
             title="Who is this session for?"
-            isOpen={activeSection === 'student'}
+            isOpen={activeSection === 'student' && studentStatus !== 'signed_out'}
             isCompleted={revealed.subjects && Boolean(selectedStudent)}
             summary={selectedStudent?.fullName}
             onEdit={() => setActiveSection('student')}
+            disabled={studentStatus === 'signed_out'}
           >
-            <StudentSelection
-              students={students}
-              selectedStudentId={state.studentId}
-              status={studentStatus}
-              onSelect={(student) => {
-                updateStudent(student.id)
-                setAuthoritativeBlockedMethod(null)
-              }}
-              onContinue={() => handleNext('student')}
-              onRetry={() => void loadStudents()}
-              onStudentCreated={(studentId) => void loadStudents(studentId)}
-            />
+            {studentStatus !== 'signed_out' && (
+              <StudentSelection
+                students={students}
+                selectedStudentId={state.studentId}
+                status={studentStatus}
+                onSelect={(student) => {
+                  updateStudent(student.id)
+                  setAuthoritativeBlockedMethod(null)
+                }}
+                onContinue={() => handleNext('student')}
+                onRetry={() => void loadStudents()}
+                onStudentCreated={(studentId) => void loadStudents(studentId, true)}
+              />
+            )}
           </BookingSection>
         )}
 

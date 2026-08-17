@@ -76,7 +76,7 @@ test('unapproved Step Up and Zelle choices use the exact fail-closed copy and ac
 
   assert.match(paymentSelector, /<DialogTitle>Account Not Approved<\/DialogTitle>/)
   assert.match(paymentSelector, /<Link href="\/contact">Contact ScoreMax<\/Link>/)
-  assert.match(paymentSelector, />Choose Another Payment Method<\/Button>/)
+  assert.doesNotMatch(paymentSelector, /Choose Another Payment Method/)
   assert.match(paymentSelector, /Check Approval Again\s*<\/Button>/)
   assert.match(paymentSelector, /cache: 'no-store'/)
   assert.match(paymentSelector, /status\.signedIn && status\.approvals\[method\]/)

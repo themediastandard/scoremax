@@ -1,7 +1,7 @@
 "use client"
 
 import Link from 'next/link'
-import { AlertCircle, GraduationCap, Loader2, LogIn } from 'lucide-react'
+import { AlertCircle, GraduationCap, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { StudentDto } from '@/lib/student-contract'
 import { AddFirstStudentForm } from '@/components/booking/AddFirstStudentForm'
@@ -9,7 +9,7 @@ import { AddFirstStudentForm } from '@/components/booking/AddFirstStudentForm'
 interface StudentSelectionProps {
   students: StudentDto[]
   selectedStudentId: string | null
-  status: 'loading' | 'signed_out' | 'ready' | 'error'
+  status: 'loading' | 'ready' | 'error'
   onSelect: (student: StudentDto) => void
   onContinue: () => void
   onRetry: () => void
@@ -30,30 +30,6 @@ export function StudentSelection({
       <div className="flex min-h-36 items-center justify-center gap-2 text-sm text-gray-500" role="status">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         Loading your students…
-      </div>
-    )
-  }
-
-  if (status === 'signed_out') {
-    return (
-      <div className="rounded-xl border border-[#b08a30]/35 bg-amber-50/50 p-5 sm:p-6">
-        <div className="flex items-start gap-3">
-          <LogIn className="mt-0.5 h-5 w-5 shrink-0 text-[#8a6a25]" aria-hidden="true" />
-          <div>
-            <p className="font-semibold text-[#1e293b]">Create an account before booking</p>
-            <p className="mt-1 text-sm leading-6 text-gray-600">
-              Parents add their students during signup so every session reaches the right family member.
-            </p>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="bg-[#1e293b] hover:bg-[#334155]">
-                <Link href={`/register?next=${encodeURIComponent('/book')}`}>Create Account</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href={`/login?next=${encodeURIComponent('/book')}`}>Sign In</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     )
   }
