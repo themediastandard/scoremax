@@ -225,10 +225,7 @@ export default function RegisterPage() {
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-black mb-2">
               Create an account
             </h1>
-            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
-            <p className="text-black text-sm leading-relaxed mb-8">
-              Enter your information to get started.
-            </p>
+            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-8" />
           </div>
 
           <form onSubmit={handleRegister} className="space-y-6">
@@ -527,6 +524,10 @@ export default function RegisterPage() {
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   Add Another Student
                 </Button>
+                <p className="rounded-lg border border-[#b08a30]/20 bg-white px-4 py-3 text-xs leading-5 text-gray-600">
+                  <span className="font-semibold text-[#1e293b]">Tip:</span>{' '}
+                  At least one student is required to continue signing up. You can log into your account and manage your students in your ScoreMax portal after your account is created.
+                </p>
               </fieldset>
             )}
 
@@ -543,7 +544,11 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
-                  disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
+                  disabled={
+                    loading ||
+                    (AUTH_CAPTCHA_CONFIGURED && !captchaToken) ||
+                    (accountType === 'parent' && Boolean(signupStudentDraftError(students)))
+                  }
                 >
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
                 </Button>

@@ -28,7 +28,9 @@ export function GoogleAuthButton({
 }) {
   const signupDetailsMissing =
     mode === 'signup' &&
-    (!signupAccountType || (signupAccountType === 'student' && !studentGrade))
+    (!signupAccountType ||
+      (signupAccountType === 'student' && !studentGrade) ||
+      (signupAccountType === 'parent' && Boolean(signupStudentDraftError(signupStudents))))
 
   const handleGoogle = async () => {
     if (signupDetailsMissing) return
