@@ -18,7 +18,7 @@ import {
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
-import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck, Plus, Trash2, UserRound, Users } from 'lucide-react'
+import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, Mail, MailCheck, Plus, Trash2, UserRound, Users } from 'lucide-react'
 import type { AccountType } from '@/lib/account-type'
 import { GRADE_OPTIONS } from '@/lib/student-grades'
 import { readBookContinuation, withBookContinuation } from '@/lib/auth-continuation'
@@ -36,6 +36,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [accountType, setAccountType] = useState<AccountType | null>(null)
+  const [signupMethod, setSignupMethod] = useState<'email' | 'google' | null>(null)
   const [studentGrade, setStudentGrade] = useState('')
   const [students, setStudents] = useState<SignupStudentDraft[]>([{ ...EMPTY_STUDENT }])
   const [nextPath, setNextPath] = useState<'/book' | null>(null)
@@ -61,6 +62,10 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (signupMethod !== 'email') {
+      setError('Use Continue with Google below to create your account')
+      return
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       return
@@ -226,13 +231,14 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <fieldset className="mb-6 space-y-3">
-            <legend className="text-sm font-medium text-gray-900">Who will use this account?</legend>
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={handleRegister} className="space-y-6">
+            <fieldset className="space-y-3 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+            <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">Who will use this account?</legend>
+            <div className="!mt-2 grid grid-cols-2 gap-3">
               {([
                 {
                   value: 'parent' as const,
-                  label: 'Parent/Guardian',
+                  label: 'Parent / Guardian',
                   description: 'Book and manage sessions for your children',
                   icon: Users,
                 },
@@ -248,10 +254,10 @@ export default function RegisterPage() {
                 return (
                   <label
                     key={option.value}
-                    className={`cursor-pointer border p-4 transition-colors focus-within:ring-2 focus-within:ring-[#b08a30] focus-within:ring-offset-2 ${
+                    className={`cursor-pointer border p-4 transition-colors focus-within:border-[#b08a30] focus-within:shadow-sm ${
                       selected
-                        ? 'border-[#b08a30] bg-[#b08a30]/5'
-                        : 'border-gray-200 hover:border-[#b08a30]/50'
+                        ? 'border-[#b08a30] bg-white shadow-sm'
+                        : 'border-gray-200 bg-white hover:border-[#b08a30]/50'
                     }`}
                   >
                     <input
@@ -261,6 +267,8 @@ export default function RegisterPage() {
                       checked={selected}
                       onChange={() => {
                         setAccountType(option.value)
+                        setSignupMethod(null)
+                        setError(null)
                         if (option.value === 'parent') setStudentGrade('')
                       }}
                       className="sr-only"
@@ -272,232 +280,289 @@ export default function RegisterPage() {
                 )
               })}
             </div>
-          </fieldset>
+            </fieldset>
 
-          {accountType === 'student' && (
-            <div className="mb-6 space-y-2">
-              <Label htmlFor="signup-student-grade">Your Grade</Label>
-              <Select value={studentGrade || undefined} onValueChange={setStudentGrade}>
-                <SelectTrigger id="signup-student-grade" className="h-11 w-full" aria-required="true">
-                  <SelectValue placeholder="Select grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {GRADE_OPTIONS.map((grade) => (
-                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs leading-5 text-gray-500">
-                Your student profile will be created automatically using this account&apos;s name and email.
-              </p>
-            </div>
-          )}
-
-          {accountType === 'parent' && (
-            <fieldset className="mb-6 space-y-4">
-              <legend className="text-sm font-medium text-gray-900">Add your student{students.length > 1 ? 's' : ''}</legend>
-              <div>
-                <p className="mt-1 text-xs leading-5 text-gray-500">
-                  Student emails receive session schedules and reminders. They do not create separate logins.
-                </p>
+            {accountType && (
+            <fieldset className="space-y-3 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+              <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">How would you like to sign up?</legend>
+              <div className="!mt-2 grid grid-cols-2 gap-3">
+                {([
+                  {
+                    value: 'email' as const,
+                    label: 'Email',
+                    description: 'Sign up with your email',
+                    icon: Mail,
+                  },
+                  {
+                    value: 'google' as const,
+                    label: 'Google',
+                    description: 'Sign up with Google',
+                    icon: UserRound,
+                  },
+                ]).map((option) => {
+                  const Icon = option.icon
+                  const selected = signupMethod === option.value
+                  return (
+                    <label
+                      key={option.value}
+                      className={`cursor-pointer border p-4 transition-colors focus-within:border-[#b08a30] focus-within:shadow-sm ${
+                        selected
+                          ? 'border-[#b08a30] bg-white shadow-sm'
+                          : 'border-gray-200 bg-white hover:border-[#b08a30]/50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="signup-method"
+                        value={option.value}
+                        checked={selected}
+                        onChange={() => {
+                          setSignupMethod(option.value)
+                          setError(null)
+                        }}
+                        className="sr-only"
+                      />
+                      <Icon className={`pointer-events-none h-5 w-5 ${selected ? 'text-[#b08a30]' : 'text-gray-400'}`} aria-hidden="true" />
+                      <span className="mt-2 block text-sm font-semibold text-gray-900">{option.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-gray-500">{option.description}</span>
+                    </label>
+                  )
+                })}
               </div>
-              {students.map((student, index) => (
-                <div key={index} className="space-y-4 rounded-xl border border-gray-200 bg-slate-50/60 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-[#1e293b]">Student {index + 1}</p>
-                    {students.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-500 hover:text-red-700"
-                        onClick={() => setStudents((current) => current.filter((_, studentIndex) => studentIndex !== index))}
-                        aria-label={`Remove student ${index + 1}`}
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`signup-student-${index}-name`}>Student Name</Label>
+            </fieldset>
+            )}
+
+            {accountType && signupMethod === 'email' && (
+              <fieldset className="space-y-4 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+                <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">
+                  {accountType === 'parent' ? 'Parent / Guardian Information' : 'Student Information'}
+                </legend>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">
+                    {accountType === 'parent' ? 'Parent / Guardian Name' : 'Full Name'}
+                  </Label>
+                  <Input
+                    id="fullName"
+                    placeholder="First and Last Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">
+                    {accountType === 'parent' ? 'Parent / Guardian Email' : 'Email'}
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                  />
+                </div>
+              </fieldset>
+            )}
+
+            {signupMethod && accountType === 'student' && (
+              <fieldset className="space-y-2 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+                <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">
+                  Student Details
+                </legend>
+                <Label htmlFor="signup-student-grade">Your Grade</Label>
+                <Select value={studentGrade || undefined} onValueChange={setStudentGrade}>
+                  <SelectTrigger id="signup-student-grade" className="h-11 w-full bg-white focus-visible:border-[#b08a30] focus-visible:ring-0" aria-required="true">
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GRADE_OPTIONS.map((grade) => (
+                      <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </fieldset>
+            )}
+
+            {signupMethod === 'email' && (
+              <fieldset className="space-y-4 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+                <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">
+                  Secure your account
+                </legend>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
                     <Input
-                      id={`signup-student-${index}-name`}
-                      value={student.fullName}
-                      onChange={(event) => updateStudent(index, { fullName: event.target.value })}
-                      maxLength={200}
-                      autoComplete="name"
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="h-11 bg-white"
+                      className="pr-10 h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
                     />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor={`signup-student-${index}-email`}>Student Email</Label>
-                      <Input
-                        id={`signup-student-${index}-email`}
-                        type="email"
-                        value={student.email}
-                        onChange={(event) => updateStudent(index, { email: event.target.value })}
-                        maxLength={320}
-                        autoComplete="email"
-                        required
-                        className="h-11 bg-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`signup-student-${index}-phone`}>
-                        Student Phone <span className="font-normal text-gray-500">(Optional)</span>
-                      </Label>
-                      <Input
-                        id={`signup-student-${index}-phone`}
-                        type="tel"
-                        value={student.phone}
-                        onChange={(event) => updateStudent(index, { phone: event.target.value })}
-                        maxLength={50}
-                        autoComplete="tel"
-                        className="h-11 bg-white"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`signup-student-${index}-grade`}>Grade</Label>
-                    <Select value={student.grade || undefined} onValueChange={(grade) => updateStudent(index, { grade })}>
-                      <SelectTrigger id={`signup-student-${index}-grade`} className="h-11 w-full bg-white" aria-required="true">
-                        <SelectValue placeholder="Select grade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GRADE_OPTIONS.map((grade) => (
-                          <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <button
+                      type="button"
+                      tabIndex={0}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setStudents((current) => [...current, { ...EMPTY_STUDENT }])}
-                disabled={students.length >= 10}
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Add Another Student
-              </Button>
-            </fieldset>
-          )}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="pr-10 h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                    />
+                    <button
+                      type="button"
+                      tabIndex={0}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowConfirmPassword((p) => !p)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </fieldset>
+            )}
 
-          <GoogleAuthButton
-            mode="signup"
-            signupAccountType={accountType}
-            studentGrade={studentGrade}
-            signupStudents={accountType === 'parent' ? students : undefined}
-            next={nextPath ?? '/book'}
-            onError={setError}
-          />
-
-          {!accountType && (
-            <p className="mt-2 text-center text-xs text-gray-500">
-              Choose an account type before continuing with Google.
-            </p>
-          )}
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs uppercase tracking-widest text-gray-500">
-                Or continue with email
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={handleRegister} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="pr-10 h-11"
-                />
-                <button
+            {signupMethod && accountType === 'parent' && (
+              <fieldset className="space-y-4 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+                <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">
+                  Add your student{students.length > 1 ? 's' : ''}
+                </legend>
+                {students.map((student, index) => (
+                  <div key={index} className="space-y-4 rounded-xl border border-[#b08a30]/20 bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-[#1e293b]">Student {index + 1}</p>
+                      {students.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 hover:text-red-700"
+                          onClick={() => setStudents((current) => current.filter((_, studentIndex) => studentIndex !== index))}
+                          aria-label={`Remove student ${index + 1}`}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`signup-student-${index}-name`}>Student Name</Label>
+                      <Input
+                        id={`signup-student-${index}-name`}
+                        value={student.fullName}
+                        onChange={(event) => updateStudent(index, { fullName: event.target.value })}
+                        maxLength={200}
+                        autoComplete="name"
+                        required
+                        className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor={`signup-student-${index}-email`}>Student Email</Label>
+                        <Input
+                          id={`signup-student-${index}-email`}
+                          type="email"
+                          value={student.email}
+                          onChange={(event) => updateStudent(index, { email: event.target.value })}
+                          maxLength={320}
+                          autoComplete="email"
+                          required
+                          className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`signup-student-${index}-phone`}>
+                          Student Phone <span className="font-normal text-gray-500">(Optional)</span>
+                        </Label>
+                        <Input
+                          id={`signup-student-${index}-phone`}
+                          type="tel"
+                          value={student.phone}
+                          onChange={(event) => updateStudent(index, { phone: event.target.value })}
+                          maxLength={50}
+                          autoComplete="tel"
+                          className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`signup-student-${index}-grade`}>Grade</Label>
+                      <Select value={student.grade || undefined} onValueChange={(grade) => updateStudent(index, { grade })}>
+                        <SelectTrigger id={`signup-student-${index}-grade`} className="h-11 w-full bg-white focus-visible:border-[#b08a30] focus-visible:ring-0" aria-required="true">
+                          <SelectValue placeholder="Select grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {GRADE_OPTIONS.map((grade) => (
+                            <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ))}
+                <Button
                   type="button"
-                  tabIndex={0}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer"
+                  variant="outline"
+                  className="w-full border-[#b08a30]/50 bg-white text-[#1e293b] hover:bg-[#b08a30]/10"
+                  onClick={() => setStudents((current) => [...current, { ...EMPTY_STUDENT }])}
+                  disabled={students.length >= 10}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="pr-10 h-11"
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Add Another Student
+                </Button>
+              </fieldset>
+            )}
+
+            {signupMethod === 'email' && (
+              <>
+                <AuthTurnstile
+                  key={captchaGeneration}
+                  action="register"
+                  onTokenChange={setCaptchaToken}
                 />
-                <button
-                  type="button"
-                  tabIndex={0}
-                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowConfirmPassword((p) => !p)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 cursor-pointer"
+
+                {error && <p className="text-sm text-red-500">{error}</p>}
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
+                  disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
+                </Button>
+              </>
+            )}
+
+            {signupMethod === 'google' && (
+              <div className="space-y-3">
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <GoogleAuthButton
+                  mode="signup"
+                  signupAccountType={accountType}
+                  studentGrade={studentGrade}
+                  signupStudents={accountType === 'parent' ? students : undefined}
+                  next={nextPath ?? '/book'}
+                  onError={setError}
+                />
               </div>
-            </div>
-
-            <AuthTurnstile
-              key={captchaGeneration}
-              action="register"
-              onTokenChange={setCaptchaToken}
-            />
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <Button
-              type="submit"
-              className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
-              disabled={loading || (AUTH_CAPTCHA_CONFIGURED && !captchaToken)}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
-            </Button>
+            )}
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">

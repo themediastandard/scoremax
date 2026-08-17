@@ -11,7 +11,7 @@ const completion = readSource('src/app/api/auth/complete-signup/route.ts')
 
 test('signup explicitly requires parent or student instead of guessing', () => {
   assert.match(registerPage, /Who will use this account\?/)
-  assert.match(registerPage, /Parent\/Guardian/)
+  assert.match(registerPage, /Parent \/ Guardian/)
   assert.match(registerPage, /Student/)
   assert.match(registerPage, /account_type: accountType/)
   assert.match(registerPage, /if \(!accountType\)/)
@@ -21,7 +21,9 @@ test('signup explicitly requires parent or student instead of guessing', () => {
 test('student signup requires a grade and creates a self student through trusted server paths', () => {
   assert.match(registerPage, /accountType === 'student' && !studentGrade/)
   assert.match(registerPage, /student_grade: studentGrade/)
-  assert.match(registerPage, /Your student profile will be created automatically/)
+  assert.match(registerPage, /Student Details/)
+  assert.match(registerPage, /Label htmlFor="signup-student-grade">Your Grade/)
+  assert.match(registerPage, /signupMethod && accountType === 'student'/)
   assert.match(completion, /GRADE_OPTIONS\.includes\(body\.studentGrade\)/)
   assert.match(completion, /ensureSelfStudent\(customer\)/)
   assert.match(completion, /customer\.account_type === 'student'/)
