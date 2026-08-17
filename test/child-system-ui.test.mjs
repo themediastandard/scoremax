@@ -21,11 +21,20 @@ test('booking contact copy tells both recipients about schedules and reminders',
 })
 
 test('managed student grade never comes from legacy booking contact state or payloads', () => {
-  for (const source of [bookingPage, bookingHook, contactForm]) {
+  for (const source of [bookingHook, contactForm]) {
     assert.doesNotMatch(source, /studentGrade/)
     assert.doesNotMatch(source, /student_grade/)
   }
 
+  const bookingSubmissionStart = bookingPage.indexOf('// 1. If using credit (member)')
+  const bookingSubmissionEnd = bookingPage.indexOf('if (loadingSubjects)')
+  assert.ok(bookingSubmissionStart >= 0)
+  assert.ok(bookingSubmissionEnd > bookingSubmissionStart)
+  const bookingSubmission = bookingPage.slice(bookingSubmissionStart, bookingSubmissionEnd)
+  assert.doesNotMatch(bookingSubmission, /studentGrade/)
+  assert.doesNotMatch(bookingSubmission, /student_grade/)
+  assert.match(bookingPage, /fetch\('\/api\/auth\/complete-signup'/)
+  assert.match(bookingPage, /studentGrade: pendingGoogleSignup\?\.accountType === 'student'/)
   assert.match(bookingPage, /student_id:\s*state\.studentId/)
 })
 

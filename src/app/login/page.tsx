@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -12,6 +12,7 @@ import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
 import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award } from 'lucide-react'
+import { readBookContinuation, withBookContinuation } from '@/lib/auth-continuation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,8 +26,13 @@ export default function LoginPage() {
   const [lastUsedGoogle, setLastUsedGoogle] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [captchaGeneration, setCaptchaGeneration] = useState(0)
+  const [nextPath, setNextPath] = useState<'/book' | null>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    setNextPath(readBookContinuation(new URLSearchParams(window.location.search).get('next')))
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,7 +79,7 @@ export default function LoginPage() {
         body: JSON.stringify({ provider: 'email' }),
       }).catch(() => {})
 
-      router.push('/dashboard')
+      router.push(nextPath ?? '/dashboard')
       router.refresh()
     }
   }
@@ -154,7 +160,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <GoogleAuthButton mode="signin" />
+          <GoogleAuthButton mode="signin" next={nextPath} />
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
@@ -256,7 +262,7 @@ export default function LoginPage() {
               breaking the line box. Set in the body colour with a permanent
               underline instead — same treatment as links in the legal pages.
             */}
-            <Link href="/register" className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
+            <Link href={withBookContinuation('/register', nextPath)} className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
               Sign up
             </Link>
           </p>

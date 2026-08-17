@@ -1,9 +1,10 @@
 "use client"
 
 import Link from 'next/link'
-import { AlertCircle, GraduationCap, Loader2, LogIn, UserPlus } from 'lucide-react'
+import { AlertCircle, GraduationCap, Loader2, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { StudentDto } from '@/lib/student-contract'
+import { AddFirstStudentForm } from '@/components/booking/AddFirstStudentForm'
 
 interface StudentSelectionProps {
   students: StudentDto[]
@@ -12,6 +13,7 @@ interface StudentSelectionProps {
   onSelect: (student: StudentDto) => void
   onContinue: () => void
   onRetry: () => void
+  onStudentCreated: (studentId: string) => void
 }
 
 export function StudentSelection({
@@ -21,6 +23,7 @@ export function StudentSelection({
   onSelect,
   onContinue,
   onRetry,
+  onStudentCreated,
 }: StudentSelectionProps) {
   if (status === 'loading') {
     return (
@@ -37,13 +40,18 @@ export function StudentSelection({
         <div className="flex items-start gap-3">
           <LogIn className="mt-0.5 h-5 w-5 shrink-0 text-[#8a6a25]" aria-hidden="true" />
           <div>
-            <p className="font-semibold text-[#1e293b]">Sign in to choose a student</p>
+            <p className="font-semibold text-[#1e293b]">Create an account before booking</p>
             <p className="mt-1 text-sm leading-6 text-gray-600">
-              A parent or account owner must sign in before booking for a managed student.
+              Parents add their students during signup so every session reaches the right family member.
             </p>
-            <Button asChild className="mt-4 bg-[#1e293b] hover:bg-[#334155]">
-              <Link href={`/login?next=${encodeURIComponent('/book')}`}>Sign In</Link>
-            </Button>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Button asChild className="bg-[#1e293b] hover:bg-[#334155]">
+                <Link href={`/register?next=${encodeURIComponent('/book')}`}>Create Account</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={`/login?next=${encodeURIComponent('/book')}`}>Sign In</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -72,19 +80,10 @@ export function StudentSelection({
 
   if (activeStudents.length === 0) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white p-7 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#517cad]/10">
-          <UserPlus className="h-6 w-6 text-[#4a729f]" aria-hidden="true" />
-        </div>
-        <p className="mt-4 font-semibold text-[#1e293b]">Add a student before booking</p>
-        <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-gray-500">
-          Every booking must be assigned to an active student on your account.
-        </p>
-        <Button asChild className="mt-5 bg-[#1e293b] hover:bg-[#334155]">
-          <Link href="/dashboard/students">Add a Student</Link>
-        </Button>
+      <div className="space-y-3">
+        <AddFirstStudentForm onCreated={onStudentCreated} />
         {inactiveCount > 0 && (
-          <p className="mt-3 text-xs text-gray-500">
+          <p className="text-center text-xs text-gray-500">
             You also have {inactiveCount} inactive {inactiveCount === 1 ? 'student' : 'students'} you can reactivate in My Students.
           </p>
         )}

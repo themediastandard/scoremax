@@ -3,6 +3,7 @@ import { Webhook } from 'standardwebhooks'
 import { resend, getEmailDefaults } from '@/lib/resend'
 import { emailLayout } from '@/lib/email-templates'
 import { buildAuthContinueUrl, readEmailOtpType } from '@/lib/auth-email-link'
+import { readBookContinuationFromRedirect } from '@/lib/auth-continuation'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.scoremaxtutoring.com'
 
@@ -87,7 +88,9 @@ export async function POST(req: NextRequest) {
     APP_URL,
     emailData.token_hash,
     verifyType,
-    emailData.redirect_to
+    actionType === 'signup'
+      ? readBookContinuationFromRedirect(emailData.redirect_to, APP_URL)
+      : emailData.redirect_to
   )
 
   const fullName = user.user_metadata?.full_name

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -18,9 +18,17 @@ import {
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { AUTH_CAPTCHA_CONFIGURED, AuthTurnstile } from '@/components/auth/AuthTurnstile'
 import Link from 'next/link'
-import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck, UserRound, Users } from 'lucide-react'
+import { Loader2, Eye, EyeOff, GraduationCap, TrendingUp, Award, MailCheck, Plus, Trash2, UserRound, Users } from 'lucide-react'
 import type { AccountType } from '@/lib/account-type'
 import { GRADE_OPTIONS } from '@/lib/student-grades'
+import { readBookContinuation, withBookContinuation } from '@/lib/auth-continuation'
+import {
+  PENDING_STUDENTS_METADATA_KEY,
+  signupStudentDraftError,
+  type SignupStudentDraft,
+} from '@/lib/signup-onboarding'
+
+const EMPTY_STUDENT: SignupStudentDraft = { fullName: '', email: '', phone: '', grade: '' }
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -29,6 +37,8 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [accountType, setAccountType] = useState<AccountType | null>(null)
   const [studentGrade, setStudentGrade] = useState('')
+  const [students, setStudents] = useState<SignupStudentDraft[]>([{ ...EMPTY_STUDENT }])
+  const [nextPath, setNextPath] = useState<'/book' | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -38,6 +48,16 @@ export default function RegisterPage() {
   const [captchaGeneration, setCaptchaGeneration] = useState(0)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    setNextPath(readBookContinuation(new URLSearchParams(window.location.search).get('next')))
+  }, [])
+
+  const updateStudent = (index: number, updates: Partial<SignupStudentDraft>) => {
+    setStudents((current) => current.map((student, studentIndex) => (
+      studentIndex === index ? { ...student, ...updates } : student
+    )))
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,6 +73,11 @@ export default function RegisterPage() {
       setError('Select your grade to continue')
       return
     }
+    const studentError = accountType === 'parent' ? signupStudentDraftError(students) : null
+    if (studentError) {
+      setError(studentError)
+      return
+    }
     if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
       setError('Complete the security check to continue')
       return
@@ -65,10 +90,12 @@ export default function RegisterPage() {
       password,
       options: {
         ...(captchaToken && { captchaToken }),
+        emailRedirectTo: new URL('/book', window.location.origin).toString(),
         data: {
           full_name: fullName,
           account_type: accountType,
           ...(accountType === 'student' && { student_grade: studentGrade }),
+          ...(accountType === 'parent' && { [PENDING_STUDENTS_METADATA_KEY]: students }),
         }
       }
     })
@@ -93,7 +120,7 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push('/book')
     router.refresh()
   }
 
@@ -172,16 +199,16 @@ export default function RegisterPage() {
               <p className="text-black text-sm leading-relaxed">
                 We sent a confirmation link to{' '}
                 <span className="font-semibold break-all">{email.toLowerCase().trim()}</span>.
-                Click it to activate your account, then sign in.
+                Click it to activate your account and continue your booking.
               </p>
               <p className="text-gray-500 text-xs leading-relaxed mt-4">
                 The link can take a minute to arrive. Check your spam folder if you don&apos;t see it.
               </p>
               <Link
-                href="/login"
+                href="/book"
                 className="mt-8 inline-flex w-full items-center justify-center bg-[#b08a30] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#9a7628] font-[family-name:var(--font-playfair)]"
               >
-                Go to Sign In
+                Continue Booking After Confirming
               </Link>
             </div>
           ) : (
@@ -238,7 +265,7 @@ export default function RegisterPage() {
                       }}
                       className="sr-only"
                     />
-                    <Icon className={`h-5 w-5 ${selected ? 'text-[#b08a30]' : 'text-gray-400'}`} aria-hidden="true" />
+                    <Icon className={`pointer-events-none h-5 w-5 ${selected ? 'text-[#b08a30]' : 'text-gray-400'}`} aria-hidden="true" />
                     <span className="mt-2 block text-sm font-semibold text-gray-900">{option.label}</span>
                     <span className="mt-1 block text-xs leading-5 text-gray-500">{option.description}</span>
                   </label>
@@ -266,10 +293,108 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {accountType === 'parent' && (
+            <fieldset className="mb-6 space-y-4">
+              <legend className="text-sm font-medium text-gray-900">Add your student{students.length > 1 ? 's' : ''}</legend>
+              <div>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  Student emails receive session schedules and reminders. They do not create separate logins.
+                </p>
+              </div>
+              {students.map((student, index) => (
+                <div key={index} className="space-y-4 rounded-xl border border-gray-200 bg-slate-50/60 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-[#1e293b]">Student {index + 1}</p>
+                    {students.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 hover:text-red-700"
+                        onClick={() => setStudents((current) => current.filter((_, studentIndex) => studentIndex !== index))}
+                        aria-label={`Remove student ${index + 1}`}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`signup-student-${index}-name`}>Student Name</Label>
+                    <Input
+                      id={`signup-student-${index}-name`}
+                      value={student.fullName}
+                      onChange={(event) => updateStudent(index, { fullName: event.target.value })}
+                      maxLength={200}
+                      autoComplete="name"
+                      required
+                      className="h-11 bg-white"
+                    />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor={`signup-student-${index}-email`}>Student Email</Label>
+                      <Input
+                        id={`signup-student-${index}-email`}
+                        type="email"
+                        value={student.email}
+                        onChange={(event) => updateStudent(index, { email: event.target.value })}
+                        maxLength={320}
+                        autoComplete="email"
+                        required
+                        className="h-11 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`signup-student-${index}-phone`}>
+                        Student Phone <span className="font-normal text-gray-500">(Optional)</span>
+                      </Label>
+                      <Input
+                        id={`signup-student-${index}-phone`}
+                        type="tel"
+                        value={student.phone}
+                        onChange={(event) => updateStudent(index, { phone: event.target.value })}
+                        maxLength={50}
+                        autoComplete="tel"
+                        className="h-11 bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`signup-student-${index}-grade`}>Grade</Label>
+                    <Select value={student.grade || undefined} onValueChange={(grade) => updateStudent(index, { grade })}>
+                      <SelectTrigger id={`signup-student-${index}-grade`} className="h-11 w-full bg-white" aria-required="true">
+                        <SelectValue placeholder="Select grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GRADE_OPTIONS.map((grade) => (
+                          <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setStudents((current) => [...current, { ...EMPTY_STUDENT }])}
+                disabled={students.length >= 10}
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Add Another Student
+              </Button>
+            </fieldset>
+          )}
+
           <GoogleAuthButton
             mode="signup"
             signupAccountType={accountType}
             studentGrade={studentGrade}
+            signupStudents={accountType === 'parent' ? students : undefined}
+            next={nextPath ?? '/book'}
+            onError={setError}
           />
 
           {!accountType && (
@@ -378,7 +503,7 @@ export default function RegisterPage() {
           <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
             Already have an account?{' '}
             {/* Inline link in 14px copy — see the matching note on /login. */}
-            <Link href="/login" className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
+            <Link href={withBookContinuation('/login', nextPath ?? '/book')} className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
               Sign in
             </Link>
           </p>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { readEmailOtpType, readRelativeNextPath } from '@/lib/auth-email-link'
+import { readBookContinuation } from '@/lib/auth-continuation'
 
 export const metadata: Metadata = {
   title: 'Continue securely | ScoreMax',
@@ -57,7 +58,9 @@ export default async function AuthContinuePage({
   const params = await searchParams
   const tokenHash = readSingle(params.token_hash)
   const type = readEmailOtpType(readSingle(params.type))
-  const next = readRelativeNextPath(readSingle(params.next))
+  const next = type === 'signup'
+    ? readBookContinuation(readSingle(params.next))
+    : readRelativeNextPath(readSingle(params.next))
 
   if (!tokenHash || !type) {
     return (

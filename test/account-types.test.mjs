@@ -7,6 +7,7 @@ const readSource = (path) => readFileSync(new URL(`../${path}`, import.meta.url)
 const registerPage = readSource('src/app/register/page.tsx')
 const googleButton = readSource('src/components/auth/GoogleAuthButton.tsx')
 const callback = readSource('src/app/auth/callback/route.ts')
+const completion = readSource('src/app/api/auth/complete-signup/route.ts')
 
 test('signup explicitly requires parent or student instead of guessing', () => {
   assert.match(registerPage, /Who will use this account\?/)
@@ -14,25 +15,27 @@ test('signup explicitly requires parent or student instead of guessing', () => {
   assert.match(registerPage, /Student/)
   assert.match(registerPage, /account_type: accountType/)
   assert.match(registerPage, /if \(!accountType\)/)
-  assert.doesNotMatch(registerPage, /students\.length.*accountType/s)
+  assert.doesNotMatch(registerPage, /setAccountType\([^)]*students/i)
 })
 
 test('student signup requires a grade and creates a self student through trusted server paths', () => {
   assert.match(registerPage, /accountType === 'student' && !studentGrade/)
   assert.match(registerPage, /student_grade: studentGrade/)
   assert.match(registerPage, /Your student profile will be created automatically/)
-  assert.match(callback, /GRADE_OPTIONS\.includes\(studentGrade\)/)
-  assert.match(callback, /\.from\('students'\)\.insert|from\('students'\)\.insert/s)
-  assert.match(callback, /customer\.account_type !== 'student'/)
+  assert.match(completion, /GRADE_OPTIONS\.includes\(body\.studentGrade\)/)
+  assert.match(completion, /ensureSelfStudent\(customer\)/)
+  assert.match(completion, /customer\.account_type === 'student'/)
 })
 
 test('Google signup carries validated account type context without changing normal sign-in', () => {
   assert.match(googleButton, /mode === 'signup'/)
   assert.match(googleButton, /callbackUrl\.searchParams\.set\('account_type'/)
-  assert.match(googleButton, /callbackUrl\.searchParams\.set\('student_grade'/)
+  assert.doesNotMatch(googleButton, /callbackUrl\.searchParams\.set\('student_grade'/)
+  assert.match(googleButton, /studentGrade,/)
   assert.match(callback, /isAccountType\(accountTypeValue\)/)
-  assert.match(callback, /\.is\('account_type', null\)/)
-  assert.match(callback, /Never overwrite that established classification/)
+  assert.match(callback, /SIGNUP_ONBOARDING_GATE_KEY\]: signup\.accountType/)
+  assert.match(callback, /Existing accounts get no[\s\S]*gate/)
+  assert.match(completion, /\.is\('account_type', null\)/)
 })
 
 test('student accounts cannot enter or mutate the parent-only managed-student workflow', () => {

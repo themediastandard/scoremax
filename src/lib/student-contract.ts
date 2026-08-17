@@ -28,6 +28,12 @@ export interface StudentsResponse {
   selfStudentId: string | null
 }
 
+export interface SignupCompletionResponse extends StudentsResponse {
+  /** A server-verified active student from the just-completed parent signup. */
+  preferredStudentId: string | null
+  onboardingCompleted: boolean
+}
+
 export interface CreateStudentRequest {
   fullName: string
   email: string

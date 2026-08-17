@@ -13,13 +13,14 @@ import { normalizeAvailabilityWindows } from '@/lib/availability-windows'
 import { Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { OfflinePaymentMethod } from '@/lib/payment-method'
-import type { StudentCreditSummaryResponse, StudentDto, StudentsResponse } from '@/lib/student-contract'
+import type { SignupCompletionResponse, StudentCreditSummaryResponse, StudentDto } from '@/lib/student-contract'
 import type { AccountType } from '@/lib/account-type'
 import {
   readBookingDraft,
   writeBookingDraft,
   type BookingDraftSection,
 } from '@/lib/booking-draft'
+import { clearPendingGoogleSignup, readPendingGoogleSignup } from '@/lib/signup-onboarding'
 
 const OFFLINE_PURCHASE_KEY_STORAGE = 'scoremax:offline-purchase-keys:v1'
 
@@ -187,10 +188,19 @@ export default function BookPage() {
   // which shows the address rather than asking for it again.
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null)
 
-  const loadStudents = useCallback(async () => {
+  const loadStudents = useCallback(async (preferredStudentId?: string) => {
     setStudentStatus('loading')
     try {
-      const response = await fetch('/api/account/students', { cache: 'no-store' })
+      const pendingGoogleSignup = readPendingGoogleSignup(window.sessionStorage)
+      const response = await fetch('/api/auth/complete-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          students: pendingGoogleSignup?.accountType === 'parent' ? pendingGoogleSignup.students : undefined,
+          studentGrade: pendingGoogleSignup?.accountType === 'student' ? pendingGoogleSignup.studentGrade : undefined,
+        }),
+      })
       if (response.status === 401) {
         setStudents([])
         setAccountType(null)
@@ -202,15 +212,30 @@ export default function BookPage() {
         setStudentStatus('error')
         return
       }
-      const body = await response.json() as StudentsResponse
+      const body = await response.json() as SignupCompletionResponse
+      if (pendingGoogleSignup) clearPendingGoogleSignup(window.sessionStorage)
       setStudents(body.students)
       setAccountType(body.accountType)
       setSelfStudentId(body.selfStudentId)
+      const retriedGoogleStudentId = pendingGoogleSignup?.accountType === 'parent'
+        ? body.students.find((student) => (
+            student.isActive && student.email.trim().toLowerCase() === pendingGoogleSignup.students[0].email
+          ))?.id ?? null
+        : null
+      const authoritativePreferredId = body.preferredStudentId ?? preferredStudentId ?? retriedGoogleStudentId
+      const preferredStudent = authoritativePreferredId
+        ? body.students.find((student) => student.id === authoritativePreferredId && student.isActive)
+        : null
+      if (preferredStudent) {
+        setState((previous) => ({ ...previous, studentId: preferredStudent.id }))
+        setRevealed((previous) => ({ ...previous, subjects: true }))
+        setActiveSection('subjects')
+      }
       setStudentStatus('ready')
     } catch {
       setStudentStatus('error')
     }
-  }, [])
+  }, [setRevealed, setState])
 
   useEffect(() => {
     void loadStudents()
@@ -585,6 +610,7 @@ export default function BookPage() {
               }}
               onContinue={() => handleNext('student')}
               onRetry={() => void loadStudents()}
+              onStudentCreated={(studentId) => void loadStudents(studentId)}
             />
           </BookingSection>
         )}

@@ -34,13 +34,13 @@ test('parent portal can add, edit, clear, and view a student phone', () => {
 test('admins see student phone and self student profiles stay synchronized', () => {
   const detailLoader = readSource('src/lib/admin-customer-detail.ts')
   const detail = readSource('src/components/dashboard/CustomerDetailContent.tsx')
-  const callback = readSource('src/app/auth/callback/route.ts')
+  const completion = readSource('src/app/api/auth/complete-signup/route.ts')
   const profile = readSource('src/app/api/account/profile/route.ts')
   const privacy = readSource('src/app/privacy/page.tsx')
 
   assert.match(detailLoader, /select\('id, full_name, email, phone, grade, is_active'\)/)
   assert.match(detail, /student\.phone \|\| 'Phone not provided'/)
-  assert.match(callback, /phone: customer\.phone\?\.trim\(\) \|\| null/)
+  assert.match(completion, /phone: customer\.phone\?\.trim\(\) \|\| null/)
   assert.match(profile, /customer\.account_type === 'student'/)
   assert.match(profile, /\.update\(\{ phone: customerUpdates\.phone \?\? null \}\)/)
   assert.match(privacy, /optional phone number/)
