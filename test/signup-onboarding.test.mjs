@@ -175,6 +175,9 @@ test('parent drafts remain untrusted until verified server finalization', () => 
   assert.match(route, /onboardingGate === 'student'/)
   assert.match(route, /requestStudentGrade/)
   assert.match(route, /\.is\('account_type', null\)/)
+  assert.match(route, /metadataAccountType === 'parent' && metadataStudents !== null/)
+  assert.match(route, /const canConsumeParentDrafts = onboardingAuthorized \|\| hasPendingEmailSignupStudents/)
+  assert.match(route, /const drafts = canConsumeParentDrafts \? \(metadataStudents \?\? requestStudents\) : null/)
 })
 
 test('multi-student creation is atomic, owner-scoped, idempotent, and retry-safe', () => {
@@ -210,7 +213,7 @@ test('zero-student parents recover inside booking while student accounts retain 
 
 test('a lost Google parent draft clears the one-time gate and reaches Add First Student', () => {
   const route = readSource('src/app/api/auth/complete-signup/route.ts')
-  assert.match(route, /onboardingAuthorized && !drafts/)
+  assert.match(route, /canConsumeParentDrafts && !drafts/)
   assert.match(route, /missing child details[\s\S]*Add First Student recovery path/)
   assert.match(route, /PENDING_STUDENTS_METADATA_KEY\]: null/)
   assert.match(route, /SIGNUP_ONBOARDING_GATE_KEY\]: null/)

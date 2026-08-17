@@ -198,8 +198,17 @@ export async function POST(request: NextRequest) {
       const metadataStudents = parseSignupStudentDrafts(
         user.user_metadata?.[PENDING_STUDENTS_METADATA_KEY]
       )
-      const drafts = onboardingAuthorized ? (metadataStudents ?? requestStudents) : null
-      if (onboardingAuthorized && !drafts) {
+      // Email confirmation can return after another completion request has
+      // already classified the customer as a parent but before it created the
+      // pending students. The persisted parent classification plus the
+      // original signup account type must still be allowed to finish that
+      // idempotent, owner-scoped work on the next /book load.
+      const hasPendingEmailSignupStudents = (
+        metadataAccountType === 'parent' && metadataStudents !== null
+      )
+      const canConsumeParentDrafts = onboardingAuthorized || hasPendingEmailSignupStudents
+      const drafts = canConsumeParentDrafts ? (metadataStudents ?? requestStudents) : null
+      if (canConsumeParentDrafts && !drafts) {
         // OAuth may return in a new tab or a browser may discard sessionStorage.
         // The trusted gate can classify the parent, but missing child details
         // must fail soft into the inline Add First Student recovery path rather
