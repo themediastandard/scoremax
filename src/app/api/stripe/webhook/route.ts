@@ -317,14 +317,24 @@ export async function POST(req: Request) {
 
     // 5. Create Session Records
     if (bookingId && customer) {
-        await supabaseAdmin.from('sessions').upsert({
+        const { error: sessionError } = await supabaseAdmin.from('sessions').insert({
             order_id: bookingId,
             customer_id: customer.id,
             student_id: authoritativeBooking.student_id ?? null,
             session_type: authoritativeBooking.session_type || 'online',
             subjects: authoritativeBooking.subjects || [],
             status: 'pending_scheduling',
-        }, { onConflict: 'order_id', ignoreDuplicates: true })
+        })
+
+        // sessions_order_id_unique is a partial unique index, so PostgREST's
+        // bare ON CONFLICT (order_id) upsert cannot use it. A Stripe retry can
+        // still race or encounter the row created by the first delivery; that
+        // exact duplicate is already fulfilled, while every other write error
+        // must fail the webhook so Stripe retries instead of silently losing
+        // the customer's session.
+        if (sessionError && sessionError.code !== '23505') {
+          throw new Error(`Could not create session for booking ${bookingId}: ${sessionError.message}`)
+        }
     }
 
     // 6. Notify Admin

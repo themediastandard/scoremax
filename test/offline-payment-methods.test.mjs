@@ -138,6 +138,19 @@ test('authorization is scoped to the signed-in customer and the exact offline me
   assert.match(adminApproval, /onConflict: 'customer_id,payment_method'/)
 })
 
+test('Stripe fulfillment cannot silently lose the initial session', () => {
+  const sessionFulfillment = sourceBetween(
+    stripeWebhook,
+    '// 5. Create Session Records',
+    '// 6. Notify Admin'
+  )
+
+  assert.match(sessionFulfillment, /\.from\('sessions'\)\.insert\(/)
+  assert.doesNotMatch(sessionFulfillment, /onConflict:\s*'order_id'/)
+  assert.match(sessionFulfillment, /if \(sessionError && sessionError\.code !== '23505'\)/)
+  assert.match(sessionFulfillment, /throw new Error\(`Could not create session for booking/)
+})
+
 test('the offline request boundary rejects forged methods and accepts no client price or customer authority', () => {
   const schema = sourceBetween(
     offlinePurchase,
