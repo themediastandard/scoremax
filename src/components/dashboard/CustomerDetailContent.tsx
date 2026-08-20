@@ -72,6 +72,11 @@ export function CustomerDetailContent({ detail }: { detail: AdminCustomerDetail 
   const studentCredits = Array.from(studentCreditMap.values()).reduce((sum, credits) => sum + credits, 0)
   const totalCredits = familyCredits + studentCredits
   const activeStudents = students.filter((student) => student.is_active)
+  const ownerEmail = customer.email.trim().toLowerCase()
+  const selfStudent = students.find((student) => student.email.trim().toLowerCase() === ownerEmail)
+  const hasNonSelfStudents = students.some(
+    (student) => student.email.trim().toLowerCase() !== ownerEmail
+  )
   const planLabels = [
     activeMembership && `${activeMembership.tier.charAt(0).toUpperCase()}${activeMembership.tier.slice(1)} membership`,
     packages.length > 0 && 'Prepaid package',
@@ -240,12 +245,19 @@ export function CustomerDetailContent({ detail }: { detail: AdminCustomerDetail 
             </div>
           </Section>
 
-          <Section title="Account Type" description="Controls whether this account belongs to a parent/guardian or a student.">
+          <Section title="Account Type" description="Complete a blank account or safely correct an existing classification.">
             <div className="px-5 py-5 sm:px-6">
               <AccountTypeControl
                 customerId={customer.id}
                 customerName={customer.full_name || customer.email}
+                customerEmail={customer.email}
+                customerPhone={customer.phone}
+                customerGrade={customer.student_grade}
+                selfStudentPhone={selfStudent?.phone ?? null}
+                selfStudentGrade={selfStudent?.grade ?? null}
                 initialAccountType={customer.account_type}
+                hasActiveStudents={activeStudents.length > 0}
+                hasNonSelfStudents={hasNonSelfStudents}
               />
             </div>
           </Section>

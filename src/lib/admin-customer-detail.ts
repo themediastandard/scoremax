@@ -9,6 +9,7 @@ export interface AdminCustomerDetail {
     full_name: string | null
     email: string
     phone: string | null
+    student_grade: string | null
     account_type: 'parent' | 'student' | null
     created_at: string
   }
@@ -79,7 +80,7 @@ export async function loadAdminCustomerDetail(
 ): Promise<AdminCustomerDetail | null> {
   const { data: customer, error: customerError } = await supabaseAdmin
     .from('customers')
-    .select('id, full_name, email, phone, account_type, created_at')
+    .select('id, full_name, email, phone, student_grade, account_type, created_at')
     .eq('id', customerId)
     .maybeSingle()
 
