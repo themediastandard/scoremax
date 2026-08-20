@@ -57,8 +57,7 @@ test('cron completes only scheduled sessions whose confirmed end has passed', ()
 
 test('newly completed overdue sessions are emailed while unrelated historical completions are excluded', () => {
   assert.match(cronRoute, /const COMPLETION_EMAIL_WINDOW_MS = 30 \* 60 \* 1000/)
-  assert.match(cronRoute, /\[\.\.\.newlyCompletedSessions, \.\.\.recentCompletionEmailCandidates\]/)
-  assert.match(cronRoute, /new Map\(/)
+  assert.match(cronRoute, /mergeRowsById\(\s*newlyCompletedSessions,\s*recentCompletionEmailCandidates\s*\)/)
   assert.match(cronRoute, /\.eq\('status', 'completed'\)/)
   assert.match(cronRoute, /\.gte\('confirmed_end', completionEmailWindowStart\)/)
   assert.match(cronRoute, /\.lte\('confirmed_end', nowIso\)/)

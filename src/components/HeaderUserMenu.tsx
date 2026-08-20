@@ -1,8 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { signOutAndRedirect } from '@/lib/sign-out'
+import {
+  headerUserMenuAuthReducer,
+  initialHeaderUserMenuAuthState,
+  scheduleHeaderUserRoleLookup,
+} from '@/lib/header-user-menu-auth'
 import Link from 'next/link'
 import {
   DropdownMenu,
@@ -13,50 +18,69 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { User, UserPlus, LogOut, LayoutDashboard } from 'lucide-react'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export function HeaderUserMenu() {
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [role, setRole] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [client] = useState(() => createClient())
+  const [authState, dispatch] = useReducer(
+    headerUserMenuAuthReducer,
+    initialHeaderUserMenuAuthState
+  )
+  const { user } = authState
+  const loadedRole = authState.role
+  const role = loadedRole && loadedRole.userId === user?.id ? loadedRole.value : null
+  const isRoleLoading = Boolean(user && loadedRole?.userId !== user.id)
 
   useEffect(() => {
-    const client = createClient()
     let cancelled = false
+    const initialRequest = {}
+    dispatch({ type: 'initial-started', request: initialRequest })
+
     const getInitial = async () => {
       try {
         const { data: { user: u } } = await client.auth.getUser()
         if (cancelled) return
-        setUser(u)
-        if (u) {
-          const { data: profile } = await client.from('profiles').select('role').eq('id', u.id).single()
-          setRole(profile?.role ?? null)
-        } else {
-          setRole(null)
-        }
+        dispatch({ type: 'initial-resolved', request: initialRequest, user: u })
       } catch {
-        if (!cancelled) setUser(null)
-      } finally {
-        if (!cancelled) setIsLoading(false)
+        if (!cancelled) dispatch({ type: 'initial-failed', request: initialRequest })
       }
     }
-    const timeout = setTimeout(() => setIsLoading(false), 3000)
-    getInitial()
-    const { data: { subscription } } = client.auth.onAuthStateChange(async (_, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const { data: profile } = await client.from('profiles').select('role').eq('id', session.user.id).single()
-        setRole(profile?.role ?? null)
-      } else {
-        setRole(null)
-      }
+
+    const timeout = setTimeout(() => dispatch({ type: 'auth-timeout' }), 3000)
+    const { data: { subscription } } = client.auth.onAuthStateChange((_, session) => {
+      dispatch({ type: 'auth-event', user: session?.user ?? null })
     })
+    void getInitial()
+
     return () => {
       cancelled = true
       clearTimeout(timeout)
       subscription.unsubscribe()
     }
-  }, [])
+  }, [client])
+
+  useEffect(() => {
+    const userId = user?.id
+    if (!userId) return
+
+    return scheduleHeaderUserRoleLookup({
+      userId,
+      loadRole: async (requestedUserId) => {
+        const { data: profile } = await client
+          .from('profiles')
+          .select('role')
+          .eq('id', requestedUserId)
+          .single()
+        return profile?.role ?? null
+      },
+      onResolved: (resolvedUserId, resolvedRole) => {
+        dispatch({
+          type: 'role-resolved',
+          userId: resolvedUserId,
+          role: resolvedRole,
+        })
+      },
+    })
+  }, [client, user?.id])
 
   const handleSignOut = async () => {
     await signOutAndRedirect('/')
@@ -70,7 +94,7 @@ export function HeaderUserMenu() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {isLoading ? (
+        {authState.authLoading || isRoleLoading ? (
           <DropdownMenuItem disabled className="text-gray-500">
             Checking...
           </DropdownMenuItem>

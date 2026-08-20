@@ -11,6 +11,16 @@ import {
 import { flushReports, reportIssue } from '@/lib/report-error'
 import { operationalRecipients, sessionStudentName } from '@/lib/session-recipients'
 import { sendSessionCompletionEmail } from '@/lib/session-completion-email'
+import {
+  mergeRowsById,
+  retrySupabaseOperation,
+  runConditionalUpdateWithRecovery,
+} from '@/lib/supabase-operation-retry'
+import type {
+  SupabaseOperationResponse,
+  SupabaseRetryOptions,
+  SupabaseRetryOutcome,
+} from '@/lib/supabase-operation-retry'
 
 // node:crypto and Buffer, so not the edge runtime. Node is already the default
 // for route handlers; stated here because the timing-safe comparison below
@@ -50,6 +60,8 @@ const CRON_SECRET_HEADER = 'x-cron-secret'
  */
 const MAX_SESSIONS_PER_RUN = 12
 const RUN_DEADLINE_MS = 8_000
+const SUPABASE_RETRY_DEADLINE_RESERVE_MS = 750
+const SUPABASE_RETRY_DELAYS_MS = [75, 150]
 
 /**
  * How many rows the poll reads, as distinct from how many it will act on. Kept
@@ -152,6 +164,34 @@ function checkCronAuth(req: NextRequest): 'ok' | 'denied' | 'unconfigured' {
   return timingSafeEqual(expectedDigest, providedDigest) ? 'ok' : 'denied'
 }
 
+function retryOptions(operation: string, deadlineAt: number): SupabaseRetryOptions {
+  return {
+    operation,
+    maxAttempts: 3,
+    delaysMs: SUPABASE_RETRY_DELAYS_MS,
+    deadlineAt,
+  }
+}
+
+function reportSupabaseOperationFailure(
+  context: string,
+  description: string,
+  outcome: SupabaseRetryOutcome<unknown>
+) {
+  const disposition = outcome.exhausted
+    ? 'after bounded retries'
+    : 'because Supabase returned a non-retryable error'
+  reportIssue(context, `${description} ${disposition}.`, {
+    operation: outcome.operation,
+    attempts: outcome.attempts,
+    maxAttempts: outcome.maxAttempts,
+    retriesExhausted: outcome.exhausted,
+    failureCategory: outcome.failure?.category ?? 'unknown',
+    status: outcome.failure?.status ?? 0,
+    code: outcome.failure?.code ?? null,
+  })
+}
+
 export async function POST(req: NextRequest) {
   const auth = checkCronAuth(req)
 
@@ -194,6 +234,7 @@ export async function POST(req: NextRequest) {
   }
 
   const startedAt = Date.now()
+  const retryDeadlineAt = startedAt + RUN_DEADLINE_MS - SUPABASE_RETRY_DEADLINE_RESERVE_MS
   const now = new Date()
   const nowIso = now.toISOString()
   const pollWindow = reminderWindow(now)
@@ -204,46 +245,77 @@ export async function POST(req: NextRequest) {
 
   let newlyCompletedSessions: CompletionEmailCandidate[] = []
   let automaticallyCompleted = 0
-  if (dryRun) {
-    const { data: endedRows, error: completionLoadError } = await supabaseAdmin
+  const endedSessionsOutcome = await retrySupabaseOperation(
+    () => supabaseAdmin
       .from('sessions')
       .select(COMPLETION_EMAIL_COLUMNS)
       .eq('status', 'scheduled')
       .not('confirmed_end', 'is', null)
       .lte('confirmed_end', nowIso)
-      .order('confirmed_end', { ascending: true })
+      .order('confirmed_end', { ascending: true }),
+    retryOptions('select-ended-scheduled', retryDeadlineAt)
+  )
 
-    if (completionLoadError) {
-      reportIssue(
-        'cron:session-completion',
-        `Could not load ended sessions: ${completionLoadError.message}`
-      )
-      await flushReports()
-      return NextResponse.json({ error: 'Could not load ended sessions' }, { status: 500 })
-    }
+  if (endedSessionsOutcome.response.error) {
+    reportSupabaseOperationFailure(
+      'cron:session-completion',
+      'Could not load ended sessions',
+      endedSessionsOutcome
+    )
+    await flushReports()
+    return NextResponse.json({ error: 'Could not load ended sessions' }, { status: 500 })
+  }
+
+  const endedRows = (endedSessionsOutcome.response.data ?? []) as unknown as CompletionEmailCandidate[]
+  if (dryRun) {
     newlyCompletedSessions = (endedRows ?? []) as unknown as CompletionEmailCandidate[]
     automaticallyCompleted = newlyCompletedSessions.length
   } else {
-    // One conditional UPDATE is the concurrency guard. Overlapping cron runs
-    // cannot both claim the same row because the first changes its status away
-    // from scheduled before the second can return it.
-    const { data: completedRows, error: completionError } = await supabaseAdmin
-      .from('sessions')
-      .update({ status: 'completed' })
-      .eq('status', 'scheduled')
-      .not('confirmed_end', 'is', null)
-      .lte('confirmed_end', nowIso)
-      .select(COMPLETION_EMAIL_COLUMNS)
+    // The UPDATE remains conditional and idempotent. If Postgres commits but
+    // the HTTP response is lost, the retry returns no rows because the status
+    // is already completed. Re-read only the IDs observed by the preceding
+    // SELECT so an old overdue session still reaches the stable email
+    // idempotency path without widening the recent-completion window.
+    const endedSessionIds = endedRows.map((session) => session.id)
+    const completion = await runConditionalUpdateWithRecovery<CompletionEmailCandidate>({
+      expectedRows: endedRows,
+      update: async () => (
+        await supabaseAdmin
+          .from('sessions')
+          .update({ status: 'completed' })
+          .eq('status', 'scheduled')
+          .not('confirmed_end', 'is', null)
+          .lte('confirmed_end', nowIso)
+          .in('id', endedSessionIds)
+          .select(COMPLETION_EMAIL_COLUMNS)
+      ) as unknown as SupabaseOperationResponse<CompletionEmailCandidate[]>,
+      loadCompletedRows: async (sessionIds) => (
+        await supabaseAdmin
+          .from('sessions')
+          .select(COMPLETION_EMAIL_COLUMNS)
+          .eq('status', 'completed')
+          .in('id', sessionIds)
+      ) as unknown as SupabaseOperationResponse<CompletionEmailCandidate[]>,
+      updateRetry: retryOptions('update-ended-scheduled', retryDeadlineAt),
+      recoveryRetry: retryOptions('select-completed-update-recovery', retryDeadlineAt),
+    })
 
-    if (completionError) {
-      reportIssue(
+    if (!completion.ok) {
+      const failedOutcome = completion.stage === 'recovery'
+        ? completion.recoveryOutcome ?? completion.updateOutcome
+        : completion.updateOutcome
+      reportSupabaseOperationFailure(
         'cron:session-completion',
-        `Could not complete ended sessions: ${completionError.message}`
+        completion.stage === 'recovery'
+          ? 'Could not confirm sessions after a retried completion update'
+          : 'Could not complete ended sessions',
+        failedOutcome
       )
       await flushReports()
       return NextResponse.json({ error: 'Could not complete ended sessions' }, { status: 500 })
     }
-    newlyCompletedSessions = (completedRows ?? []) as unknown as CompletionEmailCandidate[]
+
+    newlyCompletedSessions = completion.rows
     automaticallyCompleted = newlyCompletedSessions.length
   }
 
@@ -251,54 +323,63 @@ export async function POST(req: NextRequest) {
   // UPDATE. This lets the next tick retry a provider failure. Resend receives a
   // stable per-session idempotency key, so a successful first send is not
   // delivered twice when the same row appears in the next tick.
-  const { data: recentCompletedRows, error: recentCompletedError } = await supabaseAdmin
-    .from('sessions')
-    .select(COMPLETION_EMAIL_COLUMNS)
-    .eq('status', 'completed')
-    .not('confirmed_end', 'is', null)
-    .gte('confirmed_end', completionEmailWindowStart)
-    .lte('confirmed_end', nowIso)
-    .order('confirmed_end', { ascending: true })
+  const recentCompletedOutcome = await retrySupabaseOperation(
+    () => supabaseAdmin
+      .from('sessions')
+      .select(COMPLETION_EMAIL_COLUMNS)
+      .eq('status', 'completed')
+      .not('confirmed_end', 'is', null)
+      .gte('confirmed_end', completionEmailWindowStart)
+      .lte('confirmed_end', nowIso)
+      .order('confirmed_end', { ascending: true }),
+    retryOptions('select-recent-completed', retryDeadlineAt)
+  )
 
-  if (recentCompletedError) {
-    reportIssue(
+  if (recentCompletedOutcome.response.error) {
+    reportSupabaseOperationFailure(
       'cron:session-completion',
-      `Could not load recent completed sessions: ${recentCompletedError.message}`
+      'Could not load recent completed sessions',
+      recentCompletedOutcome
     )
     await flushReports()
     return NextResponse.json({ error: 'Could not load recent completed sessions' }, { status: 500 })
   }
 
-  const recentCompletionEmailCandidates = (recentCompletedRows ?? []) as unknown as CompletionEmailCandidate[]
-  const completionEmailCandidates = Array.from(
-    new Map(
-      [...newlyCompletedSessions, ...recentCompletionEmailCandidates]
-        .map((session) => [session.id, session])
-    ).values()
+  const recentCompletionEmailCandidates = (
+    recentCompletedOutcome.response.data ?? []
+  ) as unknown as CompletionEmailCandidate[]
+  const completionEmailCandidates = mergeRowsById(
+    newlyCompletedSessions,
+    recentCompletionEmailCandidates
   )
 
   // supabaseAdmin bypasses every RLS policy, so the scope has to be explicit:
   // only sessions that are still scheduled, and only those inside this tick's
   // window. Nothing here is keyed to a user, which is exactly why the status and
   // window predicates are the whole guard.
-  const { data, error } = await supabaseAdmin
-    .from('sessions')
-    .select(CANDIDATE_COLUMNS)
-    .eq('status', 'scheduled')
-    .gte('confirmed_start', pollWindow.start)
-    .lte('confirmed_start', pollWindow.end)
-    .order('confirmed_start', { ascending: true })
-    .limit(MAX_CANDIDATES_FETCHED)
+  const candidateOutcome = await retrySupabaseOperation(
+    () => supabaseAdmin
+      .from('sessions')
+      .select(CANDIDATE_COLUMNS)
+      .eq('status', 'scheduled')
+      .gte('confirmed_start', pollWindow.start)
+      .lte('confirmed_start', pollWindow.end)
+      .order('confirmed_start', { ascending: true })
+      .limit(MAX_CANDIDATES_FETCHED),
+    retryOptions('select-reminder-candidates', retryDeadlineAt)
+  )
 
-  if (error) {
-    reportIssue('cron:session-reminders', `Could not load sessions due a reminder: ${error.message}`, {
-      window: pollWindow,
-    })
+  if (candidateOutcome.response.error) {
+    reportSupabaseOperationFailure(
+      'cron:session-reminders',
+      'Could not load sessions due a reminder',
+      candidateOutcome
+    )
     await flushReports()
     return NextResponse.json({ error: 'Could not load sessions' }, { status: 500 })
   }
 
-  const candidates = (data ?? []) as unknown as ReminderCandidate[]
+  const candidates = (candidateOutcome.response.data ?? []) as unknown as ReminderCandidate[]
 
   // `reminder_sent_for is distinct from confirmed_start` cannot be expressed in
   // PostgREST — it compares two columns of the same row — so it happens here,
