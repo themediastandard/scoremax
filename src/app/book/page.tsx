@@ -203,6 +203,7 @@ export default function BookPage() {
         body: JSON.stringify({
           students: pendingGoogleSignup?.accountType === 'parent' ? pendingGoogleSignup.students : undefined,
           studentGrade: pendingGoogleSignup?.accountType === 'student' ? pendingGoogleSignup.studentGrade : undefined,
+          studentPhone: pendingGoogleSignup?.accountType === 'student' ? pendingGoogleSignup.studentPhone : undefined,
         }),
       })
       if (response.status === 401) {
@@ -213,6 +214,11 @@ export default function BookPage() {
         return
       }
       if (!response.ok) {
+        const errorBody = await response.json().catch(() => null) as { code?: string } | null
+        if (response.status === 409 && errorBody?.code === 'account_setup_required') {
+          router.replace(`/register?complete=google&next=${encodeURIComponent('/book')}`)
+          return
+        }
         setStudentStatus('error')
         return
       }
@@ -241,7 +247,7 @@ export default function BookPage() {
     } catch {
       setStudentStatus('error')
     }
-  }, [setRevealed, setState])
+  }, [router, setRevealed, setState])
 
   useEffect(() => {
     void loadStudents()

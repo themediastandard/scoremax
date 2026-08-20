@@ -64,7 +64,7 @@ function authErrorUrl(type: EmailOtpType | null, next: string | null): URL {
   return url
 }
 
-async function authorizeGoogleSignup(
+async function inspectGoogleSignup(
   user: {
     id: string
     email?: string
@@ -72,7 +72,6 @@ async function authorizeGoogleSignup(
   },
   accountType: AccountType | null
 ) {
-  if (!accountType) return { classified: false, accountType: null }
   const { data: customer, error } = await supabaseAdmin
     .from('customers')
     .select('account_type')
@@ -80,16 +79,26 @@ async function authorizeGoogleSignup(
     .maybeSingle()
   if (error) {
     console.error('Failed to inspect Google signup:', error.message)
-    return { classified: false, accountType: null }
+    return { inspectionFailed: true, needsSetup: false, accountType: null }
   }
 
   // Never classify in the OAuth callback. Authorize only a newly created,
   // still-unclassified customer; the completion endpoint validates the
   // same-tab draft, classifies, and creates students. Existing accounts get no
   // gate and therefore cannot be changed by visiting the signup page.
-  return customer?.account_type === null
-    ? { classified: true, accountType }
-    : { classified: false, accountType: null }
+  const needsSetup = customer?.account_type === null
+  return {
+    inspectionFailed: false,
+    needsSetup,
+    accountType: needsSetup ? accountType : null,
+  }
+}
+
+function googleSetupUrl(next: string | null): URL {
+  const url = publicUrl('/register')
+  url.searchParams.set('complete', 'google')
+  if (next === '/book') url.searchParams.set('next', next)
+  return url
 }
 
 async function verifyToken(
@@ -136,7 +145,11 @@ export async function GET(request: NextRequest) {
       // Google. Record it so the login page can tell them which method they
       // used, rather than leaving them retrying a password they never set.
       const provider = data?.user?.app_metadata?.provider
-      if (data?.user?.id && provider === 'google') {
+      const providers = data?.user?.app_metadata?.providers
+      const usedGoogle = provider === 'google' || (
+        Array.isArray(providers) && providers.includes('google')
+      )
+      if (data?.user?.id && usedGoogle) {
         const { error: recordError } = await supabaseAdmin
           .from('profiles')
           .update({ last_auth_provider: 'google' })
@@ -145,11 +158,11 @@ export async function GET(request: NextRequest) {
         if (recordError) {
           console.error('Failed to record Google login provider:', recordError.message)
         }
-        const signup = await authorizeGoogleSignup(
+        const signup = await inspectGoogleSignup(
           data.user,
           signupAccountType
         )
-        if (signup.classified && signup.accountType) {
+        if (signup.accountType) {
           const { error: gateError } = await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
             app_metadata: {
               ...data.user.app_metadata,
@@ -158,8 +171,17 @@ export async function GET(request: NextRequest) {
             },
           })
           if (gateError) {
-            console.error('Failed to authorize Google parent onboarding:', gateError.message)
+            console.error('Failed to authorize Google signup onboarding:', gateError.message)
+            return redirectWithSessionCookies(googleSetupUrl(next), 303)
           }
+        }
+        // A Google sign-in can create an Auth user even when the person used
+        // the login page rather than the signup form. Stop any such
+        // unclassified customer before dashboard/booking and reuse /register
+        // as a signed-in setup form instead of letting an empty account leak
+        // into the product.
+        if (signup.inspectionFailed || (signup.needsSetup && !signupAccountType)) {
+          return redirectWithSessionCookies(googleSetupUrl(next), 303)
         }
       }
       return redirectWithSessionCookies(publicUrl(next ?? '/dashboard'))

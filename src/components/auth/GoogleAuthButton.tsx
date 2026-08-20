@@ -15,6 +15,7 @@ export function GoogleAuthButton({
   mode = 'signin',
   signupAccountType,
   studentGrade,
+  studentPhone,
   signupStudents,
   next,
   onError,
@@ -22,6 +23,7 @@ export function GoogleAuthButton({
   mode?: 'signin' | 'signup'
   signupAccountType?: AccountType | null
   studentGrade?: string
+  studentPhone?: string
   signupStudents?: SignupStudentDraft[]
   next?: string | null
   onError?: (message: string) => void
@@ -29,7 +31,7 @@ export function GoogleAuthButton({
   const signupDetailsMissing =
     mode === 'signup' &&
     (!signupAccountType ||
-      (signupAccountType === 'student' && !studentGrade) ||
+      (signupAccountType === 'student' && (!studentGrade || !studentPhone?.trim())) ||
       (signupAccountType === 'parent' && Boolean(signupStudentDraftError(signupStudents))))
 
   const handleGoogle = async () => {
@@ -51,14 +53,20 @@ export function GoogleAuthButton({
         onError?.('Your browser could not safely preserve the student details. Use email signup or enable session storage and try again.')
         return
       }
-    } else if (mode === 'signup' && signupAccountType === 'student' && studentGrade) {
+    } else if (
+      mode === 'signup' &&
+      signupAccountType === 'student' &&
+      studentGrade &&
+      studentPhone?.trim()
+    ) {
       const stored = writePendingGoogleSignup(window.sessionStorage, {
         accountType: 'student',
         studentGrade,
+        studentPhone,
         next: safeNext,
       })
       if (!stored) {
-        onError?.('Your browser could not safely preserve the grade. Use email signup or enable session storage and try again.')
+        onError?.('Your browser could not safely preserve the student details. Use email signup or enable session storage and try again.')
         return
       }
     }

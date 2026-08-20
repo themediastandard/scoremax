@@ -74,17 +74,51 @@ test('Google parent draft is same-tab, validated on read, and cleared after fina
   assert.equal(onboarding.readPendingGoogleSignup(tab), null)
 })
 
-test('Google student grade remains same-tab instead of entering the callback URL', () => {
+test('Google student grade and phone remain same-tab instead of entering the callback URL', () => {
   const tab = storage()
   assert.equal(onboarding.writePendingGoogleSignup(tab, {
-    accountType: 'student', studentGrade: '11th Grade', next: '/book',
+    accountType: 'student', studentGrade: '11th Grade', studentPhone: ' 555-1234 ', next: '/book',
   }), true)
   assert.deepEqual(onboarding.readPendingGoogleSignup(tab), {
-    accountType: 'student', studentGrade: '11th Grade', next: '/book',
+    accountType: 'student', studentGrade: '11th Grade', studentPhone: '555-1234', next: '/book',
   })
   assert.equal(onboarding.readPendingGoogleSignup({ ...tab, getItem: () => JSON.stringify({
-    accountType: 'student', studentGrade: 'Not a grade', next: '/book',
+    accountType: 'student', studentGrade: 'Not a grade', studentPhone: '555-1234', next: '/book',
   }) }), null)
+  assert.equal(onboarding.readPendingGoogleSignup({ ...tab, getItem: () => JSON.stringify({
+    accountType: 'student', studentGrade: '11th Grade', next: '/book',
+  }) }), null)
+})
+
+test('email confirmation comparison is trimmed, case-insensitive, and rejects typos', () => {
+  assert.equal(onboarding.normalizeSignupEmail(' Jennifer@Example.COM '), 'jennifer@example.com')
+  assert.equal(onboarding.signupEmailsMatch(' Jennifer@Example.COM ', 'jennifer@example.com'), true)
+  assert.equal(onboarding.signupEmailsMatch('jennifer@gamil.com', 'jennifer@gmail.com'), false)
+})
+
+test('Google account completion accepts only strict parent or student setup details', () => {
+  assert.deepEqual(onboarding.parseGoogleAccountSetup({
+    accountType: 'parent',
+    students: [student],
+  }), {
+    accountType: 'parent',
+    students: [{ fullName: 'Maya Student', email: 'maya@example.com', phone: '555-1234', grade: '6th Grade' }],
+  })
+  assert.deepEqual(onboarding.parseGoogleAccountSetup({
+    accountType: 'student',
+    studentGrade: '11th Grade',
+    studentPhone: ' 555-1234 ',
+  }), {
+    accountType: 'student',
+    studentGrade: '11th Grade',
+    studentPhone: '555-1234',
+  })
+  assert.equal(onboarding.parseGoogleAccountSetup({
+    accountType: 'student', studentGrade: '11th Grade',
+  }), null)
+  assert.equal(onboarding.parseGoogleAccountSetup({
+    accountType: 'parent', students: [student], profileId: 'someone-else',
+  }), null)
 })
 
 test('signed-out booking shows auth above a disabled first step with no child PII in links', () => {
@@ -114,6 +148,8 @@ test('registration clearly separates email signup from Google signup requirement
   const signupMethod = register.indexOf('How would you like to sign up?')
   const fullName = register.indexOf('<Label htmlFor="fullName">')
   const email = register.indexOf('<Label htmlFor="email">')
+  const confirmEmail = register.indexOf('<Label htmlFor="confirmEmail">')
+  const studentPhone = register.indexOf('<Label htmlFor="signup-student-phone">')
   const studentGrade = register.indexOf('<Label htmlFor="signup-student-grade">')
   const parentStudents = register.indexOf('Add your student{students.length')
   const password = register.indexOf('<Label htmlFor="password">')
@@ -122,15 +158,17 @@ test('registration clearly separates email signup from Google signup requirement
   assert.ok(whoUses < signupMethod)
   assert.ok(signupMethod < fullName)
   assert.ok(fullName < email)
-  assert.ok(email < studentGrade)
+  assert.ok(email < confirmEmail)
+  assert.ok(confirmEmail < studentPhone)
+  assert.ok(studentPhone < studentGrade)
   assert.ok(email < parentStudents)
   assert.ok(studentGrade < password)
   assert.ok(password < confirmation)
   assert.ok(confirmation < parentStudents)
   assert.match(register, /signupMethod === 'email'/)
   assert.match(register, /signupMethod === 'google'/)
-  assert.match(register, /accountType && \(\s*<fieldset[^>]+>\s*<legend[^>]+>How would you like to sign up\?/)
-  assert.match(register, /setAccountType\(option\.value\)[\s\S]*setSignupMethod\(null\)/)
+  assert.match(register, /accountType && !googleCompletionMode && \(\s*<fieldset[^>]+>\s*<legend[^>]+>How would you like to sign up\?/)
+  assert.match(register, /setAccountType\(option\.value\)[\s\S]*setSignupMethod\(googleCompletionMode \? 'google' : null\)/)
   assert.doesNotMatch(register, /Google creates the account owner&apos;s login/)
   assert.doesNotMatch(register, /Google provides your name and email/)
   assert.match(register, /accountType === 'parent' \? 'Parent \/ Guardian Name' : 'Full Name'/)
@@ -141,6 +179,11 @@ test('registration clearly separates email signup from Google signup requirement
   assert.match(register, /Parent \/ Guardian Information/)
   assert.match(register, /Secure your account/)
   assert.match(register, /Student Details/)
+  assert.match(register, /Your Phone Number/)
+  assert.match(register, /id="confirmEmail"/)
+  assert.match(register, /autoComplete="off"/)
+  assert.match(register, /signupEmailsMatch\(email, confirmEmail\)/)
+  assert.match(register, /Email addresses do not match/)
   assert.match(register, /Student Phone/)
   assert.match(register, /id=\{`signup-student-\$\{index\}-phone`\}[\s\S]{0,350}required/)
   assert.doesNotMatch(register, /Student Phone[\s\S]{0,80}\(Optional\)/)
@@ -148,6 +191,7 @@ test('registration clearly separates email signup from Google signup requirement
   assert.match(register, /Tip:<\/span>\{' '\}[\s\S]*At least one student is required to continue signing up\.[\s\S]*manage your students in your ScoreMax portal after your account is created\./)
   assert.match(register, /accountType === 'parent' && Boolean\(signupStudentDraftError\(students\)\)/)
   assert.match(readSource('src/components/auth/GoogleAuthButton.tsx'), /signupAccountType === 'parent' && Boolean\(signupStudentDraftError\(signupStudents\)\)/)
+  assert.match(readSource('src/components/auth/GoogleAuthButton.tsx'), /signupAccountType === 'student' && \(!studentGrade \|\| !studentPhone\?\.trim\(\)\)/)
   assert.ok((register.match(/rounded-2xl border-2 border-\[#b08a30\]\/40 bg-\[#b08a30\]\/5 px-5 pb-5 pt-1/g) ?? []).length >= 5)
   assert.ok((register.match(/bg-white/g) ?? []).length >= 10)
   assert.ok((register.match(/focus-visible:border-\[#b08a30\] focus-visible:ring-0/g) ?? []).length >= 9)
@@ -191,12 +235,36 @@ test('parent drafts remain untrusted until verified server finalization', () => 
   assert.match(route, /customer\.account_type === 'student'/)
   assert.match(route, /onboardingAuthorized/)
   assert.match(route, /SIGNUP_ONBOARDING_GATE_KEY/)
-  assert.match(route, /onboardingGate === 'student'/)
+  assert.match(route, /effectiveOnboardingGate === 'student'/)
   assert.match(route, /requestStudentGrade/)
   assert.match(route, /\.is\('account_type', null\)/)
   assert.match(route, /metadataAccountType === 'parent' && metadataStudents !== null/)
   assert.match(route, /const canConsumeParentDrafts = onboardingAuthorized \|\| hasPendingEmailSignupStudents/)
   assert.match(route, /const drafts = canConsumeParentDrafts \? \(metadataStudents \?\? requestStudents\) : null/)
+})
+
+test('bare Google sign-ins are stopped and completed through the existing signup form', () => {
+  const callback = readSource('src/app/auth/callback/route.ts')
+  const register = readSource('src/app/register/page.tsx')
+  const route = readSource('src/app/api/auth/complete-signup/route.ts')
+  const book = readSource('src/app/book/page.tsx')
+
+  assert.match(callback, /signup\.needsSetup && !signupAccountType/)
+  assert.match(callback, /googleSetupUrl\(next\)/)
+  assert.match(callback, /url\.searchParams\.set\('complete', 'google'\)/)
+  assert.match(register, /searchParams\.get\('complete'\) === 'google'/)
+  assert.match(register, /Finish setting up your account/)
+  assert.match(register, /Tell us who will use ScoreMax to finish your setup/)
+  assert.match(register, /body: JSON\.stringify\(accountType === 'parent'/)
+  assert.match(register, /\{ accountType, studentGrade, studentPhone \}/)
+  assert.match(route, /hasGoogleIdentity/)
+  assert.match(route, /parseGoogleAccountSetup\(body\)/)
+  assert.match(route, /code: 'account_setup_required'/)
+  assert.match(route, /profile\?\.role !== 'customer'/)
+  assert.match(route, /\.eq\('profile_id', user\.id\)/)
+  assert.match(route, /\.is\('account_type', null\)/)
+  assert.doesNotMatch(route, /body\.(profileId|customerId|userId)/)
+  assert.match(book, /account_setup_required[\s\S]*\/register\?complete=google/)
 })
 
 test('multi-student creation is atomic, owner-scoped, idempotent, and retry-safe', () => {

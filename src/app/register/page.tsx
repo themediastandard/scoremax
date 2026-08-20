@@ -24,7 +24,10 @@ import { GRADE_OPTIONS } from '@/lib/student-grades'
 import { readBookContinuation, withBookContinuation } from '@/lib/auth-continuation'
 import {
   PENDING_STUDENTS_METADATA_KEY,
+  normalizeSignupEmail,
+  signupEmailsMatch,
   signupStudentDraftError,
+  writePendingGoogleSignup,
   type SignupStudentDraft,
 } from '@/lib/signup-onboarding'
 
@@ -32,14 +35,19 @@ const EMPTY_STUDENT: SignupStudentDraft = { fullName: '', email: '', phone: '', 
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
+  const [confirmEmail, setConfirmEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [accountType, setAccountType] = useState<AccountType | null>(null)
   const [signupMethod, setSignupMethod] = useState<'email' | 'google' | null>(null)
   const [studentGrade, setStudentGrade] = useState('')
+  const [studentPhone, setStudentPhone] = useState('')
   const [students, setStudents] = useState<SignupStudentDraft[]>([{ ...EMPTY_STUDENT }])
   const [nextPath, setNextPath] = useState<'/book' | null>(null)
+  const [googleCompletionMode, setGoogleCompletionMode] = useState(false)
+  const [routeModeReady, setRouteModeReady] = useState(false)
+  const [googleAccountEmail, setGoogleAccountEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -51,8 +59,50 @@ export default function RegisterPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    setNextPath(readBookContinuation(new URLSearchParams(window.location.search).get('next')))
-  }, [])
+    const searchParams = new URLSearchParams(window.location.search)
+    const safeNext = readBookContinuation(searchParams.get('next'))
+    const completesGoogleAccount = searchParams.get('complete') === 'google'
+    setNextPath(safeNext)
+    setGoogleCompletionMode(completesGoogleAccount)
+
+    if (!completesGoogleAccount) {
+      setRouteModeReady(true)
+      return
+    }
+
+    setSignupMethod('google')
+    let cancelled = false
+    fetch('/api/account/profile', { cache: 'no-store' })
+      .then(async (response) => {
+        if (cancelled) return
+        if (response.status === 401) {
+          router.replace(withBookContinuation('/login', safeNext))
+          return
+        }
+        if (!response.ok) {
+          setError('We could not load your Google account. Refresh and try again.')
+          setRouteModeReady(true)
+          return
+        }
+        const profile = await response.json() as {
+          email?: string
+          phone?: string
+        }
+        if (cancelled) return
+        setGoogleAccountEmail(profile.email?.trim() ?? '')
+        setStudentPhone(profile.phone?.trim() ?? '')
+        setRouteModeReady(true)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError('We could not load your Google account. Refresh and try again.')
+        setRouteModeReady(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   const updateStudent = (index: number, updates: Partial<SignupStudentDraft>) => {
     setStudents((current) => current.map((student, studentIndex) => (
@@ -62,14 +112,6 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (signupMethod !== 'email') {
-      setError('Use Continue with Google below to create your account')
-      return
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
     if (!accountType) {
       setError('Choose whether this is a parent/guardian or student account')
       return
@@ -78,9 +120,59 @@ export default function RegisterPage() {
       setError('Select your grade to continue')
       return
     }
+    if (accountType === 'student' && !studentPhone.trim()) {
+      setError('Enter your phone number to continue')
+      return
+    }
     const studentError = accountType === 'parent' ? signupStudentDraftError(students) : null
     if (studentError) {
       setError(studentError)
+      return
+    }
+
+    if (googleCompletionMode) {
+      setLoading(true)
+      setError(null)
+      try {
+        const response = await fetch('/api/auth/complete-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+          body: JSON.stringify(accountType === 'parent'
+            ? { accountType, students }
+            : { accountType, studentGrade, studentPhone }),
+        })
+        const body = await response.json().catch(() => null) as { error?: string } | null
+        if (!response.ok) {
+          setError(body?.error ?? 'Could not finish your account setup. Try again.')
+          setLoading(false)
+          return
+        }
+
+        if (nextPath === '/book') {
+          writePendingGoogleSignup(window.sessionStorage, accountType === 'parent'
+            ? { accountType, students, next: '/book' }
+            : { accountType, studentGrade, studentPhone, next: '/book' })
+        }
+        router.push(nextPath ?? '/dashboard')
+        router.refresh()
+      } catch {
+        setError('Could not finish your account setup. Try again.')
+        setLoading(false)
+      }
+      return
+    }
+
+    if (signupMethod !== 'email') {
+      setError('Use Sign up with Google below to create your account')
+      return
+    }
+    if (!signupEmailsMatch(email, confirmEmail)) {
+      setError('Email addresses do not match')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
       return
     }
     if (AUTH_CAPTCHA_CONFIGURED && !captchaToken) {
@@ -91,7 +183,7 @@ export default function RegisterPage() {
     setError(null)
 
     const { data, error } = await supabase.auth.signUp({
-      email: email.toLowerCase().trim(),
+      email: normalizeSignupEmail(email),
       password,
       options: {
         ...(captchaToken && { captchaToken }),
@@ -99,7 +191,10 @@ export default function RegisterPage() {
         data: {
           full_name: fullName,
           account_type: accountType,
-          ...(accountType === 'student' && { student_grade: studentGrade }),
+          ...(accountType === 'student' && {
+            student_grade: studentGrade,
+            phone: studentPhone.trim(),
+          }),
           ...(accountType === 'parent' && { [PENDING_STUDENTS_METADATA_KEY]: students }),
         }
       }
@@ -192,7 +287,12 @@ export default function RegisterPage() {
               />
             </Link>
           </div>
-          {awaitingConfirmation ? (
+          {!routeModeReady ? (
+            <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center" role="status">
+              <Loader2 className="h-6 w-6 animate-spin text-[#b08a30]" aria-hidden="true" />
+              <p className="text-sm text-gray-600">Loading your account…</p>
+            </div>
+          ) : awaitingConfirmation ? (
             <div className="text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#b08a30]/10">
                 <MailCheck className="h-7 w-7 text-[#b08a30]" aria-hidden="true" />
@@ -203,7 +303,7 @@ export default function RegisterPage() {
               <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
               <p className="text-black text-sm leading-relaxed">
                 We sent a confirmation link to{' '}
-                <span className="font-semibold break-all">{email.toLowerCase().trim()}</span>.
+                <span className="font-semibold break-all">{normalizeSignupEmail(email)}</span>.
                 Click it to activate your account and continue your booking.
               </p>
               <p className="text-gray-500 text-xs leading-relaxed mt-4">
@@ -220,12 +320,21 @@ export default function RegisterPage() {
           <>
           <div className="text-center">
             <div className="uppercase font-[family-name:var(--font-playfair)] text-xs tracking-widest text-[#b08a30] font-semibold mb-3">
-              Account
+              {googleCompletionMode ? 'Google account' : 'Account'}
             </div>
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl lg:text-4xl text-black mb-2">
-              Create an account
+              {googleCompletionMode ? 'Finish setting up your account' : 'Create an account'}
             </h1>
-            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-8" />
+            <div className="w-10 h-[2px] bg-[#b08a30] mx-auto mb-5" />
+            {googleCompletionMode && (
+              <p className="mb-8 text-sm leading-relaxed text-gray-600">
+                You&apos;re signed in with Google as{' '}
+                <span className="font-semibold break-all text-gray-900">
+                  {googleAccountEmail || 'your Google account'}
+                </span>.
+                Tell us who will use ScoreMax to finish your setup.
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleRegister} className="space-y-6">
@@ -264,9 +373,12 @@ export default function RegisterPage() {
                       checked={selected}
                       onChange={() => {
                         setAccountType(option.value)
-                        setSignupMethod(null)
+                        setSignupMethod(googleCompletionMode ? 'google' : null)
                         setError(null)
-                        if (option.value === 'parent') setStudentGrade('')
+                        if (option.value === 'parent') {
+                          setStudentGrade('')
+                          setStudentPhone('')
+                        }
                       }}
                       className="sr-only"
                     />
@@ -279,7 +391,7 @@ export default function RegisterPage() {
             </div>
             </fieldset>
 
-            {accountType && (
+            {accountType && !googleCompletionMode && (
             <fieldset className="space-y-3 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
               <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">How would you like to sign up?</legend>
               <div className="!mt-2 grid grid-cols-2 gap-3">
@@ -361,25 +473,67 @@ export default function RegisterPage() {
                     className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmEmail">Confirm Email</Label>
+                  <Input
+                    id="confirmEmail"
+                    type="email"
+                    placeholder="Enter your email again"
+                    value={confirmEmail}
+                    onChange={(e) => setConfirmEmail(e.target.value)}
+                    autoComplete="off"
+                    aria-invalid={Boolean(confirmEmail) && !signupEmailsMatch(email, confirmEmail)}
+                    aria-describedby="confirm-email-help"
+                    required
+                    className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                  />
+                  <p
+                    id="confirm-email-help"
+                    className={`text-xs ${
+                      confirmEmail && !signupEmailsMatch(email, confirmEmail)
+                        ? 'font-medium text-red-600'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {confirmEmail && !signupEmailsMatch(email, confirmEmail)
+                      ? 'Email addresses do not match.'
+                      : 'Enter the same email again so we can confirm it is correct.'}
+                  </p>
+                </div>
               </fieldset>
             )}
 
             {signupMethod && accountType === 'student' && (
-              <fieldset className="space-y-2 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
+              <fieldset className="space-y-4 rounded-2xl border-2 border-[#b08a30]/40 bg-[#b08a30]/5 px-5 pb-5 pt-1 shadow-sm">
                 <legend className="px-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#1e293b]">
                   Student Details
                 </legend>
-                <Label htmlFor="signup-student-grade">Your Grade</Label>
-                <Select value={studentGrade || undefined} onValueChange={setStudentGrade}>
-                  <SelectTrigger id="signup-student-grade" className="h-11 w-full bg-white focus-visible:border-[#b08a30] focus-visible:ring-0" aria-required="true">
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GRADE_OPTIONS.map((grade) => (
-                      <SelectItem key={grade} value={grade}>{grade}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-student-phone">Your Phone Number</Label>
+                  <Input
+                    id="signup-student-phone"
+                    type="tel"
+                    value={studentPhone}
+                    onChange={(event) => setStudentPhone(event.target.value)}
+                    maxLength={50}
+                    autoComplete="tel"
+                    required
+                    className="h-11 bg-white focus-visible:border-[#b08a30] focus-visible:ring-0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-student-grade">Your Grade</Label>
+                  <Select value={studentGrade || undefined} onValueChange={setStudentGrade}>
+                    <SelectTrigger id="signup-student-grade" className="h-11 w-full bg-white focus-visible:border-[#b08a30] focus-visible:ring-0" aria-required="true">
+                      <SelectValue placeholder="Select grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADE_OPTIONS.map((grade) => (
+                        <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </fieldset>
             )}
 
@@ -546,6 +700,8 @@ export default function RegisterPage() {
                   disabled={
                     loading ||
                     (AUTH_CAPTCHA_CONFIGURED && !captchaToken) ||
+                    !signupEmailsMatch(email, confirmEmail) ||
+                    (accountType === 'student' && (!studentGrade || !studentPhone.trim())) ||
                     (accountType === 'parent' && Boolean(signupStudentDraftError(students)))
                   }
                 >
@@ -556,26 +712,44 @@ export default function RegisterPage() {
 
             {signupMethod === 'google' && (
               <div className="space-y-3">
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <GoogleAuthButton
-                  mode="signup"
-                  signupAccountType={accountType}
-                  studentGrade={studentGrade}
-                  signupStudents={accountType === 'parent' ? students : undefined}
-                  next={nextPath ?? '/book'}
-                  onError={setError}
-                />
+                {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+                {googleCompletionMode ? (
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-[#b08a30] hover:bg-[#9a7628] text-white font-[family-name:var(--font-playfair)]"
+                    disabled={
+                      loading ||
+                      !accountType ||
+                      (accountType === 'student' && (!studentGrade || !studentPhone.trim())) ||
+                      (accountType === 'parent' && Boolean(signupStudentDraftError(students)))
+                    }
+                  >
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Finish Account Setup'}
+                  </Button>
+                ) : (
+                  <GoogleAuthButton
+                    mode="signup"
+                    signupAccountType={accountType}
+                    studentGrade={studentGrade}
+                    studentPhone={studentPhone}
+                    signupStudents={accountType === 'parent' ? students : undefined}
+                    next={nextPath ?? '/book'}
+                    onError={setError}
+                  />
+                )}
               </div>
             )}
           </form>
 
-          <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
-            Already have an account?{' '}
-            {/* Inline link in 14px copy — see the matching note on /login. */}
-            <Link href={withBookContinuation('/login', nextPath ?? '/book')} className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
-              Sign in
-            </Link>
-          </p>
+          {!googleCompletionMode && (
+            <p className="mt-8 text-center text-sm text-gray-500 leading-relaxed">
+              Already have an account?{' '}
+              {/* Inline link in 14px copy — see the matching note on /login. */}
+              <Link href={withBookContinuation('/login', nextPath ?? '/book')} className="text-gray-900 underline font-semibold font-[family-name:var(--font-playfair)]">
+                Sign in
+              </Link>
+            </p>
+          )}
           </>
           )}
         </div>

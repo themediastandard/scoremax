@@ -9,11 +9,17 @@ export const SIGNUP_ADMIN_NOTIFICATION_SENT_KEY = 'scoremax_admin_signup_notific
 export const GOOGLE_SIGNUP_STORAGE_KEY = 'scoremax:signup-onboarding:v1'
 export const MAX_SIGNUP_STUDENTS = 10
 
+const signupPhoneSchema = z.string().trim().min(1).max(50)
+const signupGradeSchema = z.string().trim().refine(
+  (grade) => GRADE_OPTIONS.includes(grade),
+  'Select a valid grade'
+)
+
 const studentDraftSchema = z.strictObject({
   fullName: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320).transform((email) => email.toLowerCase()),
-  phone: z.string().trim().min(1).max(50),
-  grade: z.string().trim().refine((grade) => GRADE_OPTIONS.includes(grade), 'Select a valid grade'),
+  phone: signupPhoneSchema,
+  grade: signupGradeSchema,
 })
 
 const studentDraftsSchema = z
@@ -36,6 +42,28 @@ const studentDraftsSchema = z
 
 export type SignupStudentDraft = z.infer<typeof studentDraftSchema>
 
+const googleAccountSetupSchema = z.discriminatedUnion('accountType', [
+  z.strictObject({
+    accountType: z.literal('parent'),
+    students: studentDraftsSchema,
+  }),
+  z.strictObject({
+    accountType: z.literal('student'),
+    studentGrade: signupGradeSchema,
+    studentPhone: signupPhoneSchema,
+  }),
+])
+
+export type GoogleAccountSetupRequest = z.infer<typeof googleAccountSetupSchema>
+
+export function normalizeSignupEmail(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+export function signupEmailsMatch(email: string, confirmation: string): boolean {
+  return normalizeSignupEmail(email) === normalizeSignupEmail(confirmation)
+}
+
 export function parseSignupStudentDrafts(value: unknown): SignupStudentDraft[] | null {
   const parsed = studentDraftsSchema.safeParse(value)
   return parsed.success ? parsed.data : null
@@ -49,9 +77,20 @@ export function signupStudentDraftError(value: unknown): string | null {
   return 'Enter a name, valid email, phone number, and grade for every student.'
 }
 
+export function parseGoogleAccountSetup(value: unknown): GoogleAccountSetupRequest | null {
+  const parsed = googleAccountSetupSchema.safeParse(value)
+  return parsed.success ? parsed.data : null
+}
+
 type PendingGoogleSignup =
   | { accountType: 'parent'; students: SignupStudentDraft[]; studentGrade?: never; next: '/book' | null }
-  | { accountType: 'student'; students?: never; studentGrade: string; next: '/book' | null }
+  | {
+      accountType: 'student'
+      students?: never
+      studentGrade: string
+      studentPhone: string
+      next: '/book' | null
+    }
 
 export function writePendingGoogleSignup(storage: Storage, value: PendingGoogleSignup): boolean {
   try {
@@ -72,10 +111,20 @@ export function readPendingGoogleSignup(storage: Storage): PendingGoogleSignup |
       const students = parseSignupStudentDrafts(candidate.students)
       return students ? { accountType: 'parent', students, next } : null
     }
-    if (candidate.accountType === 'student' && (
-      typeof candidate.studentGrade === 'string' && GRADE_OPTIONS.includes(candidate.studentGrade)
-    )) {
-      return { accountType: 'student', studentGrade: candidate.studentGrade, next }
+    if (candidate.accountType === 'student') {
+      const setup = googleAccountSetupSchema.safeParse({
+        accountType: 'student',
+        studentGrade: candidate.studentGrade,
+        studentPhone: candidate.studentPhone,
+      })
+      if (setup.success && setup.data.accountType === 'student') {
+        return {
+          accountType: 'student',
+          studentGrade: setup.data.studentGrade,
+          studentPhone: setup.data.studentPhone,
+          next,
+        }
+      }
     }
     return null
   } catch {

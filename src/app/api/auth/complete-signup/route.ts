@@ -6,13 +6,20 @@ import {
   PENDING_STUDENTS_METADATA_KEY,
   SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY,
   SIGNUP_ONBOARDING_GATE_KEY,
+  parseGoogleAccountSetup,
   parseSignupStudentDrafts,
+  type GoogleAccountSetupRequest,
   type SignupStudentDraft,
 } from '@/lib/signup-onboarding'
 import { notifyAdminsOfSignup } from '@/lib/signup-admin-notification'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { normalizeStudentEmail, toStudentDto, type ManagedStudent } from '@/lib/student-server'
+import {
+  normalizeStudentEmail,
+  normalizeStudentPhone,
+  toStudentDto,
+  type ManagedStudent,
+} from '@/lib/student-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,8 +121,24 @@ export async function POST(request: NextRequest) {
 
   let requestStudents: SignupStudentDraft[] | null = null
   let requestStudentGrade: string | null = null
+  let requestStudentPhone: string | null = null
+  let googleSetupRequest: GoogleAccountSetupRequest | null = null
   try {
-    const body = await request.json() as { students?: unknown; studentGrade?: unknown }
+    const body = await request.json() as {
+      accountType?: unknown
+      students?: unknown
+      studentGrade?: unknown
+      studentPhone?: unknown
+    }
+    if (body.accountType !== undefined) {
+      googleSetupRequest = parseGoogleAccountSetup(body)
+      if (!googleSetupRequest) {
+        return NextResponse.json(
+          { error: 'Complete every required account setup field' },
+          { status: 400 }
+        )
+      }
+    }
     if (body.students !== undefined) requestStudents = parseSignupStudentDrafts(body.students)
     if (body.students !== undefined && !requestStudents) {
       return NextResponse.json({ error: 'Check every student and try again' }, { status: 400 })
@@ -125,6 +148,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Choose a valid student grade' }, { status: 400 })
       }
       requestStudentGrade = body.studentGrade
+    }
+    if (body.studentPhone !== undefined) {
+      if (typeof body.studentPhone !== 'string') {
+        return NextResponse.json({ error: 'Enter a valid phone number' }, { status: 400 })
+      }
+      requestStudentPhone = normalizeStudentPhone(body.studentPhone)
+      if (!requestStudentPhone || requestStudentPhone.length > 50) {
+        return NextResponse.json({ error: 'Enter a valid phone number' }, { status: 400 })
+      }
     }
   } catch {
     // An empty body is valid for email signup and normal returning customers.
@@ -142,23 +174,62 @@ export async function POST(request: NextRequest) {
     const onboardingGate = isAccountType(user.app_metadata?.[SIGNUP_ONBOARDING_GATE_KEY])
       ? user.app_metadata[SIGNUP_ONBOARDING_GATE_KEY]
       : null
+    const authProviders = user.app_metadata?.providers
+    const hasGoogleIdentity = user.app_metadata?.provider === 'google' || (
+      Array.isArray(authProviders) && authProviders.includes('google')
+    )
+    const requestedGoogleAccountType = googleSetupRequest?.accountType ?? null
+    if (requestedGoogleAccountType && !hasGoogleIdentity) {
+      return NextResponse.json({ error: 'Google account setup is not available' }, { status: 403 })
+    }
+    if (
+      requestedGoogleAccountType &&
+      customer.account_type &&
+      customer.account_type !== requestedGoogleAccountType
+    ) {
+      return NextResponse.json({ error: 'Account setup is already complete' }, { status: 409 })
+    }
+    const googleSetupAuthorized = Boolean(
+      requestedGoogleAccountType &&
+      hasGoogleIdentity &&
+      (!customer.account_type || onboardingGate === requestedGoogleAccountType)
+    )
+    let effectiveOnboardingGate = onboardingGate
     let onboardingAuthorized = onboardingGate === 'parent'
     let signupNotificationPending = (
       user.app_metadata?.[SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY] === true
     )
 
     if (!customer.account_type) {
-      const requestedAccountType = metadataAccountType ?? onboardingGate
+      const requestedAccountType = metadataAccountType ?? onboardingGate ?? (
+        googleSetupAuthorized ? requestedGoogleAccountType : null
+      )
       if (!requestedAccountType) {
-        return NextResponse.json({ error: 'Choose a parent or student account type' }, { status: 409 })
+        if (hasGoogleIdentity) {
+          return NextResponse.json(
+            { error: 'Finish setting up your account', code: 'account_setup_required' },
+            { status: 409 }
+          )
+        }
+        return NextResponse.json(
+          { error: 'Choose a parent or student account type' },
+          { status: 409 }
+        )
       }
       const metadataGrade = user.user_metadata?.student_grade
       const requestedStudentGrade = (
         typeof metadataGrade === 'string' && GRADE_OPTIONS.includes(metadataGrade)
       ) ? metadataGrade : requestStudentGrade
+      const metadataPhone = typeof user.user_metadata?.phone === 'string'
+        ? normalizeStudentPhone(user.user_metadata.phone)
+        : null
+      const requestedStudentPhone = metadataPhone ?? requestStudentPhone
       if (requestedAccountType === 'student') {
         if (!requestedStudentGrade) {
           return NextResponse.json({ error: 'Choose a valid student grade' }, { status: 409 })
+        }
+        if (!requestedStudentPhone) {
+          return NextResponse.json({ error: 'Enter a valid phone number' }, { status: 409 })
         }
       }
 
@@ -168,12 +239,13 @@ export async function POST(request: NextRequest) {
       const { error: gateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
         app_metadata: {
           ...user.app_metadata,
-          ...(requestedAccountType === 'parent' && { [SIGNUP_ONBOARDING_GATE_KEY]: 'parent' }),
+          [SIGNUP_ONBOARDING_GATE_KEY]: requestedAccountType,
           [SIGNUP_ADMIN_NOTIFICATION_PENDING_KEY]: true,
         },
       })
       if (gateError) throw gateError
       signupNotificationPending = true
+      effectiveOnboardingGate = requestedAccountType
       if (requestedAccountType === 'parent') {
         onboardingAuthorized = true
       }
@@ -182,7 +254,10 @@ export async function POST(request: NextRequest) {
         .from('customers')
         .update({
           account_type: requestedAccountType,
-          ...(requestedAccountType === 'student' && { student_grade: requestedStudentGrade }),
+          ...(requestedAccountType === 'student' && {
+            student_grade: requestedStudentGrade,
+            phone: requestedStudentPhone,
+          }),
         })
         .eq('profile_id', user.id)
         .is('account_type', null)
@@ -197,7 +272,7 @@ export async function POST(request: NextRequest) {
 
     if (customer.account_type === 'student') {
       students = await ensureSelfStudent(customer)
-      if (onboardingGate === 'student') {
+      if (effectiveOnboardingGate === 'student') {
         const { error: clearError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
           app_metadata: {
             ...user.app_metadata,
