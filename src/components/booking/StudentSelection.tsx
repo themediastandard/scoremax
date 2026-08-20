@@ -60,7 +60,11 @@ export function StudentSelection({
         <AddFirstStudentForm onCreated={onStudentCreated} />
         {inactiveCount > 0 && (
           <p className="text-center text-xs text-gray-500">
-            You also have {inactiveCount} inactive {inactiveCount === 1 ? 'student' : 'students'} you can reactivate in My Students.
+            You also have {inactiveCount} inactive {inactiveCount === 1 ? 'student' : 'students'} you can reactivate in{' '}
+            <Link href="/dashboard/students" className="font-medium text-[#4a729f] hover:text-[#3b5c85]">
+              My Students
+            </Link>
+            .
           </p>
         )}
       </div>

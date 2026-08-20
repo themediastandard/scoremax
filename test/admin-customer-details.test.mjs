@@ -11,6 +11,12 @@ const detailContent = readSource('src/components/dashboard/CustomerDetailContent
 const detailLoader = readSource('src/lib/admin-customer-detail.ts')
 const accountTypeControl = readSource('src/components/dashboard/AccountTypeControl.tsx')
 const accountTypeRoute = readSource('src/app/api/admin/customers/[id]/account-type/route.ts')
+const addStudentControl = readSource('src/components/dashboard/AdminAddStudentDialog.tsx')
+const customerOwnerControl = readSource('src/components/dashboard/AdminCustomerOwnerControl.tsx')
+const studentActionsControl = readSource('src/components/dashboard/AdminStudentActions.tsx')
+const addStudentRoute = readSource('src/app/api/admin/customers/[id]/students/route.ts')
+const studentActionsRoute = readSource('src/app/api/admin/customers/[id]/students/[studentId]/route.ts')
+const customerOwnerRoute = readSource('src/app/api/admin/customers/[id]/owner/route.ts')
 
 test('customer directory is a compact read-only index with details navigation', () => {
   assert.doesNotMatch(customersTable, /PaymentApprovalControls/)
@@ -86,6 +92,187 @@ test('details page contains owner, child, credits, approvals, orders, and sessio
   assert.match(detailContent, /package_hours: linkedPackage\?\.total_hours/)
   assert.match(detailContent, /title=\{`Orders \(\$\{orders\.length\}\)`\}/)
   assert.match(detailContent, /title=\{`Sessions \(\$\{sessions\.length\}\)`\}/)
+})
+
+test('managed students render as a compact responsive directory with an account-scoped add action', () => {
+  assert.match(detailContent, /data-managed-student-table/)
+  assert.match(detailContent, /data-managed-student-two-line-row/)
+  assert.match(detailContent, /data-managed-student-card/)
+  assert.match(detailContent, /hidden overflow-x-auto md:block/)
+  assert.match(detailContent, /divide-y divide-slate-100 md:hidden/)
+  for (const heading of ['Student', 'Details', 'Status / Actions']) {
+    assert.match(detailContent, new RegExp(`>${heading}<\\/th>`))
+  }
+  assert.match(detailContent, /min-w-\[560px\]/)
+  assert.match(detailContent, /student\.is_active \? 'Active' : 'Inactive'/)
+  assert.match(detailContent, /href=\{`mailto:\$\{student\.email\}`\}/)
+  assert.match(detailContent, /href=\{`tel:\$\{student\.phone\}`\}/)
+  assert.match(detailContent, /formatPhoneForDisplay\(student\.phone\)/)
+  assert.match(detailContent, /reserved credits/)
+  assert.match(detailContent, /No managed students yet/)
+  assert.match(detailContent, /customer\.account_type === 'parent'[\s\S]*<AdminAddStudentDialog/)
+  assert.match(detailContent, /customerId=\{customer\.id\}/)
+  assert.match(detailContent, /customerName=\{customer\.full_name \|\| customer\.email\}/)
+})
+
+test('admin student actions expose accessible status controls and guarded deletion', () => {
+  assert.match(detailContent, /<AdminStudentActions/)
+  assert.match(detailContent, /studentId=\{student\.id\}/)
+  assert.match(detailContent, /studentPhone=\{student\.phone\}/)
+  assert.match(detailContent, /isActive=\{student\.is_active\}/)
+  assert.match(detailContent, /isAccountOwner=\{customer\.account_type === 'student' && selfStudent\?\.id === student\.id\}/)
+  assert.match(studentActionsControl, /aria-label=\{`Manage \$\{currentName\}`\}/)
+  assert.match(studentActionsControl, /Deactivate student/)
+  assert.match(studentActionsControl, /Activate student/)
+  assert.match(studentActionsControl, /Deactivate before deleting/)
+  assert.match(studentActionsControl, /Delete Student/)
+  assert.match(studentActionsControl, /Students with orders,[\s\S]*sessions, credits, or course history cannot be deleted/)
+  assert.match(studentActionsControl, /method: 'PATCH'/)
+  assert.match(studentActionsControl, /method: 'DELETE'/)
+  assert.match(studentActionsControl, /router\.refresh\(\)/)
+  assert.match(studentActionsControl, /role="alert"/)
+  assert.doesNotMatch(studentActionsControl, /alert\(/)
+})
+
+test('admin can edit a managed student name and phone with accessible, scoped controls', () => {
+  assert.match(studentActionsControl, /Edit student/)
+  assert.match(studentActionsControl, /Edit through Account Owner/)
+  assert.match(studentActionsControl, /Student Name/)
+  assert.match(studentActionsControl, /Phone Number/)
+  assert.match(studentActionsControl, /Save Student/)
+  assert.match(studentActionsControl, /htmlFor=\{`admin-student-\$\{studentId\}-name`\}/)
+  assert.match(studentActionsControl, /id=\{`admin-student-\$\{studentId\}-name`\}/)
+  assert.match(studentActionsControl, /htmlFor=\{`admin-student-\$\{studentId\}-phone`\}/)
+  assert.match(studentActionsControl, /id=\{`admin-student-\$\{studentId\}-phone`\}/)
+  assert.match(studentActionsControl, /action: 'details'/)
+  assert.match(studentActionsControl, /expectedFullName: currentName/)
+  assert.match(studentActionsControl, /expectedPhone: currentPhone/)
+  assert.match(studentActionsControl, /role="alert"/)
+  assert.doesNotMatch(studentActionsControl, /alert\(/)
+
+  assert.match(studentActionsRoute, /z\.discriminatedUnion\('action'/)
+  assert.match(studentActionsRoute, /action: z\.literal\('status'\)/)
+  assert.match(studentActionsRoute, /action: z\.literal\('details'\)/)
+  assert.match(studentActionsRoute, /normalizeStudentPhone\(parsedBody\.data\.phone\)/)
+  assert.match(studentActionsRoute, /Edit this student through Account Owner so the linked profile stays synchronized/)
+  assert.match(studentActionsRoute, /\.update\(\{ full_name: fullName, phone \}\)/)
+  assert.match(studentActionsRoute, /\.eq\('id', studentId\)[\s\S]*\.eq\('customer_id', customerId\)[\s\S]*\.eq\('full_name', context\.student\.full_name\)/)
+  assert.match(studentActionsRoute, /updateQuery\.is\('phone', null\)/)
+  assert.match(studentActionsRoute, /updateQuery\.eq\('phone', context\.student\.phone\)/)
+  assert.match(studentActionsRoute, /current\?\.full_name === fullName && current\.phone === phone/)
+  assert.match(studentActionsRoute, /revalidateCustomer\(customerId\)/)
+  assert.doesNotMatch(studentActionsRoute, /body\.(customerId|studentId)/)
+})
+
+test('admin student status and deletion stay account-scoped and preserve operational history', () => {
+  assert.match(studentActionsRoute, /requireAdmin\(\)/)
+  assert.match(studentActionsRoute, /id: z\.string\(\)\.uuid\(\)/)
+  assert.match(studentActionsRoute, /studentId: z\.string\(\)\.uuid\(\)/)
+  assert.match(studentActionsRoute, /z\.strictObject\(\{[\s\S]*isActive[\s\S]*expectedIsActive/)
+  assert.match(studentActionsControl, /action: 'status'/)
+  assert.match(studentActionsRoute, /\.eq\('id', studentId\)[\s\S]*\.eq\('customer_id', customerId\)/)
+  assert.match(studentActionsRoute, /isRequiredSelfStudent\(context\.customer, context\.student\)/)
+  assert.match(studentActionsRoute, /Change this account type before deactivating/)
+  assert.match(studentActionsRoute, /Deactivate this student before deleting them/)
+  for (const table of [
+    'booking_requests',
+    'sessions',
+    'packages',
+    'course_enrollments',
+    'act_course_enrollments',
+    'admin_session_booking_audit',
+  ]) {
+    assert.ok(studentActionsRoute.includes(`'${table}'`), `missing delete guard for ${table}`)
+  }
+  assert.match(studentActionsRoute, /\.delete\(\)[\s\S]*\.eq\('id', studentId\)[\s\S]*\.eq\('customer_id', customerId\)[\s\S]*\.eq\('is_active', false\)/)
+  assert.match(studentActionsRoute, /deleteError\?\.code === '23503'/)
+  assert.match(studentActionsRoute, /committed = \(await readStudent\(customerId, studentId\)\) === null/)
+  assert.match(studentActionsRoute, /revalidatePath\(`\/dashboard\/customers\/\$\{customerId\}`\)/)
+  assert.doesNotMatch(studentActionsRoute, /body\.(customerId|studentId)/)
+})
+
+test('orders and sessions use matching responsive operational tables', () => {
+  assert.match(detailContent, /data-customer-orders-table/)
+  assert.match(detailContent, /data-customer-order-card/)
+  for (const heading of ['Plan', 'Student', 'Payment', 'Amount', 'Date', 'Status']) {
+    assert.match(detailContent, new RegExp(`>${heading}<\\/th>`))
+  }
+  assert.match(detailContent, /href=\{`\/dashboard\/orders\/\$\{order\.id\}`\}/)
+  assert.match(detailContent, /order\.student\?\.full_name/)
+  assert.match(detailContent, /order\.paymentMethod/)
+  assert.match(detailContent, /order\.amount/)
+  assert.match(detailContent, /order\.date/)
+
+  assert.match(detailContent, /data-customer-sessions-table/)
+  assert.match(detailContent, /data-customer-session-card/)
+  for (const heading of ['Student', 'Tutor', 'Status']) {
+    assert.match(detailContent, new RegExp(`>${heading}<\\/th>`))
+  }
+  assert.doesNotMatch(detailContent, />Type<\/th>/)
+  assert.match(detailContent, /Date &amp; Time/)
+  assert.match(detailContent, /session\.student\?\.full_name/)
+  assert.match(detailContent, /session\.tutors\?\.full_name/)
+  assert.doesNotMatch(detailContent, /session\.sessionType/)
+  assert.match(detailContent, /session\.dateTime/)
+  assert.match(detailContent, /session\.statusPresentation/)
+})
+
+test('admin student creation is strict, parent-only, owner-scoped, and retry-safe', () => {
+  assert.match(addStudentRoute, /requireAdmin\(\)/)
+  assert.match(addStudentRoute, /z\.object\(\{ id: z\.string\(\)\.uuid\(\) \}\)/)
+  assert.match(addStudentRoute, /parseSignupStudentDrafts\(\[body\]\)/)
+  assert.match(addStudentRoute, /customer\.account_type !== 'parent'/)
+  assert.match(addStudentRoute, /customer_id: customerId/)
+  assert.match(addStudentRoute, /const studentId = randomUUID\(\)/)
+  assert.match(addStudentRoute, /readCreatedStudent\(customerId, studentId\)/)
+  assert.match(addStudentRoute, /error\?\.code === '23505'/)
+  assert.match(addStudentRoute, /A student with this email already exists on this account/)
+  assert.match(addStudentRoute, /revalidatePath\(`\/dashboard\/customers\/\$\{customerId\}`\)/)
+  assert.doesNotMatch(addStudentRoute, /body\.(customerId|profileId|studentId)/)
+  assert.doesNotMatch(addStudentRoute, /\.delete\(/)
+})
+
+test('admin add-student dialog requires every field and has associated accessible controls', () => {
+  assert.match(addStudentControl, /Add Student/)
+  assert.match(addStudentControl, /method: 'POST'/)
+  assert.match(addStudentControl, /router\.refresh\(\)/)
+  assert.match(addStudentControl, /Name, email, phone, and grade are required\./)
+  for (const suffix of ['name', 'email', 'phone', 'grade']) {
+    assert.ok(addStudentControl.includes('htmlFor={`${idPrefix}-' + suffix + '`}'))
+    assert.ok(addStudentControl.includes('id={`${idPrefix}-' + suffix + '`}'))
+  }
+  assert.match(addStudentControl, /aria-label=\{`Student grade for \$\{customerName\}`\}/)
+  assert.match(addStudentControl, /role="alert"/)
+  assert.doesNotMatch(addStudentControl, /alert\(/)
+})
+
+test('account owner edit action updates name and phone without breaking linked identity records', () => {
+  assert.match(detailContent, /title="Account Owner"[\s\S]*action=\{\([\s\S]*<AdminCustomerOwnerControl/)
+  assert.match(detailContent, /initialName=\{customer\.full_name\}/)
+  assert.match(detailContent, /initialPhone=\{customer\.phone\}/)
+  assert.match(customerOwnerRoute, /requireAdmin\(\)/)
+  assert.match(customerOwnerRoute, /z\.strictObject\(\{[\s\S]*fullName[\s\S]*phone[\s\S]*expectedFullName[\s\S]*expectedPhone/)
+  assert.match(customerOwnerRoute, /customer\.full_name !== parsedBody\.data\.expectedFullName/)
+  assert.match(customerOwnerRoute, /customer\.phone !== parsedBody\.data\.expectedPhone/)
+  assert.match(customerOwnerRoute, /customer\.account_type === 'student'/)
+  assert.match(customerOwnerRoute, /readSelfStudent\(customer\)/)
+  assert.match(customerOwnerRoute, /profile\.role !== 'customer'/)
+  assert.match(customerOwnerRoute, /\.from\('students'\)[\s\S]*\.update\(\{ full_name: fullName, phone \}\)/)
+  assert.match(customerOwnerRoute, /\.from\('profiles'\)[\s\S]*\.update\(\{ full_name: fullName \}\)/)
+  assert.match(customerOwnerRoute, /restoreCustomerOwner\(customer, fullName, phone\)/)
+  assert.match(customerOwnerRoute, /restoreSelfStudent\(selfStudent, customerId, fullName, phone\)/)
+  assert.match(customerOwnerRoute, /restoreProfileName\(profile, fullName\)/)
+  assert.match(customerOwnerRoute, /revalidatePath\('\/dashboard\/customers'\)/)
+  assert.doesNotMatch(customerOwnerRoute, /body\.(customerId|profileId|studentId)/)
+  assert.match(customerOwnerControl, /Edit account owner/)
+  assert.match(customerOwnerControl, /Save Account Owner/)
+  assert.match(customerOwnerControl, /aria-label=\{`Edit account owner details for \$\{ownerLabel\}`\}/)
+  for (const suffix of ['name', 'phone']) {
+    assert.ok(customerOwnerControl.includes('htmlFor={`${idPrefix}-' + suffix + '`}'))
+    assert.ok(customerOwnerControl.includes('id={`${idPrefix}-' + suffix + '`}'))
+  }
+  assert.match(customerOwnerControl, /role="alert"/)
+  assert.doesNotMatch(customerOwnerControl, /alert\(/)
 })
 
 test('admin completes or corrects an account type through a required-details modal', () => {

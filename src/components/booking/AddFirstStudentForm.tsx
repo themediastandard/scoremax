@@ -52,8 +52,10 @@ export function AddFirstStudentForm({ onCreated }: { onCreated: (studentId: stri
           <UserPlus className="h-5 w-5 text-[#4a729f]" aria-hidden="true" />
         </div>
         <div>
-          <h3 className="font-semibold text-[#1e293b]">Add your first student</h3>
-          <p className="mt-1 text-sm leading-6 text-gray-500">Add the student receiving this session, then continue booking here.</p>
+          <h3 className="font-semibold text-[#1e293b]">Add a student to continue</h3>
+          <p className="mt-1 text-sm leading-6 text-gray-600">
+            This parent account does not have an active student yet. Add the student receiving tutoring, and we&apos;ll continue this booking as soon as they&apos;re saved.
+          </p>
         </div>
       </div>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
