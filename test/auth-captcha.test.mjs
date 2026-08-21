@@ -31,6 +31,14 @@ test('password sign-in passes a Turnstile token to Supabase Auth', () => {
   assert.match(login, /AUTH_CAPTCHA_CONFIGURED && !captchaToken/)
 })
 
+test('unconfirmed email sign-in gives the customer a clear next step', () => {
+  assert.match(login, /error\.code === 'email_not_confirmed'/)
+  assert.match(
+    login,
+    /Please confirm your email before signing in\. Check your inbox or junk folder for the confirmation email\./
+  )
+})
+
 test('password recovery passes a Turnstile token to Supabase Auth', () => {
   assert.match(forgotPassword, /action="password-reset"/)
   assert.match(forgotPassword, /resetPasswordForEmail\(email/)

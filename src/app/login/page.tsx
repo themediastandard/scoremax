@@ -68,7 +68,11 @@ export default function LoginPage() {
       } catch {
         setLastUsedGoogle(false)
       }
-      setError(error.message)
+      setError(
+        error.code === 'email_not_confirmed'
+          ? 'Please confirm your email before signing in. Check your inbox or junk folder for the confirmation email.'
+          : error.message
+      )
       setLoading(false)
     } else {
       // Keep last_auth_provider current so the hint stays accurate. Fire and
